@@ -8,7 +8,7 @@ const HelpCenter = () => {
   const [copied, setCopied] = useState(false);
 
   const handleEmailClick = () => {
-    navigator.clipboard.writeText('support@fleetflow.com').then(() => {
+    navigator.clipboard.writeText('fleetflow.info@gmail.com').then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
@@ -100,7 +100,7 @@ const HelpCenter = () => {
                   </svg>
                 </div>
                 <h4>Email Support</h4>
-                <p>{copied ? 'Email copied to clipboard!' : 'support@fleetflow.com'}</p>
+                <p>{copied ? 'Email copied to clipboard!' : 'fleetflow.info@gmail.com'}</p>
               </div>
             </div>
 
@@ -149,7 +149,7 @@ const HelpCenter = () => {
               <div className="contact-methods">
                 <div className="contact-method">
                   <strong>Email:</strong>
-                  <a href="mailto:support@fleetflow.com">support@fleetflow.com</a>
+                  <a href="mailto:fleetflow.info@gmail.com">fleetflow.info@gmail.com</a>
                 </div>
                 <div className="contact-method">
                   <strong>Phone:</strong>
