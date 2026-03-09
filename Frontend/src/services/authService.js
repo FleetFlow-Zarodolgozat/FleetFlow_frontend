@@ -3,23 +3,41 @@ import api from './api';
 export const authService = {
   // Login
   async login(email, password) {
-    const response = await api.post('/login', { email, password });
-    if (response.data.token) {
-      localStorage.setItem('authToken', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+    console.log('Attempting login to:', api.defaults.baseURL + '/login');
+    try {
+      const response = await api.post('/login', { email, password });
+      console.log('Login response:', response.data);
+      
+      // Handle different response formats (camelCase or PascalCase)
+      const token = response.data.token || response.data.Token;
+      const user = response.data.user || response.data.User;
+      
+      if (token) {
+        localStorage.setItem('authToken', token);
+        if (user) {
+          localStorage.setItem('user', JSON.stringify(user));
+        }
+      }
+      return response.data;
+    } catch (error) {
+      console.error('Login error:', error.response?.status, error.response?.data);
+      throw error;
     }
-    return response.data;
   },
 
-  // Register
-  async register(userData) {
-    const response = await api.post('/register', userData);
-    return response.data;
-  },
-
-  // Forgot Password
+  // Forgot Password - request password reset email
   async forgotPassword(email) {
-    const response = await api.post('/forgot-password', { email });
+    const response = await api.post('/profile/forgot-password', { email });
+    return response.data;
+  },
+
+  // Set Password - set new password with token (for new users and password reset)
+  async setPassword(token, password, confirmPassword) {
+    const response = await api.post('/profile/set-password', { 
+      token, 
+      password, 
+      confirmPassword 
+    });
     return response.data;
   },
 

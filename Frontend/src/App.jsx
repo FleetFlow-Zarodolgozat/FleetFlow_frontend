@@ -1,10 +1,11 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
-import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
+import SetPassword from './pages/SetPassword';
 import TermsOfService from './pages/TermsOfService';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import HelpCenter from './pages/HelpCenter';
+import DriverDashboard from './pages/DriverDashboard';
 import { authService } from './services/authService';
 import './App.css';
 
@@ -14,8 +15,14 @@ const ProtectedRoute = ({ children }) => {
   return isAuthenticated ? children : <Navigate to="/login" />;
 };
 
-// Dashboard placeholder
-const Dashboard = () => {
+// Home Route - redirects based on auth status
+const HomeRoute = () => {
+  const isAuthenticated = authService.isAuthenticated();
+  return isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/login" />;
+};
+
+// Admin Dashboard placeholder
+const AdminDashboard = () => {
   const user = authService.getCurrentUser();
   
   const handleLogout = () => {
@@ -25,11 +32,19 @@ const Dashboard = () => {
 
   return (
     <div style={{ padding: '20px' }}>
-      <h1>Dashboard</h1>
+      <h1>Admin Dashboard</h1>
       <p>Üdvözöllek, {user?.name || user?.email}!</p>
       <button onClick={handleLogout}>Kijelentkezés</button>
     </div>
   );
+};
+
+// Dashboard router - redirects based on user role
+const DashboardRouter = () => {
+  const user = authService.getCurrentUser();
+  const isAdmin = user?.role === 'admin';
+  
+  return isAdmin ? <AdminDashboard /> : <DriverDashboard />;
 };
 
 function App() {
@@ -37,8 +52,8 @@ function App() {
     <Router>
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/profile/set-password" element={<SetPassword />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/help" element={<HelpCenter />} />
@@ -46,11 +61,11 @@ function App() {
           path="/dashboard" 
           element={
             <ProtectedRoute>
-              <Dashboard />
+              <DashboardRouter />
             </ProtectedRoute>
           } 
         />
-        <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="/" element={<HomeRoute />} />
       </Routes>
     </Router>
   );

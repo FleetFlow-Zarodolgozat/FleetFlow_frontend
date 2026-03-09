@@ -129,14 +129,6 @@ const Login = () => {
                 {loading ? 'Signing In...' : 'Sign In'}
               </Button>
             </Form>
-
-            {/* Footer */}
-            <div className="card-footer-text">
-              <p>
-                Don't have an account?{' '}
-                <a href="/register">Create an account</a>
-              </p>
-            </div>
           </Card.Body>
         </Card>
 
