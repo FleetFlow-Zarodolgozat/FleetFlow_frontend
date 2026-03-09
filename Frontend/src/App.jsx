@@ -1,6 +1,9 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import TermsOfService from './pages/TermsOfService';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import HelpCenter from './pages/HelpCenter';
 import { authService } from './services/authService';
 import './App.css';
 
@@ -34,6 +37,9 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/terms" element={<TermsOfService />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/help" element={<HelpCenter />} />
         <Route 
           path="/dashboard" 
           element={
