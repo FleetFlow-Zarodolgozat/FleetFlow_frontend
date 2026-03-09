@@ -11,6 +11,12 @@ export const authService = {
     return response.data;
   },
 
+  // Register
+  async register(userData) {
+    const response = await api.post('/register', userData);
+    return response.data;
+  },
+
   // Logout
   logout() {
     localStorage.removeItem('authToken');
