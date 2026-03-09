@@ -175,6 +175,7 @@
   color: #344054;
   cursor: pointer;
   user-select: none;
+  margin-left: 8px;
 }
 
 /* Sign In Button */
