@@ -134,7 +134,7 @@ const Login = () => {
             <div className="card-footer-text">
               <p>
                 Don't have an account?{' '}
-                <a href="/contact-admin">Contact your administrator</a>
+                <a href="/register">Create an account</a>
               </p>
             </div>
           </Card.Body>
