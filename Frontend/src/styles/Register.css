@@ -298,3 +298,34 @@
     gap: 12px;
   }
 }
+
+/* Alert Styles */
+.register-page .alert {
+  border-radius: 8px;
+  font-size: 14px;
+  padding: 12px 40px 12px 16px;
+  position: relative;
+}
+
+.register-page .alert-danger {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+
+.register-page .alert .btn-close {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  padding: 8px;
+  margin: 0;
+  opacity: 0.5;
+  background-size: 10px;
+  width: 20px;
+  height: 20px;
+}
+
+.register-page .alert .btn-close:hover {
+  opacity: 1;
+}

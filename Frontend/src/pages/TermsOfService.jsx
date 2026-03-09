@@ -119,7 +119,7 @@ const TermsOfService = () => {
                 </p>
                 <p className="contact-info">
                   <strong>FleetFlow Systems Inc.</strong><br />
-                  Email: legal@fleetflow.com<br />
+                  Email: fleetflow.info@gmail.com<br />
                   Address: 123 Fleet Street, Budapest, Hungary
                 </p>
               </section>
