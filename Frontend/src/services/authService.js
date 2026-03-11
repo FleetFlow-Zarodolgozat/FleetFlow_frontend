@@ -5,18 +5,26 @@ export const authService = {
   async login(email, password) {
     console.log('Attempting login to:', api.defaults.baseURL + '/login');
     try {
-      const response = await api.post('/login', { email, password });
+      // Backend expects PascalCase: Email, Password
+      const response = await api.post('/login', { Email: email, Password: password });
       console.log('Login response:', response.data);
       
-      // Handle different response formats (camelCase or PascalCase)
-      const token = response.data.token || response.data.Token;
-      const user = response.data.user || response.data.User;
+      // Backend returns JWT token directly as string, not as { token: "..." }
+      const token = typeof response.data === 'string' ? response.data : (response.data.token || response.data.Token);
       
       if (token) {
         localStorage.setItem('authToken', token);
-        if (user) {
-          localStorage.setItem('user', JSON.stringify(user));
-        }
+        console.log('Token saved to localStorage');
+        
+        // Decode JWT to get user info
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const user = {
+          email: payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'],
+          role: payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'],
+          id: payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier']
+        };
+        localStorage.setItem('user', JSON.stringify(user));
+        console.log('User extracted from token:', user);
       }
       return response.data;
     } catch (error) {
