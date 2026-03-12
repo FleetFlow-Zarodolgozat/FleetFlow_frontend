@@ -39,14 +39,7 @@ const Login = () => {
             {/* Logo and Header */}
             <div className="login-header">
               <div className="logo-section">
-                <div className="logo-icon">
-                  <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-                    <rect width="48" height="48" rx="12" fill="#0d6efd"/>
-                    <path d="M14 18L24 12L34 18V30L24 36L14 30V18Z" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M14 18L24 24L34 18" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M24 24V36" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </div>
+                <img src="/fleetflow_logo.png" alt="FleetFlow Logo" style={{ height: '48px', width: 'auto' }} />
                 <h1 className="logo-title">FleetFlow</h1>
               </div>
               <h2 className="welcome-title">Welcome back</h2>
@@ -133,13 +126,15 @@ const Login = () => {
         </Card>
 
         {/* Page Footer */}
-        <div className="page-footer">
-          <div className="footer-links">
-            <a href="/privacy">PRIVACY POLICY</a>
-            <a href="/terms">TERMS OF SERVICE</a>
-            <a href="/help">HELP CENTER</a>
+        <div className="page-footer mt-4">
+          <div className="d-flex justify-content-center gap-3 mb-2 flex-wrap">
+            <a href="/privacy" className="text-decoration-none text-muted small fw-semibold">PRIVACY POLICY</a>
+            <span className="text-muted">•</span>
+            <a href="/terms" className="text-decoration-none text-muted small fw-semibold">TERMS OF SERVICE</a>
+            <span className="text-muted">•</span>
+            <a href="/help" className="text-decoration-none text-muted small fw-semibold">HELP CENTER</a>
           </div>
-          <p className="copyright">© 2024 FleetFlow Systems Inc. All rights reserved.</p>
+          <p className="text-center text-muted small mb-0">© 2024 FleetFlow Systems Inc. All rights reserved.</p>
         </div>
       </div>
     </div>

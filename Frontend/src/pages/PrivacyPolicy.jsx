@@ -12,14 +12,7 @@ const PrivacyPolicy = () => {
             <div className="legal-header">
               <Link to="/login" className="logo-link">
                 <div className="logo-section">
-                  <div className="logo-icon">
-                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-                      <rect width="48" height="48" rx="12" fill="#0d6efd"/>
-                      <path d="M14 18L24 12L34 18V30L24 36L14 30V18Z" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      <path d="M14 18L24 24L34 18" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      <path d="M24 24V36" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </div>
+                  <img src="/fleetflow_logo.png" alt="FleetFlow Logo" style={{ height: '48px', width: 'auto' }} />
                   <h1 className="logo-title">FleetFlow</h1>
                 </div>
               </Link>
