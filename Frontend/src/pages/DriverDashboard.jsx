@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Card, Form, Button, Container, Row, Col, Badge, ProgressBar } from 'react-bootstrap';
 import { authService } from '../services/authService';
@@ -33,6 +33,8 @@ const DriverDashboard = () => {
     date: '',
     description: ''
   });
+  const [copiedField, setCopiedField] = useState('');
+  const copyFeedbackTimeoutRef = useRef(null);
 
   // Fetch profile and statistics from API
   useEffect(() => {
@@ -83,9 +85,16 @@ const DriverDashboard = () => {
     navigate('/login');
   };
 
-  const handleCopyToClipboard = (text, label) => {
+  const handleCopyToClipboard = (text, label, fieldKey) => {
     if (text && text !== 'N/A') {
       navigator.clipboard.writeText(text).then(() => {
+        setCopiedField(fieldKey);
+        if (copyFeedbackTimeoutRef.current) {
+          clearTimeout(copyFeedbackTimeoutRef.current);
+        }
+        copyFeedbackTimeoutRef.current = setTimeout(() => {
+          setCopiedField('');
+        }, 1800);
         // You could add a toast notification here
         console.log(`${label} copied to clipboard: ${text}`);
       }).catch(err => {
@@ -93,6 +102,14 @@ const DriverDashboard = () => {
       });
     }
   };
+
+  useEffect(() => {
+    return () => {
+      if (copyFeedbackTimeoutRef.current) {
+        clearTimeout(copyFeedbackTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleEventChange = (e) => {
     const { name, value } = e.target;
@@ -606,32 +623,32 @@ const DriverDashboard = () => {
               </div>
             </div>
             <div className="info-grid">
-              <div className="info-item" onClick={() => handleCopyToClipboard(profile.email, 'Email')} style={{ cursor: 'pointer' }}>
+              <div className={`info-item ${copiedField === 'email' ? 'bg-success-subtle border-success' : ''}`} onClick={() => handleCopyToClipboard(profile.email, 'Email', 'email')} style={{ cursor: 'pointer' }}>
                 <div className="info-icon">
                   <svg width="20" height="20" fill="none" stroke="#0d6efd" strokeWidth="2" viewBox="0 0 24 24">
                     <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" strokeLinecap="round" strokeLinejoin="round"/>
                     <polyline points="22,6 12,13 2,6" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </div>
-                <div className="info-content">
+                <div className="info-content d-flex flex-column justify-content-center w-100 text-center">
                   <span className="info-label">EMAIL</span>
                   <span className="info-value">{profile.email}</span>
                 </div>
               </div>
-              <div className="info-item" onClick={() => handleCopyToClipboard(profile.phone, 'Phone')} style={{ cursor: 'pointer' }}>
+              <div className={`info-item ${copiedField === 'phone' ? 'bg-success-subtle border-success' : ''}`} onClick={() => handleCopyToClipboard(profile.phone, 'Phone', 'phone')} style={{ cursor: 'pointer' }}>
                 <div className="info-icon">
                   <svg width="20" height="20" fill="none" stroke="#0d6efd" strokeWidth="2" viewBox="0 0 24 24">
                     <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </div>
-                <div className="info-content">
+                <div className="info-content d-flex flex-column justify-content-center w-100 text-center">
                   <span className="info-label">PHONE</span>
                   <span className="info-value">{profile.phone || 'N/A'}</span>
                 </div>
               </div>
             </div>
             <div className="info-grid">
-              <div className="info-item" onClick={() => handleCopyToClipboard(profile.licenseNumber, 'License Number')} style={{ cursor: 'pointer' }}>
+              <div className={`info-item ${copiedField === 'licenseNumber' ? 'bg-success-subtle border-success' : ''}`} onClick={() => handleCopyToClipboard(profile.licenseNumber, 'License Number', 'licenseNumber')} style={{ cursor: 'pointer' }}>
                 <div className="info-icon">
                   <svg width="20" height="20" fill="none" stroke="#0d6efd" strokeWidth="2" viewBox="0 0 24 24">
                     <rect x="2" y="7" width="20" height="14" rx="2" ry="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -640,12 +657,12 @@ const DriverDashboard = () => {
                     <path d="M14 15h4" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </div>
-                <div className="info-content">
+                <div className="info-content d-flex flex-column justify-content-center w-100 text-center">
                   <span className="info-label">LICENSE NUMBER</span>
                   <span className="info-value">{profile.licenseNumber || 'N/A'}</span>
                 </div>
               </div>
-              <div className="info-item" onClick={() => handleCopyToClipboard(formatLicenseExpiry(), 'License Expiry')} style={{ cursor: 'pointer' }}>
+              <div className={`info-item ${copiedField === 'licenseExpiry' ? 'bg-success-subtle border-success' : ''}`} onClick={() => handleCopyToClipboard(formatLicenseExpiry(), 'License Expiry', 'licenseExpiry')} style={{ cursor: 'pointer' }}>
                 <div className="info-icon">
                   <svg width="20" height="20" fill="none" stroke="#0d6efd" strokeWidth="2" viewBox="0 0 24 24">
                     <rect x="3" y="4" width="18" height="18" rx="2" ry="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -654,7 +671,7 @@ const DriverDashboard = () => {
                     <line x1="3" y1="10" x2="21" y2="10" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </div>
-                <div className="info-content">
+                <div className="info-content d-flex flex-column justify-content-center w-100 text-center">
                   <span className="info-label">LICENSE EXPIRES</span>
                   <span className="info-value">{formatLicenseExpiry()}</span>
                 </div>
