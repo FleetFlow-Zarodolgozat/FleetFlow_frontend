@@ -1,5 +1,5 @@
 // Delete fuel log handler
-  const handleDeleteFuelLog = async (id) => {
+const handleDeleteFuelLog = async (id) => {
     if (!window.confirm('Biztosan törlöd ezt a tankolást?')) return;
     try {
       await api.delete(`/fuellogs/${id}`);
@@ -253,7 +253,7 @@ const FuelLogs = () => {
                   <circle cx="12" cy="8" r="4" />
                   <path d="M4 20c0-4 4-6 8-6s8 2 8 6" />
                 </svg>
-              )}
+                            )}
             </div>
             <div className="user-details">
               <p className="user-name">{getDisplayName()}</p>
@@ -280,7 +280,7 @@ const FuelLogs = () => {
               <p className="text-muted mb-0">Your own fuel purchases ordered by latest date.</p>
             </Col>
             <Col md={4} className="d-flex gap-2 justify-content-md-end">
-              <Button className="new-fuel-btn" onClick={() => navigate('/add-fuel-log')}>
+<Button className="new-fuel-btn" onClick={() => navigate('/add-fuel-log')}>
                 <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path d="M3 22V8l4-4h6l4 4v14H3z" strokeLinecap="round" strokeLinejoin="round"/>
                   <path d="M17 13h2a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -339,8 +339,8 @@ const FuelLogs = () => {
                                   <line x1="10" y1="11" x2="10" y2="17" />
                                   <line x1="14" y1="11" x2="14" y2="17" />
                                 </svg>
-                              </Button>
-                            </div>
+                              </Button>                            
+                              </div>
 
                             <div className="fuel-log-divider mb-3" />
 

@@ -215,7 +215,7 @@
   opacity: 1 !important;
   visibility: visible !important;
 }
-}
+
 
 .action-btn:hover {
   background: #e2e8f0;
@@ -592,7 +592,6 @@
 .rbc-wrapper .rbc-current-time-indicator {
   background-color: #0d6efd;
   height: 2px;
-}
 }
 
 .calendar-header {

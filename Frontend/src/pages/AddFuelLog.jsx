@@ -355,15 +355,11 @@ const AddFuelLog = () => {
                         <Form.Group>
                           <Form.Label className="fw-semibold text-start w-100 d-flex align-items-center gap-2">
                             <span style={{display:'flex',alignItems:'center'}}>
-                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{marginRight:2}}>
-                                <rect x="4" y="10" width="16" height="6" rx="2" fill="#6b7280"/>
-                                <rect x="7" y="6" width="10" height="5" rx="2" fill="#a3a3a3"/>
-                                <rect x="9" y="8" width="6" height="2" rx="1" fill="#fff"/>
-                                <circle cx="7" cy="18" r="1.5" fill="#6b7280"/>
-                                <circle cx="17" cy="18" r="1.5" fill="#6b7280"/>
-                                <rect x="6" y="16" width="2" height="2" rx="1" fill="#a3a3a3"/>
-                                <rect x="16" y="16" width="2" height="2" rx="1" fill="#a3a3a3"/>
-                                <rect x="10.5" y="13" width="3" height="1.5" rx="0.75" fill="#fff"/>
+                              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: 6}}>
+                                <rect x="3" y="11" width="18" height="5" rx="2"/>
+                                <circle cx="7.5" cy="17" r="1.5" fill="#6b7280"/>
+                                <circle cx="16.5" cy="17" r="1.5" fill="#6b7280"/>
+                                <path d="M7 11V7a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v4"/>
                               </svg>
                             </span>
                             Station Name <span className="text-muted">(optional)</span>
