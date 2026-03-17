@@ -1,3 +1,19 @@
+// Delete fuel log handler
+  const handleDeleteFuelLog = async (id) => {
+    if (!window.confirm('Biztosan törlöd ezt a tankolást?')) return;
+    try {
+      await api.delete(`/fuellogs/${id}`);
+      await fetchFuelLogs(pagination.page);
+    } catch (err) {
+      alert('Hiba történt a törlés során!');
+      if (err.response) {
+        alert('Részletes hiba: ' + (err.response.data?.message || JSON.stringify(err.response.data)));
+        console.log('Delete error:', err.response);
+      } else {
+        console.log('Delete error:', err);
+      }
+    }
+  };
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Alert, Badge, Button, Card, Col, Container, Pagination, Row, Spinner } from 'react-bootstrap';
@@ -233,7 +249,10 @@ const FuelLogs = () => {
                   alt={getDisplayName()}
                 />
               ) : (
-                getInitials()
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6c757d" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="8" r="4" />
+                  <path d="M4 20c0-4 4-6 8-6s8 2 8 6" />
+                </svg>
               )}
             </div>
             <div className="user-details">
@@ -261,7 +280,7 @@ const FuelLogs = () => {
               <p className="text-muted mb-0">Your own fuel purchases ordered by latest date.</p>
             </Col>
             <Col md={4} className="d-flex gap-2 justify-content-md-end">
-              <Button className="new-fuel-btn" onClick={() => navigate('/dashboard')}>
+              <Button className="new-fuel-btn" onClick={() => navigate('/add-fuel-log')}>
                 <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path d="M3 22V8l4-4h6l4 4v14H3z" strokeLinecap="round" strokeLinejoin="round"/>
                   <path d="M17 13h2a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -306,29 +325,74 @@ const FuelLogs = () => {
                                 </span>
                                 <span className="fuel-log-date fw-semibold">{formatDateTime(log.date || log.Date)}</span>
                               </div>
-                              <Badge bg={(log.receiptFileId || log.ReceiptFileId) ? 'warning' : 'light'} text="dark" pill>
-                                {(log.receiptFileId || log.ReceiptFileId) ? 'Receipt' : 'No Receipt'}
-                              </Badge>
+                              <Button
+                                variant="outline-danger"
+                                size="sm"
+                                title="Törlés"
+                                style={{ borderRadius: '50%', width: 32, height: 32, padding: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                                onClick={() => handleDeleteFuelLog(log.id || log.Id)}
+                              >
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                  <path d="M3 6h18" />
+                                  <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                                  <line x1="10" y1="11" x2="10" y2="17" />
+                                  <line x1="14" y1="11" x2="14" y2="17" />
+                                </svg>
+                              </Button>
                             </div>
 
                             <div className="fuel-log-divider mb-3" />
 
                             <div className="fuel-log-details">
-                              <div className="fuel-log-detail-row">
-                                <span className="fuel-log-label">Liters</span>
-                                <span className="fuel-log-value text-warning-emphasis">{log.liters || log.Liters || 0} L</span>
+                              <div className="fuel-log-detail-row lcp-row">
+                                <div style={{display: 'flex', alignItems: 'center'}}>
+                                  {/* Filled orange drop icon */}
+                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="#fb923c" style={{marginRight: 2}}><path d="M12 2C12 2 5 11 5 16a7 7 0 0 0 14 0c0-5-7-14-7-14z"/><path d="M12 21a5 5 0 0 1-5-5c0-3.07 4.13-9.14 5-10.32C14.87 6.86 19 12.93 19 16a5 5 0 0 1-5 5z" fill="#fb923c"/></svg>
+                                  <span className="fuel-log-label">Liters</span>
+                                  <span className="fuel-log-value text-warning-emphasis ms-2">{log.liters || log.Liters || 0} L</span>
+                                </div>
+                                <div style={{display: 'flex', alignItems: 'center'}}>
+                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: 2}}><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/><line x1="12" y1="1" x2="12" y2="23"/></svg>
+                                  <span className="fuel-log-label">Cost</span>
+                                  <span className="fuel-log-value text-success ms-2">{log.totalCostCur || log.TotalCostCur || 'N/A'}</span>
+                                </div>
+                                <div style={{display: 'flex', alignItems: 'center'}}>
+                                  {/* Front-facing car icon */}
+                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{marginRight: 2}}>
+                                    <rect x="4" y="10" width="16" height="6" rx="2" fill="#2563eb"/>
+                                    <rect x="7" y="6" width="10" height="5" rx="2" fill="#60a5fa"/>
+                                    <rect x="9" y="8" width="6" height="2" rx="1" fill="#fff"/>
+                                    <circle cx="7" cy="18" r="1.5" fill="#2563eb"/>
+                                    <circle cx="17" cy="18" r="1.5" fill="#2563eb"/>
+                                    <rect x="6" y="16" width="2" height="2" rx="1" fill="#60a5fa"/>
+                                    <rect x="16" y="16" width="2" height="2" rx="1" fill="#60a5fa"/>
+                                    <rect x="10.5" y="13" width="3" height="1.5" rx="0.75" fill="#fff"/>
+                                  </svg>
+                                  <span className="fuel-log-label">Plate</span>
+                                  <span className="fuel-log-value text-primary ms-2">{log.licensePlate || log.LicensePlate || 'N/A'}</span>
+                                </div>
                               </div>
-                              <div className="fuel-log-detail-row">
-                                <span className="fuel-log-label">Cost</span>
-                                <span className="fuel-log-value text-success">{log.totalCostCur || log.TotalCostCur || 'N/A'}</span>
-                              </div>
-                              <div className="fuel-log-detail-row">
-                                <span className="fuel-log-label">Plate</span>
-                                <span className="fuel-log-value text-primary">{log.licensePlate || log.LicensePlate || 'N/A'}</span>
-                              </div>
-                              <div className="fuel-log-detail-row">
-                                <span className="fuel-log-label">Station</span>
-                                <span className="fuel-log-value text-dark">{log.stationName || log.StationName || 'N/A'}</span>
+                              <div className="fuel-log-detail-row" style={{gap: '0.5rem', justifyContent: 'flex-start'}}>
+                                <span style={{display: 'flex', alignItems: 'center', color: '#fb923c'}}>
+                                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fb923c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: 6}}>
+                                    <rect x="3" y="11" width="18" height="5" rx="2"/>
+                                    <circle cx="7.5" cy="17" r="1.5" fill="#fb923c"/>
+                                    <circle cx="16.5" cy="17" r="1.5" fill="#fb923c"/>
+                                    <path d="M7 11V7a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v4"/>
+                                  </svg>
+                                  <span
+                                    className="fuel-log-value"
+                                    style={{
+                                      marginLeft: 0,
+                                      textAlign: 'left',
+                                      color: '#fb923c',
+                                      fontWeight: 600,
+                                    }}
+                                  >
+                                    {log.stationName || log.StationName || 'N/A'}
+                                  </span>
+                                </span>
                               </div>
                             </div>
 

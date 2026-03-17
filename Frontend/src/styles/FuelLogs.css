@@ -1,6 +1,10 @@
 .fuel-logs-page {
   min-height: 100vh;
-  background: linear-gradient(180deg, #f8fbff 0%, #f6f8fb 100%);
+  background: transparent;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding-left: 24px;
+  padding-right: 24px;
 }
 
 .fuel-logs-title {
@@ -10,15 +14,42 @@
 
 .fuel-log-list {
   display: grid;
-  gap: 1rem;
+  gap: 1.5rem;
+  grid-template-columns: 1fr;
 }
 
 .fuel-log-card {
   background: #ffffff;
   border-radius: 16px;
   border: 1px solid #eef2f7;
+  box-shadow: 0 6px 24px rgba(13, 110, 253, 0.18), 0 1.5px 6px rgba(0,0,0,0.10);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   width: 100%;
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
+}
+/* Custom row for liters, cost, plate */
+.fuel-log-detail-row.lcp-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4rem;
+  padding: 0.75rem 0.9rem;
+  background: #fffaf5;
+  border: 1px solid #ffedd5;
+  border-radius: 12px;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+.fuel-log-detail-row.lcp-row .fuel-log-label {
+  min-width: 60px;
+  font-weight: 600;
+}
+.fuel-log-detail-row.lcp-row .fuel-log-value {
+  min-width: 80px;
+  text-align: center;
 }
 
 .fuel-log-card:hover {
@@ -105,6 +136,40 @@
 
 .fuel-log-station-name {
   font-size: 1rem;
+}
+
+/* Orange button hover effect for New Fuel Log button */
+.btn-orange, .btn-warning {
+  background-color: #fb923c !important;
+  border-color: #fb923c !important;
+  color: #fff !important;
+}
+.btn-orange:hover, .btn-warning:hover {
+  background-color: #f97316 !important;
+  border-color: #f97316 !important;
+  color: #fff !important;
+}
+
+/* File input styling for AddFuelLog */
+.add-fuel-log-file-input input[type="file"] {
+  width: 100%;
+  min-height: 38px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+}
+
+.btn-fuel-log-save {
+  background-color: #fff;
+  border-color: #fb923c;
+  color: #fb923c;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+.btn-fuel-log-save:hover, .btn-fuel-log-save:focus {
+  background-color: #fb923c;
+  color: #fff;
+  border-color: #fb923c;
 }
 
 @media (max-width: 576px) {
