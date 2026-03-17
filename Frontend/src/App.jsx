@@ -6,6 +6,7 @@ import TermsOfService from './pages/TermsOfService';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import HelpCenter from './pages/HelpCenter';
 import DriverDashboard from './pages/DriverDashboard';
+import FuelLogs from './pages/FuelLogs';
 import { authService } from './services/authService';
 import './App.css';
 
@@ -64,6 +65,14 @@ function App() {
               <DashboardRouter />
             </ProtectedRoute>
           } 
+        />
+        <Route
+          path="/fuel-logs"
+          element={
+            <ProtectedRoute>
+              <FuelLogs />
+            </ProtectedRoute>
+          }
         />
         <Route path="/" element={<HomeRoute />} />
       </Routes>
