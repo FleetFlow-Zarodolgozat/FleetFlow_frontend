@@ -425,6 +425,138 @@
   margin-top: 8px;
 }
 
+/* react-big-calendar overrides */
+.rbc-wrapper .rbc-calendar {
+  font-family: inherit;
+}
+
+.rbc-wrapper .rbc-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 0;
+}
+
+.rbc-wrapper .rbc-toolbar button {
+  border: 1px solid #dee2e6;
+  background: #fff;
+  color: #495057;
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.rbc-wrapper .rbc-toolbar button:hover {
+  background: #e9ecef;
+  border-color: #adb5bd;
+}
+
+.rbc-wrapper .rbc-toolbar button.rbc-active {
+  background: #0d6efd;
+  border-color: #0d6efd;
+  color: #fff;
+}
+
+.rbc-wrapper .rbc-toolbar-label {
+  font-weight: 600;
+  font-size: 15px;
+  color: #212529;
+}
+
+.rbc-wrapper .rbc-month-view,
+.rbc-wrapper .rbc-time-view {
+  border: 1px solid #dee2e6;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.rbc-wrapper .rbc-header {
+  background: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  padding: 8px 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.rbc-wrapper .rbc-header + .rbc-header {
+  border-left: 1px solid #dee2e6;
+}
+
+.rbc-wrapper .rbc-month-row {
+  border-top: 1px solid #dee2e6;
+}
+
+.rbc-wrapper .rbc-day-bg + .rbc-day-bg {
+  border-left: 1px solid #dee2e6;
+}
+
+.rbc-wrapper .rbc-today {
+  background-color: #e8f0fe;
+}
+
+.rbc-wrapper .rbc-off-range-bg {
+  background: #f8f9fa;
+}
+
+.rbc-wrapper .rbc-date-cell {
+  padding: 4px 8px;
+  font-size: 13px;
+  color: #495057;
+}
+
+.rbc-wrapper .rbc-date-cell.rbc-now {
+  font-weight: 700;
+  color: #0d6efd;
+}
+
+.rbc-wrapper .rbc-event {
+  background: #0d6efd;
+  border: none;
+  border-radius: 6px;
+  padding: 2px 6px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.rbc-wrapper .rbc-event:focus,
+.rbc-wrapper .rbc-event:active {
+  background: #0b5ed7;
+  outline: none;
+}
+
+.rbc-wrapper .rbc-show-more {
+  color: #0d6efd;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.rbc-wrapper .rbc-time-header-content {
+  border-left: 1px solid #dee2e6;
+}
+
+.rbc-wrapper .rbc-time-content {
+  border-top: 2px solid #dee2e6;
+}
+
+.rbc-wrapper .rbc-label {
+  font-size: 12px;
+  color: #6c757d;
+}
+
+.rbc-wrapper .rbc-current-time-indicator {
+  background-color: #0d6efd;
+  height: 2px;
+}
+}
+
 .calendar-header {
   display: grid;
   grid-template-columns: repeat(7, 1fr);

@@ -1,15 +1,28 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Card, Form, Button, Container, Row, Col, Badge, ProgressBar } from 'react-bootstrap';
+import { Card, Form, Button, Container, Row, Col, Badge } from 'react-bootstrap';
+import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
+import { format, parse, startOfWeek, getDay } from 'date-fns';
+import { hu } from 'date-fns/locale';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { authService } from '../services/authService';
 import api from '../services/api';
 import '../styles/DriverDashboard.css';
+
+const localizer = dateFnsLocalizer({
+  format,
+  parse,
+  startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 1 }),
+  getDay,
+  locales: { hu },
+});
 
 const DriverDashboard = () => {
   const navigate = useNavigate();
   const user = authService.getCurrentUser();
   const [currentDate] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState(14);
+  const [calendarDate, setCalendarDate] = useState(new Date());
+  const [calendarView, setCalendarView] = useState('month');
   const [profile, setProfile] = useState({
     id: user?.id || 0,
     fullName: '',
@@ -28,13 +41,53 @@ const DriverDashboard = () => {
     totalFuels: 0,
     totalFuelCost: 0
   });
+  const [scheduleEvents, setScheduleEvents] = useState([]);
+  const [vehicle, setVehicle] = useState(null);
+  const [vehicleLoading, setVehicleLoading] = useState(true);
   const [eventForm, setEventForm] = useState({
     title: '',
     date: '',
+    startTime: '09:00',
+    endTime: '',
     description: ''
   });
+  const [eventSaving, setEventSaving] = useState(false);
+  const [eventFeedback, setEventFeedback] = useState({ type: '', message: '' });
+  const [selectedCalendarEvent, setSelectedCalendarEvent] = useState(null);
+  const [eventDeleting, setEventDeleting] = useState(false);
+  const [calendarDetailFeedback, setCalendarDetailFeedback] = useState({ type: '', message: '' });
   const [copiedField, setCopiedField] = useState('');
   const copyFeedbackTimeoutRef = useRef(null);
+
+  const loadCalendarEvents = async () => {
+    try {
+      const calendarResponse = await api.get('/calendarevents');
+      const calendarData = Array.isArray(calendarResponse.data) ? calendarResponse.data : [];
+      const mappedEvents = calendarData
+        .map((evt) => {
+          const startValue = evt.startAt || evt.StartAt;
+          const endValue = evt.endAt || evt.EndAt || startValue;
+          const start = new Date(startValue);
+          const end = new Date(endValue);
+
+          return {
+            id: evt.id || evt.Id,
+            title: evt.title || evt.Title || 'Untitled event',
+            start,
+            end,
+            allDay: false,
+            eventType: evt.eventType || evt.EventType || 'DEFAULT',
+            description: evt.description || evt.Description || '',
+            relatedServiceRequestId: evt.relatedServiceRequestId || evt.RelatedServiceRequestId || null,
+          };
+        })
+        .filter((evt) => !Number.isNaN(evt.start.getTime()) && !Number.isNaN(evt.end.getTime()));
+
+      setScheduleEvents(mappedEvents);
+    } catch (error) {
+      console.log('Could not fetch calendar events:', error.message);
+    }
+  };
 
   // Fetch profile and statistics from API
   useEffect(() => {
@@ -57,6 +110,25 @@ const DriverDashboard = () => {
       } catch (error) {
         console.log('Could not fetch profile:', error.message);
       }
+
+      try {
+        const vehicleResponse = await api.get('/profile/assigned-vehicle');
+        const v = vehicleResponse.data;
+        setVehicle({
+          brandModel: v.brandModel || v.BrandModel || '',
+          licensePlate: v.licensePlate || v.LicensePlate || '',
+          year: v.year || v.Year || 0,
+          currentMileageKm: v.currentMileageKm || v.CurrentMileageKm || 0,
+          vin: v.vin || v.Vin || '',
+          status: v.status || v.Status || 'Unknown'
+        });
+      } catch (error) {
+        console.log('Could not fetch assigned vehicle:', error.message);
+      } finally {
+        setVehicleLoading(false);
+      }
+
+      await loadCalendarEvents();
 
       try {
         // Get statistics for last 12 months
@@ -111,47 +183,179 @@ const DriverDashboard = () => {
     };
   }, []);
 
+  useEffect(() => {
+    if (!eventFeedback.message) {
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      setEventFeedback({ type: '', message: '' });
+    }, 2000);
+
+    return () => clearTimeout(timeoutId);
+  }, [eventFeedback]);
+
+  useEffect(() => {
+    if (!calendarDetailFeedback.message) {
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      setCalendarDetailFeedback({ type: '', message: '' });
+    }, 2000);
+
+    return () => clearTimeout(timeoutId);
+  }, [calendarDetailFeedback]);
+
   const handleEventChange = (e) => {
     const { name, value } = e.target;
     setEventForm(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSaveEvent = (e) => {
+  const getApiErrorMessage = (error, fallbackMessage) => {
+    const apiData = error?.response?.data;
+
+    if (typeof apiData === 'string' && apiData.trim()) {
+      return apiData;
+    }
+
+    if (apiData?.message || apiData?.Message) {
+      return apiData.message || apiData.Message;
+    }
+
+    if (Array.isArray(apiData?.errors) && apiData.errors.length > 0) {
+      return apiData.errors.join(' ');
+    }
+
+    if (apiData?.errors && typeof apiData.errors === 'object') {
+      const firstErrorList = Object.values(apiData.errors).find((value) => Array.isArray(value) && value.length > 0);
+      if (firstErrorList) {
+        return firstErrorList.join(' ');
+      }
+    }
+
+    const status = error?.response?.status;
+    if (status === 400) return 'Invalid event data. Please check date, time and title.';
+    if (status === 401) return 'You are not authorized. Please sign in again.';
+    if (status === 403) return 'You do not have permission for this action.';
+    if (status === 404) return 'Requested endpoint or resource was not found.';
+
+    if (error?.message === 'Network Error') {
+      return 'Network error: backend is unavailable or blocked by CORS.';
+    }
+
+    return fallbackMessage;
+  };
+
+  const handleSaveEvent = async (e) => {
     e.preventDefault();
-    console.log('Event saved:', eventForm);
-    // TODO: API call to save event
+
+    const title = eventForm.title.trim();
+    if (!title || !eventForm.date || !eventForm.startTime) {
+      setEventFeedback({ type: 'danger', message: 'Title, date and start time are required.' });
+      return;
+    }
+
+    const startDate = new Date(`${eventForm.date}T${eventForm.startTime}:00`);
+    if (Number.isNaN(startDate.getTime())) {
+      setEventFeedback({ type: 'danger', message: 'Invalid date format.' });
+      return;
+    }
+
+    let endDate = null;
+    if (eventForm.endTime) {
+      endDate = new Date(`${eventForm.date}T${eventForm.endTime}:00`);
+      if (Number.isNaN(endDate.getTime())) {
+        setEventFeedback({ type: 'danger', message: 'Invalid end time format.' });
+        return;
+      }
+      if (endDate <= startDate) {
+        setEventFeedback({ type: 'danger', message: 'End time must be later than start time.' });
+        return;
+      }
+    }
+
+    setEventSaving(true);
+    setEventFeedback({ type: '', message: '' });
+
+    try {
+      await api.post('/calendarevents', {
+        title,
+        description: eventForm.description?.trim() || null,
+        startAt: startDate.toISOString(),
+        endAt: endDate ? endDate.toISOString() : null,
+      });
+
+      setEventForm({ title: '', date: '', startTime: '09:00', endTime: '', description: '' });
+      setEventFeedback({ type: 'success', message: 'Event created successfully.' });
+      await loadCalendarEvents();
+    } catch (error) {
+      const message = getApiErrorMessage(error, 'Failed to create event.');
+      setEventFeedback({ type: 'danger', message });
+    } finally {
+      setEventSaving(false);
+    }
   };
 
-  const vehicleData = {
-    name: 'Volvo FH16 Globetrotter',
-    id: 'FL-9982-K',
-    type: 'Heavy Duty Hauler',
-    year: 2023,
-    status: 'Active',
-    nextMaintenance: '12 Days',
-    maintenanceKm: '1,420 km',
-    maintenanceProgress: 75,
-    image: '/truck-placeholder.jpg'
+  const handleDeleteSelectedEvent = async () => {
+    if (!selectedCalendarEvent?.id) {
+      setCalendarDetailFeedback({ type: 'danger', message: 'Event id is missing.' });
+      return;
+    }
+
+    const selectedType = String(selectedCalendarEvent?.eventType || '').toUpperCase();
+    if (selectedType === 'SERVICE_APPOINTMENT' && profile.role !== 'ADMIN') {
+      setCalendarDetailFeedback({ type: 'danger', message: 'Not allowed to delete' });
+      return;
+    }
+
+    setEventDeleting(true);
+    setCalendarDetailFeedback({ type: '', message: '' });
+
+    try {
+      await api.delete(`/calendarevents/${selectedCalendarEvent.id}`);
+      setSelectedCalendarEvent(null);
+      await loadCalendarEvents();
+    } catch (error) {
+      const message = getApiErrorMessage(error, 'Failed to delete event.');
+      setCalendarDetailFeedback({ type: 'danger', message });
+    } finally {
+      setEventDeleting(false);
+    }
   };
 
-  const scheduleEvents = [
-    { day: 4, type: 'trip', label: '#442' },
-    { day: 7, type: 'rest', label: 'Rest Day' }
-  ];
+  const calendarEventStyleGetter = (event) => {
+    const eventType = String(event?.eventType || '').toUpperCase();
+    const bgMap = {
+      TRIP: '#0d6efd',
+      REST: '#198754',
+      SERVICE: '#fd7e14',
+      MAINTENANCE: '#dc3545',
+      DEFAULT: '#6c757d',
+    };
 
-  const formatMonth = (date) => {
-    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    return {
+      style: {
+        backgroundColor: bgMap[eventType] || bgMap.DEFAULT,
+        borderRadius: '6px',
+        border: 'none',
+        color: '#ffffff',
+      },
+    };
   };
 
-  const getDaysInMonth = (date) => {
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    const firstDay = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    return { firstDay: firstDay === 0 ? 6 : firstDay - 1, daysInMonth };
+  const formatEventDateTime = (dateValue) => {
+    if (!dateValue) return 'N/A';
+    const d = new Date(dateValue);
+    if (Number.isNaN(d.getTime())) return 'N/A';
+    return d.toLocaleString('hu-HU', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
   };
-
-  const { firstDay, daysInMonth } = getDaysInMonth(currentDate);
 
   // Get display name from profile
   const getDisplayName = () => {
@@ -291,19 +495,19 @@ const DriverDashboard = () => {
             </div>
           </div>
           <div className="sidebar-actions">
-            <button className="action-btn" title="Notifications">
+            <button className="action-btn" title="Notifications" aria-label="Notifications">
               <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" strokeLinecap="round" strokeLinejoin="round"/>
                 <path d="M13.73 21a2 2 0 0 1-3.46 0" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </button>
-            <button className="action-btn" title="Settings">
+            <button className="action-btn" title="Settings" aria-label="Settings">
               <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="3" strokeLinecap="round" strokeLinejoin="round"/>
                 <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </button>
-            <button className="action-btn" title="Logout" onClick={handleLogout}>
+            <button className="action-btn" title="Logout" aria-label="Logout" onClick={handleLogout}>
               <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" strokeLinecap="round" strokeLinejoin="round"/>
                 <polyline points="16,17 21,12 16,7" strokeLinecap="round" strokeLinejoin="round"/>
@@ -488,6 +692,7 @@ const DriverDashboard = () => {
                       placeholder="e.g. Service Checkup"
                       value={eventForm.title}
                       onChange={handleEventChange}
+                      required
                     />
                   </Form.Group>
                   <Form.Group className="mb-3" style={{ flexShrink: 0 }}>
@@ -497,8 +702,34 @@ const DriverDashboard = () => {
                       name="date"
                       value={eventForm.date}
                       onChange={handleEventChange}
+                      required
                     />
                   </Form.Group>
+                  <Row className="g-2 mb-3" style={{ flexShrink: 0 }}>
+                    <Col xs={6}>
+                      <Form.Group>
+                        <Form.Label className="small text-muted fw-semibold">START</Form.Label>
+                        <Form.Control
+                          type="time"
+                          name="startTime"
+                          value={eventForm.startTime}
+                          onChange={handleEventChange}
+                          required
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col xs={6}>
+                      <Form.Group>
+                        <Form.Label className="small text-muted fw-semibold">END</Form.Label>
+                        <Form.Control
+                          type="time"
+                          name="endTime"
+                          value={eventForm.endTime}
+                          onChange={handleEventChange}
+                        />
+                      </Form.Group>
+                    </Col>
+                  </Row>
                   <Form.Group className="mb-3 d-flex flex-column" style={{ flex: 1, minHeight: 0 }}>
                     <Form.Label className="small text-muted fw-semibold" style={{ flexShrink: 0 }}>DESCRIPTION</Form.Label>
                     <Form.Control
@@ -510,14 +741,19 @@ const DriverDashboard = () => {
                       style={{ resize: 'none', flex: 1, minHeight: 0 }}
                     />
                   </Form.Group>
-                  <Button type="submit" variant="primary" className="w-100" style={{ flexShrink: 0 }}>
+                  <Button type="submit" variant="primary" className="w-100" style={{ flexShrink: 0 }} disabled={eventSaving}>
                     <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="me-2">
                       <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" strokeLinecap="round" strokeLinejoin="round"/>
                       <polyline points="17,21 17,13 7,13 7,21" strokeLinecap="round" strokeLinejoin="round"/>
                       <polyline points="7,3 7,8 15,8" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
-                    Save Event
+                    {eventSaving ? 'Saving...' : 'Save Event'}
                   </Button>
+                  {eventFeedback.message && (
+                    <div className={`mt-2 alert alert-${eventFeedback.type} py-2 px-3 mb-0`} role="alert">
+                      {eventFeedback.message}
+                    </div>
+                  )}
                 </Form>
               </Card.Body>
             </Card>
@@ -527,62 +763,118 @@ const DriverDashboard = () => {
             {/* Schedule Calendar */}
             <Card className="schedule-card h-100">
               <Card.Header className="bg-light">
-                <div className="d-flex justify-content-between align-items-center">
-                  <h3 className="mb-0">Schedule - {formatMonth(currentDate)}</h3>
-                  <div className="calendar-nav">
-                    <button className="nav-btn btn btn-sm btn-outline-secondary me-2">
-                      <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                        <polyline points="15,18 9,12 15,6" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </button>
-                    <button className="nav-btn btn btn-sm btn-outline-secondary">
-                      <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                        <polyline points="9,18 15,12 9,6" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </button>
-                  </div>
-                </div>
+                <h3 className="mb-0 text-center">Schedule</h3>
               </Card.Header>
-              <Card.Body>
-                <div className="calendar">
-                  <div className="calendar-header">
-                    <span>MON</span>
-                    <span>TUE</span>
-                    <span>WED</span>
-                    <span>THU</span>
-                    <span>FRI</span>
-                    <span>SAT</span>
-                    <span>SUN</span>
-                  </div>
-                  <div className="calendar-body">
-                    {/* Previous month days */}
-                    {[...Array(firstDay)].map((_, i) => (
-                      <div key={`prev-${i}`} className="calendar-day other-month">
-                        {new Date(currentDate.getFullYear(), currentDate.getMonth(), 0).getDate() - firstDay + i + 1}
+              <Card.Body className="rbc-wrapper" style={{ minHeight: 460 }}>
+                {!selectedCalendarEvent ? (
+                  <Calendar
+                    localizer={localizer}
+                    events={scheduleEvents}
+                    eventPropGetter={calendarEventStyleGetter}
+                    onSelectEvent={(event) => {
+                      setCalendarDetailFeedback({ type: '', message: '' });
+                      setSelectedCalendarEvent(event);
+                    }}
+                    date={calendarDate}
+                    onNavigate={setCalendarDate}
+                    view={calendarView}
+                    onView={setCalendarView}
+                    views={['month', 'week', 'day']}
+                    style={{ height: 440 }}
+                    toolbar={true}
+                    popup
+                  />
+                ) : (
+                  <div className="h-100 d-flex flex-column">
+                    <div className="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                      <div>
+                        <h4 className="mb-1 fw-bold">Event Details</h4>
+                        <small className="text-muted">Review, then delete if needed.</small>
                       </div>
-                    ))}
-                    {/* Current month days */}
-                    {[...Array(daysInMonth)].map((_, i) => {
-                      const day = i + 1;
-                      const event = scheduleEvents.find(e => e.day === day);
-                      const isToday = day === currentDate.getDate();
-                      const isSelected = day === selectedDate;
-                  return (
-                    <div
-                      key={day}
-                      className={`calendar-day ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''} ${event ? `has-event ${event.type}` : ''}`}
-                      onClick={() => setSelectedDate(day)}
-                    >
-                      {event ? (
-                        <span className="event-badge">{event.type === 'trip' ? `Trip ${event.label}` : event.label}</span>
-                      ) : (
-                        day
-                      )}
+                      <Button
+                        type="button"
+                        variant="outline-secondary"
+                        size="sm"
+                        className="rounded-circle d-flex align-items-center justify-content-center"
+                        style={{ width: 34, height: 34 }}
+                        aria-label="Close"
+                        onClick={() => {
+                          setCalendarDetailFeedback({ type: '', message: '' });
+                          setSelectedCalendarEvent(null);
+                        }}
+                      >
+                        ×
+                      </Button>
                     </div>
-                  );
-                })}
-              </div>
-            </div>
+
+                    <Card className="border-0 bg-light-subtle mb-3 shadow-sm">
+                      <Card.Body className="p-3">
+                        <div className="d-flex justify-content-between align-items-start mb-3">
+                          <div>
+                            <small className="text-muted d-block">TITLE</small>
+                            <h5 className="mb-0 fw-semibold">{selectedCalendarEvent.title || 'N/A'}</h5>
+                          </div>
+                          <Badge bg="dark" pill>{selectedCalendarEvent.eventType || 'DEFAULT'}</Badge>
+                        </div>
+
+                        <Row className="g-2">
+                          <Col md={6} xs={12}>
+                            <div className="p-2 bg-white rounded border h-100">
+                              <small className="text-muted d-block">START</small>
+                              <span className="fw-medium">{formatEventDateTime(selectedCalendarEvent.start)}</span>
+                            </div>
+                          </Col>
+                          <Col md={6} xs={12}>
+                            <div className="p-2 bg-white rounded border h-100">
+                              <small className="text-muted d-block">END</small>
+                              <span className="fw-medium">{formatEventDateTime(selectedCalendarEvent.end)}</span>
+                            </div>
+                          </Col>
+                          <Col xs={12}>
+                            <div className="p-2 bg-white rounded border">
+                              <small className="text-muted d-block">DESCRIPTION</small>
+                              <span>{selectedCalendarEvent.description || 'No description'}</span>
+                            </div>
+                          </Col>
+                          {selectedCalendarEvent.relatedServiceRequestId && (
+                            <Col xs={12}>
+                              <div className="p-2 bg-white rounded border">
+                                <small className="text-muted d-block">RELATED SERVICE REQUEST</small>
+                                <span className="fw-medium">#{selectedCalendarEvent.relatedServiceRequestId}</span>
+                              </div>
+                            </Col>
+                          )}
+                        </Row>
+                      </Card.Body>
+                    </Card>
+
+                    {calendarDetailFeedback.message && (
+                      <div className={`alert alert-${calendarDetailFeedback.type} py-2 px-3`} role="alert">
+                        {calendarDetailFeedback.message}
+                      </div>
+                    )}
+
+                    {String(selectedCalendarEvent?.eventType || '').toUpperCase() === 'SERVICE_APPOINTMENT' && profile.role !== 'ADMIN' && (
+                      <div className="alert alert-warning py-2 px-3" role="alert">
+                        This event type can only be deleted by admin.
+                      </div>
+                    )}
+
+                    <div className="mt-auto d-flex justify-content-center">
+                      <Button
+                        variant="danger"
+                        className="px-4"
+                        onClick={handleDeleteSelectedEvent}
+                        disabled={
+                          eventDeleting ||
+                          (String(selectedCalendarEvent?.eventType || '').toUpperCase() === 'SERVICE_APPOINTMENT' && profile.role !== 'ADMIN')
+                        }
+                      >
+                        {eventDeleting ? 'Deleting...' : 'Delete Event'}
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </Card.Body>
             </Card>
           </Col>
@@ -685,39 +977,69 @@ const DriverDashboard = () => {
             {/* Assigned Vehicle */}
             <Card className="vehicle-card h-100">
               <Card.Header className="bg-light">
-                <div className="d-flex justify-content-between align-items-center">
-                  <h3 className="mb-0">Assigned Vehicle</h3>
-                  <Badge bg="success" className="d-flex align-items-center">
-                    <span className="me-1">●</span> Active
-                  </Badge>
-                </div>
+                <h3 className="mb-0">Assigned Vehicle</h3>
               </Card.Header>
               <Card.Body>
-                <div className="vehicle-info">
-                  <div className="vehicle-header mb-3">
-                    <div>
-                      <h4 className="mb-1">{vehicleData.name}</h4>
-                      <span className="vehicle-type text-muted small">{vehicleData.type} • {vehicleData.year} Model</span>
+                {vehicleLoading ? (
+                  <div className="text-center text-muted py-4">Loading...</div>
+                ) : !vehicle ? (
+                  <div className="text-center text-muted py-4">No vehicle assigned</div>
+                ) : (
+                  <div className="vehicle-info">
+                    <div className="vehicle-header mb-3">
+                      <div>
+                        <h4 className="mb-1">{vehicle.brandModel}</h4>
+                        <span className="vehicle-type text-muted small">{vehicle.year}</span>
+                      </div>
+                      <Badge bg="secondary">{vehicle.licensePlate}</Badge>
                     </div>
-                    <Badge bg="secondary">{vehicleData.id}</Badge>
-                  </div>
-                  <div className="maintenance-info mb-3">
-                    <div className="d-flex justify-content-between mb-2">
-                      <span className="maintenance-label text-muted small">Next Maintenance</span>
-                      <span className="maintenance-value fw-semibold">{vehicleData.nextMaintenance} / {vehicleData.maintenanceKm}</span>
+
+                    <div className="d-flex justify-content-center mb-3">
+                      <Badge
+                        bg={vehicle.status?.toLowerCase() === 'active' ? 'success' : 'secondary'}
+                        className="d-flex align-items-center px-3 py-2"
+                        style={{ fontSize: '0.85rem' }}
+                      >
+                        <span className="me-1">●</span> {vehicle.status}
+                      </Badge>
                     </div>
-                    <ProgressBar now={vehicleData.maintenanceProgress} variant="primary" />
+
+                    <Row className="g-2">
+                      <Col xs={12}>
+                        <div className="info-item">
+                          <div className="info-icon">
+                            <svg width="20" height="20" fill="none" stroke="#0d6efd" strokeWidth="2" viewBox="0 0 24 24">
+                              <circle cx="12" cy="12" r="10" strokeLinecap="round" strokeLinejoin="round"/>
+                              <path d="M12 8v4l3 3" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </div>
+                          <div className="info-content d-flex flex-column justify-content-center w-100 text-center">
+                            <span className="info-label">MILEAGE</span>
+                            <span className="info-value">{vehicle.currentMileageKm.toLocaleString()} km</span>
+                          </div>
+                        </div>
+                      </Col>
+                      <Col xs={12}>
+                        <div
+                          className="info-item"
+                          style={{ cursor: 'pointer' }}
+                          onClick={() => handleCopyToClipboard(vehicle.vin, 'VIN', 'vin')}
+                        >
+                          <div className="info-icon">
+                            <svg width="20" height="20" fill="none" stroke="#0d6efd" strokeWidth="2" viewBox="0 0 24 24">
+                              <rect x="2" y="7" width="20" height="14" rx="2" ry="2" strokeLinecap="round" strokeLinejoin="round"/>
+                              <path d="M16 3h-2a2 2 0 0 0-2 2v2h6V5a2 2 0 0 0-2-2z" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </div>
+                          <div className="info-content d-flex flex-column justify-content-center w-100 text-center">
+                            <span className="info-label">VIN</span>
+                            <span className="info-value" style={{ fontSize: '0.75rem', wordBreak: 'break-all' }}>{vehicle.vin || 'N/A'}</span>
+                          </div>
+                        </div>
+                      </Col>
+                    </Row>
                   </div>
-                  <Button variant="outline-primary" className="w-100">
-                    <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="me-2">
-                      <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <rect x="9" y="3" width="6" height="4" rx="1" strokeLinecap="round" strokeLinejoin="round"/>
-                      <path d="M9 12h6" strokeLinecap="round" strokeLinejoin="round"/>
-                      <path d="M9 16h6" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    Vehicle Inspection Report
-                  </Button>
-                </div>
+                )}
               </Card.Body>
             </Card>
           </Col>
