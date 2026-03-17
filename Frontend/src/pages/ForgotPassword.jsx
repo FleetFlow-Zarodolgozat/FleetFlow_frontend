@@ -37,14 +37,7 @@ const ForgotPassword = () => {
             <div className="forgot-password-header">
               <Link to="/login" className="logo-link">
                 <div className="logo-section">
-                  <div className="logo-icon">
-                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-                      <rect width="48" height="48" rx="12" fill="#0d6efd"/>
-                      <path d="M14 18L24 12L34 18V30L24 36L14 30V18Z" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      <path d="M14 18L24 24L34 18" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      <path d="M24 24V36" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </div>
+                  <img src="/fleetflow_logo.png" alt="FleetFlow Logo" style={{ height: '48px', width: 'auto' }} />
                   <h1 className="logo-title">FleetFlow</h1>
                 </div>
               </Link>
@@ -116,7 +109,7 @@ const ForgotPassword = () => {
                     variant="primary"
                     type="submit"
                     disabled={loading}
-                    className="w-100 reset-btn"
+                    className="w-100 reset-btn mb-4"
                   >
                     {loading ? 'Sending...' : 'Reset Password'}
                   </Button>
@@ -125,7 +118,7 @@ const ForgotPassword = () => {
             )}
 
             {/* Back to Login */}
-            <div className="back-to-login">
+            <div className="back-to-login mt-3 text-center">
               <Link to="/login" className="back-link">
                 <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path d="M19 12H5M12 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round"/>
@@ -137,13 +130,15 @@ const ForgotPassword = () => {
         </Card>
 
         {/* Page Footer */}
-        <div className="page-footer">
-          <div className="footer-links">
-            <Link to="/privacy">PRIVACY POLICY</Link>
-            <Link to="/terms">TERMS OF SERVICE</Link>
-            <Link to="/help">HELP CENTER</Link>
+        <div className="page-footer mt-4">
+          <div className="d-flex justify-content-center gap-3 mb-2 flex-wrap">
+            <Link to="/privacy" className="text-decoration-none text-muted small fw-semibold">PRIVACY POLICY</Link>
+            <span className="text-muted">•</span>
+            <Link to="/terms" className="text-decoration-none text-muted small fw-semibold">TERMS OF SERVICE</Link>
+            <span className="text-muted">•</span>
+            <Link to="/help" className="text-decoration-none text-muted small fw-semibold">HELP CENTER</Link>
           </div>
-          <p className="copyright">© 2024 FleetFlow Systems Inc. All rights reserved.</p>
+          <p className="text-center text-muted small mb-0">© 2024 FleetFlow Systems Inc. All rights reserved.</p>
         </div>
       </div>
     </div>

@@ -64,115 +64,127 @@ const HelpCenter = () => {
   return (
     <div className="help-page">
       <div className="help-content">
-        <Card className="help-card">
-          <Card.Body>
+        <Card className="help-card shadow-sm">
+          <Card.Body className="p-4 p-md-5">
             {/* Header */}
-            <div className="help-header">
-              <Link to="/login" className="logo-link">
+            <div className="help-header text-center mb-5">
+              <Link to="/login" className="text-decoration-none">
                 <div className="logo-section">
-                  <div className="logo-icon">
-                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-                      <rect width="48" height="48" rx="12" fill="#0d6efd"/>
-                      <path d="M14 18L24 12L34 18V30L24 36L14 30V18Z" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      <path d="M14 18L24 24L34 18" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      <path d="M24 24V36" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </div>
+                  <img src="/fleetflow_logo.png" alt="FleetFlow Logo" style={{ height: '48px', width: 'auto' }} />
                   <h1 className="logo-title">FleetFlow</h1>
                 </div>
               </Link>
-              <h2 className="page-title">Help Center</h2>
-              <p className="page-subtitle">Find answers to common questions and get support</p>
+              <h2 className="h3 fw-bold mb-2 mt-4">Help Center</h2>
+              <p className="text-muted">Find answers to common questions and get support</p>
             </div>
 
             {/* Quick Links */}
-            <div className="quick-links">
-              <div 
-                className={`quick-link-card ${copied ? 'copied' : ''}`}
+            <div className="d-flex justify-content-center mb-5">
+              <Card 
+                className={`help-card text-center p-4 ${copied ? 'border-success bg-light' : 'border'}`}
+                style={{ cursor: 'pointer', maxWidth: '300px', width: '100%' }}
                 onClick={handleEmailClick}
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => e.key === 'Enter' && handleEmailClick()}
               >
-                <div className="quick-link-icon">
-                  <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <div className={`rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center ${copied ? 'bg-success' : 'bg-primary'}`} 
+                     style={{ width: '56px', height: '56px' }}>
+                  <svg width="24" height="24" fill="none" stroke="white" strokeWidth="2" viewBox="0 0 24 24">
                     <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </div>
-                <h4>Email Support</h4>
-                <p>{copied ? 'Email copied to clipboard!' : 'fleetflow.info@gmail.com'}</p>
-              </div>
+                <h4 className="h6 fw-semibold mb-2">Email Support</h4>
+                <p className="small text-muted mb-0">{copied ? 'Email copied to clipboard!' : 'fleetflow.info@gmail.com'}</p>
+              </Card>
             </div>
 
             {/* FAQ Section */}
-            <div className="faq-section">
-              <h3 className="section-title">Frequently Asked Questions</h3>
-              <div className="faq-list">
+            <div className="mb-5">
+              <h3 className="h5 fw-bold mb-4">Frequently Asked Questions</h3>
+              <div className="d-flex flex-column gap-3">
                 {faqs.map((faq) => (
-                  <div 
+                  <Card 
                     key={faq.id} 
-                    className={`faq-item ${expandedFaq === faq.id ? 'expanded' : ''}`}
+                    className={`faq-item border ${expandedFaq === faq.id ? 'border-primary' : ''}`}
                   >
-                    <button 
-                      className="faq-question"
+                    <Card.Header 
+                      className="bg-white border-0 p-3"
+                      style={{ cursor: 'pointer' }}
                       onClick={() => toggleFaq(faq.id)}
                     >
-                      <span>{faq.question}</span>
-                      <svg 
-                        className="faq-icon" 
-                        width="20" 
-                        height="20" 
-                        fill="none" 
-                        stroke="currentColor" 
-                        strokeWidth="2" 
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M19 9l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </button>
-                    {expandedFaq === faq.id && (
-                      <div className="faq-answer">
-                        <p>{faq.answer}</p>
+                      <div className="d-flex justify-content-between align-items-center">
+                        <span className="fw-semibold">{faq.question}</span>
+                        <svg 
+                          className={`text-muted transition ${expandedFaq === faq.id ? 'rotate-180' : ''}`}
+                          style={{ 
+                            transform: expandedFaq === faq.id ? 'rotate(180deg)' : 'rotate(0deg)',
+                            transition: 'transform 0.2s'
+                          }}
+                          width="20" 
+                          height="20" 
+                          fill="none" 
+                          stroke="currentColor" 
+                          strokeWidth="2" 
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M19 9l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
                       </div>
+                    </Card.Header>
+                    {expandedFaq === faq.id && (
+                      <Card.Body className="pt-0 px-3 pb-3">
+                        <p className="text-muted mb-0 small">{faq.answer}</p>
+                      </Card.Body>
                     )}
-                  </div>
+                  </Card>
                 ))}
               </div>
             </div>
 
             {/* Contact Section */}
-            <div className="contact-section">
-              <h3 className="section-title">Still need help?</h3>
-              <p className="contact-text">
-                Our support team is available Monday to Friday, 9:00 AM - 6:00 PM (CET)
-              </p>
-              <div className="contact-methods">
-                <div className="contact-method">
-                  <strong>Email:</strong>
-                  <a href="mailto:fleetflow.info@gmail.com">fleetflow.info@gmail.com</a>
+            <Card className="bg-light border-0 mb-4">
+              <Card.Body className="p-4 text-center">
+                <h3 className="h6 fw-bold mb-3">Still need help?</h3>
+                <p className="text-muted small mb-4">
+                  Our support team is available Monday to Friday, 9:00 AM - 6:00 PM (CET)
+                </p>
+                <div className="d-flex flex-column flex-md-row justify-content-center gap-4">
+                  <div className="text-muted small">
+                    <strong className="text-dark">Email:</strong>{' '}
+                    <a href="mailto:fleetflow.info@gmail.com" className="text-primary text-decoration-none">
+                      fleetflow.info@gmail.com
+                    </a>
+                  </div>
+                  <div className="text-muted small">
+                    <strong className="text-dark">Phone:</strong>{' '}
+                    <a href="tel:+3612345678" className="text-primary text-decoration-none">
+                      +36 1 234 5678
+                    </a>
+                  </div>
                 </div>
-                <div className="contact-method">
-                  <strong>Phone:</strong>
-                  <a href="tel:+3612345678">+36 1 234 5678</a>
-                </div>
-              </div>
-            </div>
+              </Card.Body>
+            </Card>
 
             {/* Back Link */}
-            <div className="help-footer">
-              <Link to="/login" className="back-link">← Back to Login</Link>
+            <div className="text-center mt-4 pt-3 border-top">
+              <Link to="/login" className="text-primary text-decoration-none fw-semibold">
+                ← Back to Login
+              </Link>
             </div>
           </Card.Body>
         </Card>
 
         {/* Page Footer */}
-        <div className="page-footer">
-          <div className="footer-links">
-            <Link to="/privacy">PRIVACY POLICY</Link>
-            <Link to="/terms">TERMS OF SERVICE</Link>
-            <Link to="/help">HELP CENTER</Link>
+        <div className="page-footer mt-4">
+          <div className="d-flex justify-content-center gap-3 mb-2 flex-wrap">
+            <Link to="/privacy" className="text-decoration-none text-muted small fw-semibold">PRIVACY POLICY</Link>
+            <span className="text-muted">•</span>
+            <Link to="/terms" className="text-decoration-none text-muted small fw-semibold">TERMS OF SERVICE</Link>
+            <span className="text-muted">•</span>
+            <Link to="/help" className="text-decoration-none text-muted small fw-semibold">HELP CENTER</Link>
           </div>
-          <p className="copyright">© 2024 FleetFlow Systems Inc. All rights reserved.</p>
+          <p className="text-center text-muted small mb-0">© 2024 FleetFlow Systems Inc. All rights reserved.</p>
         </div>
       </div>
     </div>

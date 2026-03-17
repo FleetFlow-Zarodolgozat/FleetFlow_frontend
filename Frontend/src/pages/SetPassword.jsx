@@ -1,90 +1,160 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { authService } from '../services/authService';
 import { Container, Card, Form, Button, Alert } from 'react-bootstrap';
-import '../styles/Register.css';
+import '../styles/SetPassword.css';
 
-const Register = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
-  });
+const SetPassword = () => {
+  const [searchParams] = useSearchParams();
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [tokenMissing, setTokenMissing] = useState(false);
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+  const token = searchParams.get('token');
+
+  useEffect(() => {
+    if (!token) {
+      setTokenMissing(true);
+    }
+  }, [token]);
+
+  const validatePassword = () => {
+    if (password.length < 5) {
+      setError('Password must be at least 5 characters long.');
+      return false;
+    }
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.');
+      return false;
+    }
+    return true;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    // Validation
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match.');
-      return;
-    }
-
-    if (formData.password.length < 8) {
-      setError('Password must be at least 8 characters long.');
-      return;
-    }
-
-    if (!agreeToTerms) {
-      setError('You must agree to the Terms of Service and Privacy Policy.');
+    if (!validatePassword()) {
       return;
     }
 
     setLoading(true);
 
     try {
-      await authService.register({
-        name: formData.name,
-        email: formData.email,
-        password: formData.password
-      });
-      navigate('/login');
+      await authService.setPassword(token, password, confirmPassword);
+      setSuccess(true);
     } catch (err) {
       setError(
-        err.response?.data?.message || 
-        'Registration failed. Please try again.'
+        err.response?.data || 
+        'Failed to set password. The link may have expired.'
       );
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <div className="register-page">
-      <div className="register-content">
-        <Card className="register-card">
-          <Card.Body>
-            {/* Logo and Header */}
-            <div className="register-header">
-              <div className="logo-section">
-                <div className="logo-icon">
-                  <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-                    <rect width="48" height="48" rx="12" fill="#0d6efd"/>
-                    <path d="M14 18L24 12L34 18V30L24 36L14 30V18Z" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M14 18L24 24L34 18" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M24 24V36" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+  if (tokenMissing) {
+    return (
+      <div className="set-password-page">
+        <div className="set-password-content">
+          <Card className="set-password-card">
+            <Card.Body>
+              <div className="set-password-header">
+                <div className="logo-section">
+                  <img src="/fleetflow_logo.png" alt="FleetFlow Logo" style={{ height: '48px', width: 'auto' }} />
+                  <h1 className="logo-title">FleetFlow</h1>
+                </div>
+                <div className="error-icon">
+                  <svg width="64" height="64" fill="none" viewBox="0 0 24 24" stroke="#dc3545">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                   </svg>
                 </div>
+                <h2 className="page-title">Invalid Link</h2>
+                <p className="page-subtitle">
+                  This password reset link is invalid or missing. Please request a new password reset.
+                </p>
+              </div>
+              <Button
+                variant="primary"
+                className="w-100"
+                onClick={() => navigate('/forgot-password')}
+              >
+                Request New Link
+              </Button>
+              <div className="card-footer-text">
+                <p>
+                  Remember your password?{' '}
+                  <a href="/login">Back to Sign In</a>
+                </p>
+              </div>
+            </Card.Body>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  if (success) {
+    return (
+      <div className="set-password-page">
+        <div className="set-password-content">
+          <Card className="set-password-card">
+            <Card.Body>
+              <div className="set-password-header">
+                <div className="logo-section">
+                  <img src="/fleetflow_logo.png" alt="FleetFlow Logo" style={{ height: '48px', width: 'auto' }} />
+                  <h1 className="logo-title">FleetFlow</h1>
+                </div>
+                <div className="success-icon">
+                  <svg width="64" height="64" fill="none" viewBox="0 0 24 24" stroke="#198754">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h2 className="page-title">Password Set Successfully!</h2>
+                <p className="page-subtitle">
+                  Your password has been set. You can now sign in with your new password.
+                </p>
+              </div>
+              <Button
+                variant="primary"
+                className="w-100"
+                onClick={() => navigate('/login')}
+              >
+                Go to Sign In
+              </Button>
+            </Card.Body>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="set-password-page">
+      <div className="set-password-content">
+        <Card className="set-password-card">
+          <Card.Body>
+            {/* Logo and Header */}
+            <div className="set-password-header">
+              <div className="logo-section">
+                <img src="/fleetflow_logo.png" alt="FleetFlow Logo" style={{ height: '48px', width: 'auto' }} />
                 <h1 className="logo-title">FleetFlow</h1>
               </div>
-              <h2 className="welcome-title">Create your account</h2>
-              <p className="welcome-subtitle">Join FleetFlow to manage your fleet operations</p>
+              <div className="password-icon">
+                <svg width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="#0d6efd">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              <h2 className="page-title">Set Your Password</h2>
+              <p className="page-subtitle">
+                Create a secure password for your FleetFlow account.
+              </p>
             </div>
 
             {/* Error Alert */}
@@ -94,45 +164,19 @@ const Register = () => {
               </Alert>
             )}
 
-            {/* Registration Form */}
+            {/* Set Password Form */}
             <Form onSubmit={handleSubmit}>
               <Form.Group className="mb-3">
-                <Form.Label>Full Name</Form.Label>
-                <Form.Control
-                  type="text"
-                  name="name"
-                  placeholder="John Doe"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                  disabled={loading}
-                />
-              </Form.Group>
-
-              <Form.Group className="mb-3">
-                <Form.Label>Email Address</Form.Label>
-                <Form.Control
-                  type="email"
-                  name="email"
-                  placeholder="e.g. name@company.com"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  disabled={loading}
-                />
-              </Form.Group>
-
-              <Form.Group className="mb-3">
-                <Form.Label>Password</Form.Label>
+                <Form.Label>New Password</Form.Label>
                 <div className="password-input-wrapper">
                   <Form.Control
                     type={showPassword ? 'text' : 'password'}
-                    name="password"
-                    placeholder="••••••••"
-                    value={formData.password}
-                    onChange={handleChange}
+                    placeholder="Enter your new password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     required
                     disabled={loading}
+                    minLength={5}
                   />
                   <button
                     type="button"
@@ -154,22 +198,22 @@ const Register = () => {
                     )}
                   </button>
                 </div>
-                <Form.Text className="password-hint">
-                  Must be at least 8 characters
+                <Form.Text className="text-muted">
+                  Password must be at least 5 characters long.
                 </Form.Text>
               </Form.Group>
 
-              <Form.Group className="mb-3">
+              <Form.Group className="mb-4">
                 <Form.Label>Confirm Password</Form.Label>
                 <div className="password-input-wrapper">
                   <Form.Control
                     type={showConfirmPassword ? 'text' : 'password'}
-                    name="confirmPassword"
-                    placeholder="••••••••"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
+                    placeholder="Confirm your new password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
                     required
                     disabled={loading}
+                    minLength={5}
                   />
                   <button
                     type="button"
@@ -193,35 +237,21 @@ const Register = () => {
                 </div>
               </Form.Group>
 
-              <Form.Group className="mb-4">
-                <Form.Check
-                  type="checkbox"
-                  id="agreeToTerms"
-                  label={
-                    <span>
-                      I agree to the <a href="/terms" className="terms-link">Terms of Service</a> and <a href="/privacy" className="terms-link">Privacy Policy</a>
-                    </span>
-                  }
-                  checked={agreeToTerms}
-                  onChange={(e) => setAgreeToTerms(e.target.checked)}
-                />
-              </Form.Group>
-
               <Button
                 variant="primary"
                 type="submit"
                 disabled={loading}
-                className="w-100 register-btn"
+                className="w-100"
               >
-                {loading ? 'Creating Account...' : 'Create Account'}
+                {loading ? 'Setting Password...' : 'Set Password'}
               </Button>
             </Form>
 
             {/* Footer */}
             <div className="card-footer-text">
               <p>
-                Already have an account?{' '}
-                <a href="/login">Sign in</a>
+                Remember your password?{' '}
+                <a href="/login">Back to Sign In</a>
               </p>
             </div>
           </Card.Body>
@@ -241,4 +271,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default SetPassword;
