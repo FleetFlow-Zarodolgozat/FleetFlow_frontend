@@ -167,7 +167,7 @@ const FuelLogs = () => {
 const handleDeleteFuelLog = async (id) => {
     if (!window.confirm('Biztosan törlöd ezt a tankolást?')) return;
     try {
-      await api.delete(`/fuellogs/${id}`);
+  await api.patch(`/fuellogs/delete/${id}`);
       await fetchFuelLogs(pagination.page);
     } catch (err) {
       alert('Hiba történt a törlés során!');
