@@ -149,17 +149,18 @@ const AddFuelLog = () => {
       if (date && time) {
         dateTime = date + 'T' + time;
       }
-      // Prepare form data for file upload
+
+      // FuelLog POST (file-t közvetlenül küldjük)
       const formData = new FormData();
-      formData.append('liters', liters);
-      formData.append('totalCostCur', cost);
-      formData.append('station', station);
-      formData.append('odometer', odometer);
-      formData.append('location', location);
-      formData.append('licensePlate', plate);
-      formData.append('date', dateTime);
+      formData.append('Liters', Number(liters));
+      formData.append('TotalCost', Number(cost));
+      formData.append('StationName', station);
+      formData.append('OdometerKm', Number(odometer));
+      formData.append('LocationText', location);
+      formData.append('LicensePlate', plate);
+      formData.append('Date', new Date(dateTime).toISOString());
       if (receiptPhoto) {
-        formData.append('receiptPhoto', receiptPhoto);
+        formData.append('File', receiptPhoto);
       }
       await api.post('/fuellogs', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
@@ -346,9 +347,9 @@ const AddFuelLog = () => {
                                                       <line x1="11" y1="8" x2="13" y2="8" strokeLinecap="round" strokeLinejoin="round"/>
                                                     </svg>
                                                   </span>
-                                                  Odometer (km) <span className="text-muted">(optional)</span>
+                                                  Odometer (km)
                                                 </Form.Label>
-                                                <Form.Control type="number" value={odometer} onChange={e => setOdometer(e.target.value)} placeholder="0" min="0" step="1" />
+                                                <Form.Control type="number" value={odometer} onChange={e => setOdometer(e.target.value)} placeholder="0" min="0" step="1" required />
                                               </Form.Group>
                                             </Col>
                       <Col xs={12} md={12} lg={12}>
@@ -390,6 +391,7 @@ const AddFuelLog = () => {
                               accept="image/*"
                               id="receiptPhotoInput"
                               style={{display:'none'}}
+                              required
                               onChange={e => {
                                 setReceiptPhoto(e.target.files[0]);
                                 setReceiptPhotoName(e.target.files[0]?.name || '');
