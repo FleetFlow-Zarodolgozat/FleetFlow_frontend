@@ -84,6 +84,7 @@ const Trips = () => {
       try {
         const response = await api.get('/trips/mine', { params: { page: 1, pageSize: 10 } });
         setTrips(response.data.data || []);
+        console.log('Trips API response:', response.data.data);
       } catch (err) {
         setError('Hiba történt az utazások lekérésekor!');
       } finally {
@@ -103,7 +104,7 @@ const Trips = () => {
     if (!dateStr) return 'N/A';
     const date = new Date(dateStr);
     if (Number.isNaN(date.getTime())) return 'N/A';
-    return `${date.getFullYear()}.${String(date.getMonth()+1).padStart(2,'0')}.${String(date.getDate()).padStart(2,'0')}`;
+    return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
   };
 
   return (
@@ -186,7 +187,7 @@ const Trips = () => {
           <Row className="justify-content-center">
             <Col md={8} lg={6}>
               <Card className="shadow-lg border-0 rounded-4">
-                <Card.Header className="bg-white rounded-top-4 d-flex align-items-center gap-2 border-bottom" style={{minHeight: 60}}>
+                <Card.Header className="bg-white rounded-top-4 d-flex align-items-center gap-2 border-bottom" style={{ minHeight: 60 }}>
                   <svg width="32" height="32" fill="none" stroke="#2563eb" strokeWidth="2" viewBox="0 0 24 24">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" strokeLinecap="round" strokeLinejoin="round" />
                     <polyline points="14,2 14,8 20,8" strokeLinecap="round" strokeLinejoin="round" />
@@ -210,15 +211,25 @@ const Trips = () => {
                             <div className="fuel-log-accent mb-3" />
                             <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
                               <div className="d-flex align-items-center gap-2 min-w-0">
-                                <span className="fuel-log-calendar-icon">
-                                  <svg width="18" height="18" fill="none" stroke="#2563eb" strokeWidth="2" viewBox="0 0 24 24">
-                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" strokeLinecap="round" strokeLinejoin="round" />
-                                    <line x1="16" y1="2" x2="16" y2="6" strokeLinecap="round" strokeLinejoin="round" />
-                                    <line x1="8" y1="2" x2="8" y2="6" strokeLinecap="round" strokeLinejoin="round" />
-                                    <line x1="3" y1="10" x2="21" y2="10" strokeLinecap="round" strokeLinejoin="round" />
+                                {/* Route icon */}
+                                <span style={{ display: 'flex', alignItems: 'center', color: '#2563eb' }}>
+                                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 6 }}>
+                                    <path d="M12 2C7.03 2 3 6.03 3 11c0 5.25 7.25 10.25 8.25 10.92a1 1 0 0 0 1.5 0C13.75 21.25 21 16.25 21 11c0-4.97-4.03-9-9-9zm0 13a4 4 0 1 1 0-8 4 4 0 0 1 0 8z" />
+                                    <circle cx="12" cy="11" r="2" fill="#2563eb" />
                                   </svg>
+                                  <span
+                                    className="fuel-log-value"
+                                    style={{
+                                      marginLeft: 0,
+                                      textAlign: 'left',
+                                      color: '#2563eb',
+                                      fontWeight: 600,
+                                      fontSize: '1.1em',
+                                    }}
+                                  >
+                                    {(trip.StartLocation || trip.startLocation) + ' → ' + (trip.EndLocation || trip.endLocation)}
+                                  </span>
                                 </span>
-                                <span className="fuel-log-date fw-semibold">{formatDate(trip.StartTime)}</span>
                               </div>
                               <Button
                                 variant="outline-danger"
@@ -238,46 +249,51 @@ const Trips = () => {
                             </div>
                             <div className="fuel-log-divider mb-3" />
                             <div className="fuel-log-details">
-                              <div className="fuel-log-detail-row lcp-row">
-                                <div style={{display: 'flex', alignItems: 'center'}}>
-                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="#2563eb" style={{marginRight: 2}}><path d="M12 2C12 2 5 11 5 16a7 7 0 0 0 14 0c0-5-7-14-7-14z"/><path d="M12 21a5 5 0 0 1-5-5c0-3.07 4.13-9.14 5-10.32C14.87 6.86 19 12.93 19 16a5 5 0 0 1-5 5z" fill="#2563eb"/></svg>
-                                  <span className="fuel-log-label">From</span>
-                                  <span className="fuel-log-value text-warning-emphasis ms-2">{trip.StartLocation}</span>
-                                </div>
-                                <div style={{display: 'flex', alignItems: 'center'}}>
-                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="#22c55e" style={{marginRight: 2}}><path d="M3 20L8 4" strokeLinecap="round" strokeLinejoin="round"/><path d="M21 20L16 4" strokeLinecap="round" strokeLinejoin="round"/><line x1="10" y1="16" x2="14" y2="16" strokeLinecap="round" strokeLinejoin="round"/><line x1="10.5" y1="12" x2="13.5" y2="12" strokeLinecap="round" strokeLinejoin="round"/><line x1="11" y1="8" x2="13" y2="8" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                                  <span className="fuel-log-label">Distance</span>
-                                  <span className="fuel-log-value text-success ms-2">{trip.DistanceKm?.toLocaleString('hu-HU',{minimumFractionDigits:1,maximumFractionDigits:1}) || 'N/A'} km</span>
-                                </div>
-                                <div style={{display: 'flex', alignItems: 'center'}}>
-                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="#fb923c" style={{marginRight: 2}}>
-                                    <rect x="4" y="10" width="16" height="6" rx="2" />
-                                    <circle cx="7" cy="18" r="1.5" />
-                                    <circle cx="17" cy="18" r="1.5" />
-                                  </svg>
-                                  <span className="fuel-log-label">Plate</span>
-                                  <span className="fuel-log-value text-primary ms-2">{trip.LicensePlate}</span>
-                                </div>
-                              </div>
-                              <div className="fuel-log-detail-row" style={{gap: '0.5rem', justifyContent: 'flex-start'}}>
-                                <span style={{display: 'flex', alignItems: 'center', color: '#2563eb'}}>
-                                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: 6}}>
-                                    <path d="M12 2C7.03 2 3 6.03 3 11c0 5.25 7.25 10.25 8.25 10.92a1 1 0 0 0 1.5 0C13.75 21.25 21 16.25 21 11c0-4.97-4.03-9-9-9zm0 13a4 4 0 1 1 0-8 4 4 0 0 1 0 8z" />
-                                    <circle cx="12" cy="11" r="2" fill="#2563eb" />
-                                  </svg>
-                                  <span
-                                    className="fuel-log-value"
-                                    style={{
-                                      marginLeft: 0,
-                                      textAlign: 'left',
-                                      color: '#2563eb',
-                                      fontWeight: 600,
-                                      fontSize: '1.1em',
-                                    }}
-                                  >
-                                    {trip.StartLocation} &rarr; {trip.EndLocation}
+                              <div className="fuel-log-detail-row lcp-row" style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: '1.5rem', width: '100%', padding: '0.5rem 0'}}>
+                                {/* Date */}
+                                <div style={{display: 'flex', alignItems: 'center', minWidth: '120px', flex: '1 1 0', overflow: 'hidden'}}>
+                                  <span className="fuel-log-calendar-icon" style={{flexShrink: 0}}>
+                                    <svg width="18" height="18" fill="none" stroke="#2563eb" strokeWidth="2" viewBox="0 0 24 24">
+                                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" strokeLinecap="round" strokeLinejoin="round" />
+                                      <line x1="16" y1="2" x2="16" y2="6" strokeLinecap="round" strokeLinejoin="round" />
+                                      <line x1="8" y1="2" x2="8" y2="6" strokeLinecap="round" strokeLinejoin="round" />
+                                      <line x1="3" y1="10" x2="21" y2="10" strokeLinecap="round" strokeLinejoin="round" />
+                                    </svg>
                                   </span>
-                                </span>
+                                  <span className="fuel-log-label" style={{marginLeft: 4, fontWeight: 500}}>Date</span>
+                                  <span className="fuel-log-value text-warning-emphasis ms-2" style={{marginLeft: 8, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>{formatDate(trip.StartTime || trip.startTime)}</span>
+                                </div>
+                                {/* Distance */}
+                                <div style={{display: 'flex', alignItems: 'center', minWidth: '120px', flex: '1 1 0', overflow: 'hidden'}}>
+                                  <span className="fuel-log-distance-icon" style={{flexShrink: 0}}>
+                                    <svg width="18" height="18" fill="none" stroke="#22c55e" strokeWidth="2" viewBox="0 0 24 24">
+                                      <path d="M3 20L8 4" strokeLinecap="round" strokeLinejoin="round" />
+                                      <path d="M21 20L16 4" strokeLinecap="round" strokeLinejoin="round" />
+                                      <line x1="10" y1="16" x2="14" y2="16" strokeLinecap="round" strokeLinejoin="round" />
+                                      <line x1="10.5" y1="12" x2="13.5" y2="12" strokeLinecap="round" strokeLinejoin="round" />
+                                      <line x1="11" y1="8" x2="13" y2="8" strokeLinecap="round" strokeLinejoin="round" />
+                                    </svg>
+                                  </span>
+                                  <span className="fuel-log-label" style={{marginLeft: 4, fontWeight: 500}}>Distance</span>
+                                  <span className="fuel-log-value text-success ms-2" style={{marginLeft: 8, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>{(trip.DistanceKm || trip.distanceKm)?.toLocaleString('hu-HU',{minimumFractionDigits:1,maximumFractionDigits:1}) || 'N/A'} km</span>
+                                </div>
+                                {/* Plate */}
+                                <div style={{display: 'flex', alignItems: 'center', minWidth: '120px', flex: '1 1 0', overflow: 'hidden'}}>
+                                  <span className="fuel-log-plate-icon" style={{flexShrink: 0}}>
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{marginRight: 2}}>
+                                      <rect x="4" y="10" width="16" height="6" rx="2" fill="#fb923c"/>
+                                      <rect x="7" y="6" width="10" height="5" rx="2" fill="#fdba74"/>
+                                      <rect x="9" y="8" width="6" height="2" rx="1" fill="#fff"/>
+                                      <circle cx="7" cy="18" r="1.5" fill="#fb923c"/>
+                                      <circle cx="17" cy="18" r="1.5" fill="#fb923c"/>
+                                      <rect x="6" y="16" width="2" height="2" rx="1" fill="#fdba74"/>
+                                      <rect x="16" y="16" width="2" height="2" rx="1" fill="#fdba74"/>
+                                      <rect x="10.5" y="13" width="3" height="1.5" rx="0.75" fill="#fff"/>
+                                    </svg>
+                                  </span>
+                                  <span className="fuel-log-label" style={{marginLeft: 4, fontWeight: 500}}>Plate</span>
+                                  <span className="fuel-log-value text-primary ms-2" style={{marginLeft: 8, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>{trip.LicensePlate || trip.licensePlate}</span>
+                                </div>
                               </div>
                             </div>
                           </Card.Body>
