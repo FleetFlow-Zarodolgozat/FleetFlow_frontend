@@ -192,28 +192,14 @@
 }
 
 .action-btn {
-  width: 36px;
-  height: 36px;
-  border: none;
-  background: #f8f9fa;
-  border-radius: 8px;
   color: #6c757d;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
 }
 
 .action-btn svg {
   width: 22px;
   height: 22px;
   display: block;
-  color: #6c757d;
-  stroke: currentColor !important;
-  fill: none !important;
-  opacity: 1 !important;
-  visibility: visible !important;
+  color: grey;
 }
 
 
