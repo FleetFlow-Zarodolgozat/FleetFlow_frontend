@@ -1,19 +1,3 @@
-// Delete fuel log handler
-const handleDeleteFuelLog = async (id) => {
-    if (!window.confirm('Biztosan törlöd ezt a tankolást?')) return;
-    try {
-      await api.delete(`/fuellogs/${id}`);
-      await fetchFuelLogs(pagination.page);
-    } catch (err) {
-      alert('Hiba történt a törlés során!');
-      if (err.response) {
-        alert('Részletes hiba: ' + (err.response.data?.message || JSON.stringify(err.response.data)));
-        console.log('Delete error:', err.response);
-      } else {
-        console.log('Delete error:', err);
-      }
-    }
-  };
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Alert, Badge, Button, Card, Col, Container, Pagination, Row, Spinner } from 'react-bootstrap';
@@ -21,6 +5,7 @@ import api from '../services/api';
 import { authService } from '../services/authService';
 import '../styles/DriverDashboard.css';
 import '../styles/FuelLogs.css';
+
 
 const FuelLogs = () => {
   const navigate = useNavigate();
@@ -77,6 +62,8 @@ const FuelLogs = () => {
       setLoading(false);
     }
   };
+
+  // ...existing code...
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -142,16 +129,6 @@ const FuelLogs = () => {
     return emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1);
   };
 
-  const getInitials = () => {
-    if (profile.fullName) {
-      const names = profile.fullName.split(' ');
-      if (names.length >= 2) {
-        return (names[0].charAt(0) + names[names.length - 1].charAt(0)).toUpperCase();
-      }
-      return profile.fullName.charAt(0).toUpperCase();
-    }
-    return (profile.email || user?.email || 'D').charAt(0).toUpperCase();
-  };
 
   const formatDateTime = (value) => {
     if (!value) return 'N/A';
@@ -184,6 +161,23 @@ const FuelLogs = () => {
     }
 
     return items;
+  };
+
+  // Delete fuel log handler
+const handleDeleteFuelLog = async (id) => {
+    if (!window.confirm('Biztosan törlöd ezt a tankolást?')) return;
+    try {
+      await api.delete(`/fuellogs/${id}`);
+      await fetchFuelLogs(pagination.page);
+    } catch (err) {
+      alert('Hiba történt a törlés során!');
+      if (err.response) {
+        alert('Részletes hiba: ' + (err.response.data?.message || JSON.stringify(err.response.data)));
+        console.log('Delete error:', err.response);
+      } else {
+        console.log('Delete error:', err);
+      }
+    }
   };
 
   return (
