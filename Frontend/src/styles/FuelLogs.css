@@ -1,3 +1,8 @@
+/* Orange outline for Add New Fuel Log card */
+.add-fuel-log-orange-outline {
+  border: 2px solid #fb923c !important;
+  box-shadow: 0 6px 24px rgba(13,110,253,0.18), 0 1.5px 6px rgba(0,0,0,0.10), 0 0 0 4px #fffaf5 !important;
+}
 .fuel-logs-page {
   min-height: 100vh;
   background: transparent;

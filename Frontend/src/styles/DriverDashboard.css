@@ -1,15 +1,3 @@
-/* Orange border for AddFuelLog card */
-/* Softer orange box shadow for AddFuelLog card */
-.add-fuel-log-orange-outline {
-  border: 2.5px solid #fb923c !important;
-  box-shadow: 0 4px 18px rgba(251, 146, 60, 0.18), 0 2px 8px rgba(0,0,0,0.10) !important;
-}
-
-/* Orange header for AddFuelLog */
-.bg-orange {
-  background-color: #fb923c !important;
-  color: #fff !important;
-}
 /* Driver Dashboard Styles */
 .driver-dashboard {
   display: flex;
@@ -192,28 +180,14 @@
 }
 
 .action-btn {
-  width: 36px;
-  height: 36px;
-  border: none;
-  background: #f8f9fa;
-  border-radius: 8px;
   color: #6c757d;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
 }
 
 .action-btn svg {
   width: 22px;
   height: 22px;
   display: block;
-  color: #6c757d;
-  stroke: currentColor !important;
-  fill: none !important;
-  opacity: 1 !important;
-  visibility: visible !important;
+  color: grey;
 }
 
 
@@ -676,6 +650,22 @@
   .info-grid {
     grid-template-columns: 1fr;
   }
+  .trip-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .fuel-log-card {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin-bottom: 1.5rem !important;
+  }
+  .fuel-log-detail-row {
+    flex-wrap: wrap !important;
+    gap: 1rem !important;
+    padding: 0.5rem 0 !important;
+    overflow-x: auto !important;
+  }
 }
 
 @media (max-width: 768px) {
@@ -735,6 +725,20 @@
     font-size: 8px;
     padding: 2px 4px;
   }
+  .trip-list {
+    gap: 1rem;
+  }
+  .fuel-log-card {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin-bottom: 1rem !important;
+  }
+  .fuel-log-detail-row {
+    flex-wrap: wrap !important;
+    gap: 0.5rem !important;
+    padding: 0.5rem 0 !important;
+    overflow-x: auto !important;
+  }
 }
 
 @media (max-width: 480px) {
@@ -765,5 +769,19 @@
   .event-badge {
     font-size: 7px;
     padding: 1px 3px;
+  }
+  .trip-list {
+    gap: 0.5rem;
+  }
+  .fuel-log-card {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin-bottom: 0.5rem !important;
+  }
+  .fuel-log-detail-row {
+    flex-wrap: wrap !important;
+    gap: 0.25rem !important;
+    padding: 0.5rem 0 !important;
+    overflow-x: auto !important;
   }
 }
