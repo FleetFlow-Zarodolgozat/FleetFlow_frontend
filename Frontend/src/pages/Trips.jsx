@@ -129,8 +129,23 @@ const Trips = () => {
 
   const handleDeleteTrip = async (id) => {
     if (!window.confirm('Biztosan törlöd ezt az utazást?')) return;
-    // TODO: Implement delete endpoint if available
-    alert('Törlés funkció még nincs implementálva.');
+    setError('');
+    try {
+      await api.patch(`/trips/delete/${id}`);
+      await fetchTrips(pagination.page);
+    } catch (err) {
+      let msg = 'Hiba történt a törlés során!';
+      if (err.response && err.response.data) {
+        const data = err.response.data;
+        if (typeof data === 'string') msg = data;
+        else if (data.message) msg = data.message;
+        else if (data.detail) msg = data.detail;
+        else if (data.errors) msg = Array.isArray(data.errors) ? data.errors.join(', ') : JSON.stringify(data.errors);
+        else if (err.response.statusText) msg = err.response.statusText;
+        else msg = JSON.stringify(data);
+      }
+      setError(msg);
+    }
   };
 
   const formatDate = (dateStr) => {

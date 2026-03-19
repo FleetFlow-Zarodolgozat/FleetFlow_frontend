@@ -20,24 +20,26 @@ const AddNewTrip = () => {
 			};
 			fetchVehicleMileage();
 		}, []);
-	const [liters, setLiters] = useState('');
-	const [cost, setCost] = useState('');
-	const [station, setStation] = useState('');
-	const [location, setLocation] = useState('');
-	const [receiptPhoto, setReceiptPhoto] = useState(null);
-	const [receiptPhotoName, setReceiptPhotoName] = useState('');
-	const [odometer, setOdometer] = useState('');
-	const [plate, setPlate] = useState('');
-	const [date, setDate] = useState('');
-	const [time, setTime] = useState('');
+	const [startDate, setStartDate] = useState('');
+	const [startHour, setStartHour] = useState('');
+	const [endDate, setEndDate] = useState('');
+	const [endHour, setEndHour] = useState('');
+	const [startLocation, setStartLocation] = useState('');
+	const [endLocation, setEndLocation] = useState('');
+	const [distanceKm, setDistanceKm] = useState('');
+	const [startOdometerKm, setStartOdometerKm] = useState('');
+	const [endOdometerKm, setEndOdometerKm] = useState('');
+	const [notes, setNotes] = useState('');
 		useEffect(() => {
 			// Set default date and time to now
 			const now = new Date();
 			const pad = n => n.toString().padStart(2, '0');
 			const defaultDate = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
-			const defaultTime = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
-			setDate(defaultDate);
-			setTime(defaultTime);
+			const defaultHour = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+			setStartDate(defaultDate);
+			setStartHour(defaultHour);
+			setEndDate(defaultDate);
+			setEndHour(defaultHour);
 		}, []);
 	const [error, setError] = useState('');
 	const [success, setSuccess] = useState(false);
@@ -109,60 +111,50 @@ const AddNewTrip = () => {
 		setError('');
 		setSuccess(false);
 		// Frontend validation
-		if (!liters || Number(liters) <= 0) {
-			setError('Liters must be greater than 0');
-			return;
-		}
-		if (!cost || Number(cost) <= 0) {
-			setError('Total cost must be greater than 0');
-			return;
-		}
 		const now = new Date();
-		const logDate = new Date(date + 'T' + (time || '00:00'));
-		if (logDate > now) {
-			setError('Date cannot be in the future');
+		const start = new Date(`${startDate}T${startHour}`);
+		const end = new Date(`${endDate}T${endHour}`);
+		if (end < start) {
+			setError('End time cannot be before start time');
 			return;
 		}
-		if (logDate < new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)) {
-			setError('Date cannot be older than 7 days');
+		if (start > now) {
+			setError('Start time cannot be in the future');
 			return;
 		}
-		// Odometer check
-		if (
-			odometer && vehicleCurrentMileageKm !== null &&
-			Number(odometer) < Number(vehicleCurrentMileageKm)
-		) {
-			setError('OdometerKm must be greater than or equal to the current mileage of the vehicle (' + vehicleCurrentMileageKm + ' km)');
+		if (end > now) {
+			setError('End time cannot be in the future');
 			return;
 		}
-		// Receipt file required check
-		if (!receiptPhoto) {
-			setError('Receipt file is required');
+		if (start < new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)) {
+			setError('Start time cannot be more than 7 days in the past');
+			return;
+		}
+		if (Number(distanceKm) < 0) {
+			setError('Distance cannot be negative');
+			return;
+		}
+		if (Number(startOdometerKm) > Number(endOdometerKm)) {
+			setError('Start odometer cannot be greater than end odometer');
+			return;
+		}
+		if (vehicleCurrentMileageKm !== null && Number(startOdometerKm) < Number(vehicleCurrentMileageKm)) {
+			setError('Start odometer cannot be less than current vehicle mileage (' + vehicleCurrentMileageKm + ' km)');
 			return;
 		}
 
 		try {
-			// Combine date and time for submission
-			let dateTime = date;
-			if (date && time) {
-				dateTime = date + 'T' + time;
-			}
-
-			// Trip POST (file-t közvetlenül küldjük)
-			const formData = new FormData();
-			formData.append('Liters', Number(liters));
-			formData.append('TotalCost', Number(cost));
-			formData.append('StationName', station);
-			formData.append('OdometerKm', Number(odometer));
-			formData.append('LocationText', location);
-			formData.append('LicensePlate', plate);
-			formData.append('Date', new Date(dateTime).toISOString());
-			if (receiptPhoto) {
-				formData.append('File', receiptPhoto);
-			}
-			await api.post('/trips', formData, {
-				headers: { 'Content-Type': 'multipart/form-data' }
-			});
+			const payload = {
+				StartTime: new Date(`${startDate}T${startHour}`).toISOString(),
+				EndTime: new Date(`${endDate}T${endHour}`).toISOString(),
+				StartLocation: startLocation,
+				EndLocation: endLocation,
+				DistanceKm: Number(distanceKm),
+				StartOdometerKm: Number(startOdometerKm),
+				EndOdometerKm: Number(endOdometerKm),
+				Notes: notes
+			};
+			await api.post('trips', payload);
 			setSuccess(true);
 			setTimeout(() => navigate(-1), 1200);
 		} catch (err) {
@@ -294,12 +286,12 @@ const AddNewTrip = () => {
 														</span>
 														Start
 													</Form.Label>
-													<Form.Control type="date" value={date} onChange={e => setDate(e.target.value)} required style={{minHeight: '38px'}} />
+													  <Form.Control type="date" value={startDate} onChange={e => setStartDate(e.target.value)} required style={{minHeight: '38px'}} />
 												</Form.Group>
 											</Col>
 											<Col xs={12} md={12} lg={6}>
 												<Form.Group className="mb-0">
-													<Form.Control type="time" value={time} onChange={e => setTime(e.target.value)} required style={{minHeight: '38px'}} />
+													  <Form.Control type="time" value={startHour} onChange={e => setStartHour(e.target.value)} required style={{minHeight: '38px'}} />
 												</Form.Group>
 											</Col>
                                             <Col xs={12} md={12} lg={6}>
@@ -315,12 +307,12 @@ const AddNewTrip = () => {
 														</span>
 														End
 													</Form.Label>
-													<Form.Control type="date" value={date} onChange={e => setDate(e.target.value)} required style={{minHeight: '38px'}} />
+													  <Form.Control type="date" value={endDate} onChange={e => setEndDate(e.target.value)} required style={{minHeight: '38px'}} />
 												</Form.Group>
 											</Col>
 											<Col xs={12} md={12} lg={6}>
 												<Form.Group className="mb-0">
-													<Form.Control type="time" value={time} onChange={e => setTime(e.target.value)} required style={{minHeight: '38px'}} />
+													  <Form.Control type="time" value={endHour} onChange={e => setEndHour(e.target.value)} required style={{minHeight: '38px'}} />
 												</Form.Group>
 											</Col>
                                             <Col xs={12} md={12} lg={12}>
@@ -334,7 +326,7 @@ const AddNewTrip = () => {
 														</span>
 														Start Location
 													</Form.Label>
-													<Form.Control type="text" value={location} onChange={e => setLocation(e.target.value)} placeholder="e.g. M1 highway" />
+													  <Form.Control type="text" value={startLocation} onChange={e => setStartLocation(e.target.value)} placeholder="e.g. M1 highway" />
 												</Form.Group>
 											</Col>
                                             <Col xs={12} md={12} lg={12}>
@@ -348,7 +340,7 @@ const AddNewTrip = () => {
 														</span>
 														End Location
 													</Form.Label>
-													<Form.Control type="text" value={location} onChange={e => setLocation(e.target.value)} placeholder="e.g. M1 highway" />
+													  <Form.Control type="text" value={endLocation} onChange={e => setEndLocation(e.target.value)} placeholder="e.g. M1 highway" />
 												</Form.Group>
 											</Col>
 											<Col xs={12} md={12} lg={4}>
@@ -356,7 +348,7 @@ const AddNewTrip = () => {
 													<Form.Label className="fw-semibold d-flex align-items-center gap-2 text-start w-100">
 														Distance <span className="text-muted">(km)</span>
 													</Form.Label>
-													<Form.Control type="number" value={liters} onChange={e => setLiters(e.target.value)} required min="0" step="1" placeholder="0" />
+													  <Form.Control type="number" value={distanceKm} onChange={e => setDistanceKm(e.target.value)} required min="0" step="1" placeholder="0" />
 												</Form.Group>
 											</Col>
 											<Col xs={12} md={12} lg={4}>
@@ -364,7 +356,7 @@ const AddNewTrip = () => {
 													<Form.Label className="fw-semibold d-flex align-items-center gap-2 text-start w-100">
 														Start Odo.
 													</Form.Label>
-													<Form.Control type="number" value={cost} onChange={e => setCost(e.target.value)} required min="0" step="1" placeholder="0" />
+													  <Form.Control type="number" value={startOdometerKm} onChange={e => setStartOdometerKm(e.target.value)} required min="0" step="1" placeholder="0" />
 												</Form.Group>
 											</Col>
                                             <Col xs={12} md={12} lg={4}>
@@ -372,7 +364,7 @@ const AddNewTrip = () => {
 													<Form.Label className="fw-semibold d-flex align-items-center gap-2 text-start w-100">
 														End Odo.
 													</Form.Label>
-													<Form.Control type="number" value={liters} onChange={e => setLiters(e.target.value)} required min="0" step="1" placeholder="0" />
+													  <Form.Control type="number" value={endOdometerKm} onChange={e => setEndOdometerKm(e.target.value)} required min="0" step="1" placeholder="0" />
 												</Form.Group>
 											</Col>
 											<Col xs={12} md={12} lg={12}>
@@ -386,7 +378,7 @@ const AddNewTrip = () => {
 														</span>
 														Notes <span className="text-muted">(optional)</span>
 													</Form.Label>
-													<Form.Control type="text" value={location} onChange={e => setLocation(e.target.value)} placeholder="Any Notes" />
+													  <Form.Control type="text" value={notes} onChange={e => setNotes(e.target.value)} placeholder="Any Notes" />
 												</Form.Group>
 											</Col>
 										</Row>
