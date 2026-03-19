@@ -9,6 +9,7 @@ import DriverDashboard from './pages/DriverDashboard';
 import FuelLogs from './pages/FuelLogs';
 import AddFuelLog from './pages/AddFuelLog';
 import Trips from './pages/Trips';
+import AddNewTrip from './pages/AddNewTrip';
 import { authService } from './services/authService';
 import './App.css';
 
@@ -77,6 +78,11 @@ function App() {
           }
         />
         <Route path="/add-fuel-log" element={<ProtectedRoute><AddFuelLog /></ProtectedRoute>} />
+        <Route path="/add-new-trip" element={
+          <ProtectedRoute>
+            <AddNewTrip />
+          </ProtectedRoute>
+        } />
         <Route path="/trips" element={
           <ProtectedRoute>
             <Trips />
