@@ -10,6 +10,7 @@ import FuelLogs from './pages/FuelLogs';
 import AddFuelLog from './pages/AddFuelLog';
 import Trips from './pages/Trips';
 import AddNewTrip from './pages/AddNewTrip';
+import ServiceRequests from './pages/ServiceRequests';
 import { authService } from './services/authService';
 import './App.css';
 
@@ -88,6 +89,11 @@ function App() {
             <Trips />
           </ProtectedRoute>
         } />
+          <Route path="/service-requests" element={
+            <ProtectedRoute>
+              <ServiceRequests />
+            </ProtectedRoute>
+          } />
         <Route path="/" element={<HomeRoute />} />
       </Routes>
     </Router>
