@@ -186,21 +186,29 @@ const ServiceRequests = () => {
                       <Card key={request.id || request.Id} className="service-request-card border-0">
                         <Card.Body className="p-3 p-md-4">
                           <div className="service-request-divider-purple mb-3" />
-                          <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                          <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
                             <div className="d-flex align-items-center gap-2 min-w-0">
                               <span className="service-request-title fw-semibold">{request.title}</span>
-
                             </div>
-                            <Badge bg={request.status === 'Completed' ? 'success' : 'warning'}>
+                            <Badge  bg="danger" style={{ fontWeight: 600, margin: 0, padding: '2px 6px', fontSize: '1em' }}>
                               {request.status}
                             </Badge>
                           </div>
-                          <div className="service-request-divider mb-3" />
+                          <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                            <div className="d-flex align-items-center gap-2 min-w-0">
+                              <span className="service-request-title fw-semibold text-muted">{request.licensePlate}</span>
+                            </div>
+                          </div>
+                          <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                            <div className="d-flex align-items-center gap-2 min-w-0">
+                              <span className="service-request-title fw-semibold text-muted">{request.description}</span>
+                            </div>
+                          </div>
                           <div className="service-request-details">
                             <div className="service-request-detail-row srp-row">
                               <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                <span className="service-request-calendar-icon">
-                                  <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                <span className="service-request-calendar-icon" style={{ marginRight: '8px', display: 'inline-flex', alignItems: 'center' }}>
+                                  <svg width="18" height="18" fill="none" stroke="#7c3aed" strokeWidth="2" viewBox="0 0 24 24" style={{ verticalAlign: 'middle', display: 'inline-block' }}>
                                     <rect x="3" y="4" width="18" height="18" rx="2" ry="2" strokeLinecap="round" strokeLinejoin="round" />
                                     <line x1="16" y1="2" x2="16" y2="6" strokeLinecap="round" strokeLinejoin="round" />
                                     <line x1="8" y1="2" x2="8" y2="6" strokeLinecap="round" strokeLinejoin="round" />
@@ -208,18 +216,18 @@ const ServiceRequests = () => {
                                   </svg>
                                 </span>
                                 <span className="service-request-label">Scheduled</span>
-                                <span className="service-request-value ms-2">{formatDateTime(request.scheduledStart)}</span>
+                                <span className="service-request-value ms-2" style={{ color: '#7c3aed', fontWeight: 600 }}>{formatDateTime(request.scheduledStart)}</span>
                               </span>
                               <div style={{ display: 'flex', alignItems: 'center' }}>
-                                <span className="service-request-label">Cost</span>
-                                <span className="service-request-value ms-2">{request.driverReportCost}</span>
+                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ margin: 0, verticalAlign: 'middle', display: 'inline-block' }}>
+                                    <path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                                    <line x1="12" y1="1" x2="12" y2="23" />
+                                  </svg>
+                                  <span className="service-request-label" style={{ margin: 0, padding: 0 }}>Driver Cost</span>
+                                  <span className="service-request-value" style={{ color: '#22c55e', fontWeight: 600, margin: 0, padding: 0 }}>{request.driverReportCost}</span>
+                                </span>
                               </div>
-                            </div>
-                            <div className="service-request-detail-row" style={{ gap: '0.5rem', justifyContent: 'flex-start' }}>
-                              <span style={{ display: 'flex', alignItems: 'center', color: '#fb923c' }}>
-                                <span className="service-request-label">Description</span>
-                                <span className="service-request-value ms-2">{request.description}</span>
-                              </span>
                             </div>
                           </div>
                         </Card.Body>

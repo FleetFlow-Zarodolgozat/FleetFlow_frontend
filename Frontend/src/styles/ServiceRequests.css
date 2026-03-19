@@ -27,7 +27,7 @@
   background: #ffffff;
   border-radius: 16px;
   border: 1px solid #eef2f7;
-  box-shadow: 0 6px 24px rgba(13, 110, 253, 0.18), 0 1.5px 6px rgba(0,0,0,0.10);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   width: 100%;
   max-width: 1100px;
