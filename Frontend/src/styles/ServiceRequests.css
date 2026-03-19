@@ -1,3 +1,18 @@
+/* New button styling for Service Requests */
+.new-request-btn {
+  background: #7c3aed !important;
+  border-color: #7c3aed !important;
+  color: #fff !important;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(124,58,237,0.15);
+  transition: background 0.2s, border-color 0.2s, transform 0.18s cubic-bezier(.4,1.3,.7,1), box-shadow 0.2s;
+}
+.new-request-btn:hover, .new-request-btn:focus {
+  background: #5b21b6 !important;
+  border-color: #5b21b6 !important;
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: 0 16px 32px rgba(124,58,237,0.12) !important;
+}
 /* Orange outline for Add New Service Request card */
 .add-service-request-orange-outline {
   border: 2px solid #fb923c !important;
@@ -42,8 +57,8 @@
   justify-content: space-between;
   gap: 4rem;
   padding: 0.75rem 0.9rem;
-  background: #fffaf5;
-  border: 1px solid #ffedd5;
+  background: rgba(124, 58, 237, 0.12);
+  border: 1.5px solid #7c3aed;
   border-radius: 12px;
   min-width: 0;
   flex-wrap: wrap;
@@ -58,15 +73,25 @@
 }
 
 .service-request-card:hover {
-  transform: translateY(-4px) scale(1.03);
-  box-shadow: 0 16px 40px rgba(124, 58, 237, 0.35), 0 4px 16px rgba(124, 58, 237, 0.18);
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 6px 16px rgba(124, 58, 237, 0.18), 0 2px 8px rgba(124, 58, 237, 0.10);
 }
 
 /* Purple divider always visible */
 .service-request-divider-purple {
   width: 100%;
   height: 4px;
-  background: linear-gradient(90deg, #a78bfa 0%, #7c3aed 100%);
+  background: #7c3aed;
   border-radius: 6px;
   margin-bottom: 8px;
+}
+
+/* Custom Details button styling */
+.details-btn-custom:hover, .details-btn-custom:focus {
+  background: #7c3aed !important;
+  color: #fff !important;
+  border: 1.5px solid #7c3aed !important;
+}
+.details-btn-custom:hover svg, .details-btn-custom:focus svg {
+  stroke: #fff !important;
 }

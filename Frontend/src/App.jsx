@@ -11,6 +11,7 @@ import AddFuelLog from './pages/AddFuelLog';
 import Trips from './pages/Trips';
 import AddNewTrip from './pages/AddNewTrip';
 import ServiceRequests from './pages/ServiceRequests';
+import ServiceRequestDetails from './pages/ServiceRequestDetails';
 import { authService } from './services/authService';
 import './App.css';
 
@@ -90,10 +91,15 @@ function App() {
           </ProtectedRoute>
         } />
           <Route path="/service-requests" element={
-            <ProtectedRoute>
-              <ServiceRequests />
-            </ProtectedRoute>
-          } />
+              <ProtectedRoute>
+                <ServiceRequests />
+              </ProtectedRoute>
+            } />
+          <Route path="/service-request-details" element={
+              <ProtectedRoute>
+                <ServiceRequestDetails />
+              </ProtectedRoute>
+            } />
         <Route path="/" element={<HomeRoute />} />
       </Routes>
     </Router>
