@@ -1,3 +1,8 @@
+/* Purple outline for Add New Service Request card */
+.add-service-request-purple-outline {
+  border: 2px solid #7c3aed !important;
+  box-shadow: 0 6px 24px rgba(124,58,237,0.18), 0 1.5px 6px rgba(124,58,237,0.10), 0 0 0 4px #f5f3ff !important;
+}
 /* New button styling for Service Requests */
 .new-request-btn {
   background: #7c3aed !important;
