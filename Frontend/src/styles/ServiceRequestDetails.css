@@ -1,3 +1,8 @@
+/* Title balra igazítása a fejlécben */
+.service-details-title-left {
+  text-align: left;
+  width: 100%;
+}
 
 .service-request-details-dashboard {
   min-height: 100vh;
