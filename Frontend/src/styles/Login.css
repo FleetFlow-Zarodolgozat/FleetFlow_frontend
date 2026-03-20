@@ -1,0 +1,115 @@
+/* Login Page - Bootstrap optimized */
+.login-page {
+  min-height: 100vh;
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.login-content {
+  width: 100%;
+  max-width: 460px;
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.logo-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #212529;
+  margin: 0;
+}
+
+.login-page .form-label {
+  text-align: left;
+  display: block;
+  font-weight: 500;
+  color: #212529;
+  margin-bottom: 8px;
+}
+
+.password-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.forgot-link {
+  font-size: 14px;
+  color: #0d6efd;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.forgot-link:hover {
+  color: #0b5ed7;
+  text-decoration: underline;
+}
+
+.password-input-wrapper {
+  position: relative;
+  margin-bottom: 24px;
+}
+
+/* Disable browser's default password reveal button */
+.password-input-wrapper input[type="password"]::-ms-reveal,
+.password-input-wrapper input[type="password"]::-ms-clear,
+.password-input-wrapper input[type="text"]::-ms-reveal,
+.password-input-wrapper input[type="text"]::-ms-clear {
+  display: none;
+}
+
+.password-input-wrapper input[type="password"]::-webkit-contacts-auto-fill-button,
+.password-input-wrapper input[type="password"]::-webkit-credentials-auto-fill-button {
+  visibility: hidden;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #6c757d;
+  cursor: pointer;
+  padding: 4px 8px;
+  z-index: 10;
+}
+
+.password-toggle:hover {
+  color: #212529;
+}
+
+.forgot-password-link {
+  margin-top: 16px;
+  display: block;
+}
+
+.sign-in-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(13, 110, 253, 0.25);
+}
+
+.page-footer a:hover {
+  color: #0d6efd !important;
+  text-decoration: underline !important;
+}
+
+@media (max-width: 576px) {
+  .login-page {
+    padding: 20px 16px;
+  }
+}

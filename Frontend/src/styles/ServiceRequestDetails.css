@@ -1,0 +1,97 @@
+/* Title balra igazítása a fejlécben */
+.service-details-title-left {
+  text-align: left;
+  width: 100%;
+}
+
+.service-request-details-dashboard {
+  min-height: 100vh;
+  background: transparent;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+.service-request-details-orange-outline {
+  border: 2px solid #7c3aed !important;
+  box-shadow: 0 6px 24px rgba(124,58,237,0.18), 0 1.5px 6px rgba(0,0,0,0.10), 0 0 0 4px #f5f3ff !important;
+}
+
+.service-request-details-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 0.75rem 0.9rem;
+  background: rgba(124, 58, 237, 0.12);
+  border: 1.5px solid #7c3aed;
+  border-radius: 12px;
+  min-width: 0;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+  transition: all 0.2s;
+}
+
+@media (max-width: 1024px) {
+  .service-request-details-dashboard {
+    max-width: 900px !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+  .service-request-details-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 1rem !important;
+    padding: 0.75rem 0.5rem !important;
+  }
+  .service-request-details-label,
+  .service-request-details-value {
+    min-width: 0 !important;
+    font-size: 1rem !important;
+    text-align: left !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .service-request-details-dashboard {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+  .service-request-details-row {
+    gap: 0.5rem !important;
+    padding: 0.5rem 0.25rem !important;
+  }
+  .service-request-details-label,
+  .service-request-details-value {
+    font-size: 0.95rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .service-request-details-row {
+    gap: 0.25rem !important;
+    padding: 0.25rem 0.1rem !important;
+  }
+  .service-request-details-label,
+  .service-request-details-value {
+    font-size: 0.9rem !important;
+  }
+}
+
+.service-request-details-label {
+  min-width: 60px;
+  font-weight: 600;
+  color: #7c3aed;
+}
+
+.service-request-details-value {
+  min-width: 80px;
+  text-align: center;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.text-purple {
+  color: #7c3aed !important;
+}

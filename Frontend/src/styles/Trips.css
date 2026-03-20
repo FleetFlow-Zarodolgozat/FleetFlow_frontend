@@ -1,0 +1,135 @@
+/* Trips Page Styles */
+
+
+.trips-dashboard {
+  display: flex;
+  min-height: 100vh;
+  background-color: #ffffff;
+}
+
+.trip-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.trip-list > .trip-card:first-child {
+  margin-top: 1.5rem;
+}
+
+.trip-card {
+  width: 100% !important;
+  min-width: 0 !important;
+  margin-bottom: 2rem !important;
+  border-radius: 1.5rem !important;
+  box-shadow: 0 2px 8px 0 rgba(60,64,67,0.10) !important;
+  transition: box-shadow 0.2s;
+}
+
+.trip-card:hover {
+  box-shadow: 0 8px 24px 0 rgba(37,99,235,0.25) !important;
+}
+
+.trip-accent {
+  height: 4px;
+  width: 100%;
+  background: #2563eb;
+  border-radius: 2px;
+  margin-bottom: 1rem;
+}
+
+.trips-new-btn {
+  transition: transform 0.2s cubic-bezier(.4,1.3,.7,1), box-shadow 0.2s;
+}
+.trips-new-btn:hover, .trips-new-btn:focus {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 32px rgba(37,99,235,0.12) !important;
+}
+
+.trip-detail-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  width: 100%;
+  flex-wrap: nowrap;
+  padding: 0.5rem 0;
+  overflow-x: auto;
+}
+
+.trip-date-row {
+  background: rgba(37, 99, 235, 0.08); /* transparent blue */
+  border: 1px solid #2563eb;
+  border-radius: 0.75rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.trip-label {
+  font-weight: 500;
+}
+
+.trip-value {
+  font-weight: 600;
+}
+
+.trip-divider {
+  height: 1px;
+  width: 100%;
+  background: #e5e7eb;
+  margin-bottom: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .trip-list {
+    gap: 1.5rem;
+  }
+  .trip-card {
+    margin-bottom: 1.5rem !important;
+  }
+  .trip-detail-row {
+    flex-direction: column !important;
+    flex-wrap: nowrap !important;
+    gap: 1rem !important;
+    padding: 0.5rem 0 !important;
+    overflow-x: visible !important;
+    align-items: flex-start !important;
+  }
+  .trip-detail-row > div {
+    width: 100% !important;
+    min-width: 0 !important;
+    overflow: visible !important;
+    white-space: normal !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .trip-list {
+    gap: 1rem;
+  }
+  .trip-card {
+    margin-bottom: 1rem !important;
+  }
+  .trip-detail-row {
+    flex-wrap: wrap !important;
+    gap: 0.5rem !important;
+    padding: 0.5rem 0 !important;
+    overflow-x: auto !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .trip-list {
+    gap: 0.5rem;
+  }
+  .trip-card {
+    margin-bottom: 0.5rem !important;
+  }
+  .trip-detail-row {
+    flex-wrap: wrap !important;
+    gap: 0.25rem !important;
+    padding: 0.5rem 0 !important;
+    overflow-x: auto !important;
+  }
+}
