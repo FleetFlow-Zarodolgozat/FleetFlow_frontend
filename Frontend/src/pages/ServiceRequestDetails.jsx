@@ -9,7 +9,55 @@ const ServiceRequestDetails = () => {
   const navigate = useNavigate();
   const request = location.state?.request || {};
   const [driverCost, setDriverCost] = useState(request.driverReportCost || '');
+  const [closeNote, setCloseNote] = useState(request.driverCloseNote || '');
+  const [file, setFile] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0] || null);
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    setError('');
+    setSuccess('');
+    // Custom file required validation for first upload
+    if (!request.driverReportCost && !file) {
+      setError('A file is required');
+      setSaving(false);
+      return;
+    }
+    const formData = new FormData();
+    if (driverCost !== '') formData.append('DriverReportCost', driverCost);
+    if (closeNote !== '') formData.append('DriverCloseNote', closeNote);
+    if (file) formData.append('File', file);
+    try {
+      let endpoint = '';
+      if (!request.driverReportCost) {
+        endpoint = `/service-requests/upload-details/${request.id || request.Id}`;
+      } else {
+        endpoint = `/service-requests/edit-uploaded-data/${request.id || request.Id}`;
+      }
+      await import('../services/api').then(({ default: api }) =>
+        api.patch(endpoint, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        })
+      );
+      setSuccess('Service details saved successfully!');
+      setTimeout(() => navigate(-1), 1200);
+    } catch (err) {
+      const apiMessage = err?.response?.data;
+      const message =
+        typeof apiMessage === 'string'
+          ? apiMessage
+          : apiMessage?.message || apiMessage?.Message || 'Failed to save service details.';
+      setError(message);
+    } finally {
+      setSaving(false);
+    }
+  };
   return (
     <div className="service-request-details-dashboard">
       <div className="main-content">
@@ -75,7 +123,7 @@ const ServiceRequestDetails = () => {
                                               </span>
                                               Close Note <span className="text-muted">(optional)</span>
                                             </Form.Label>
-                                              <Form.Control type="text" placeholder="Any notes about the service" />
+                                              <Form.Control type="text" value={closeNote} onChange={e => setCloseNote(e.target.value)} placeholder="Any notes about the service" />
                                           </Form.Group>
                                         </Col>
                   <Col xs={12} md={12} lg={6}>
@@ -87,7 +135,7 @@ const ServiceRequestDetails = () => {
                                                 accept="image/*"
                                                 id="receiptPhotoInput"
                                                 style={{display:'none'}}
-                                                required
+                                                onChange={handleFileChange}
                                               />
                                               <Button
                                                 variant="primary"
@@ -96,8 +144,9 @@ const ServiceRequestDetails = () => {
                                               >
                                                 Choose File
                                               </Button>
-                                              <span style={{fontSize:'0.95em',color:'#555'}}>{ 'No file selected'}</span>
+                                              <span style={{fontSize:'0.95em',color:'#555'}}>{ file ? file.name : 'No file selected'}</span>
                                             </div>
+                                            {/* No file error here, all errors below Save button */}
                                           </Form.Group>
                  </Col>
                 </Row>
@@ -107,10 +156,16 @@ const ServiceRequestDetails = () => {
                     className="details-btn-custom"
                     style={{background:'#fff',color:'#7c3aed',borderColor:'#7c3aed',fontWeight:'600',minWidth:'120px',borderRadius:'8px',border:'1.5px solid #7c3aed'}}
                     type="button"
+                    disabled={saving}
+                    onClick={handleSave}
                   >
-                    Save
+                    {saving ? 'Saving...' : 'Save'}
                   </Button>
                 </div>
+                {error && (
+                  <div className="alert alert-danger mt-3" style={{padding:'6px 12px',fontSize:'0.95em',textAlign:'center',maxWidth:'100%'}}>{error}</div>
+                )}
+                {success && <Alert variant="success" className="mt-3">{success}</Alert>}
               </Card.Body>
             </Card>
           </Col>

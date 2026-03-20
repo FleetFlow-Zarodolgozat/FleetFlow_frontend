@@ -70,28 +70,13 @@ const AddServiceRequest = () => {
       setError('Title is required');
       return;
     }
-    if (!scheduledStart) {
-      setError('Scheduled start is required');
-      return;
-    }
-    if (!licensePlate) {
-      setError('License plate is required');
-      return;
-    }
     // Add more validation as needed
     try {
-      const formData = new FormData();
-      formData.append('Title', title);
-      formData.append('Description', description);
-      formData.append('ScheduledStart', scheduledStart);
-      formData.append('LicensePlate', licensePlate);
-      formData.append('DriverCost', driverCost);
-      if (file) {
-        formData.append('File', file);
-      }
-      await api.post('/service-requests', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      const payload = {
+        Title: title,
+        Description: description,
+      };
+      await api.post('/service-requests', payload);
       setSuccess(true);
       setTimeout(() => navigate(-1), 1200);
     } catch (err) {
@@ -140,7 +125,7 @@ const AddServiceRequest = () => {
                       </Col>
                       <Col xs={12} md={12} lg={12}>
                         <Form.Group>
-                          <Form.Label className="fw-semibold text-start w-100">Description</Form.Label>
+                          <Form.Label className="fw-semibold text-start w-100">Description <span className="text-muted">(optional)</span></Form.Label>
                           <Form.Control as="textarea" rows={3} value={description} onChange={e => setDescription(e.target.value)} placeholder="Describe the issue..." />
                         </Form.Group>
                       </Col>

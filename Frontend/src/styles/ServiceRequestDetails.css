@@ -34,6 +34,11 @@
 }
 
 @media (max-width: 1024px) {
+  .service-request-details-dashboard {
+    max-width: 900px !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
   .service-request-details-row {
     flex-direction: column !important;
     align-items: flex-start !important;

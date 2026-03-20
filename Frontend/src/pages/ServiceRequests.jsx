@@ -79,6 +79,27 @@ const ServiceRequests = () => {
         setPagination((prev) => ({ ...prev, page }));
     };
 
+        // Handler for deleting a service request
+        const handleDeleteServiceRequest = async (id) => {
+            if (!window.confirm('Are you sure you want to cancel this service request?')) return;
+            setLoading(true);
+            setError('');
+            try {
+                await api.delete(`/service-requests/cancel/${id}`);
+                // Refresh the list after deletion
+                fetchServiceRequests(pagination.page);
+            } catch (err) {
+                const apiMessage = err?.response?.data;
+                const message =
+                    typeof apiMessage === 'string'
+                        ? apiMessage
+                        : apiMessage?.message || apiMessage?.Message || 'Could not cancel service request.';
+                setError(message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
     return (
         <div className="driver-dashboard">
             {!sidebarOpen && (
@@ -253,21 +274,21 @@ const ServiceRequests = () => {
                                                                 </svg>
                                                                 Details
                                                             </Button>
-                                                            <Button
-                                                                variant="outline-danger"
-                                                                size="sm"
-                                                                title="Törlés"
-                                                                style={{ borderRadius: '50%', width: 32, height: 32, padding: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
-                                                                onClick={() => handleDeleteFuelLog(log.id || log.Id)}
-                                                            >
-                                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                                    <path d="M3 6h18" />
-                                                                    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                                                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
-                                                                    <line x1="10" y1="11" x2="10" y2="17" />
-                                                                    <line x1="14" y1="11" x2="14" y2="17" />
-                                                                </svg>
-                                                            </Button>
+                                                                <Button
+                                                                    variant="outline-danger"
+                                                                    size="sm"
+                                                                    title="Törlés"
+                                                                    style={{ borderRadius: '50%', width: 32, height: 32, padding: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                                                                    onClick={() => handleDeleteServiceRequest(request.id || request.Id)}
+                                                                >
+                                                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                                        <path d="M3 6h18" />
+                                                                        <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                                                                        <line x1="10" y1="11" x2="10" y2="17" />
+                                                                        <line x1="14" y1="11" x2="14" y2="17" />
+                                                                    </svg>
+                                                                </Button>
                                                         </div>
                                                     </div>
                                                 </Card.Body>
