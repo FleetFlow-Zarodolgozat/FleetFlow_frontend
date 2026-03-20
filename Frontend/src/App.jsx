@@ -6,10 +6,14 @@ import TermsOfService from './pages/TermsOfService';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import HelpCenter from './pages/HelpCenter';
 import DriverDashboard from './pages/DriverDashboard';
+import Notifications from './pages/Notifications';
 import FuelLogs from './pages/FuelLogs';
 import AddFuelLog from './pages/AddFuelLog';
+import AddServiceRequest from './pages/AddServiceRequest';
 import Trips from './pages/Trips';
 import AddNewTrip from './pages/AddNewTrip';
+import ServiceRequests from './pages/ServiceRequests';
+import ServiceRequestDetails from './pages/ServiceRequestDetails';
 import { authService } from './services/authService';
 import './App.css';
 
@@ -77,7 +81,8 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="/add-fuel-log" element={<ProtectedRoute><AddFuelLog /></ProtectedRoute>} />
+  <Route path="/add-fuel-log" element={<ProtectedRoute><AddFuelLog /></ProtectedRoute>} />
+  <Route path="/add-service-request" element={<ProtectedRoute><AddServiceRequest /></ProtectedRoute>} />
         <Route path="/add-new-trip" element={
           <ProtectedRoute>
             <AddNewTrip />
@@ -86,6 +91,21 @@ function App() {
         <Route path="/trips" element={
           <ProtectedRoute>
             <Trips />
+          </ProtectedRoute>
+        } />
+        <Route path="/notifications" element={
+          <ProtectedRoute>
+            <Notifications />
+          </ProtectedRoute>
+        } />
+        <Route path="/service-requests" element={
+          <ProtectedRoute>
+            <ServiceRequests />
+          </ProtectedRoute>
+        } />
+        <Route path="/service-request-details" element={
+          <ProtectedRoute>
+            <ServiceRequestDetails />
           </ProtectedRoute>
         } />
         <Route path="/" element={<HomeRoute />} />

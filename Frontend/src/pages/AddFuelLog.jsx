@@ -27,7 +27,6 @@ const AddFuelLog = () => {
   const [receiptPhoto, setReceiptPhoto] = useState(null);
   const [receiptPhotoName, setReceiptPhotoName] = useState('');
   const [odometer, setOdometer] = useState('');
-  const [plate, setPlate] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
     useEffect(() => {
@@ -157,7 +156,6 @@ const AddFuelLog = () => {
       formData.append('StationName', station);
       formData.append('OdometerKm', Number(odometer));
       formData.append('LocationText', location);
-      formData.append('LicensePlate', plate);
       formData.append('Date', new Date(dateTime).toISOString());
       if (receiptPhoto) {
         formData.append('File', receiptPhoto);

@@ -243,7 +243,7 @@ const Trips = () => {
                 style={{ background: '#2563eb', borderColor: '#2563eb', color: '#fff', fontWeight: 600, boxShadow: '0 2px 8px rgba(37,99,235,0.15)', transition: 'background 0.2s, border-color 0.2s' }}
                 onMouseOver={e => { e.currentTarget.style.background = '#1746a2'; e.currentTarget.style.borderColor = '#1746a2'; }}
                 onMouseOut={e => { e.currentTarget.style.background = '#2563eb'; e.currentTarget.style.borderColor = '#2563eb'; }}
-                className="mb-3 d-flex align-items-center gap-2"
+                className="mb-3 d-flex align-items-center gap-2 trips-new-btn"
                 onClick={() => navigate('/add-new-trip')}
               >
                 <svg width="20" height="20" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24">
@@ -258,7 +258,7 @@ const Trips = () => {
             <Col md={12} lg={12} style={{ width: '100%', maxWidth: '100%' }}>
               <Card className="border-0 rounded-4" style={{ width: '100%', maxWidth: '100%', boxShadow: '0 2px 8px rgba(37,99,235,0.08)' }}>
                 <Card.Header className="bg-white rounded-top-4 d-flex align-items-center justify-content-between gap-2 border-bottom" style={{ minHeight: 60 }}>
-                  <span className="fs-5 fw-semibold">My Trips</span>
+                  <span className="fw-semibold">My Trips</span>
                   <Badge bg="primary">Total: {pagination.totalCount}</Badge>
                 </Card.Header>
                 <Card.Body className="p-0">
