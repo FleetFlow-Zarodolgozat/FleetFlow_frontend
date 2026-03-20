@@ -6,6 +6,7 @@ import TermsOfService from './pages/TermsOfService';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import HelpCenter from './pages/HelpCenter';
 import DriverDashboard from './pages/DriverDashboard';
+import Notifications from './pages/Notifications';
 import FuelLogs from './pages/FuelLogs';
 import AddFuelLog from './pages/AddFuelLog';
 import AddServiceRequest from './pages/AddServiceRequest';
@@ -92,16 +93,21 @@ function App() {
             <Trips />
           </ProtectedRoute>
         } />
-          <Route path="/service-requests" element={
-              <ProtectedRoute>
-                <ServiceRequests />
-              </ProtectedRoute>
-            } />
-          <Route path="/service-request-details" element={
-              <ProtectedRoute>
-                <ServiceRequestDetails />
-              </ProtectedRoute>
-            } />
+        <Route path="/notifications" element={
+          <ProtectedRoute>
+            <Notifications />
+          </ProtectedRoute>
+        } />
+        <Route path="/service-requests" element={
+          <ProtectedRoute>
+            <ServiceRequests />
+          </ProtectedRoute>
+        } />
+        <Route path="/service-request-details" element={
+          <ProtectedRoute>
+            <ServiceRequestDetails />
+          </ProtectedRoute>
+        } />
         <Route path="/" element={<HomeRoute />} />
       </Routes>
     </Router>

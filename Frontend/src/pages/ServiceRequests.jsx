@@ -256,7 +256,7 @@ const ServiceRequests = () => {
                                                                         <line x1="12" y1="1" x2="12" y2="23" />
                                                                     </svg>
                                                                     <span className="service-request-label" style={{ margin: 0, padding: 0 }}>Driver Cost</span>
-                                                                    <span className="service-request-value" style={{ color: '#10b981', fontWeight: 600, margin: 0, padding: 0 }}>{request.driverReportCost} Ft</span>
+                                                                    <span className="service-request-value" style={{ color: '#10b981', fontWeight: 600, margin: 0, padding: 0 }}>{request.driverReportCost || request.driverReportCost === 0 ? request.driverReportCost : '0'} Ft</span>
                                                                 </span>
                                                             </div>
                                                         </div>
