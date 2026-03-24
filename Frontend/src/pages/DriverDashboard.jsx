@@ -153,11 +153,6 @@ const DriverDashboard = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleLogout = () => {
-    authService.logout();
-    navigate('/login');
-  };
-
   const handleCopyToClipboard = (text, label, fieldKey) => {
     if (text && text !== 'N/A') {
       navigator.clipboard.writeText(text).then(() => {
@@ -377,53 +372,44 @@ const DriverDashboard = () => {
     return date.toLocaleDateString('hu-HU', { year: 'numeric', month: 'short', day: 'numeric' });
   };
 
-  // State for profile image loading
+  // Mobile sidebar toggle
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Profile image for the profile card
   const [profileImageError, setProfileImageError] = useState(false);
   const [profileImageUrl, setProfileImageUrl] = useState(null);
 
-  // Fetch profile image with auth
   useEffect(() => {
-    const fetchProfileImage = async () => {
-      if (profile.id) {
-        try {
-          const response = await api.get(`/files/thumbnail/${profile.id}`, {
-            responseType: 'blob'
-          });
-          const imageUrl = URL.createObjectURL(response.data);
-          setProfileImageUrl(imageUrl);
-          setProfileImageError(false);
-        } catch (error) {
-          console.log('Could not fetch profile image:', error.message);
-          setProfileImageError(true);
-        }
-      }
-    };
-    
-    fetchProfileImage();
-    
-    // Cleanup URL on unmount
-    return () => {
-      if (profileImageUrl) {
-        URL.revokeObjectURL(profileImageUrl);
-      }
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profile.id]);
+    if (!profile.id) return;
 
-  // Mobile sidebar toggle
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+    let objectUrl = null;
+
+    const fetchProfileImage = async () => {
+      try {
+        const response = await api.get(`/files/thumbnail/${profile.id}`, {
+          responseType: 'blob',
+        });
+        objectUrl = URL.createObjectURL(response.data);
+        setProfileImageUrl(objectUrl);
+        setProfileImageError(false);
+      } catch (error) {
+        console.log('Could not fetch profile image:', error.message);
+        setProfileImageError(true);
+      }
+    };
+
+    fetchProfileImage();
+
+    return () => {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [profile.id]);
 
   return (
     <div className="driver-dashboard">
       <Sidebar
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
-        profileImageError={profileImageError}
-        profileImageUrl={profileImageUrl}
-        getDisplayName={getDisplayName}
-        getInitials={getInitials}
-        profile={profile}
-        handleLogout={handleLogout}
       />
 
       {/* Main Content */}

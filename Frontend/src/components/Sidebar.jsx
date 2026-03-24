@@ -1,20 +1,93 @@
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { authService } from '../services/authService';
+import api from '../services/api';
 
-const Sidebar = ({
-  sidebarOpen,
-  setSidebarOpen,
-  profileImageError,
-  profileImageUrl,
-  getDisplayName,
-  getInitials,
-  profile,
-  handleLogout,
-}) => {
+const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const navigate = useNavigate();
+  const user = authService.getCurrentUser();
+
+  const [profile, setProfile] = useState({
+    id: user?.id || 0,
+    fullName: '',
+    email: user?.email || '',
+    role: user?.role || 'DRIVER',
+  });
+  const [profileImageUrl, setProfileImageUrl] = useState(null);
+  const [profileImageError, setProfileImageError] = useState(false);
+
+  // Fetch profile data
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await api.get('/profile/mine');
+        const d = response.data;
+        setProfile({
+          id: d.id || d.Id || user?.id || 0,
+          fullName: d.fullName || d.FullName || '',
+          email: d.email || d.Email || user?.email || '',
+          role: d.role || d.Role || user?.role || 'DRIVER',
+        });
+      } catch (error) {
+        console.log('Sidebar: could not fetch profile:', error.message);
+      }
+    };
+
+    fetchProfile();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Fetch profile image
+  useEffect(() => {
+    if (!profile.id) return;
+
+    let objectUrl = null;
+
+    const fetchImage = async () => {
+      try {
+        const response = await api.get(`/files/thumbnail/${profile.id}`, {
+          responseType: 'blob',
+        });
+        objectUrl = URL.createObjectURL(response.data);
+        setProfileImageUrl(objectUrl);
+        setProfileImageError(false);
+      } catch (error) {
+        console.log('Sidebar: could not fetch profile image:', error.message);
+        setProfileImageError(true);
+      }
+    };
+
+    fetchImage();
+
+    return () => {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [profile.id]);
+
+  const getDisplayName = () => {
+    if (profile.fullName) return profile.fullName;
+    const emailPrefix = profile.email?.split('@')[0] || 'Driver';
+    return emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1);
+  };
+
+  const getInitials = () => {
+    if (profile.fullName) {
+      const names = profile.fullName.split(' ');
+      if (names.length >= 2) {
+        return (names[0].charAt(0) + names[names.length - 1].charAt(0)).toUpperCase();
+      }
+      return profile.fullName.charAt(0).toUpperCase();
+    }
+    return profile.email?.charAt(0)?.toUpperCase() || 'D';
+  };
+
+  const handleLogout = () => {
+    authService.logout();
+    navigate('/login');
+  };
 
   return (
     <>
-      {/* Mobile Menu Button */}
       {!sidebarOpen && (
         <button className="mobile-menu-btn" onClick={() => setSidebarOpen(true)}>
           <svg width="28" height="28" fill="none" stroke="#ffffff" strokeWidth="3" viewBox="0 0 24 24">
@@ -23,12 +96,10 @@ const Sidebar = ({
         </button>
       )}
 
-      {/* Sidebar Overlay */}
       {sidebarOpen && (
         <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)}></div>
       )}
 
-      {/* Sidebar */}
       <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
           <div className="sidebar-logo">
@@ -75,10 +146,7 @@ const Sidebar = ({
           <div className="user-info">
             <div className="user-avatar">
               {!profileImageError && profileImageUrl ? (
-                <img
-                  src={profileImageUrl}
-                  alt={getDisplayName()}
-                />
+                <img src={profileImageUrl} alt={getDisplayName()} />
               ) : (
                 getInitials()
               )}
