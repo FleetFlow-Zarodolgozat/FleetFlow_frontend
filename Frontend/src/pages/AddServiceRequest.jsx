@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import { Button, Card, Form, Container, Row, Col, Alert } from 'react-bootstrap';
 import api from '../services/api';
-import { authService } from '../services/authService';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import Sidebar from '../components/Sidebar';
 import '../styles/DriverDashboard.css';
 import '../styles/ServiceRequests.css';
 
@@ -17,50 +18,7 @@ const AddServiceRequest = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const user = authService.getCurrentUser();
-  const [profile, setProfile] = useState({
-    id: user?.id || 0,
-    fullName: '',
-    email: user?.email || '',
-    role: user?.role || 'DRIVER',
-  });
-  const [profileImageError, setProfileImageError] = useState(false);
-  const [profileImageUrl, setProfileImageUrl] = useState(null);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const profileResponse = await api.get('/profile/mine');
-        const profileData = profileResponse.data;
-        setProfile({
-          id: profileData.id || profileData.Id || user?.id || 0,
-          fullName: profileData.fullName || profileData.FullName || '',
-          email: profileData.email || profileData.Email || user?.email || '',
-          role: profileData.role || profileData.Role || user?.role || 'DRIVER',
-        });
-      } catch (profileErr) {}
-    };
-    fetchProfile();
-  }, []);
-
-  useEffect(() => {
-    const fetchProfileImage = async () => {
-      if (!profile.id) return;
-      try {
-        const response = await api.get(`/files/thumbnail/${profile.id}`, { responseType: 'blob' });
-        const imageUrl = URL.createObjectURL(response.data);
-        setProfileImageUrl(imageUrl);
-        setProfileImageError(false);
-      } catch (profileImageErr) {
-        setProfileImageError(true);
-      }
-    };
-    fetchProfileImage();
-    return () => {
-      if (profileImageUrl) URL.revokeObjectURL(profileImageUrl);
-    };
-  }, [profile.id]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -100,7 +58,7 @@ const AddServiceRequest = () => {
 
   return (
     <div className="driver-dashboard">
-      {/* ...existing sidebar/menu code... */}
+      <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       <div className="main-content">
         <Container className="py-5">
           <Row className="justify-content-center">

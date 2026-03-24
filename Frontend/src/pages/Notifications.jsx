@@ -1,22 +1,14 @@
+
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Card, Container, Row, Col, Pagination, Badge, Alert, Spinner, Button } from 'react-bootstrap';
 import api from '../services/api';
-import { authService } from '../services/authService';
+import Sidebar from '../components/Sidebar';
 import '../styles/Trips.css';
 
 const Notifications = () => {
   const navigate = useNavigate();
-  const user = authService.getCurrentUser();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [profile, setProfile] = useState({
-    id: user?.id || 0,
-    fullName: '',
-    email: user?.email || '',
-    role: user?.role || 'DRIVER',
-  });
-  const [profileImageError, setProfileImageError] = useState(false);
-  const [profileImageUrl, setProfileImageUrl] = useState(null);
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -27,58 +19,7 @@ const Notifications = () => {
   });
   const totalPages = Math.max(1, Math.ceil((pagination.totalCount || 0) / pagination.pageSize));
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const profileResponse = await api.get('/profile/mine');
-        const profileData = profileResponse.data;
-        setProfile({
-          id: profileData.id || profileData.Id || user?.id || 0,
-          fullName: profileData.fullName || profileData.FullName || '',
-          email: profileData.email || profileData.Email || user?.email || '',
-          role: profileData.role || profileData.Role || user?.role || 'DRIVER',
-        });
-      } catch (profileErr) {}
-    };
-    fetchProfile();
-  }, []);
 
-  useEffect(() => {
-    const fetchProfileImage = async () => {
-      if (!profile.id) return;
-      try {
-        const response = await api.get(`/files/thumbnail/${profile.id}`, { responseType: 'blob' });
-        const imageUrl = URL.createObjectURL(response.data);
-        setProfileImageUrl(imageUrl);
-        setProfileImageError(false);
-      } catch (profileImageErr) {
-        setProfileImageError(true);
-      }
-    };
-    fetchProfileImage();
-    return () => {
-      if (profileImageUrl) URL.revokeObjectURL(profileImageUrl);
-    };
-  }, [profile.id]);
-
-  const getDisplayName = () => {
-    if (profile.fullName) return profile.fullName;
-    const emailPrefix = profile.email?.split('@')[0] || user?.email?.split('@')[0] || 'Driver';
-    return emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1);
-  };
-  const getInitials = () => {
-    if (profile.fullName) {
-      const names = profile.fullName.split(' ');
-      if (names.length >= 2) return (names[0][0] + names[names.length - 1][0]).toUpperCase();
-      return profile.fullName.charAt(0).toUpperCase();
-    }
-    return (profile.email || user?.email || 'D').charAt(0).toUpperCase();
-  };
-
-  const handleLogout = () => {
-    authService.logout();
-    navigate('/login');
-  };
 
   const fetchNotifications = async (pageToLoad = 1) => {
     setLoading(true);
@@ -167,7 +108,7 @@ const Notifications = () => {
 
   return (
     <div className="trips-dashboard">
-      {/* ...existing sidebar code... */}
+      <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       <main className="main-content">
         <Container className="py-2">
           <Row className="g-3 mb-3 align-items-center justify-content-between">
