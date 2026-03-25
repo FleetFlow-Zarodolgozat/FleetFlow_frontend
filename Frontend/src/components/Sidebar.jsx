@@ -144,7 +144,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
         </nav>
 
         <div className="sidebar-footer">
-          <div className="user-info">
+          <div className="user-info" style={{ cursor: 'pointer' }} onClick={() => navigate('/profile-details')}>
             <div className="user-avatar">
               {!profileImageError && profileImageUrl ? (
                 <img src={profileImageUrl} alt={getDisplayName()} />

@@ -1,9 +1,18 @@
+/* Details gomb alapértelmezett stílus */
+.details-btn-custom {
+  background: #fff !important;
+  color: #7c3aed !important;
+  border: 1.5px solid #7c3aed !important;
+  font-weight: 600;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
 /* Center AddServiceRequest main content */
 .main-content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  padding-top: 12vh;
   min-height: 100vh;
 }
 /* Purple outline for Add New Service Request card */

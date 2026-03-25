@@ -1,5 +1,21 @@
 /* Trips Page Styles */
 
+/* Horizontal notification card */
+.notification-card-horizontal {
+  transition: box-shadow 0.2s, transform 0.15s;
+}
+.notification-card-horizontal:hover {
+  box-shadow: 0 6px 16px rgba(37,99,235,0.15) !important;
+  transform: translateY(-2px);
+}
+
+.notification-accent {
+  height: 4px;
+  width: 100%;
+  background: #2563eb;
+  border-radius: 2px;
+  margin-bottom: 1rem;
+}
 
 .trips-dashboard {
   display: flex;
@@ -62,7 +78,7 @@
   background: rgba(37, 99, 235, 0.08); /* transparent blue */
   border: 1px solid #2563eb;
   border-radius: 0.75rem;
-  padding: 0.5rem 0.75rem;
+  padding: 1rem 1.25rem;
 }
 
 .trip-label {

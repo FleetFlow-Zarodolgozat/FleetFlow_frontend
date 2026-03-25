@@ -181,10 +181,9 @@ const ServiceRequests = () => {
                                                             <div className="d-flex justify-content-between w-100 gap-3 mt-3">
                                                                 <Button
                                                                     className="details-btn-custom"
-                                                                    style={{ background: '#fff', color: '#7c3aed', borderColor: '#7c3aed', fontWeight: 600 }}
                                                                     onClick={() => navigate('/service-request-details', { state: { request } })}
                                                                 >
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px', verticalAlign: 'middle' }}>
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px', verticalAlign: 'middle' }}>
                                                                         <path d="M12 20h9" />
                                                                         <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
                                                                     </svg>

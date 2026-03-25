@@ -14,6 +14,7 @@ import Trips from './pages/Trips';
 import AddNewTrip from './pages/AddNewTrip';
 import ServiceRequests from './pages/ServiceRequests';
 import ServiceRequestDetails from './pages/ServiceRequestDetails';
+import ProfileDetails from './pages/ProfileDetails';
 import { authService } from './services/authService';
 import './App.css';
 
@@ -106,6 +107,11 @@ function App() {
         <Route path="/service-request-details" element={
           <ProtectedRoute>
             <ServiceRequestDetails />
+          </ProtectedRoute>
+        } />
+        <Route path="/profile-details" element={
+          <ProtectedRoute>
+            <ProfileDetails />
           </ProtectedRoute>
         } />
         <Route path="/" element={<HomeRoute />} />

@@ -177,7 +177,7 @@ const Trips = () => {
                               </div>
                               <div className="trip-divider mb-3"></div>
                               <div className="trip-details">
-                                <div className="trip-detail-row trip-date-row lcp-row" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: '2rem', width: '100%', flexWrap: 'nowrap', padding: '0.5rem 0', overflowX: 'auto' }}>
+                                <div className="trip-detail-row trip-date-row lcp-row" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: '2rem', width: '100%', flexWrap: 'nowrap', padding: '1rem 1.25rem', overflowX: 'auto' }}>
                                   {/* Date */}
                                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: 0, verticalAlign: 'middle' }}>
                                     <span className="trip-calendar-icon" style={{ flexShrink: 0, marginLeft: 5, padding: 0, background: 'none', display: 'flex', alignItems: 'center', height: '24px' }}>

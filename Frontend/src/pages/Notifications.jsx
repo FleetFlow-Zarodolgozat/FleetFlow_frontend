@@ -159,56 +159,60 @@ const Notifications = () => {
                     <div className="p-3">
                       <div className="trip-list">
                         {notifications.map(notification => (
-                          <Card key={notification.id} className="trip-card border-0 shadow-sm position-relative" style={{ width: '100%', maxWidth: '100%', marginBottom: '2.5rem', boxShadow: '0 8px 24px 0 rgba(37,99,235,0.25) !important' }}>
-                            <Card.Body className="p-3 p-md-4 position-relative">
-                              <div style={{ textAlign: 'center', marginBottom: '0.25rem' }}>
-                                <span style={{ fontWeight: 700, fontSize: '1.05em', color: notification.isRead ? '#2563eb' : '#dc2626', letterSpacing: '0.5px' }}>
-                                  {notification.isRead ? 'Read' : 'Unread'}
-                                </span>
-                              </div>
-                              <div className="trip-accent mb-3" style={{ height: '4px', width: '100%', background: notification.isRead ? '#2563eb' : '#dc2626', borderRadius: '2px' }}></div>
-                              <div className="d-flex align-items-center gap-3 mb-3">
-                                <div style={{ minWidth: 56, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <Card key={notification.id} className="notification-card-horizontal border-0 shadow-sm position-relative" style={{ width: '100%', marginBottom: '1rem', boxShadow: '0 2px 8px rgba(37,99,235,0.08)' }}>
+                            <Card.Body className="p-3 position-relative">
+                              {/* Accent bar at top like trips/fuel-logs */}
+                              <div className="notification-accent mb-3" style={{ height: '4px', width: '100%', background: notification.isRead ? '#2563eb' : '#dc2626', borderRadius: '2px' }}></div>
+                              <div className="d-flex align-items-center gap-3" style={{ width: '100%' }}>
+
+                                {/* Icon */}
+                                <div style={{ minWidth: 48, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke={notification.isRead ? '#2563eb' : '#dc2626'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
                                     <path d="M13.73 21a2 2 0 0 1-3.46 0" />
                                   </svg>
                                 </div>
-                                <div className="d-flex align-items-center gap-2 min-w-0" style={{ flex: 1 }}>
-                                  <span className="trip-value" style={{ marginLeft: 0, textAlign: 'left', color: '#2563eb', fontWeight: 600, fontSize: '1.1em' }}>
-                                    {notification.title || 'Notification'}
-                                  </span>
+
+                                {/* Content */}
+                                <div className="flex-grow-1 min-w-0" style={{ flex: 1 }}>
+                                  <div className="d-flex align-items-center gap-2 flex-wrap mb-1">
+                                    <span style={{ fontWeight: 700, fontSize: '1em', color: '#1f2937', letterSpacing: '0.3px' }}>
+                                      {notification.title || 'Notification'}
+                                    </span>
+                                    <Badge bg={notification.isRead ? 'info' : 'danger'} style={{ fontSize: '0.7em' }}>
+                                      {notification.isRead ? 'Read' : 'Unread'}
+                                    </Badge>
+                                    <Badge bg="secondary" style={{ fontSize: '0.7em' }}>{notification.type || 'INFO'}</Badge>
+                                  </div>
+                                  <div style={{ fontWeight: 500, color: '#4b5563', fontSize: '0.95em' }} className="text-truncate">
+                                    {notification.message || notification.content || ''}
+                                  </div>
+                                  <small style={{ color: '#9ca3af', fontWeight: 500 }}>
+                                    {(() => {
+                                      const dateVal = notification.DateTime || notification.date || notification.createdAt || notification.timestamp;
+                                      return dateVal ? new Date(dateVal).toLocaleString('hu-HU', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
+                                    })()}
+                                  </small>
                                 </div>
-                              </div>
-                              <div className="trip-divider mb-3"></div>
-                              <div className="trip-details mb-2">
-                                <Badge bg="info">{notification.type || 'INFO'}</Badge>
-                                <div className="mt-2" style={{ fontWeight: 500 }}>{notification.message || notification.content || ''}</div>
-                              </div>
-                              <div style={{ width: '100%', textAlign: 'center', marginTop: '1rem' }}>
-                                <small style={{ color: '#333', fontWeight: 500 }}>
-                                  {(() => {
-                                    const dateVal = notification.DateTime || notification.date || notification.createdAt || notification.timestamp;
-                                    return dateVal ? new Date(dateVal).toLocaleString('hu-HU', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
-                                  })()}
-                                </small>
-                              </div>
-                              <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: '1.5rem' }}>
-                                <Button
-                                  variant="outline-danger"
-                                  size="sm"
-                                  title="Törlés"
-                                  style={{ borderRadius: '50%', width: 36, height: 36, padding: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
-                                  onClick={() => handleDeleteNotification(notification.id)}
-                                >
-                                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M3 6h18" />
-                                    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
-                                    <line x1="10" y1="11" x2="10" y2="17" />
-                                    <line x1="14" y1="11" x2="14" y2="17" />
-                                  </svg>
-                                </Button>
+
+                                {/* Delete button */}
+                                <div style={{ flexShrink: 0 }}>
+                                  <Button
+                                    variant="outline-danger"
+                                    size="sm"
+                                    title="Törlés"
+                                    style={{ borderRadius: '50%', width: 36, height: 36, padding: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                                    onClick={() => handleDeleteNotification(notification.id)}
+                                  >
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                      <path d="M3 6h18" />
+                                      <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                                      <line x1="10" y1="11" x2="10" y2="17" />
+                                      <line x1="14" y1="11" x2="14" y2="17" />
+                                    </svg>
+                                  </Button>
+                                </div>
                               </div>
                             </Card.Body>
                           </Card>
