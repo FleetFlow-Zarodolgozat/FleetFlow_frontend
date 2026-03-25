@@ -1,6 +1,6 @@
 
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, Row, Col, Button, Alert, Form } from 'react-bootstrap';
 import '../styles/ServiceRequestDetails.css';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -16,6 +16,32 @@ const ServiceRequestDetails = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [invoiceImgUrl, setInvoiceImgUrl] = useState(null);
+  // Kép letöltése authentikációval, ha van fileId
+  useEffect(() => {
+    const fileId = request.InvoiceFileId || request.invoiceFileId;
+    if (!fileId) {
+      setInvoiceImgUrl(null);
+      return;
+    }
+    let objectUrl = null;
+    const fetchImage = async () => {
+      try {
+        const token = localStorage.getItem('authToken');
+        const response = await fetch(`https://fleetflow-zarodolgozat-backend-ressdominik.jcloud.jedlik.cloud/api/files/${fileId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error('Image fetch failed');
+        const blob = await response.blob();
+        objectUrl = URL.createObjectURL(blob);
+        setInvoiceImgUrl(objectUrl);
+      } catch (e) {
+        setInvoiceImgUrl(null);
+      }
+    };
+    fetchImage();
+    return () => { if (objectUrl) URL.revokeObjectURL(objectUrl); };
+  }, [request.InvoiceFileId, request.invoiceFileId]);
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0] || null);
@@ -149,7 +175,16 @@ const ServiceRequestDetails = () => {
                           </Button>
                           <span style={{fontSize:'0.95em',color:'#555'}}>{ file ? file.name : 'No file selected'}</span>
                         </div>
-                        {/* No file error here, all errors below Save button */}
+                        {/* Show image from database if exists */}
+                        {invoiceImgUrl ? (
+                          <div style={{marginTop:'16px',textAlign:'center'}}>
+                            <img
+                              src={invoiceImgUrl}
+                              alt="Invoice"
+                              className="invoice-image-purple-shadow"
+                            />
+                          </div>
+                        ) : null}
                       </Form.Group>
                   </Col>
                 </Row>

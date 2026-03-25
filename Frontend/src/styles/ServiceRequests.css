@@ -1,3 +1,11 @@
+/* Center AddServiceRequest main content */
+.main-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
 /* Purple outline for Add New Service Request card */
 .add-service-request-purple-outline {
   border: 2px solid #7c3aed !important;

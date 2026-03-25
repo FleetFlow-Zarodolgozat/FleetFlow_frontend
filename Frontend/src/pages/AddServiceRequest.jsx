@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 
 import React, { useState } from 'react';
 import { Button, Card, Form, Container, Row, Col, Alert } from 'react-bootstrap';
@@ -8,6 +9,14 @@ import '../styles/DriverDashboard.css';
 import '../styles/ServiceRequests.css';
 
 const AddServiceRequest = () => {
+    useEffect(() => {
+      // Disable scroll on mount
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }, []);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [scheduledStart, setScheduledStart] = useState('');
@@ -77,13 +86,30 @@ const AddServiceRequest = () => {
                     <Row className="g-3 align-items-end">
                       <Col xs={12} md={12} lg={12}>
                         <Form.Group>
-                          <Form.Label className="fw-semibold text-start w-100">Title</Form.Label>
+                          <Form.Label className="fw-semibold text-start w-100 d-flex align-items-center gap-2">
+                            <span style={{display:'flex',alignItems:'center'}}>
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{marginRight:4}}>
+                                <circle cx="12" cy="12" r="10" fill="#2563eb" />
+                                <circle cx="12" cy="8" r="1.2" fill="#fff" />
+                                <rect x="11" y="11" width="2" height="6" rx="1" fill="#fff" />
+                              </svg>
+                            </span>
+                            Title
+                          </Form.Label>
                           <Form.Control type="text" value={title} onChange={e => setTitle(e.target.value)} required placeholder="e.g. Oil change needed" />
                         </Form.Group>
                       </Col>
                       <Col xs={12} md={12} lg={12}>
                         <Form.Group>
-                          <Form.Label className="fw-semibold text-start w-100">Description <span className="text-muted">(optional)</span></Form.Label>
+                          <Form.Label className="fw-semibold text-start w-100 d-flex align-items-center gap-2">
+                            <span style={{display:'flex',alignItems:'center'}}>
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{marginRight:6}}>
+                                <rect x="4" y="3" width="16" height="18" rx="2" fill="#22c55e"/>
+                                <path d="M8 7h8M8 11h8M8 15h4" stroke="#fff" strokeWidth="2" strokeLinecap="round"/>
+                              </svg>
+                            </span>
+                            Description <span className="text-muted">(optional)</span>
+                          </Form.Label>
                           <Form.Control as="textarea" rows={3} value={description} onChange={e => setDescription(e.target.value)} placeholder="Describe the issue..." />
                         </Form.Group>
                       </Col>

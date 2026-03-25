@@ -9,6 +9,14 @@ import '../styles/AddNewTrip.css';
 
 
 const AddNewTrip = () => {
+	useEffect(() => {
+		// Disable scroll on mount
+		const originalOverflow = document.body.style.overflow;
+		document.body.style.overflow = 'hidden';
+		return () => {
+			document.body.style.overflow = originalOverflow;
+		};
+	}, []);
   const [vehicleCurrentMileageKm, setVehicleCurrentMileageKm] = useState(null);
   useEffect(() => {
 	const fetchVehicleMileage = async () => {

@@ -114,34 +114,39 @@ const Notifications = () => {
           <Row className="g-3 mb-3 align-items-center justify-content-between">
             <Col md={8}>
               <h1 className="fuel-logs-title mb-1">Notifications</h1>
-            </Col>
-            <Col md={4} className="d-flex justify-content-end">
-              <Button
-                variant="primary"
-                size="sm"
-                style={{ background: '#2563eb', borderColor: '#2563eb', color: '#fff', borderRadius: '50%', width: 36, height: 36, padding: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(37,99,235,0.15)' }}
-                onMouseOver={e => { e.currentTarget.style.background = '#1746a2'; e.currentTarget.style.borderColor = '#1746a2'; }}
-                onMouseOut={e => { e.currentTarget.style.background = '#2563eb'; e.currentTarget.style.borderColor = '#2563eb'; }}
-                className="mb-1 d-flex align-items-center justify-content-center trips-new-btn"
-                onClick={handleMarkAllAsRead}
-                title="Mark All As Read"
-                aria-label="Mark All As Read"
-              >
-                <svg width="20" height="20" fill="none" stroke="#fff" strokeWidth="2.5" viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="10" stroke="#fff" strokeWidth="2" fill="none" />
-                  <path d="M8 12.5l3 3 5-5" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </Button>
+              <p className="text-muted mb-0">Your notifications ordered by latest date.</p>
             </Col>
           </Row>
           <Row className="justify-content-center">
             <Col md={12} lg={12} style={{ width: '100%', maxWidth: '100%' }}>
               <Card className="border-0 rounded-4" style={{ width: '100%', maxWidth: '100%', boxShadow: '0 2px 8px rgba(37,99,235,0.08)' }}>
-                <Card.Header className="bg-white rounded-top-4 d-flex align-items-center justify-content-between gap-2 border-bottom" style={{ minHeight: 60 }}>
-                  <span className="fw-semibold">My Notifications</span>
-                  <Badge bg="primary">Total: {pagination.totalCount}</Badge>
+                <Card.Header className="bg-white rounded-top-4 d-flex flex-column align-items-start gap-1 border-bottom" style={{ minHeight: 60 }}>
+                  <div className="d-flex w-100 align-items-center justify-content-between gap-2">
+                    <span className="fw-semibold">My Notifications</span>
+                    <Badge bg="primary">Total: {pagination.totalCount}</Badge>
+                  </div>
                 </Card.Header>
                 <Card.Body className="p-0">
+                  {/* Mark All Read gomb a notification lista tetején */}
+                  <div style={{width:'100%',display:'flex',justifyContent:'center',margin:'24px 0 8px 0'}}>
+                    <Button
+                      variant="primary"
+                      size="md"
+                      style={{ background: '#2563eb', borderColor: '#2563eb', color: '#fff', borderRadius: '8px', fontWeight: 600, padding: '6px 18px', display: 'inline-flex', alignItems: 'center', gap: '8px', boxShadow: '0 2px 8px rgba(37,99,235,0.15)' }}
+                      onMouseOver={e => { e.currentTarget.style.background = '#1746a2'; e.currentTarget.style.borderColor = '#1746a2'; }}
+                      onMouseOut={e => { e.currentTarget.style.background = '#2563eb'; e.currentTarget.style.borderColor = '#2563eb'; }}
+                      className="mb-2 d-flex align-items-center justify-content-center"
+                      onClick={handleMarkAllAsRead}
+                      title="Mark All As Read"
+                      aria-label="Mark All As Read"
+                    >
+                      Mark All Read
+                      <svg width="20" height="20" fill="none" stroke="#fff" strokeWidth="2.5" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" stroke="#fff" strokeWidth="2" fill="none" />
+                        <path d="M8 12.5l3 3 5-5" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </Button>
+                  </div>
                   {loading ? (
                     <div className="py-5 text-center">
                       <Spinner animation="border" role="status" />
@@ -188,12 +193,12 @@ const Notifications = () => {
                                   })()}
                                 </small>
                               </div>
-                              <div style={{ position: 'absolute', bottom: 16, right: 16 }}>
+                              <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: '1.5rem' }}>
                                 <Button
                                   variant="outline-danger"
                                   size="sm"
                                   title="Törlés"
-                                  style={{ borderRadius: '50%', width: 32, height: 32, padding: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                                  style={{ borderRadius: '50%', width: 36, height: 36, padding: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
                                   onClick={() => handleDeleteNotification(notification.id)}
                                 >
                                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
