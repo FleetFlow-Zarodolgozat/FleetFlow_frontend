@@ -6,6 +6,7 @@ import TermsOfService from './pages/TermsOfService';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import HelpCenter from './pages/HelpCenter';
 import DriverDashboard from './pages/DriverDashboard';
+import AdminDashboard from './pages/AdminDashboard';
 import Notifications from './pages/Notifications';
 import FuelLogs from './pages/FuelLogs';
 import AddFuelLog from './pages/AddFuelLog';
@@ -30,29 +31,11 @@ const HomeRoute = () => {
   return isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/login" />;
 };
 
-// Admin Dashboard placeholder
-const AdminDashboard = () => {
-  const user = authService.getCurrentUser();
-  
-  const handleLogout = () => {
-    authService.logout();
-    window.location.href = '/login';
-  };
-
-  return (
-    <div style={{ padding: '20px' }}>
-      <h1>Admin Dashboard</h1>
-      <p>Üdvözöllek, {user?.name || user?.email}!</p>
-      <button onClick={handleLogout}>Kijelentkezés</button>
-    </div>
-  );
-};
-
 // Dashboard router - redirects based on user role
 const DashboardRouter = () => {
   const user = authService.getCurrentUser();
   const isAdmin = user?.role === 'admin';
-  
+
   return isAdmin ? <AdminDashboard /> : <DriverDashboard />;
 };
 
