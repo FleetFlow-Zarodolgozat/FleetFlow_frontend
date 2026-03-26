@@ -17,6 +17,8 @@ const Notifications = () => {
     page: 1,
     pageSize: 10,
   });
+  // notificationRefresh state for Sidebar refetch
+  const [notificationRefresh, setNotificationRefresh] = useState(0);
   const totalPages = Math.max(1, Math.ceil((pagination.totalCount || 0) / pagination.pageSize));
 
 
@@ -45,25 +47,26 @@ const Notifications = () => {
     }
   };
   const handleMarkAllAsRead = async () => {
-      if (!window.confirm('Biztosan megjelölöd az összes értesítést olvasottként?')) return;
-      setError('');
-      try {
-        await api.patch('/notifications/read');
-        await fetchNotifications(pagination.page);
-      } catch (err) {
-        let msg = 'Hiba történt a művelet során!';
-        if (err.response && err.response.data) {
-          const data = err.response.data;
-          if (typeof data === 'string') msg = data;
-          else if (data.message) msg = data.message;
-          else if (data.detail) msg = data.detail;
-          else if (data.errors) msg = Array.isArray(data.errors) ? data.errors.join(', ') : JSON.stringify(data.errors);
-          else if (err.response.statusText) msg = err.response.statusText;
-          else msg = JSON.stringify(data);
-        }
-        setError(msg);
+    if (!window.confirm('Biztosan megjelölöd az összes értesítést olvasottként?')) return;
+    setError('');
+    try {
+      await api.patch('/notifications/read');
+      await fetchNotifications(pagination.page);
+      setNotificationRefresh(r => r + 1); // trigger Sidebar refetch
+    } catch (err) {
+      let msg = 'Hiba történt a művelet során!';
+      if (err.response && err.response.data) {
+        const data = err.response.data;
+        if (typeof data === 'string') msg = data;
+        else if (data.message) msg = data.message;
+        else if (data.detail) msg = data.detail;
+        else if (data.errors) msg = Array.isArray(data.errors) ? data.errors.join(', ') : JSON.stringify(data.errors);
+        else if (err.response.statusText) msg = err.response.statusText;
+        else msg = JSON.stringify(data);
       }
-    };
+      setError(msg);
+    }
+  };
   const handleDeleteNotification = async (id) => {
     if (!window.confirm('Biztosan törlöd ezt az értesítést?')) return;
     setError('');
@@ -108,7 +111,7 @@ const Notifications = () => {
 
   return (
     <div className="trips-dashboard">
-      <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+  <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} notificationRefresh={notificationRefresh} />
       <main className="main-content">
         <Container className="py-2">
           <Row className="g-3 mb-3 align-items-center justify-content-between">
