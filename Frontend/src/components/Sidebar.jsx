@@ -18,7 +18,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, notificationRefresh }) => {
   const [profileImageUrl, setProfileImageUrl] = useState(null);
   const [profileImageError, setProfileImageError] = useState(false);
 
-  // Fetch profile data
+  // Fetch profile data (and image) on mount and when notificationRefresh changes
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -34,11 +34,31 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, notificationRefresh }) => {
         console.log('Sidebar: could not fetch profile:', error.message);
       }
     };
-
     fetchProfile();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [notificationRefresh]);
 
+  // Fetch profile image when profile.id or notificationRefresh changes
+  useEffect(() => {
+    if (!profile.id) return;
+    let objectUrl = null;
+    const fetchImage = async () => {
+      try {
+        const response = await api.get(`/files/thumbnail/${profile.id}`, {
+          responseType: 'blob',
+        });
+        objectUrl = URL.createObjectURL(response.data);
+        setProfileImageUrl(objectUrl);
+        setProfileImageError(false);
+      } catch (error) {
+        console.log('Sidebar: could not fetch profile image:', error.message);
+        setProfileImageError(true);
+      }
+    };
+    fetchImage();
+    return () => {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [profile.id, notificationRefresh]);
   // Fetch profile image
   useEffect(() => {
     if (!profile.id) return;
@@ -175,7 +195,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, notificationRefresh }) => {
         </nav>
 
         <div className="sidebar-footer">
-          <div className="user-info" style={{ cursor: 'pointer' }} onClick={() => navigate('/profile-details')}>
+          <div className="user-info" style={{ cursor: 'pointer' }} onClick={() => navigate('/profile-settings')}>
             <div className="user-avatar">
               {!profileImageError && profileImageUrl ? (
                 <img src={profileImageUrl} alt={getDisplayName()} />
