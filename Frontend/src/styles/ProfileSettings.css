@@ -1,3 +1,10 @@
+/* Átlátszó piros háttér a Remove Picture gomb körül */
+.remove-picture-bg {
+  background: rgba(220, 38, 38, 0.08);
+  border-radius: 10px;
+  padding: 3px 0;
+  margin-bottom: 8px;
+}
 @media (max-width: 768px) {
   .preference-item {
     flex-direction: column;

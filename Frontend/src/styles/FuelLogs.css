@@ -19,128 +19,226 @@
 
 .fuel-log-list {
   display: grid;
-  gap: 1.5rem;
+  gap: 1rem;
   grid-template-columns: 1fr;
 }
 
-.fuel-log-card {
-  background: #ffffff;
-  border-radius: 16px;
-  border: 1px solid #eef2f7;
-  box-shadow: 0 6px 24px rgba(13, 110, 253, 0.18), 0 1.5px 6px rgba(0,0,0,0.10);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  width: 100%;
-  max-width: 1100px;
-  margin-left: auto;
-  margin-right: auto;
+/* New Fuel Log Card Design */
+.fuel-log-card-new {
+  width: 100% !important;
+  min-width: 0 !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24) !important;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  overflow: hidden;
+  background: #fff;
 }
-/* Custom row for liters, cost, plate */
-.fuel-log-detail-row.lcp-row {
+
+.fuel-log-card-new:hover {
+  box-shadow: 0 14px 28px rgba(0,0,0,0.15), 0 10px 10px rgba(0,0,0,0.12) !important;
+  transform: translateY(-4px);
+}
+
+.fuel-log-card-header {
   display: flex;
-  flex-direction: row;
-  align-items: center;
   justify-content: space-between;
-  gap: 4rem;
-  padding: 0.75rem 0.9rem;
-  background: #fffaf5;
-  border: 1px solid #ffedd5;
-  border-radius: 12px;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  color: #fff;
+}
+
+.fuel-log-date-section {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
   min-width: 0;
-  flex-wrap: wrap;
-}
-.fuel-log-detail-row.lcp-row .fuel-log-label {
-  min-width: 60px;
-  font-weight: 600;
-}
-.fuel-log-detail-row.lcp-row .fuel-log-value {
-  min-width: 80px;
-  text-align: center;
 }
 
-.fuel-log-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 16px 32px rgba(249, 115, 22, 0.12) !important;
-}
-
-.fuel-log-accent {
-  height: 4px;
-  width: 100%;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #fb923c 0%, #f97316 100%);
-}
-
-.fuel-log-calendar-icon {
-  width: 34px;
-  height: 34px;
-  min-width: 34px;
-  border-radius: 10px;
-  display: inline-flex;
+.date-icon-wrapper {
+  display: flex;
   align-items: center;
   justify-content: center;
-  color: #f97316;
-  background: #fff3e8;
+  width: 40px;
+  height: 40px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
-.fuel-log-date {
-  color: #1f2937;
+.date-icon-wrapper svg {
+  stroke: #fff;
+}
+
+.fuel-log-date-text {
   font-size: 1rem;
+  font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  display: block;
 }
 
-.fuel-log-divider {
-  height: 1px;
-  background: #f1f5f9;
-}
-
-.fuel-log-details {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.fuel-log-detail-row {
+.delete-fuel-log-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  padding: 0;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  background: rgba(255,255,255,0.15);
+  border: 2px solid rgba(255,255,255,0.5);
+  color: #fff;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.delete-fuel-log-btn:hover {
+  background: #fff;
+  color: #dc3545;
+  border-color: #fff;
+  transform: scale(1.1);
+}
+
+.delete-fuel-log-btn svg {
+  transition: transform 0.2s;
+}
+
+.delete-fuel-log-btn:hover svg {
+  transform: scale(1.1);
+}
+
+.fuel-log-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
-  padding: 0.75rem 0.9rem;
-  background: #fffaf5;
-  border: 1px solid #ffedd5;
-  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  background: #f8f9fa;
+}
+
+.fuel-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: #fff;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.fuel-stat-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+}
+
+.fuel-stat-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 0.5rem;
+  flex-shrink: 0;
+}
+
+.liters-icon {
+  background: linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%);
+  color: #ea580c;
+}
+
+.liters-icon svg {
+  fill: #ea580c;
+}
+
+.cost-icon {
+  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+  color: #16a34a;
+}
+
+.cost-icon svg {
+  stroke: #16a34a;
+}
+
+.plate-icon {
+  background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+  color: #4f46e5;
+}
+
+.plate-icon svg {
+  stroke: #4f46e5;
+}
+
+.fuel-stat-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
   min-width: 0;
-  flex-wrap: nowrap;
 }
 
-.fuel-log-label {
-  font-size: 0.88rem;
+.fuel-stat-label {
+  font-size: 0.75rem;
+  font-weight: 500;
   color: #6b7280;
-  white-space: nowrap;
-  flex: 0 0 auto;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
 }
 
-.fuel-log-value {
-  font-size: 1rem;
-  font-weight: 700;
-  line-height: 1.2;
+.fuel-stat-value {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1f2937;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  text-align: right;
-  min-width: 0;
-  flex: 1 1 auto;
 }
 
-.fuel-log-station {
-  background: #fff7ed;
-  border: 1px solid #fed7aa;
+.fuel-stat-value.liters-value {
+  color: #ea580c;
+}
+
+.fuel-stat-value.cost-value {
+  color: #16a34a;
+}
+
+.fuel-stat-value.plate-value {
+  color: #4f46e5;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.05em;
+}
+
+.fuel-log-station-section {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+  border-top: 1px solid #fed7aa;
+}
+
+.station-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: rgba(234, 88, 12, 0.15);
+  border-radius: 0.5rem;
+  flex-shrink: 0;
+}
+
+.station-icon-wrapper svg {
+  stroke: #ea580c;
+}
+
+.station-name-text {
+  font-size: 0.95rem;
+  font-weight: 600;
   color: #c2410c;
-}
-
-.fuel-log-station-name {
-  font-size: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Orange button hover effect for New Fuel Log button */
@@ -177,17 +275,52 @@
   border-color: #fb923c;
 }
 
-@media (max-width: 576px) {
-  .fuel-log-date {
-    font-size: 0.92rem;
+/* Responsive */
+@media (max-width: 768px) {
+  .fuel-log-stats-grid {
+    grid-template-columns: 1fr;
   }
 
-  .fuel-log-detail-row {
-    padding: 0.65rem 0.75rem;
+  .fuel-log-card-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .delete-fuel-log-btn {
+    align-self: flex-end;
+  }
+
+  .fuel-log-date-section {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .fuel-log-card-header {
+    padding: 1rem;
+  }
+
+  .fuel-log-stats-grid {
+    padding: 1rem;
     gap: 0.75rem;
   }
 
-  .fuel-log-value {
-    font-size: 0.95rem;
+  .fuel-stat-item {
+    padding: 0.625rem 0.75rem;
+  }
+
+  .fuel-stat-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .date-icon-wrapper {
+    width: 36px;
+    height: 36px;
+  }
+
+  .fuel-log-station-section {
+    padding: 1rem;
   }
 }

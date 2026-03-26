@@ -782,7 +782,7 @@ const DriverDashboard = () => {
               <Card.Header className="bg-light">
                 <div className="d-flex justify-content-between align-items-center">
                   <h3 className="mb-0">Personal Information</h3>
-                  <Button variant="outline-primary" size="sm">
+                  <Button variant="outline-primary" size="sm" onClick={() => navigate('/profile-settings', { state: { edit: true, scrollToPersonal: true } })}>
                     <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="me-1">
                       <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" strokeLinecap="round" strokeLinejoin="round"/>
                       <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" strokeLinecap="round" strokeLinejoin="round"/>

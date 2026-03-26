@@ -4,7 +4,6 @@ import { authService } from '../services/authService';
 import api from '../services/api';
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen, notificationRefresh }) => {
-  console.log('Sidebar render, sidebarOpen:', sidebarOpen);
   const location = useLocation();
   const navigate = useNavigate();
   const user = authService.getCurrentUser();

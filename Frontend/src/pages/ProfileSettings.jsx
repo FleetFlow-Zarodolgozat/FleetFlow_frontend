@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { Card, Container, Row, Col, Alert, Spinner, Button, Form, Badge } from 'react-bootstrap';
 import api from '../services/api';
@@ -8,6 +9,8 @@ import '../styles/ProfileSettings.css';
 
 const ProfileSettings = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const personalInfoRef = useRef(null);
   const user = authService.getCurrentUser();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notificationRefresh, setNotificationRefresh] = useState(0);
@@ -41,6 +44,17 @@ const ProfileSettings = () => {
   });
   // Edit mode for personal info
   const [editMode, setEditMode] = useState(false);
+  // Edit mode aktiválása, ha navigation state-ben edit=true
+  useEffect(() => {
+    if (location.state && location.state.edit) {
+      setEditMode(true);
+    }
+    if (location.state && location.state.scrollToPersonal) {
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 200);
+    }
+  }, [location.state]);
 
   // Preferences
   const [preferences, setPreferences] = useState({
@@ -302,9 +316,11 @@ const ProfileSettings = () => {
                         </div>
                       </div>
                       <h3 className="card-title text-muted mb-4">{profile.fullName}</h3>
-                      <Button variant="link" className="w-100 text-danger" onClick={handleRemovePicture}>
-                        Remove Picture
-                      </Button>
+                      <div className="remove-picture-bg">
+                        <Button variant="link" className="w-100 text-danger" onClick={handleRemovePicture}>
+                          Remove Picture
+                        </Button>
+                      </div>
 
                       <p className="picture-hint text-center mt-3">
                         Must be JPEG, PNG, or GIF and cannot exceed 20MB.
@@ -347,7 +363,7 @@ const ProfileSettings = () => {
                 <Col xs={12}>
                   <Card className="personal-info-card">
                     <Card.Header className="bg-white">
-                      <h3 className="card-title mb-0">Personal Information</h3>
+                      <h3 className="card-title mb-0" ref={personalInfoRef}>Personal Information</h3>
                       <p className="card-subtitle mb-0">Update your personal details and contact information.</p>
                     </Card.Header>
                     <Card.Body className="p-4">
