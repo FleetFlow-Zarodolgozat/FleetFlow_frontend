@@ -3,6 +3,10 @@
   display: flex;
   min-height: 100vh;
   background-color: white;
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .notifications-page .main-content {
@@ -116,10 +120,9 @@
   color: #ffffff;
 }
 
+/* .notification-type-label színezését inline style-ból vezéreljük, ne legyen fix háttér/szövegszín! */
 .notification-type-label {
   margin-left: 10px;
-  background: rgba(13, 110, 253, 0.18) !important;
-  color: #0d6efd !important;
   border-radius: 8px;
   font-size: 12px;
   font-weight: 600;
