@@ -168,6 +168,13 @@ const Notifications = () => {
   const getFilteredNotifications = () => {
     if (activeFilter === 'all') return notifications;
     if (activeFilter === 'unread') return notifications.filter(n => !n.isRead && !n.read);
+    if (activeFilter === 'fuel_log') return notifications.filter(n => (n.type || '').toUpperCase() === 'FUEL_LOG');
+    if (activeFilter === 'service') return notifications.filter(n => (n.type || '').toUpperCase() === 'SERVICE_REQUEST');
+    if (activeFilter === 'trip') return notifications.filter(n => (n.type || '').toUpperCase() === 'TRIP');
+    if (activeFilter === 'system') return notifications.filter(n => {
+      const type = (n.type || '').toUpperCase();
+      return type === 'ACCOUNT' || type === 'ASSIGNMENT';
+    });
     return notifications;
   };
 
@@ -343,16 +350,22 @@ const Notifications = () => {
               {unreadCount > 0 && <span className="unread-count">{unreadCount}</span>}
             </button>
             <button
-              className={`filter-tab ${activeFilter === 'critical' ? 'active' : ''}`}
-              onClick={() => setActiveFilter('critical')}
+              className={`filter-tab ${activeFilter === 'service' ? 'active' : ''}`}
+              onClick={() => setActiveFilter('service')}
             >
-              Critical
+              Service
             </button>
             <button
-              className={`filter-tab ${activeFilter === 'warnings' ? 'active' : ''}`}
-              onClick={() => setActiveFilter('warnings')}
+              className={`filter-tab ${activeFilter === 'fuel_log' ? 'active' : ''}`}
+              onClick={() => setActiveFilter('fuel_log')}
             >
-              Warnings
+              Fuel Log
+            </button>
+            <button
+              className={`filter-tab ${activeFilter === 'trip' ? 'active' : ''}`}
+              onClick={() => setActiveFilter('trip')}
+            >
+              Trip
             </button>
             <button
               className={`filter-tab ${activeFilter === 'system' ? 'active' : ''}`}
