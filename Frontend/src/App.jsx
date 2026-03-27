@@ -34,8 +34,7 @@ const HomeRoute = () => {
 // Dashboard router - redirects based on user role
 const DashboardRouter = () => {
   const user = authService.getCurrentUser();
-  const isAdmin = user?.role === 'admin';
-
+  const isAdmin = user?.role && user.role.toLowerCase() === 'admin';
   return isAdmin ? <AdminDashboard /> : <DriverDashboard />;
 };
 
