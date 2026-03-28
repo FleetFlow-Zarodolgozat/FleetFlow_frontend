@@ -20,7 +20,12 @@ const Login = () => {
 
     try {
       await authService.login(email, password);
-      navigate('/dashboard');
+      const user = authService.getCurrentUser();
+      if (user?.role && user.role.toLowerCase() === 'admin') {
+        navigate('/dashboard'); // DashboardRouter automatikusan AdminDashboard-ot ad
+      } else {
+        navigate('/dashboard'); // DashboardRouter automatikusan DriverDashboard-ot ad
+      }
     } catch (err) {
       setError(
         err.response?.data?.message || 

@@ -1,3 +1,12 @@
+/* Lila shadow a számlaképhez */
+.invoice-image-purple-shadow {
+  border: 2.5px solid #a78bfa;
+  border-radius: 10px;
+  max-width: 100%;
+  max-height: 220px;
+  background: #f5f3ff;
+  box-sizing: border-box;
+}
 /* Title balra igazítása a fejlécben */
 .service-details-title-left {
   text-align: left;

@@ -1,0 +1,419 @@
+/* Notifications Page Styles */
+.notifications-page {
+  display: flex;
+  min-height: 100vh;
+  background-color: white;
+  width: 100%;;
+  max-width: 1600px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.notifications-page .main-content {
+  flex: 1;
+  margin-left: 240px;
+  padding: 24px;
+  background-color: white;
+}
+
+/* Header */
+.notifications-header {
+  background: #ffffff;
+  padding: 20px 24px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+.notifications-header .page-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0;
+}
+
+.mark-all-read-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #0d6efd;
+  font-weight: 500;
+  font-size: 14px;
+  padding: 8px 12px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.mark-all-read-btn:hover {
+  color: #0b5ed7;
+  background: #f0f7ff;
+  border-radius: 6px;
+}
+
+.mark-all-read-btn svg {
+  stroke: currentColor;
+}
+
+.filter-menu-btn:hover {
+  color: #495057;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+/* Filter Tabs */
+.filter-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.filter-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #ffffff;
+  border: 1px solid #e5e9f2;
+  border-radius: 24px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #495057;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-tab:hover {
+  background: #f8f9fa;
+  border-color: #dee2e6;
+}
+
+.filter-tab.active {
+  background: #0d6efd;
+  border-color: #0d6efd;
+  color: #ffffff;
+}
+
+.filter-tab .unread-count {
+  background: rgba(13, 110, 253, 0.1);
+  color: #0d6efd;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.filter-tab.active .unread-count {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+/* .notification-type-label színezését inline style-ból vezéreljük, ne legyen fix háttér/szövegszín! */
+.notification-type-label {
+  margin-left: 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  display: inline-block;
+  text-transform: capitalize;
+}
+
+/* Section Title */
+.section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+
+/* Notification Card */
+.notifications-list {
+  display: flex;
+  flex-direction: column;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.notification-card {
+  margin-bottom: 24px;
+}
+
+.notification-card:last-child {
+  margin-bottom: 0;
+}
+
+.notification-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  position: relative;
+  min-height: 64px;
+}
+
+.notification-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+
+.notification-card.unread {
+  background: #ffffff;
+}
+
+.notification-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.notification-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.notification-content {
+  flex: 1;
+  min-width: 0;
+  padding-top: 28px;
+}
+
+.notification-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.notification-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a2e;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.unread-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #0d6efd;
+  flex-shrink: 0;
+}
+
+.notification-message {
+  font-size: 14px;
+  color: #495057;
+  line-height: 1.6;
+  margin: 0 0 12px 0;
+}
+
+.notification-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.notification-time {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.notification-time svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+}
+
+.notification-location {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.notification-location svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+}
+
+.notification-action {
+  font-size: 13px;
+  color: #0d6efd;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.notification-action:hover {
+  color: #0b5ed7;
+  text-decoration: underline;
+}
+
+
+/* ServiceRequests-style delete button for notifications */
+
+/* Modern, responsive, animated delete button */
+.notification-delete-custom {
+  background: #fff;
+  border: 2px solid #dc2626;
+  color: #dc2626;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(220,38,38,0.10);
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  z-index: 10;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s, border-color 0.18s, box-shadow 0.18s, transform 0.18s;
+  outline: none;
+}
+.notification-delete-custom:hover, .notification-delete-custom:focus {
+  background: linear-gradient(135deg, #dc2626 60%, #ffb3b3 100%);
+  color: #fff;
+  border: 2px solid #dc2626;
+  box-shadow: 0 4px 16px rgba(220,38,38,0.18);
+  transform: scale(1.08) rotate(-8deg);
+}
+.notification-delete-custom:active {
+  background: #b91c1c;
+  color: #fff;
+  border-color: #b91c1c;
+  transform: scale(0.96);
+}
+.notification-delete-custom svg {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+  transition: stroke 0.18s;
+}
+.notification-delete-custom:hover svg, .notification-delete-custom:focus svg {
+  stroke: #fff;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .notifications-page .main-content {
+    margin-left: 240px;
+    padding: 20px;
+  }
+}
+
+@media (max-width: 992px) {
+  .notifications-page .main-content {
+    margin-left: 0;
+    padding: 24px;
+    padding-top: 80px;
+  
+
+  .notification-card {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .notifications-page .main-content {
+    padding: 16px;
+    padding-top: 80px;
+  }
+
+  .notifications-header {
+    padding: 16px;
+  }
+
+  .notifications-header .page-title {
+    font-size: 24px;
+  }
+
+  .filter-tabs {
+    justify-content: center;
+  }
+
+  .filter-tab {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+
+  .notification-card {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .notification-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .notification-delete {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+  }
+}
+
+@media (max-width: 576px) {
+  .notifications-page .main-content {
+    padding: 12px;
+  }
+
+  .notifications-header {
+    padding: 12px;
+  }
+
+  .notification-card {
+    padding: 12px;
+    position: relative;
+  }
+
+  .filter-tab {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+
+  /* Responsive delete button for mobile */
+  .notification-delete-custom {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    top: 8px !important;
+    right: 8px !important;
+    box-shadow: 0 1px 4px rgba(220,38,38,0.10) !important;
+    border-width: 2px !important;
+  }
+  .notification-delete-custom svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+}
+}

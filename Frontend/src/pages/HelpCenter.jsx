@@ -1,11 +1,15 @@
 import { useState } from 'react';
 import { Card } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
+import Sidebar from '../components/Sidebar';
+import { authService } from '../services/authService';
 import '../styles/HelpCenter.css';
 
 const HelpCenter = () => {
   const [expandedFaq, setExpandedFaq] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [notificationRefresh] = useState(0);
 
   const handleEmailClick = () => {
     navigator.clipboard.writeText('fleetflow.info@gmail.com').then(() => {
@@ -61,22 +65,27 @@ const HelpCenter = () => {
     setExpandedFaq(expandedFaq === id ? null : id);
   };
 
+  const isAuthenticated = authService.isAuthenticated();
   return (
     <div className="help-page">
-      <div className="help-content">
-        <Card className="help-card shadow-sm">
-          <Card.Body className="p-4 p-md-5">
-            {/* Header */}
-            <div className="help-header text-center mb-5">
-              <Link to="/login" className="text-decoration-none">
-                <div className="logo-section">
-                  <img src="/fleetflow_logo.png" alt="FleetFlow Logo" style={{ height: '48px', width: 'auto' }} />
-                  <h1 className="logo-title">FleetFlow</h1>
-                </div>
-              </Link>
-              <h2 className="h3 fw-bold mb-2 mt-4">Help Center</h2>
-              <p className="text-muted">Find answers to common questions and get support</p>
-            </div>
+      {isAuthenticated && (
+        <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} notificationRefresh={notificationRefresh} />
+      )}
+      <main className="main-content">
+        <div className="help-content">
+          <Card className="help-card shadow-sm">
+            <Card.Body className="p-4 p-md-5">
+              {/* Header */}
+              <div className="help-header text-center mb-5">
+                <Link to="/login" className="text-decoration-none">
+                  <div className="logo-section">
+                    <img src="/fleetflow_logo.png" alt="FleetFlow Logo" style={{ height: '48px', width: 'auto' }} />
+                    <h1 className="logo-title">FleetFlow</h1>
+                  </div>
+                </Link>
+                <h2 className="h3 fw-bold mb-2 mt-4">Help Center</h2>
+                <p className="text-muted">Find answers to common questions and get support</p>
+              </div>
 
             {/* Quick Links */}
             <div className="d-flex justify-content-center mb-5">
@@ -167,11 +176,13 @@ const HelpCenter = () => {
             </Card>
 
             {/* Back Link */}
-            <div className="text-center mt-4 pt-3 border-top">
-              <Link to="/login" className="text-primary text-decoration-none fw-semibold">
-                ← Back to Login
-              </Link>
-            </div>
+            {!isAuthenticated && (
+              <div className="text-center mt-4 pt-3 border-top">
+                <Link to="/login" className="text-primary text-decoration-none fw-semibold">
+                  ← Back to Login
+                </Link>
+              </div>
+            )}
           </Card.Body>
         </Card>
 
@@ -187,6 +198,7 @@ const HelpCenter = () => {
           <p className="text-center text-muted small mb-0">© 2024 FleetFlow Systems Inc. All rights reserved.</p>
         </div>
       </div>
+      </main>
     </div>
   );
 };

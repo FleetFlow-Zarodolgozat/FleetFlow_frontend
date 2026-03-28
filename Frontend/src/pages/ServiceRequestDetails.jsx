@@ -1,8 +1,10 @@
 
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Card, Row, Col, Button, Alert, Form } from 'react-bootstrap';
 import '../styles/ServiceRequestDetails.css';
-import { useLocation, useNavigate, Link } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import Sidebar from '../components/Sidebar';
 
 const ServiceRequestDetails = () => {
   const location = useLocation();
@@ -14,6 +16,32 @@ const ServiceRequestDetails = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [invoiceImgUrl, setInvoiceImgUrl] = useState(null);
+  // Kép letöltése authentikációval, ha van fileId
+  useEffect(() => {
+    const fileId = request.InvoiceFileId || request.invoiceFileId;
+    if (!fileId) {
+      setInvoiceImgUrl(null);
+      return;
+    }
+    let objectUrl = null;
+    const fetchImage = async () => {
+      try {
+        const token = localStorage.getItem('authToken');
+        const response = await fetch(`https://fleetflow-zarodolgozat-backend-ressdominik.jcloud.jedlik.cloud/api/files/${fileId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error('Image fetch failed');
+        const blob = await response.blob();
+        objectUrl = URL.createObjectURL(blob);
+        setInvoiceImgUrl(objectUrl);
+      } catch (e) {
+        setInvoiceImgUrl(null);
+      }
+    };
+    fetchImage();
+    return () => { if (objectUrl) URL.revokeObjectURL(objectUrl); };
+  }, [request.InvoiceFileId, request.invoiceFileId]);
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0] || null);
@@ -60,6 +88,7 @@ const ServiceRequestDetails = () => {
   };
   return (
     <div className="service-request-details-dashboard">
+      <Sidebar sidebarOpen={false} setSidebarOpen={() => {}} />
       <div className="main-content">
         <Row className="justify-content-center">
           <Col md={8} lg={6}>
@@ -113,42 +142,51 @@ const ServiceRequestDetails = () => {
                        </Form.Group>
                   </Col>
                   <Col xs={12} md={12} lg={12}>
-                                          <Form.Group>
-                                            <Form.Label className="fw-semibold text-start w-100 d-flex align-items-center gap-2">
-                                              <span style={{display:'flex',alignItems:'center'}}>
-                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{marginRight:6}}>
-                                                  <rect x="4" y="3" width="16" height="18" rx="2" fill="#fb923c"/>
-                                                  <path d="M8 7h8M8 11h8M8 15h4" stroke="#fff" strokeWidth="2" strokeLinecap="round"/>
-                                                </svg>
-                                              </span>
-                                              Close Note <span className="text-muted">(optional)</span>
-                                            </Form.Label>
-                                              <Form.Control type="text" value={closeNote} onChange={e => setCloseNote(e.target.value)} placeholder="Any notes about the service" />
-                                          </Form.Group>
-                                        </Col>
+                      <Form.Group>
+                        <Form.Label className="fw-semibold text-start w-100 d-flex align-items-center gap-2">
+                          <span style={{display:'flex',alignItems:'center'}}>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{marginRight:6}}>
+                              <rect x="4" y="3" width="16" height="18" rx="2" fill="#fb923c"/>
+                              <path d="M8 7h8M8 11h8M8 15h4" stroke="#fff" strokeWidth="2" strokeLinecap="round"/>
+                            </svg>
+                          </span>
+                          Close Note <span className="text-muted">(optional)</span>
+                        </Form.Label>
+                        <Form.Control type="text" value={closeNote} onChange={e => setCloseNote(e.target.value)} placeholder="Any notes about the service" />
+                      </Form.Group>
+                  </Col>
                   <Col xs={12} md={12} lg={6}>
-                                          <Form.Group className="add-fuel-log-file-input">
-                                            <Form.Label className="fw-semibold text-start w-100">Invoice Photo</Form.Label>
-                                            <div style={{display:'flex',alignItems:'center',gap:'12px'}}>
-                                              <input
-                                                type="file"
-                                                accept="image/*"
-                                                id="receiptPhotoInput"
-                                                style={{display:'none'}}
-                                                onChange={handleFileChange}
-                                              />
-                                              <Button
-                                                variant="primary"
-                                                onClick={() => document.getElementById('receiptPhotoInput').click()}
-                                                style={{minWidth:'120px',backgroundColor:'#7c3aed',borderColor:'#7c3aed',color:'#fff'}}
-                                              >
-                                                Choose File
-                                              </Button>
-                                              <span style={{fontSize:'0.95em',color:'#555'}}>{ file ? file.name : 'No file selected'}</span>
-                                            </div>
-                                            {/* No file error here, all errors below Save button */}
-                                          </Form.Group>
-                 </Col>
+                      <Form.Group className="add-fuel-log-file-input">
+                        <Form.Label className="fw-semibold text-start w-100">Invoice Photo</Form.Label>
+                        <div style={{display:'flex',alignItems:'center',gap:'12px'}}>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            id="receiptPhotoInput"
+                            style={{display:'none'}}
+                            onChange={handleFileChange}
+                          />
+                          <Button
+                            variant="primary"
+                            onClick={() => document.getElementById('receiptPhotoInput').click()}
+                            style={{minWidth:'120px',backgroundColor:'#7c3aed',borderColor:'#7c3aed',color:'#fff'}}
+                          >
+                            Choose File
+                          </Button>
+                          <span style={{fontSize:'0.95em',color:'#555'}}>{ file ? file.name : 'No file selected'}</span>
+                        </div>
+                        {/* Show image from database if exists */}
+                        {invoiceImgUrl ? (
+                          <div style={{marginTop:'16px',textAlign:'center'}}>
+                            <img
+                              src={invoiceImgUrl}
+                              alt="Invoice"
+                              className="invoice-image-purple-shadow"
+                            />
+                          </div>
+                        ) : null}
+                      </Form.Group>
+                  </Col>
                 </Row>
                 <div className="d-flex justify-content-between align-items-center mt-4">
                   <Button variant="outline-secondary" onClick={() => navigate(-1)} type="button">Back</Button>

@@ -6,6 +6,7 @@ import TermsOfService from './pages/TermsOfService';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import HelpCenter from './pages/HelpCenter';
 import DriverDashboard from './pages/DriverDashboard';
+import AdminDashboard from './pages/AdminDashboard';
 import Notifications from './pages/Notifications';
 import FuelLogs from './pages/FuelLogs';
 import AddFuelLog from './pages/AddFuelLog';
@@ -14,6 +15,7 @@ import Trips from './pages/Trips';
 import AddNewTrip from './pages/AddNewTrip';
 import ServiceRequests from './pages/ServiceRequests';
 import ServiceRequestDetails from './pages/ServiceRequestDetails';
+import ProfileSettings from './pages/ProfileSettings';
 import { authService } from './services/authService';
 import './App.css';
 
@@ -29,29 +31,10 @@ const HomeRoute = () => {
   return isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/login" />;
 };
 
-// Admin Dashboard placeholder
-const AdminDashboard = () => {
-  const user = authService.getCurrentUser();
-  
-  const handleLogout = () => {
-    authService.logout();
-    window.location.href = '/login';
-  };
-
-  return (
-    <div style={{ padding: '20px' }}>
-      <h1>Admin Dashboard</h1>
-      <p>Üdvözöllek, {user?.name || user?.email}!</p>
-      <button onClick={handleLogout}>Kijelentkezés</button>
-    </div>
-  );
-};
-
 // Dashboard router - redirects based on user role
 const DashboardRouter = () => {
   const user = authService.getCurrentUser();
-  const isAdmin = user?.role === 'admin';
-  
+  const isAdmin = user?.role && user.role.toLowerCase() === 'admin';
   return isAdmin ? <AdminDashboard /> : <DriverDashboard />;
 };
 
@@ -106,6 +89,11 @@ function App() {
         <Route path="/service-request-details" element={
           <ProtectedRoute>
             <ServiceRequestDetails />
+          </ProtectedRoute>
+        } />
+        <Route path="/profile-settings" element={
+          <ProtectedRoute>
+            <ProfileSettings />
           </ProtectedRoute>
         } />
         <Route path="/" element={<HomeRoute />} />

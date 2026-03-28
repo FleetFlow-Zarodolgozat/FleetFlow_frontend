@@ -1,24 +1,33 @@
 import { Container, Card } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
+import Sidebar from '../components/Sidebar';
+import { authService } from '../services/authService';
 import '../styles/LegalPages.css';
 
 const TermsOfService = () => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [notificationRefresh] = useState(0);
+  const isAuthenticated = authService.isAuthenticated();
   return (
     <div className="legal-page">
-      <div className="legal-content">
-        <Card className="legal-card">
-          <Card.Body>
-            {/* Header */}
-            <div className="legal-header">
-              <Link to="/login" className="logo-link">
-                <div className="logo-section">
-                  <img src="/fleetflow_logo.png" alt="FleetFlow Logo" style={{ height: '48px', width: 'auto' }} />
-                  <h1 className="logo-title">FleetFlow</h1>
-                </div>
-              </Link>
-              <h2 className="page-title">Terms of Service</h2>
-              <p className="last-updated">Last updated: March 9, 2026</p>
-            </div>
+      {isAuthenticated && (
+        <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} notificationRefresh={notificationRefresh} />
+      )}
+      <main className="main-content">
+        <div className="legal-content">
+          <Card className="legal-card">
+            <Card.Body>
+              {/* Header */}
+              <div className="legal-header">
+                <Link to="/login" className="logo-link">
+                  <div className="logo-section">
+                    <img src="/fleetflow_logo.png" alt="FleetFlow Logo" style={{ height: '48px', width: 'auto' }} />
+                    <h1 className="logo-title">FleetFlow</h1>
+                  </div>
+                </Link>
+                <h2 className="page-title">Terms of Service</h2>
+                <p className="last-updated">Last updated: March 9, 2026</p>
+              </div>
 
             {/* Content */}
             <div className="legal-body">
@@ -119,9 +128,11 @@ const TermsOfService = () => {
             </div>
 
             {/* Back Link */}
-            <div className="legal-footer">
-              <Link to="/login" className="back-link">← Back to Login</Link>
-            </div>
+            {!isAuthenticated && (
+              <div className="legal-footer">
+                <Link to="/login" className="back-link">← Back to Login</Link>
+              </div>
+            )}
           </Card.Body>
         </Card>
 
@@ -135,6 +146,7 @@ const TermsOfService = () => {
           <p className="copyright">© 2024 FleetFlow Systems Inc. All rights reserved.</p>
         </div>
       </div>
+      </main>
     </div>
   );
 };

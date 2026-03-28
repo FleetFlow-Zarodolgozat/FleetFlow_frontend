@@ -1,0 +1,481 @@
+/* Admin Dashboard Styles */
+.admin-dashboard {
+  display: flex;
+  width: 100vw;
+  height: 99vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  background-color: #f8f9fa;
+  overflow: auto;
+  z-index: 1;
+}
+
+/* Main Content */
+.admin-dashboard .main-content {
+  flex: 1;
+  margin-left: 240px;
+  padding: 24px;
+  background-color: #f8f9fa;
+}
+
+/* Header */
+.admin-dashboard .dashboard-header {
+  margin-bottom: 24px;
+}
+
+.admin-dashboard .header-title h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #212529;
+  margin: 0 0 4px 0;
+}
+
+.admin-dashboard .header-title p {
+  font-size: 14px;
+  color: #6c757d;
+  margin: 0;
+}
+
+/* Time Range Selector */
+.time-range-selector {
+  background: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.time-range-selector .btn {
+  border: none;
+  background: transparent;
+  color: #495057;
+  padding: 6px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.time-range-selector .btn:hover {
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.time-range-selector .btn.active {
+  background: #e7f1ff;
+  color: #0d6efd;
+  border-radius: 6px;
+}
+
+/* Export Report Button */
+.export-report-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #0d6efd !important;
+  border-color: #0d6efd !important;
+  padding: 10px 20px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.export-report-btn:hover {
+  background: #0b5ed7 !important;
+  border-color: #0b5ed7 !important;
+  transform: translateY(-1px);
+}
+
+/* Stat Cards */
+.admin-dashboard .stat-card {
+  background: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-dashboard .stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+.admin-dashboard .stat-card .card-body {
+  padding: 20px;
+}
+
+.admin-dashboard .stat-label {
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #6c757d;
+}
+
+.admin-dashboard .stat-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: #212529;
+  margin: 0;
+}
+
+.admin-dashboard .stat-change {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.admin-dashboard .stat-compare {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.admin-dashboard .stat-extra {
+  font-size: 12px;
+  color: #6c757d;
+  display: block;
+  margin-top: 4px;
+}
+
+.admin-dashboard .stat-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.admin-dashboard .stat-icon.fleet {
+  background: #dbeafe;
+}
+
+.admin-dashboard .stat-icon.fuel {
+  background: #ffedd5;
+}
+
+.admin-dashboard .stat-icon.trips {
+  background: #dcfce7;
+}
+
+.admin-dashboard .stat-icon.maintenance {
+  background: #ede9fe;
+}
+
+/* Schedule Card */
+.admin-dashboard .schedule-card {
+  background: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 12px;
+}
+
+.admin-dashboard .schedule-card .card-header {
+  background: #ffffff !important;
+  border-bottom: 1px solid #dee2e6;
+  padding: 16px 20px;
+}
+
+.admin-dashboard .schedule-card .card-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #212529;
+}
+
+.admin-dashboard .schedule-card .card-body {
+  padding: 20px;
+}
+
+.admin-dashboard .calendar-nav-arrows .current-month {
+  font-size: 15px;
+  font-weight: 600;
+  color: #212529;
+  min-width: 140px;
+  text-align: center;
+}
+
+.admin-dashboard .calendar-nav-arrows .btn {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Quick Add Card */
+.admin-dashboard .quick-add-card {
+  background: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 12px;
+}
+
+.admin-dashboard .quick-add-card .card-header {
+  background: #ffffff !important;
+  border-bottom: 1px solid #dee2e6;
+  padding: 14px 16px;
+}
+
+.admin-dashboard .quick-add-card .card-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #212529;
+}
+
+.admin-dashboard .quick-add-card .card-body {
+  padding: 16px;
+}
+
+/* Upcoming Card */
+.admin-dashboard .upcoming-card {
+  background: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 12px;
+}
+
+.admin-dashboard .upcoming-card .card-header {
+  background: #ffffff !important;
+  border-bottom: 1px solid #dee2e6;
+  padding: 14px 16px;
+}
+
+.admin-dashboard .upcoming-card .card-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #212529;
+}
+
+.admin-dashboard .upcoming-card .card-header .btn-link {
+  color: #0d6efd;
+  font-size: 13px;
+  padding: 0;
+}
+
+.admin-dashboard .upcoming-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-dashboard .upcoming-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background 0.2s ease;
+}
+
+.admin-dashboard .upcoming-item:last-child {
+  border-bottom: none;
+}
+
+.admin-dashboard .upcoming-item:hover {
+  background: #f8fafc;
+}
+
+.admin-dashboard .upcoming-icon {
+  width: 40px;
+  height: 40px;
+  background: #f1f5f9;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.admin-dashboard .upcoming-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.admin-dashboard .upcoming-info h6 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #212529;
+  margin: 0 0 4px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.admin-dashboard .upcoming-info small {
+  font-size: 12px;
+  color: #6c757d;
+}
+
+.admin-dashboard .upcoming-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+/* Calendar Event Styles */
+.admin-dashboard .rbc-event {
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 6px;
+}
+
+.admin-dashboard .rbc-toolbar {
+  padding: 0;
+  margin-bottom: 12px;
+}
+
+.admin-dashboard .rbc-toolbar button {
+  border: 1px solid #dee2e6;
+  background: #fff;
+  color: #495057;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.admin-dashboard .rbc-toolbar button:hover {
+  background: #f8f9fa;
+}
+
+.admin-dashboard .rbc-toolbar button.rbc-active {
+  background: #0d6efd;
+  border-color: #0d6efd;
+  color: #fff;
+}
+
+.admin-dashboard .rbc-toolbar-label {
+  font-weight: 600;
+  font-size: 15px;
+  color: #212529;
+}
+
+.admin-dashboard .rbc-month-view,
+.admin-dashboard .rbc-time-view {
+  border: 1px solid #dee2e6;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.admin-dashboard .rbc-header {
+  background: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  padding: 10px 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.admin-dashboard .rbc-date-cell {
+  padding: 6px 8px;
+  font-size: 13px;
+  color: #495057;
+}
+
+.admin-dashboard .rbc-date-cell.rbc-now {
+  font-weight: 700;
+  color: #0d6efd;
+}
+
+.admin-dashboard .rbc-today {
+  background-color: #e8f0fe;
+}
+
+.admin-dashboard .rbc-off-range-bg {
+  background: #f8f9fa;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .sidebar {
+    left: -240px;
+    transition: left 0.3s;
+  }
+  .sidebar.open {
+    left: 0;
+    z-index: 200;
+  }
+  .sidebar-overlay {
+    display: block;
+  }
+  .mobile-menu-btn {
+    display: block;
+  }
+  .admin-dashboard .main-content {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 992px) {
+  .sidebar {
+    left: -240px;
+    transition: left 0.3s;
+  }
+  .sidebar.open {
+    left: 0;
+    z-index: 200;
+  }
+  .sidebar-overlay {
+    display: block;
+  }
+  .mobile-menu-btn {
+    display: block;
+  }
+  .admin-dashboard .main-content {
+    margin-left: 0;
+    padding: 24px;
+    padding-top: 80px;
+  }
+  .admin-dashboard .stat-value {
+    font-size: 28px;
+  }
+
+  .admin-dashboard .stat-icon {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-dashboard .header-actions {
+    justify-content: center !important;
+  }
+
+  .admin-dashboard .time-range-selector {
+    margin-bottom: 8px;
+  }
+
+  .admin-dashboard .stat-value {
+    font-size: 24px;
+  }
+
+  .admin-dashboard .stat-icon {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+@media (max-width: 576px) {
+  .admin-dashboard .main-content {
+    padding: 16px;
+    padding-top: 80px;
+  }
+
+  .admin-dashboard .header-title h1 {
+    font-size: 22px;
+  }
+
+  .admin-dashboard .stat-card .card-body {
+    padding: 16px;
+  }
+
+  .admin-dashboard .stat-value {
+    font-size: 22px;
+  }
+
+  .admin-dashboard .stat-icon {
+    width: 40px;
+    height: 40px;
+  }
+}

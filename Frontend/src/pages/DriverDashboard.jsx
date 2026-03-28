@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import Sidebar from '../components/Sidebar';
 import { Card, Form, Button, Container, Row, Col, Badge } from 'react-bootstrap';
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
@@ -151,11 +152,6 @@ const DriverDashboard = () => {
     fetchData();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const handleLogout = () => {
-    authService.logout();
-    navigate('/login');
-  };
 
   const handleCopyToClipboard = (text, label, fieldKey) => {
     if (text && text !== 'N/A') {
@@ -376,142 +372,45 @@ const DriverDashboard = () => {
     return date.toLocaleDateString('hu-HU', { year: 'numeric', month: 'short', day: 'numeric' });
   };
 
-  // State for profile image loading
-  const [profileImageError, setProfileImageError] = useState(false);
-  const [profileImageUrl, setProfileImageUrl] = useState(null);
-
-  // Fetch profile image with auth
-  useEffect(() => {
-    const fetchProfileImage = async () => {
-      if (profile.id) {
-        try {
-          const response = await api.get(`/files/thumbnail/${profile.id}`, {
-            responseType: 'blob'
-          });
-          const imageUrl = URL.createObjectURL(response.data);
-          setProfileImageUrl(imageUrl);
-          setProfileImageError(false);
-        } catch (error) {
-          console.log('Could not fetch profile image:', error.message);
-          setProfileImageError(true);
-        }
-      }
-    };
-    
-    fetchProfileImage();
-    
-    // Cleanup URL on unmount
-    return () => {
-      if (profileImageUrl) {
-        URL.revokeObjectURL(profileImageUrl);
-      }
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profile.id]);
-
   // Mobile sidebar toggle
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // Profile image for the profile card
+  const [profileImageError, setProfileImageError] = useState(false);
+  const [profileImageUrl, setProfileImageUrl] = useState(null);
+
+  useEffect(() => {
+    if (!profile.id) return;
+
+    let objectUrl = null;
+
+    const fetchProfileImage = async () => {
+      try {
+        const response = await api.get(`/files/thumbnail/${profile.id}`, {
+          responseType: 'blob',
+        });
+        objectUrl = URL.createObjectURL(response.data);
+        setProfileImageUrl(objectUrl);
+        setProfileImageError(false);
+      } catch (error) {
+        console.log('Could not fetch profile image:', error.message);
+        setProfileImageError(true);
+      }
+    };
+
+    fetchProfileImage();
+
+    return () => {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [profile.id]);
+
   return (
     <div className="driver-dashboard">
-      {/* Mobile Menu Button */}
-      {!sidebarOpen && (
-        <button className="mobile-menu-btn" onClick={() => setSidebarOpen(true)}>
-          <svg width="28" height="28" fill="none" stroke="#ffffff" strokeWidth="3" viewBox="0 0 24 24">
-            <polyline points="9,6 15,12 9,18" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
-      )}
-
-      {/* Sidebar Overlay */}
-      {sidebarOpen && <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)}></div>}
-
-      {/* Sidebar */}
-      <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
-        <div className="sidebar-header">
-          <div className="sidebar-logo">
-            <img src="/fleetflow_logo.png" alt="FleetFlow Logo" className="logo-image" />
-            <div className="sidebar-brand">
-              <span className="brand-name">FleetFlow</span>
-              <span className="brand-tagline">Fleet Management</span>
-            </div>
-          </div>
-        </div>
-
-        <nav className="sidebar-nav">
-          <Link to="/dashboard" className="nav-item active">
-            <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" strokeLinecap="round" strokeLinejoin="round"/>
-              <polyline points="9,22 9,12 15,12 15,22" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            Dashboard
-          </Link>
-          <Link to="/fuel-logs" className="nav-item">
-            <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path d="M3 22V8l4-4h6l4 4v14H3z" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M17 13h2a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M7 22V12h6v10" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            Fuel Logs
-          </Link>
-          <Link to="/trips" className="nav-item">
-            <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" strokeLinecap="round" strokeLinejoin="round"/>
-              <polyline points="14,2 14,8 20,8" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            Trips
-          </Link>
-          <Link to="/service-requests" className="nav-item">
-            <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            Service Requests
-          </Link>
-        </nav>
-
-        <div className="sidebar-footer">
-          <div className="user-info">
-            <div className="user-avatar">
-              {!profileImageError && profileImageUrl ? (
-                <img 
-                  src={profileImageUrl} 
-                  alt={getDisplayName()}
-                />
-              ) : (
-                getInitials()
-              )}
-            </div>
-            <div className="user-details">
-              <p className="user-name">{getDisplayName()}</p>
-              <p className="user-role">{profile.role}</p>
-            </div>
-          </div>
-          <div className="sidebar-actions">
-            <button className="action-btn" title="Notifications" aria-label="Notifications">
-              {/* Material Bell icon */}
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M18 16v-5a6 6 0 0 0-12 0v5a2 2 0 0 1-2 2h16a2 2 0 0 1-2-2z" />
-                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-              </svg>
-            </button>
-            <button className="action-btn" title="Settings" aria-label="Settings">
-              {/* Classic Gear icon */}
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="3" />
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1-2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-              </svg>
-            </button>
-            <button className="action-btn" title="Logout" aria-label="Logout" onClick={handleLogout}>
-              {/* Material Logout icon */}
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M16 17l5-5-5-5" />
-                <path d="M21 12H9" />
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      </aside>
+      <Sidebar
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+      />
 
       {/* Main Content */}
       <main className="main-content">
@@ -528,7 +427,7 @@ const DriverDashboard = () => {
                 </Col>
                 <Col lg={12} xl={6}>
                   <div className="header-actions d-flex flex-wrap gap-2 justify-content-center justify-content-xl-end">
-                    <Button className="new-trip-btn">
+                    <Button className="new-trip-btn" onClick={() => navigate('/add-new-trip')}>
                       <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" strokeLinecap="round" strokeLinejoin="round"/>
                         <polyline points="14,2 14,8 20,8" strokeLinecap="round" strokeLinejoin="round"/>
@@ -537,7 +436,7 @@ const DriverDashboard = () => {
                       </svg>
                       New Trip
                     </Button>
-                    <Button className="new-fuel-btn">
+                    <Button className="new-fuel-btn" onClick={() => navigate('/add-fuel-log')}>
                       <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                         <path d="M3 22V8l4-4h6l4 4v14H3z" strokeLinecap="round" strokeLinejoin="round"/>
                         <path d="M17 13h2a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -563,7 +462,7 @@ const DriverDashboard = () => {
 
         {/* Stats Cards */}
         <Row className="g-3 mb-4">
-          <Col lg={4} md={6} xs={6}>
+          <Col lg={4} md={6} xs={12}>
             <Card className="stat-card h-100">
               <Card.Body className="d-flex align-items-center">
                 <div className="stat-icon trips me-3">
@@ -580,7 +479,7 @@ const DriverDashboard = () => {
             </Card>
           </Col>
 
-          <Col lg={4} md={6} xs={6}>
+          <Col lg={4} md={6} xs={12}>
             <Card className="stat-card h-100">
               <Card.Body className="d-flex align-items-center">
                 <div className="stat-icon fuel me-3">
@@ -598,7 +497,7 @@ const DriverDashboard = () => {
             </Card>
           </Col>
 
-          <Col lg={4} md={6} xs={6}>
+          <Col lg={4} md={6} xs={12}>
             <Card className="stat-card h-100">
               <Card.Body className="d-flex align-items-center">
                 <div className="stat-icon services me-3">
@@ -614,7 +513,7 @@ const DriverDashboard = () => {
             </Card>
           </Col>
 
-          <Col lg={4} md={6} xs={6}>
+          <Col lg={4} md={6} xs={12}>
             <Card className="stat-card h-100">
               <Card.Body className="d-flex align-items-center">
                 <div className="stat-icon distance me-3">
@@ -634,7 +533,7 @@ const DriverDashboard = () => {
             </Card>
           </Col>
 
-          <Col lg={4} md={6} xs={6}>
+          <Col lg={4} md={6} xs={12}>
             <Card className="stat-card h-100">
               <Card.Body className="d-flex align-items-center">
                 <div className="stat-icon fuel-cost me-3">
@@ -651,7 +550,7 @@ const DriverDashboard = () => {
             </Card>
           </Col>
 
-          <Col lg={4} md={6} xs={6}>
+          <Col lg={4} md={6} xs={12}>
             <Card className="stat-card h-100">
               <Card.Body className="d-flex align-items-center">
                 <div className="stat-icon service-cost me-3">
@@ -883,7 +782,7 @@ const DriverDashboard = () => {
               <Card.Header className="bg-light">
                 <div className="d-flex justify-content-between align-items-center">
                   <h3 className="mb-0">Personal Information</h3>
-                  <Button variant="outline-primary" size="sm">
+                  <Button variant="outline-primary" size="sm" onClick={() => navigate('/profile-settings', { state: { edit: true, scrollToPersonal: true } })}>
                     <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="me-1">
                       <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" strokeLinecap="round" strokeLinejoin="round"/>
                       <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" strokeLinecap="round" strokeLinejoin="round"/>
@@ -1001,7 +900,7 @@ const DriverDashboard = () => {
 
                     <Row className="g-2">
                       <Col xs={12}>
-                        <div className="info-item">
+                        <div className={`info-item ${copiedField === 'mileage' ? 'bg-success-subtle border-success' : ''}`} onClick={() => handleCopyToClipboard(vehicle.currentMileageKm.toLocaleString(), 'Mileage', 'mileage')} style={{ cursor: 'pointer' }}>
                           <div className="info-icon">
                             <svg width="20" height="20" fill="none" stroke="#0d6efd" strokeWidth="2" viewBox="0 0 24 24">
                               <circle cx="12" cy="12" r="10" strokeLinecap="round" strokeLinejoin="round"/>
@@ -1015,11 +914,7 @@ const DriverDashboard = () => {
                         </div>
                       </Col>
                       <Col xs={12}>
-                        <div
-                          className="info-item"
-                          style={{ cursor: 'pointer' }}
-                          onClick={() => handleCopyToClipboard(vehicle.vin, 'VIN', 'vin')}
-                        >
+                        <div className={`info-item ${copiedField === 'vin' ? 'bg-success-subtle border-success' : ''}`} onClick={() => handleCopyToClipboard(vehicle.vin, 'Vin', 'vin')} style={{ cursor: 'pointer' }}>
                           <div className="info-icon">
                             <svg width="20" height="20" fill="none" stroke="#0d6efd" strokeWidth="2" viewBox="0 0 24 24">
                               <rect x="2" y="7" width="20" height="14" rx="2" ry="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -1039,7 +934,16 @@ const DriverDashboard = () => {
             </Card>
           </Col>
         </Row>
-
+        <div className="page-footer mt-4">
+          <div className="d-flex justify-content-center gap-3 mb-2 flex-wrap">
+            <a href="/privacy" className="text-decoration-none text-muted small fw-semibold">PRIVACY POLICY</a>
+            <span className="text-muted">•</span>
+            <a href="/terms" className="text-decoration-none text-muted small fw-semibold">TERMS OF SERVICE</a>
+            <span className="text-muted">•</span>
+            <a href="/help" className="text-decoration-none text-muted small fw-semibold">HELP CENTER</a>
+          </div>
+          <p className="text-center text-muted small mb-0">© 2024 FleetFlow Systems Inc. All rights reserved.</p>
+        </div>
       </main>
     </div>
   );
