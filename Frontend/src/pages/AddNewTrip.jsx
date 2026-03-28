@@ -60,38 +60,6 @@ const AddNewTrip = () => {
 		e.preventDefault();
 		setError('');
 		setSuccess(false);
-		// Frontend validation
-		const now = new Date();
-		const start = new Date(`${startDate}T${startHour}`);
-		const end = new Date(`${endDate}T${endHour}`);
-		if (end < start) {
-			setError('End time cannot be before start time');
-			return;
-		}
-		if (start > now) {
-			setError('Start time cannot be in the future');
-			return;
-		}
-		if (end > now) {
-			setError('End time cannot be in the future');
-			return;
-		}
-		if (start < new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)) {
-			setError('Start time cannot be more than 7 days in the past');
-			return;
-		}
-		if (Number(distanceKm) < 0) {
-			setError('Distance cannot be negative');
-			return;
-		}
-		if (Number(startOdometerKm) > Number(endOdometerKm)) {
-			setError('Start odometer cannot be greater than end odometer');
-			return;
-		}
-		if (vehicleCurrentMileageKm !== null && Number(startOdometerKm) < Number(vehicleCurrentMileageKm)) {
-			setError('Start odometer cannot be less than current vehicle mileage (' + vehicleCurrentMileageKm + ' km)');
-			return;
-		}
 
 		try {
 			const payload = {

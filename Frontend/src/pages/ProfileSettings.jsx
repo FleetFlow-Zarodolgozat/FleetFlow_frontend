@@ -528,27 +528,6 @@ const ProfileSettings = () => {
                         </div>
 
                         <div className="preference-divider"></div>
-
-                        {/* Email Notifications Toggle */}
-                        <div className="preference-item">
-                          <div className="preference-icon">
-                            <svg width="20" height="20" fill="none" stroke="#6c757d" strokeWidth="2" viewBox="0 0 24 24">
-                              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" strokeLinecap="round" strokeLinejoin="round"/>
-                              <path d="M13.73 21a2 2 0 0 1-3.46 0" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                          </div>
-                          <div className="preference-content">
-                            <h4 className="preference-title">Email Notifications</h4>
-                            <p className="preference-description">
-                              Receive digests about fleet status weekly.
-                            </p>
-                          </div>
-                          <div className="preference-action">
-                            <div className={`toggle-switch ${preferences.emailNotifications ? 'active' : ''}`} onClick={() => handlePreferenceChange('emailNotifications')}>
-                              <span className="toggle-slider"></span>
-                            </div>
-                          </div>
-                        </div>
                       </div>
                     </Card.Body>
                   </Card>

@@ -462,7 +462,7 @@ const DriverDashboard = () => {
 
         {/* Stats Cards */}
         <Row className="g-3 mb-4">
-          <Col lg={4} md={6} xs={6}>
+          <Col lg={4} md={6} xs={12}>
             <Card className="stat-card h-100">
               <Card.Body className="d-flex align-items-center">
                 <div className="stat-icon trips me-3">
@@ -479,7 +479,7 @@ const DriverDashboard = () => {
             </Card>
           </Col>
 
-          <Col lg={4} md={6} xs={6}>
+          <Col lg={4} md={6} xs={12}>
             <Card className="stat-card h-100">
               <Card.Body className="d-flex align-items-center">
                 <div className="stat-icon fuel me-3">
@@ -497,7 +497,7 @@ const DriverDashboard = () => {
             </Card>
           </Col>
 
-          <Col lg={4} md={6} xs={6}>
+          <Col lg={4} md={6} xs={12}>
             <Card className="stat-card h-100">
               <Card.Body className="d-flex align-items-center">
                 <div className="stat-icon services me-3">
@@ -513,7 +513,7 @@ const DriverDashboard = () => {
             </Card>
           </Col>
 
-          <Col lg={4} md={6} xs={6}>
+          <Col lg={4} md={6} xs={12}>
             <Card className="stat-card h-100">
               <Card.Body className="d-flex align-items-center">
                 <div className="stat-icon distance me-3">
@@ -533,7 +533,7 @@ const DriverDashboard = () => {
             </Card>
           </Col>
 
-          <Col lg={4} md={6} xs={6}>
+          <Col lg={4} md={6} xs={12}>
             <Card className="stat-card h-100">
               <Card.Body className="d-flex align-items-center">
                 <div className="stat-icon fuel-cost me-3">
@@ -550,7 +550,7 @@ const DriverDashboard = () => {
             </Card>
           </Col>
 
-          <Col lg={4} md={6} xs={6}>
+          <Col lg={4} md={6} xs={12}>
             <Card className="stat-card h-100">
               <Card.Body className="d-flex align-items-center">
                 <div className="stat-icon service-cost me-3">
@@ -934,7 +934,16 @@ const DriverDashboard = () => {
             </Card>
           </Col>
         </Row>
-
+        <div className="page-footer mt-4">
+          <div className="d-flex justify-content-center gap-3 mb-2 flex-wrap">
+            <a href="/privacy" className="text-decoration-none text-muted small fw-semibold">PRIVACY POLICY</a>
+            <span className="text-muted">•</span>
+            <a href="/terms" className="text-decoration-none text-muted small fw-semibold">TERMS OF SERVICE</a>
+            <span className="text-muted">•</span>
+            <a href="/help" className="text-decoration-none text-muted small fw-semibold">HELP CENTER</a>
+          </div>
+          <p className="text-center text-muted small mb-0">© 2024 FleetFlow Systems Inc. All rights reserved.</p>
+        </div>
       </main>
     </div>
   );

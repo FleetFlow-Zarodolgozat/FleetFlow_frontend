@@ -21,7 +21,20 @@ const localizer = dateFnsLocalizer({
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const user = authService.getCurrentUser();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 1200);
+  const [selectedCalendarEvent, setSelectedCalendarEvent] = useState(null);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 1200) {
+        setSidebarOpen(true);
+      } else {
+        setSidebarOpen(false);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   const [currentDate] = useState(new Date());
   const [calendarDate, setCalendarDate] = useState(new Date());
   const [calendarView, setCalendarView] = useState('month');
@@ -455,20 +468,84 @@ const AdminDashboard = () => {
                   </div>
                 </div>
               </Card.Header>
-              <Card.Body>
-                <Calendar
-                  localizer={localizer}
-                  events={scheduleEvents}
-                  eventPropGetter={calendarEventStyleGetter}
-                  date={calendarDate}
-                  onNavigate={setCalendarDate}
-                  view={calendarView}
-                  onView={setCalendarView}
-                  views={['month', 'week', 'day']}
-                  style={{ height: 500 }}
-                  toolbar={false}
-                  popup
-                />
+              <Card.Body className="rbc-wrapper" style={{ minHeight: 460 }}>
+                {!selectedCalendarEvent ? (
+                  <Calendar
+                    localizer={localizer}
+                    events={scheduleEvents}
+                    eventPropGetter={calendarEventStyleGetter}
+                    onSelectEvent={(event) => {
+                      setSelectedCalendarEvent(event);
+                    }}
+                    date={calendarDate}
+                    onNavigate={setCalendarDate}
+                    view={calendarView}
+                    onView={setCalendarView}
+                    views={['month', 'week', 'day']}
+                    style={{ height: 440 }}
+                    toolbar={true}
+                    popup
+                  />
+                ) : (
+                  <div className="h-100 d-flex flex-column">
+                    <div className="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                      <div>
+                        <h4 className="mb-1 fw-bold">Event Details</h4>
+                        <small className="text-muted">Review, then delete if needed.</small>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline-secondary"
+                        size="sm"
+                        className="rounded-circle d-flex align-items-center justify-content-center"
+                        style={{ width: 34, height: 34 }}
+                        aria-label="Close"
+                        onClick={() => setSelectedCalendarEvent(null)}
+                      >
+                        ×
+                      </Button>
+                    </div>
+                    <Card className="border-0 bg-light-subtle mb-3 shadow-sm">
+                      <Card.Body className="p-3">
+                        <div className="d-flex justify-content-between align-items-start mb-3">
+                          <div>
+                            <small className="text-muted d-block">TITLE</small>
+                            <h5 className="mb-0 fw-semibold">{selectedCalendarEvent.title || 'N/A'}</h5>
+                          </div>
+                          <Badge bg="dark" pill>{selectedCalendarEvent.eventType || 'DEFAULT'}</Badge>
+                        </div>
+                        <Row className="g-2">
+                          <Col md={6} xs={12}>
+                            <div className="p-2 bg-white rounded border h-100">
+                              <small className="text-muted d-block">START</small>
+                              <span className="fw-medium">{selectedCalendarEvent.start?.toLocaleString() || 'N/A'}</span>
+                            </div>
+                          </Col>
+                          <Col md={6} xs={12}>
+                            <div className="p-2 bg-white rounded border h-100">
+                              <small className="text-muted d-block">END</small>
+                              <span className="fw-medium">{selectedCalendarEvent.end?.toLocaleString() || 'N/A'}</span>
+                            </div>
+                          </Col>
+                          <Col xs={12}>
+                            <div className="p-2 bg-white rounded border">
+                              <small className="text-muted d-block">DESCRIPTION</small>
+                              <span>{selectedCalendarEvent.description || 'No description'}</span>
+                            </div>
+                          </Col>
+                          {selectedCalendarEvent.relatedServiceRequestId && (
+                            <Col xs={12}>
+                              <div className="p-2 bg-white rounded border">
+                                <small className="text-muted d-block">RELATED SERVICE REQUEST</small>
+                                <span className="fw-medium">#{selectedCalendarEvent.relatedServiceRequestId}</span>
+                              </div>
+                            </Col>
+                          )}
+                        </Row>
+                      </Card.Body>
+                    </Card>
+                  </div>
+                )}
               </Card.Body>
             </Card>
           </Col>

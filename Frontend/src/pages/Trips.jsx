@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Container, Row, Col, Pagination, Badge, Alert, Spinner, Button } from 'react-bootstrap';
@@ -132,8 +131,6 @@ const Trips = () => {
                     <div className="py-5 text-center">
                       <Spinner animation="border" role="status" />
                     </div>
-                  ) : error ? (
-                    <Alert variant="danger" className="m-3 mb-0">{error}</Alert>
                   ) : trips.length === 0 ? (
                     <div className="py-5 text-center text-muted">No trips found.</div>
                   ) : (

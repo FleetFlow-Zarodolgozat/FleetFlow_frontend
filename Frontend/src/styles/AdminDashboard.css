@@ -1,8 +1,14 @@
 /* Admin Dashboard Styles */
 .admin-dashboard {
   display: flex;
-  min-height: 100vh;
+  width: 100vw;
+  height: 99vh;
+  position: fixed;
+  left: 0;
+  top: 0;
   background-color: #f8f9fa;
+  overflow: auto;
+  z-index: 1;
 }
 
 /* Main Content */
@@ -382,11 +388,45 @@
 
 /* Responsive */
 @media (max-width: 1200px) {
-  .admin-dashboard .main-content {
-    margin-left: 240px;
-    padding: 20px;
+  .sidebar {
+    left: -240px;
+    transition: left 0.3s;
   }
+  .sidebar.open {
+    left: 0;
+    z-index: 200;
+  }
+  .sidebar-overlay {
+    display: block;
+  }
+  .mobile-menu-btn {
+    display: block;
+  }
+  .admin-dashboard .main-content {
+    margin-left: 0;
+  }
+}
 
+@media (max-width: 992px) {
+  .sidebar {
+    left: -240px;
+    transition: left 0.3s;
+  }
+  .sidebar.open {
+    left: 0;
+    z-index: 200;
+  }
+  .sidebar-overlay {
+    display: block;
+  }
+  .mobile-menu-btn {
+    display: block;
+  }
+  .admin-dashboard .main-content {
+    margin-left: 0;
+    padding: 24px;
+    padding-top: 80px;
+  }
   .admin-dashboard .stat-value {
     font-size: 28px;
   }
@@ -394,18 +434,6 @@
   .admin-dashboard .stat-icon {
     width: 48px;
     height: 48px;
-  }
-}
-
-@media (max-width: 992px) {
-  .admin-dashboard .main-content {
-    margin-left: 0;
-    padding: 24px;
-    padding-top: 80px;
-  }
-
-  .admin-dashboard .schedule-card {
-    margin-bottom: 24px;
   }
 }
 
