@@ -2,7 +2,7 @@
 .driver-dashboard {
   display: flex;
   min-height: 100vh;
-  background-color: #ffffff;
+  background-color: #f8f9fa;
 }
 
 /* Mobile Menu Button */

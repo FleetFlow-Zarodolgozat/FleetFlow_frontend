@@ -1,7 +1,7 @@
 /* Legal Pages (Terms of Service, Privacy Policy) */
 .legal-page {
   min-height: 100vh;
-  background-color: #ffffff;
+  background-color: #f8f9fa;
   display: flex;
   align-items: flex-start;
   justify-content: center;

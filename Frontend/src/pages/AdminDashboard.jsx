@@ -51,10 +51,11 @@ const AdminDashboard = () => {
   });
   const [upcomingEvents, setUpcomingEvents] = useState([]);
   const [eventForm, setEventForm] = useState({
-    eventType: 'Trip',
-    vehicle: '',
+    title: '',
     date: '',
-    driver: 'Auto',
+    startTime: '09:00',
+    endTime: '',
+    description: ''
   });
   const [eventSaving, setEventSaving] = useState(false);
   const [eventFeedback, setEventFeedback] = useState({ type: '', message: '' });
@@ -125,15 +126,33 @@ const AdminDashboard = () => {
   // Fetch upcoming events
   const loadUpcomingEvents = async () => {
     try {
-      const response = await api.get('/calendarevents/upcoming?limit=5');
-      const events = Array.isArray(response.data) ? response.data : [];
-      setUpcomingEvents(events.map(e => ({
-        id: e.id || e.Id,
-        title: e.title || e.Title,
-        startAt: e.startAt || e.StartAt,
-        eventType: e.eventType || e.EventType,
-        vehicle: e.vehicle || e.Vehicle,
-      })));
+      // A scheduleEvents már tartalmazza a calendar eseményeket
+      // Ha nincs, akkor API-ból töltjük be
+      let events = scheduleEvents;
+      if (!events || events.length === 0) {
+        const response = await api.get('/calendarevents');
+        events = Array.isArray(response.data) ? response.data.map(evt => ({
+          id: evt.id || evt.Id,
+          title: evt.title || evt.Title,
+          start: new Date(evt.startAt || evt.StartAt),
+          eventType: evt.eventType || evt.EventType,
+          vehicle: evt.vehicle || evt.Vehicle,
+        })) : [];
+      }
+      // Csak jövőbeli események, dátum szerint növekvő sorrendben, első 3
+      const now = new Date();
+      const upcoming = events
+        .filter(e => new Date(e.start || e.startAt) > now)
+        .sort((a, b) => new Date(a.start || a.startAt) - new Date(b.start || b.startAt))
+        .slice(0, 3)
+        .map(e => ({
+          id: e.id,
+          title: e.title,
+          startAt: e.start ? e.start.toISOString() : e.startAt,
+          eventType: e.eventType,
+          vehicle: e.vehicle,
+        }));
+      setUpcomingEvents(upcoming);
     } catch (error) {
       console.log('Could not fetch upcoming events:', error.message);
     }
@@ -185,25 +204,44 @@ const AdminDashboard = () => {
 
   const handleSaveEvent = async (e) => {
     e.preventDefault();
+
+    const title = eventForm.title.trim();
+    if (!title || !eventForm.date || !eventForm.startTime) {
+      setEventFeedback({ type: 'danger', message: 'Title, date and start time are required.' });
+      return;
+    }
+
+    const startDate = new Date(`${eventForm.date}T${eventForm.startTime}:00`);
+    if (Number.isNaN(startDate.getTime())) {
+      setEventFeedback({ type: 'danger', message: 'Invalid date format.' });
+      return;
+    }
+
+    let endDate = null;
+    if (eventForm.endTime) {
+      endDate = new Date(`${eventForm.date}T${eventForm.endTime}:00`);
+      if (Number.isNaN(endDate.getTime())) {
+        setEventFeedback({ type: 'danger', message: 'Invalid end time format.' });
+        return;
+      }
+      if (endDate <= startDate) {
+        setEventFeedback({ type: 'danger', message: 'End time must be later than start time.' });
+        return;
+      }
+    }
+
     setEventSaving(true);
     setEventFeedback({ type: '', message: '' });
 
     try {
-      const startDate = new Date(eventForm.date);
-      startDate.setHours(9, 0, 0, 0);
-
-      const endDate = new Date(eventForm.date);
-      endDate.setHours(17, 0, 0, 0);
-
       await api.post('/calendarevents', {
-        title: `${eventForm.eventType} - ${eventForm.vehicle}`,
-        description: `${eventForm.eventType} scheduled for ${eventForm.date}`,
+        title,
+        description: eventForm.description?.trim() || null,
         startAt: startDate.toISOString(),
-        endAt: endDate.toISOString(),
-        eventType: eventForm.eventType === 'Trip' ? 'TRIP' : 'SERVICE_APPOINTMENT',
+        endAt: endDate ? endDate.toISOString() : null,
       });
 
-      setEventForm({ eventType: 'Trip', vehicle: '', date: '', driver: 'Auto' });
+      setEventForm({ title: '', date: '', startTime: '09:00', endTime: '', description: '' });
       setEventFeedback({ type: 'success', message: 'Event created successfully.' });
       await loadCalendarEvents();
       await loadUpcomingEvents();
@@ -468,7 +506,7 @@ const AdminDashboard = () => {
                   </div>
                 </div>
               </Card.Header>
-              <Card.Body className="rbc-wrapper" style={{ minHeight: 460 }}>
+              <Card.Body className="rbc-wrapper h-100" style={{ height: '100%', minHeight: 0 }}>
                 {!selectedCalendarEvent ? (
                   <Calendar
                     localizer={localizer}
@@ -482,12 +520,12 @@ const AdminDashboard = () => {
                     view={calendarView}
                     onView={setCalendarView}
                     views={['month', 'week', 'day']}
-                    style={{ height: 440 }}
+                    style={{ height: '100%' }}
                     toolbar={true}
                     popup
                   />
                 ) : (
-                  <div className="h-100 d-flex flex-column">
+                  <div className="h-100 d-flex flex-column flex-grow-1" style={{ minHeight: 0 }}>
                     <div className="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
                       <div>
                         <h4 className="mb-1 fw-bold">Event Details</h4>
@@ -505,8 +543,8 @@ const AdminDashboard = () => {
                         ×
                       </Button>
                     </div>
-                    <Card className="border-0 bg-light-subtle mb-3 shadow-sm">
-                      <Card.Body className="p-3">
+                    <Card className="border-0 bg-light-subtle mb-3 shadow-sm flex-grow-1" style={{ minHeight: 0 }}>
+                      <Card.Body className="p-3 h-100" style={{ minHeight: 0 }}>
                         <div className="d-flex justify-content-between align-items-start mb-3">
                           <div>
                             <small className="text-muted d-block">TITLE</small>
@@ -553,88 +591,79 @@ const AdminDashboard = () => {
           <Col lg={4} xl={3}>
             <Row className="g-3">
               <Col xs={12}>
-                <Card className="quick-add-card h-100">
-                  <Card.Header className="bg-light">
-                    <h3 className="mb-0 fs-5">Quick Add Event</h3>
+                <Card className="event-card h-100 d-flex flex-column">
+                  <Card.Header style={{ flexShrink: 0 }}>
+                    <h3 className="mb-0">Quick Add Event</h3>
                   </Card.Header>
-                  <Card.Body>
-                    <Form onSubmit={handleSaveEvent}>
-                      <Form.Group className="mb-3">
-                        <Form.Label className="small text-muted fw-semibold">Event Type</Form.Label>
-                        <div className="d-flex gap-2">
-                          <Button
-                            variant={eventForm.eventType === 'Trip' ? 'primary' : 'outline-primary'}
-                            className="flex-fill"
-                            onClick={() => setEventForm(prev => ({ ...prev, eventType: 'Trip' }))}
-                          >
-                            Trip
-                          </Button>
-                          <Button
-                            variant={eventForm.eventType === 'Service' ? 'primary' : 'outline-primary'}
-                            className="flex-fill"
-                            onClick={() => setEventForm(prev => ({ ...prev, eventType: 'Service' }))}
-                          >
-                            Service
-                          </Button>
-                        </div>
-                      </Form.Group>
-
-                      <Form.Group className="mb-3">
-                        <Form.Label className="small text-muted fw-semibold">Vehicle</Form.Label>
-                        <Form.Select
-                          value={eventForm.vehicle}
-                          onChange={(e) => setEventForm(prev => ({ ...prev, vehicle: e.target.value }))}
+                  <Card.Body className="d-flex flex-column" style={{ flex: 1, overflow: 'hidden' }}>
+                    <Form onSubmit={handleSaveEvent} className="d-flex flex-column h-100">
+                      <Form.Group className="mb-3" style={{ flexShrink: 0 }}>
+                        <Form.Label className="small text-muted fw-semibold">EVENT TITLE</Form.Label>
+                        <Form.Control
+                          type="text"
+                          name="title"
+                          placeholder="e.g. Service Checkup"
+                          value={eventForm.title}
+                          onChange={handleEventChange}
                           required
-                        >
-                          <option value="">Select Vehicle...</option>
-                          {vehicles.map(v => (
-                            <option key={v.id} value={v.licensePlate}>
-                              {v.brandModel} ({v.licensePlate})
-                            </option>
-                          ))}
-                        </Form.Select>
+                        />
                       </Form.Group>
-
-                      <Row className="g-2 mb-3">
+                      <Form.Group className="mb-3" style={{ flexShrink: 0 }}>
+                        <Form.Label className="small text-muted fw-semibold">DATE</Form.Label>
+                        <Form.Control
+                          type="date"
+                          name="date"
+                          value={eventForm.date}
+                          onChange={handleEventChange}
+                          required
+                        />
+                      </Form.Group>
+                      <Row className="g-2 mb-3" style={{ flexShrink: 0 }}>
                         <Col xs={6}>
                           <Form.Group>
-                            <Form.Label className="small text-muted fw-semibold">Date</Form.Label>
+                            <Form.Label className="small text-muted fw-semibold">START</Form.Label>
                             <Form.Control
-                              type="date"
-                              value={eventForm.date}
-                              onChange={(e) => setEventForm(prev => ({ ...prev, date: e.target.value }))}
+                              type="time"
+                              name="startTime"
+                              value={eventForm.startTime}
+                              onChange={handleEventChange}
                               required
                             />
                           </Form.Group>
                         </Col>
                         <Col xs={6}>
                           <Form.Group>
-                            <Form.Label className="small text-muted fw-semibold">Driver</Form.Label>
-                            <Form.Select
-                              value={eventForm.driver}
-                              onChange={(e) => setEventForm(prev => ({ ...prev, driver: e.target.value }))}
-                            >
-                              <option value="Auto">Auto</option>
-                              {drivers.map(d => (
-                                <option key={d.id} value={d.id}>
-                                  {d.fullName}
-                                </option>
-                              ))}
-                            </Form.Select>
+                            <Form.Label className="small text-muted fw-semibold">END</Form.Label>
+                            <Form.Control
+                              type="time"
+                              name="endTime"
+                              value={eventForm.endTime}
+                              onChange={handleEventChange}
+                            />
                           </Form.Group>
                         </Col>
                       </Row>
-
-                      <Button type="submit" variant="primary" className="w-100" disabled={eventSaving}>
+                      <Form.Group className="mb-3 d-flex flex-column" style={{ flex: 1, minHeight: 0 }}>
+                        <Form.Label className="small text-muted fw-semibold" style={{ flexShrink: 0 }}>DESCRIPTION</Form.Label>
+                        <Form.Control
+                          as="textarea"
+                          name="description"
+                          placeholder="Additional notes..."
+                          value={eventForm.description}
+                          onChange={handleEventChange}
+                          style={{ resize: 'none', flex: 1, minHeight: 0 }}
+                        />
+                      </Form.Group>
+                      <Button type="submit" variant="primary" className="w-100" style={{ flexShrink: 0 }} disabled={eventSaving}>
                         <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="me-2">
-                          <circle cx="12" cy="12" r="10" strokeLinecap="round" strokeLinejoin="round"/>
-                          <line x1="12" y1="8" x2="12" y2="16" strokeLinecap="round" strokeLinejoin="round"/>
-                          <line x1="8" y1="12" x2="16" y2="12" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" strokeLinecap="round" strokeLinejoin="round"/>
+                          <polyline points="17,21 17,13 7,13 7,21" strokeLinecap="round" strokeLinejoin="round"/>
+                          <polyline points="7,3 7,8 15,8" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
-                        {eventSaving ? 'Creating...' : 'Create Entry'}
+                        {eventSaving ? 'Saving...' : 'Save Event'}
                       </Button>
                       {eventFeedback.message && (
-                        <div className={`mt-2 alert alert-${eventFeedback.type} py-2 px-3 mb-0 small`}>
+                        <div className={`mt-2 alert alert-${eventFeedback.type} py-2 px-3 mb-0`} role="alert">
                           {eventFeedback.message}
                         </div>
                       )}
@@ -647,7 +676,6 @@ const AdminDashboard = () => {
                 <Card className="upcoming-card">
                   <Card.Header className="bg-light d-flex justify-content-between align-items-center">
                     <h3 className="mb-0 fs-5">Upcoming</h3>
-                    <Button variant="link" size="sm" className="text-decoration-none">View All</Button>
                   </Card.Header>
                   <Card.Body className="p-0">
                     {upcomingEvents.length === 0 ? (
@@ -655,20 +683,28 @@ const AdminDashboard = () => {
                     ) : (
                       <div className="upcoming-list">
                         {upcomingEvents.map(event => (
-                          <div key={event.id} className="upcoming-item">
-                            <div className="upcoming-icon">
-                              {getEventIcon(event.eventType)}
+                          <div key={event.id} className="upcoming-item d-flex align-items-center justify-content-between">
+                            <div className="d-flex align-items-center gap-2">
+                              <div className="upcoming-icon">
+                                {getEventIcon(event.eventType)}
+                              </div>
+                              <div className="upcoming-info">
+                                <h6 className="mb-0">{event.title}</h6>
+                                <small className="text-muted">
+                                  {event.vehicle || 'Vehicle'} • {formatEventDate(event.startAt)}, {formatEventTime(event.startAt)}
+                                </small>
+                              </div>
+                              <div
+                                className="upcoming-status-dot"
+                                style={{ backgroundColor: getEventTypeColor(event.eventType) }}
+                              />
                             </div>
-                            <div className="upcoming-info">
-                              <h6 className="mb-0">{event.title}</h6>
-                              <small className="text-muted">
-                                {event.vehicle || 'Vehicle'} • {formatEventDate(event.startAt)}, {formatEventTime(event.startAt)}
-                              </small>
-                            </div>
-                            <div
-                              className="upcoming-status-dot"
-                              style={{ backgroundColor: getEventTypeColor(event.eventType) }}
-                            />
+                            <Button size="sm" variant="outline-primary" onClick={() => {
+                              const found = scheduleEvents.find(e => String(e.id) === String(event.id));
+                              if (found) setSelectedCalendarEvent(found);
+                            }}>
+                              View
+                            </Button>
                           </div>
                         ))}
                       </div>

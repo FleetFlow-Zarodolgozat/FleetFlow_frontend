@@ -94,14 +94,14 @@
 .profile-settings-page {
   display: flex;
   min-height: 100vh;
-  background-color: white;
+  background-color: #f8f9fa;
 }
 
 .profile-settings-page .main-content {
   flex: 1;
   margin-left: 100px;
   padding: 24px;
-  background-color: white;
+  background-color: #f8f9fa;
 }
 
 /* Page Header */
