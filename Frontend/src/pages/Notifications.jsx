@@ -1,3 +1,12 @@
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Container, Row, Col, Badge, Alert, Spinner, Button, Form } from 'react-bootstrap';
+import api from '../services/api';
+import Sidebar from '../components/Sidebar';
+import '../styles/Notifications.css';
+
+import Footer from '../components/Footer';
+import { authService } from '../services/authService';
 // Ikon háttérszín a notification típus alapján
 const getNotificationTypeIconBg = (notification) => {
   const type = (notification.type || '').toUpperCase();
@@ -16,12 +25,6 @@ const getNotificationTypeIconBg = (notification) => {
   // fallback: halvány szürke
   return 'rgba(107,114,128,0.12)';
 };
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Container, Row, Col, Badge, Alert, Spinner, Button, Form } from 'react-bootstrap';
-import api from '../services/api';
-import Sidebar from '../components/Sidebar';
-import '../styles/Notifications.css';
 
 const Notifications = () => {
   const navigate = useNavigate();
@@ -443,8 +446,7 @@ const Notifications = () => {
                               }}>{notification.type}</span>
                             )}
                           </div>
-                        </div>
-                        <button
+                          <button
                           className="notification-delete-custom"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -460,6 +462,7 @@ const Notifications = () => {
                             <line x1="14" y1="11" x2="14" y2="17" />
                           </svg>
                         </button>
+                        </div>
                       </div>
                     );
                   })}
@@ -768,6 +771,10 @@ const Notifications = () => {
             </div>
           )}
         </Container>
+        {/* Footer csak ha nem ADMIN */}
+        {authService.getCurrentUser()?.role !== 'ADMIN' && (
+          <Footer userType={authService.getCurrentUser()?.role} />
+        )}
       </main>
     </div>
   );

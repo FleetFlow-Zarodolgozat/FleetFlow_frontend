@@ -6,6 +6,7 @@ import api from '../services/api';
 import Sidebar from '../components/Sidebar';
 import '../styles/DriverDashboard.css';
 import '../styles/ServiceRequests.css';
+import Footer from '../components/Footer';
 
 const ServiceRequests = () => {
     const formatDateTime = (value) => {
@@ -233,6 +234,7 @@ const ServiceRequests = () => {
                             </Card.Footer>
                         </Card>
                     </Container>
+                    <Footer/>
                 </main>
             </div>
         );

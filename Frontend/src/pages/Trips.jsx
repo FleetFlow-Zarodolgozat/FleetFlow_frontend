@@ -4,6 +4,7 @@ import { Card, Container, Row, Col, Pagination, Badge, Alert, Spinner, Button } 
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
 import '../styles/Trips.css';
+import Footer from '../components/Footer';
 
 const Trips = () => {
   const navigate = useNavigate();
@@ -235,6 +236,7 @@ const Trips = () => {
             </Col>
           </Row>
         </Container>
+        <Footer/>
       </main>
     </div>
   );

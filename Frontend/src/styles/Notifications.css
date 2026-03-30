@@ -137,7 +137,6 @@ body {
   flex-direction: column;
   border-radius: 16px;
   padding: 24px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
 .notification-card {
@@ -222,6 +221,7 @@ body {
   color: #495057;
   line-height: 1.6;
   margin: 0 0 12px 0;
+  text-align: left;
 }
 
 .notification-meta {

@@ -7,6 +7,8 @@ import Sidebar from '../components/Sidebar';
 import { authService } from '../services/authService';
 import '../styles/ProfileSettings.css';
 
+import Footer from '../components/Footer';
+
 const ProfileSettings = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -301,9 +303,9 @@ const ProfileSettings = () => {
                           )}
                           <button className="edit-picture-btn" onClick={handleImageUploadClick} type="button" aria-label="Upload new profile picture">
                             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
-                              <rect x="3" y="7" width="18" height="13" rx="2" fill="none"/>
-                              <path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" fill="none"/>
-                              <circle cx="12" cy="14" r="3" fill="none"/>
+                              <rect x="3" y="7" width="18" height="13" rx="2" fill="none" />
+                              <path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" fill="none" />
+                              <circle cx="12" cy="14" r="3" fill="none" />
                             </svg>
                           </button>
                           <input
@@ -371,30 +373,34 @@ const ProfileSettings = () => {
                         <Row className="g-3">
                           {!editMode ? (
                             <>
-                              <Col md={6}>
-                                <Form.Group>
-                                  <Form.Label className="form-label">License Number</Form.Label>
-                                  <Form.Control
-                                    type="text"
-                                    name="licenseNumber"
-                                    value={personalInfo.licenseNumber}
-                                    readOnly
-                                    placeholder="Enter license number"
-                                  />
-                                </Form.Group>
-                              </Col>
-                              <Col md={6}>
-                                <Form.Group>
-                                  <Form.Label className="form-label">License Expiry</Form.Label>
-                                  <Form.Control
-                                    type="text"
-                                    name="licenseExpiryDate"
-                                    value={personalInfo.licenseExpiryDate ? new Date(personalInfo.licenseExpiryDate).toLocaleDateString('hu-HU', { year: 'numeric', month: 'short', day: 'numeric' }) : ''}
-                                    readOnly
-                                    placeholder="YYYY-MM-DD"
-                                  />
-                                </Form.Group>
-                              </Col>
+                              {user?.role !== 'ADMIN' && (
+                                <>
+                                  <Col md={6}>
+                                    <Form.Group>
+                                      <Form.Label className="form-label">License Number</Form.Label>
+                                      <Form.Control
+                                        type="text"
+                                        name="licenseNumber"
+                                        value={personalInfo.licenseNumber}
+                                        readOnly
+                                        placeholder="Enter license number"
+                                      />
+                                    </Form.Group>
+                                  </Col>
+                                  <Col md={6}>
+                                    <Form.Group>
+                                      <Form.Label className="form-label">License Expiry</Form.Label>
+                                      <Form.Control
+                                        type="text"
+                                        name="licenseExpiryDate"
+                                        value={personalInfo.licenseExpiryDate ? new Date(personalInfo.licenseExpiryDate).toLocaleDateString('hu-HU', { year: 'numeric', month: 'short', day: 'numeric' }) : ''}
+                                        readOnly
+                                        placeholder="YYYY-MM-DD"
+                                      />
+                                    </Form.Group>
+                                  </Col>
+                                </>
+                              )}
                             </>
                           ) : (
                             <>
@@ -444,8 +450,8 @@ const ProfileSettings = () => {
                                 <Form.Label className="form-label">Email address</Form.Label>
                                 <div className="input-with-icon">
                                   <svg className="input-icon" width="20" height="20" fill="none" stroke="#6c757d" strokeWidth="2" viewBox="0 0 24 24">
-                                    <rect x="2" y="4" width="20" height="16" rx="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                    <path d="M22 6l-10 7L2 6" strokeLinecap="round" strokeLinejoin="round"/>
+                                    <rect x="2" y="4" width="20" height="16" rx="2" strokeLinecap="round" strokeLinejoin="round" />
+                                    <path d="M22 6l-10 7L2 6" strokeLinecap="round" strokeLinejoin="round" />
                                   </svg>
                                   <Form.Control
                                     type="email"
@@ -511,7 +517,7 @@ const ProfileSettings = () => {
                         <div className="preference-item">
                           <div className="preference-icon">
                             <svg width="20" height="20" fill="none" stroke="#6c757d" strokeWidth="2" viewBox="0 0 24 24">
-                              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" strokeLinecap="round" strokeLinejoin="round"/>
+                              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
                           </div>
                           <div className="preference-content">
@@ -555,19 +561,10 @@ const ProfileSettings = () => {
             </Col>
           </Row>
         </Container>
-        <div className="page-footer mt-4">
-          <div className="d-flex justify-content-center gap-3 mb-2 flex-wrap">
-            <a href="/privacy" className="text-decoration-none text-muted small fw-semibold">PRIVACY POLICY</a>
-            <span className="text-muted">•</span>
-            <a href="/terms" className="text-decoration-none text-muted small fw-semibold">TERMS OF SERVICE</a>
-            <span className="text-muted">•</span>
-            <a href="/help" className="text-decoration-none text-muted small fw-semibold">HELP CENTER</a>
-          </div>
-          <p className="text-center text-muted small mb-0">© 2024 FleetFlow Systems Inc. All rights reserved.</p>
-        </div>
-
-      </main>
-    </div>
+      {/* Footer csak ha nem ADMIN */}
+      {user?.role !== 'ADMIN' && <Footer userType={user?.role} />}
+    </main>
+  </div>
   );
 };
 

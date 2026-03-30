@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import '../styles/DriverDashboard.css';
 import '../styles/AddNewTrip.css';
+import Footer from '../components/Footer';
 
 
 const AddNewTrip = () => {
@@ -234,6 +235,7 @@ const AddNewTrip = () => {
 						</Col>
 					</Row>
 				</Container>
+				<Footer/>
 			</div>
 		</div>
 	);

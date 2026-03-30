@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import { authService } from '../services/authService';
 import '../styles/HelpCenter.css';
+import Footer from '../components/Footer';
 
 const HelpCenter = () => {
   const [expandedFaq, setExpandedFaq] = useState(null);
@@ -186,17 +187,7 @@ const HelpCenter = () => {
           </Card.Body>
         </Card>
 
-        {/* Page Footer */}
-        <div className="page-footer mt-4">
-          <div className="d-flex justify-content-center gap-3 mb-2 flex-wrap">
-            <Link to="/privacy" className="text-decoration-none text-muted small fw-semibold">PRIVACY POLICY</Link>
-            <span className="text-muted">•</span>
-            <Link to="/terms" className="text-decoration-none text-muted small fw-semibold">TERMS OF SERVICE</Link>
-            <span className="text-muted">•</span>
-            <Link to="/help" className="text-decoration-none text-muted small fw-semibold">HELP CENTER</Link>
-          </div>
-          <p className="text-center text-muted small mb-0">© 2024 FleetFlow Systems Inc. All rights reserved.</p>
-        </div>
+        <Footer/>
       </div>
       </main>
     </div>

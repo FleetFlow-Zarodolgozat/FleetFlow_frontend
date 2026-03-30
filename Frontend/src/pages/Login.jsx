@@ -8,7 +8,6 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberDevice, setRememberDevice] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -106,16 +105,6 @@ const Login = () => {
                     )}
                   </button>
                 </div>
-              </Form.Group>
-
-              <Form.Group className="mb-4">
-                <Form.Check
-                  type="checkbox"
-                  id="rememberDevice"
-                  label="Remember this device"
-                  checked={rememberDevice}
-                  onChange={(e) => setRememberDevice(e.target.checked)}
-                />
               </Form.Group>
 
               <Button

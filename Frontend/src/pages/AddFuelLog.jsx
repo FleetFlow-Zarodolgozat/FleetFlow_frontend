@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import '../styles/DriverDashboard.css';
 import '../styles/FuelLogs.css';
+import Footer from '../components/Footer';
 
 const AddFuelLog = () => {
     const [vehicleCurrentMileageKm, setVehicleCurrentMileageKm] = useState(null);
@@ -283,6 +284,7 @@ const AddFuelLog = () => {
             </Col>
           </Row>
         </Container>
+        <Footer/>
       </div>
     </div>
   );

@@ -7,6 +7,7 @@ import { authService } from '../services/authService';
 import Sidebar from '../components/Sidebar';
 import '../styles/DriverDashboard.css';
 import '../styles/FuelLogs.css';
+import Footer from '../components/Footer';
 
 
 const FuelLogs = () => {
@@ -243,6 +244,7 @@ const FuelLogs = () => {
             </Card.Footer>
           </Card>
         </Container>
+        <Footer/>
       </main>
     </div>
   );

@@ -3,18 +3,15 @@ import api from './api';
 export const authService = {
   // Login
   async login(email, password) {
-    console.log('Attempting login to:', api.defaults.baseURL + '/login');
     try {
       // Backend expects PascalCase: Email, Password
       const response = await api.post('/login', { Email: email, Password: password });
-      console.log('Login response:', response.data);
       
       // Backend returns JWT token directly as string, not as { token: "..." }
       const token = typeof response.data === 'string' ? response.data : (response.data.token || response.data.Token);
       
       if (token) {
         localStorage.setItem('authToken', token);
-        console.log('Token saved to localStorage');
         
         // Decode JWT to get user info
         const payload = JSON.parse(atob(token.split('.')[1]));
@@ -24,7 +21,6 @@ export const authService = {
           id: payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier']
         };
         localStorage.setItem('user', JSON.stringify(user));
-        console.log('User extracted from token:', user);
       }
       return response.data;
     } catch (error) {

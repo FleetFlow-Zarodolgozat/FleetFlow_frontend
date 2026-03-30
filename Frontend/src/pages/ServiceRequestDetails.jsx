@@ -5,6 +5,7 @@ import { Card, Row, Col, Button, Alert, Form } from 'react-bootstrap';
 import '../styles/ServiceRequestDetails.css';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
+import Footer from '../components/Footer';
 
 const ServiceRequestDetails = () => {
   const location = useLocation();
@@ -208,6 +209,7 @@ const ServiceRequestDetails = () => {
             </Card>
           </Col>
         </Row>
+        <Footer/>
       </div>
     </div>
   );
