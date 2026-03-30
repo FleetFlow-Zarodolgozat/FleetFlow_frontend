@@ -41,7 +41,7 @@ const AddFuelLog = () => {
           setVehicles([{ id: v.id || v.Id, name: v.vehicleName || v.VehicleName || 'Vehicle', licensePlate: v.licensePlate || v.LicensePlate || '' }]);
           setSelectedVehicle(v.id || v.Id);
           setOdometer(v.currentMileageKm || v.CurrentMileageKm || 0);
-        } catch (e) {
+        } catch {
           // No assigned vehicle, fetch all vehicles
           try {
             const allVehiclesResponse = await api.get('/vehicles');
@@ -50,7 +50,7 @@ const AddFuelLog = () => {
             if (vehicleList.length > 0) {
               setSelectedVehicle(vehicleList[0].id || vehicleList[0].Id);
             }
-          } catch (err) {
+          } catch {
             console.log('Could not fetch vehicles');
           }
         }
@@ -60,7 +60,7 @@ const AddFuelLog = () => {
           const logsResponse = await api.get('/fuellogs/mine', { params: { page: 1, pageSize: 3 } });
           const logs = Array.isArray(logsResponse.data?.data) ? logsResponse.data.data : [];
           setRecentLogs(logs);
-        } catch (e) {
+        } catch {
           console.log('Could not fetch recent logs');
         }
       } catch (err) {

@@ -1,7 +1,6 @@
 /* Trips Page Styles - Responsive Design */
 
 .trips-page {
-  min-height: 100vh;
   background: #f8fafc;
   width: 100%;
   max-width: 100%;
@@ -137,6 +136,7 @@
 /* Route Cell */
 .route-cell {
   min-width: 280px;
+  text-align: center;
 }
 
 .route-wrapper {
@@ -144,6 +144,7 @@
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
+  justify-content: center;
 }
 
 .route-from,

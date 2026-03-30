@@ -30,7 +30,7 @@ const FuelLogs = () => {
         const response = await api.get('/trips/mine', { params: { page: 1, pageSize: 1000 } });
         const payload = response.data || {};
         setTrips(Array.isArray(payload.data) ? payload.data : []);
-      } catch (err) {
+      } catch{
         setTripsError('Nem sikerült lekérni az utak adatait.');
       } finally {
         setTripsLoading(false);
@@ -48,9 +48,6 @@ const FuelLogs = () => {
 
   let totalSpent = 0;
   let lastMonthSpent = 0;
-  let totalLiters = 0;
-  let totalDistance = 0;
-  let efficiencyCount = 0;
   let nextServiceDue = 'N/A';
   let nextServiceVehicle = '';
 
@@ -63,8 +60,6 @@ const FuelLogs = () => {
     const dateObj = new Date(log.date || log.Date);
     const costStr = log.totalCostCur || log.TotalCostCur || '0';
     const cost = parseFloat(costStr.replace(/[^0-9.,]/g, '').replace(',', '.')) || 0;
-    const liters = parseFloat(log.liters || log.Liters || 0);
-    const distance = parseFloat(log.distance || log.Distance || 0);
 
     if (!isNaN(cost)) {
       // This month
@@ -76,13 +71,7 @@ const FuelLogs = () => {
         lastMonthSpent += cost;
       }
     }
-    if (!isNaN(liters)) {
-      totalLiters += liters;
-    }
-    if (!isNaN(distance) && distance > 0 && !isNaN(liters) && liters > 0) {
-      totalDistance += distance;
-      efficiencyCount++;
-    }
+
     // Service due (if present)
     if (log.nextServiceDate || log.NextServiceDate) {
       const serviceDate = new Date(log.nextServiceDate || log.NextServiceDate);
@@ -305,12 +294,6 @@ const FuelLogs = () => {
                               </td>
                               <td className="fuel-log-cell vehicle-cell">
                                 <div className="vehicle-wrapper">
-                                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="vehicle-icon">
-                                    <rect x="3" y="8" width="18" height="10" rx="2" />
-                                    <path d="M7 8V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2" />
-                                    <circle cx="7.5" cy="13" r="1.5" />
-                                    <circle cx="16.5" cy="13" r="1.5" />
-                                  </svg>
                                   <Badge bg="light" text="dark" className="vehicle-plate">
                                     {log.licensePlate || log.LicensePlate || 'N/A'}
                                   </Badge>

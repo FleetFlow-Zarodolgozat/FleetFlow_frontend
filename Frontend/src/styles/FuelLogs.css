@@ -1,7 +1,7 @@
 /* Fuel Logs Page Styles - Responsive Design */
 
 .fuel-logs-page {
-  min-height: 100vh;
+  min-height: 80vh;
   background: #f8fafc;
   width: 100%;
   max-width: 100%;
@@ -135,6 +135,7 @@
 
 .vehicle-cell {
   min-width: 200px;
+  text-align: center;
 }
 
 .location-cell {
@@ -180,7 +181,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .vehicle-icon {

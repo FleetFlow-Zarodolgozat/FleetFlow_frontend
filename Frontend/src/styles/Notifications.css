@@ -3,6 +3,7 @@ body {
   background-color: #f8f9fa;
 }
 
+
 .notifications-page {
   display: flex;
   min-height: 100vh;
@@ -196,6 +197,7 @@ body {
   align-items: center;
   gap: 8px;
   margin-bottom: 8px;
+  justify-content: space-between;
 }
 
 .notification-title {
@@ -292,13 +294,14 @@ body {
   align-items: center;
   justify-content: center;
   box-shadow: 0 1px 4px rgba(220,38,38,0.10);
-  position: absolute;
-  right: 12px;
-  top: 12px;
+  /* position: absolute; */
+  /* right: 12px; */
+  /* top: 12px; */
   z-index: 10;
   cursor: pointer;
   transition: background 0.18s, color 0.18s, border-color 0.18s, box-shadow 0.18s, transform 0.18s;
   outline: none;
+  margin-left: 8px;
 }
 .notification-delete-custom:hover, .notification-delete-custom:focus {
   background: linear-gradient(135deg, #dc2626 60%, #ffb3b3 100%);
