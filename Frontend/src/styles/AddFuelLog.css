@@ -1,0 +1,572 @@
+/* Add Fuel Log Page Styles */
+
+.add-fuel-log-page {
+  min-height: 100vh;
+  background: #f8fafc;
+  width: 100%;
+  max-width: 100%;
+  padding: 0;
+}
+
+/* Breadcrumb */
+.breadcrumb-nav {
+  font-size: 0.9rem;
+}
+
+.breadcrumb {
+  background: transparent;
+  padding: 0;
+  margin: 0;
+}
+
+.breadcrumb-item {
+  color: #64748b;
+}
+
+.breadcrumb-item a {
+  color: #64748b;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.breadcrumb-item a:hover {
+  color: #0d6efd;
+}
+
+.breadcrumb-item.active {
+  color: #1e293b;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+  color: #cbd5e1;
+}
+
+/* Header */
+.add-fuel-header {
+  max-width: 800px;
+}
+
+.add-fuel-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 8px 0;
+}
+
+.add-fuel-subtitle {
+  font-size: 1rem;
+  color: #64748b;
+  margin: 0;
+}
+
+/* Fuel Form Card */
+.fuel-form-card {
+  border-radius: 16px;
+  background: #ffffff;
+}
+
+.fuel-form-card .card-body {
+  border-radius: 16px;
+}
+
+/* Form Labels */
+.form-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 8px;
+  display: block;
+}
+
+/* Form Controls */
+.form-control-lg,
+.form-select-lg {
+  font-size: 0.95rem;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s;
+}
+
+.form-control-lg:focus,
+.form-select-lg:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+}
+
+.form-control-lg::placeholder {
+  color: #94a3b8;
+}
+
+/* Input with suffix */
+.input-with-suffix {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+}
+
+.input-with-suffix .form-control-lg {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  padding-right: 50px;
+}
+
+.input-suffix {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #64748b;
+  font-weight: 500;
+  font-size: 0.9rem;
+  pointer-events: none;
+  background: #ffffff;
+  padding-left: 8px;
+}
+
+/* Price per liter */
+.price-per-liter,
+.previous-odometer {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-top: 6px;
+}
+
+/* Fuel Type Selector */
+.fuel-type-selector {
+  display: flex;
+  gap: 8px;
+}
+
+.fuel-type-btn {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.fuel-type-btn:hover {
+  border-color: #0d6efd;
+  background: #f0f7ff;
+}
+
+.fuel-type-btn.active {
+  background: #0d6efd;
+  border-color: #0d6efd;
+  color: #ffffff;
+}
+
+/* Form Actions */
+.form-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn-save {
+  background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+  border: none;
+  border-radius: 10px;
+  padding: 14px 32px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(13, 110, 253, 0.3);
+  transition: all 0.2s;
+}
+
+.btn-save:hover {
+  background: linear-gradient(135deg, #0b5ed7 0%, #0a58ca 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(13, 110, 253, 0.4);
+}
+
+.btn-cancel {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px 32px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #475569;
+  transition: all 0.2s;
+}
+
+.btn-cancel:hover {
+  background: #e2e8f0;
+}
+
+/* Receipt Card */
+.receipt-card {
+  border-radius: 16px;
+  background: #ffffff;
+}
+
+.receipt-header {
+  display: flex;
+  align-items: center;
+  color: #1e293b;
+}
+
+.receipt-title {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* Receipt Dropzone */
+.receipt-dropzone {
+  border: 2px dashed #e2e8f0;
+  border-radius: 12px;
+  padding: 32px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #f8fafc;
+}
+
+.receipt-dropzone:hover,
+.receipt-dropzone.dragging {
+  border-color: #0d6efd;
+  background: #f0f7ff;
+}
+
+.receipt-dropzone.has-file {
+  border-color: #10b981;
+  background: #f0fdf4;
+}
+
+.upload-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 16px;
+  background: #e0e7ff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.upload-icon svg {
+  color: #0d6efd;
+}
+
+.upload-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.upload-text strong {
+  color: #1e293b;
+  font-size: 0.95rem;
+}
+
+.upload-text span {
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.upload-hint {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* File selected state */
+.receipt-file-selected {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.file-name {
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 0.9rem;
+  word-break: break-all;
+  text-align: center;
+}
+
+.file-size {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.remove-file {
+  background: #fee2e2;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #ef4444;
+}
+
+.remove-file:hover {
+  background: #fecaca;
+  transform: scale(1.1);
+}
+
+/* Pro Tip Card */
+.pro-tip-card {
+  border-radius: 16px;
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+}
+
+.pro-tip-header {
+  display: flex;
+  align-items: center;
+  color: #0d6efd;
+}
+
+.pro-tip-title {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.pro-tip-text {
+  color: #475569;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.pro-tip-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.pro-tip-list li {
+  display: flex;
+  align-items: center;
+  color: #475569;
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+}
+
+/* Recent Logs Card */
+.recent-logs-card {
+  border-radius: 16px;
+  background: #ffffff;
+}
+
+.recent-logs-header {
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+
+.recent-logs-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.recent-logs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.recent-log-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.recent-log-date {
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 0.95rem;
+}
+
+.recent-log-vehicle {
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.recent-log-cost {
+  font-weight: 700;
+  color: #1e293b;
+  font-size: 0.95rem;
+}
+
+.view-all-link {
+  display: block;
+  text-align: center;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+  color: #0d6efd;
+  font-weight: 500;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.view-all-link:hover {
+  color: #0b5ed7;
+}
+
+/* Date and Time Row */
+.date-time-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+}
+.date-time-input {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ===========================================
+   RESPONSIVE BREAKPOINTS
+   =========================================== */
+
+@media (max-width: 1199.98px) {
+  .add-fuel-title {
+    font-size: 1.75rem;
+  }
+}
+
+@media (max-width: 991.98px) {
+  .add-fuel-log-page {
+    padding: 16px;
+  }
+
+  .add-fuel-title {
+    font-size: 1.5rem;
+  }
+
+  .add-fuel-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .fuel-form-card .card-body,
+  .receipt-card .card-body,
+  .pro-tip-card .card-body,
+  .recent-logs-card .card-body {
+    padding: 24px !important;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .add-fuel-log-page {
+    padding: 12px;
+  }
+
+  .add-fuel-header {
+    margin-bottom: 24px !important;
+  }
+
+  .add-fuel-title {
+    font-size: 1.4rem;
+  }
+
+  .add-fuel-subtitle {
+    font-size: 0.85rem;
+  }
+
+  .fuel-type-selector {
+    flex-direction: column;
+  }
+
+  .fuel-type-btn {
+    width: 100%;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .btn-save,
+  .btn-cancel {
+    width: 100%;
+  }
+
+  .receipt-dropzone {
+    padding: 24px 16px;
+  }
+
+  .upload-icon {
+    width: 56px;
+    height: 56px;
+  }
+
+  .pro-tip-text {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .add-fuel-log-page {
+    padding: 8px;
+  }
+
+  .breadcrumb-nav {
+    font-size: 0.8rem;
+  }
+
+  .add-fuel-title {
+    font-size: 1.25rem;
+  }
+
+  .add-fuel-subtitle {
+    font-size: 0.8rem;
+  }
+
+  .fuel-form-card .card-body,
+  .receipt-card .card-body,
+  .pro-tip-card .card-body,
+  .recent-logs-card .card-body {
+    padding: 20px !important;
+  }
+
+  .form-label {
+    font-size: 0.85rem;
+  }
+
+  .form-control-lg,
+  .form-select-lg {
+    padding: 10px 14px;
+    font-size: 0.9rem;
+  }
+
+  .fuel-type-btn {
+    padding: 10px 14px;
+    font-size: 0.85rem;
+  }
+
+  .btn-save,
+  .btn-cancel {
+    padding: 12px 24px;
+    font-size: 0.9rem;
+  }
+
+  .receipt-title,
+  .pro-tip-title {
+    font-size: 0.9rem;
+  }
+
+  .recent-log-date,
+  .recent-log-cost {
+    font-size: 0.9rem;
+  }
+}

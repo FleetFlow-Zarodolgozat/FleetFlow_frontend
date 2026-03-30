@@ -1,9 +1,7 @@
-
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Alert, Badge, Button, Card, Col, Container, Pagination, Row, Spinner } from 'react-bootstrap';
+import { Alert, Button, Card, Col, Container, Pagination, Row, Spinner, Table, Badge } from 'react-bootstrap';
 import api from '../services/api';
-import { authService } from '../services/authService';
 import Sidebar from '../components/Sidebar';
 import '../styles/DriverDashboard.css';
 import '../styles/FuelLogs.css';
@@ -19,18 +17,153 @@ const FuelLogs = () => {
   const [pagination, setPagination] = useState({});
   const totalPages = Math.max(1, Math.ceil((pagination.totalCount || 0) / (pagination.pageSize || 10)));
 
+  // Trips state for consumption calculation
+  const [trips, setTrips] = useState([]);
+  const [tripsLoading, setTripsLoading] = useState(true);
+  const [tripsError, setTripsError] = useState('');
+  // Fetch trips for consumption calculation
+  useEffect(() => {
+    const fetchTrips = async () => {
+      setTripsLoading(true);
+      setTripsError('');
+      try {
+        const response = await api.get('/trips/mine', { params: { page: 1, pageSize: 1000 } });
+        const payload = response.data || {};
+        setTrips(Array.isArray(payload.data) ? payload.data : []);
+      } catch (err) {
+        setTripsError('Nem sikerült lekérni az utak adatait.');
+      } finally {
+        setTripsLoading(false);
+      }
+    };
+    fetchTrips();
+  }, []);
+
+  // Calculate stats based on fuelLogs
+  const now = new Date();
+  const thisMonth = now.getMonth();
+  const thisYear = now.getFullYear();
+  const lastMonth = thisMonth === 0 ? 11 : thisMonth - 1;
+  const lastMonthYear = thisMonth === 0 ? thisYear - 1 : thisYear;
+
+  let totalSpent = 0;
+  let lastMonthSpent = 0;
+  let totalLiters = 0;
+  let totalDistance = 0;
+  let efficiencyCount = 0;
+  let nextServiceDue = 'N/A';
+  let nextServiceVehicle = '';
+
+  // Find the soonest service due (if available)
+  let soonestServiceDate = null;
+  let soonestServiceVehicle = '';
+
+  fuelLogs.forEach(log => {
+    // Parse date
+    const dateObj = new Date(log.date || log.Date);
+    const costStr = log.totalCostCur || log.TotalCostCur || '0';
+    const cost = parseFloat(costStr.replace(/[^0-9.,]/g, '').replace(',', '.')) || 0;
+    const liters = parseFloat(log.liters || log.Liters || 0);
+    const distance = parseFloat(log.distance || log.Distance || 0);
+
+    if (!isNaN(cost)) {
+      // This month
+      if (dateObj.getMonth() === thisMonth && dateObj.getFullYear() === thisYear) {
+        totalSpent += cost;
+      }
+      // Last month
+      if (dateObj.getMonth() === lastMonth && dateObj.getFullYear() === lastMonthYear) {
+        lastMonthSpent += cost;
+      }
+    }
+    if (!isNaN(liters)) {
+      totalLiters += liters;
+    }
+    if (!isNaN(distance) && distance > 0 && !isNaN(liters) && liters > 0) {
+      totalDistance += distance;
+      efficiencyCount++;
+    }
+    // Service due (if present)
+    if (log.nextServiceDate || log.NextServiceDate) {
+      const serviceDate = new Date(log.nextServiceDate || log.NextServiceDate);
+      if (!soonestServiceDate || (serviceDate < soonestServiceDate && serviceDate > now)) {
+        soonestServiceDate = serviceDate;
+        soonestServiceVehicle = log.vehicleName || log.VehicleName || '';
+      }
+    }
+  });
+
+  // Calculate stats
+  const spentChange = lastMonthSpent === 0 ? 0 : Math.round(((totalSpent - lastMonthSpent) / lastMonthSpent) * 100);
+
+  // Calculate days since last refuel
+  let daysSinceLastRefuel = 'N/A';
+  if (fuelLogs.length > 0) {
+    // Find the latest log date
+    const latestLog = fuelLogs.reduce((latest, log) => {
+      const dateObj = new Date(log.date || log.Date);
+      return (!latest || dateObj > latest) ? dateObj : latest;
+    }, null);
+    if (latestLog && !isNaN(latestLog.getTime())) {
+      const diffMs = now - latestLog;
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      daysSinceLastRefuel = diffDays === 0 ? 'Today' : `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
+    }
+  }
+
+  if (soonestServiceDate) {
+    nextServiceDue = soonestServiceDate.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+    nextServiceVehicle = soonestServiceVehicle;
+  }
+
+  // Calculate average consumption (L/100km) from trips and fuelLogs
+  let avgConsumption = 'N/A';
+  if (trips.length > 0 && fuelLogs.length > 0) {
+    // Sum total distance from trips
+    const totalTripDistance = trips.reduce((sum, trip) => {
+      const d = parseFloat(trip.DistanceKm || trip.distanceKm || 0);
+      return sum + (isNaN(d) ? 0 : d);
+    }, 0);
+    // Sum total liters from fuel logs
+    const totalFuel = fuelLogs.reduce((sum, log) => {
+      const l = parseFloat(log.liters || log.Liters || 0);
+      return sum + (isNaN(l) ? 0 : l);
+    }, 0);
+    if (totalTripDistance > 0 && totalFuel > 0) {
+      avgConsumption = `${((totalFuel / totalTripDistance) * 100).toFixed(1)} L/100km`;
+    }
+  }
+
+  const stats = {
+    totalSpent: `${Math.round(totalSpent)} Ft`,
+    totalSpentChange: `${Math.abs(spentChange)}%${spentChange < 0 ? '' : ''}`,
+    daysSinceLastRefuel,
+    nextServiceDue,
+    nextServiceVehicle,
+    avgConsumption,
+  };
+
   const formatDateTime = (value) => {
-    if (!value) return 'N/A';
+    if (!value) return { date: 'N/A', time: '' };
     const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return 'N/A';
-    return date.toLocaleString('hu-HU', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    });
+    if (Number.isNaN(date.getTime())) return { date: 'N/A', time: '' };
+    return {
+      date: date.toLocaleString('en-US', {
+        month: 'short',
+        day: '2-digit',
+        year: 'numeric',
+      }),
+      time: date.toLocaleString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      }),
+    };
+  };
+
+  const formatFuelType = (type) => {
+    if (!type) return 'Unknown';
+    return type;
   };
 
   // Fetch fuel logs from API
@@ -104,35 +237,34 @@ const FuelLogs = () => {
     }
   };
 
+  const displayedCount = fuelLogs.length;
+  const totalCount = pagination.totalCount || 0;
 
   return (
     <div className="driver-dashboard">
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
       <main className="main-content">
-        <Container fluid className="fuel-logs-page py-2 px-0">
-          <Row className="g-3 mb-3 align-items-center">
-            <Col md={8}>
-              <h1 className="fuel-logs-title mb-1">Fuel Logs</h1>
-              <p className="text-muted mb-0">Your own fuel purchases ordered by latest date.</p>
-            </Col>
-            <Col md={4} className="d-flex gap-2 justify-content-md-end">
-              <Button className="new-fuel-btn" onClick={() => navigate('/add-fuel-log')}>
-                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path d="M3 22V8l4-4h6l4 4v14H3z" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M17 13h2a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M7 22V12h6v10" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                New
-              </Button>
-            </Col>
-          </Row>
+        <Container fluid className="fuel-logs-page">
+          {/* Header section */}
+          <div className="fuel-logs-header">
+            <div>
+              <h1 className="fuel-logs-title mb-1">My Fuel Logs</h1>
+              <p className="fuel-logs-subtitle text-muted mb-0">
+                Review your historical fuel consumption and add new entries.
+              </p>
+            </div>
+            <Button className="add-new-fuel-log-btn" onClick={() => navigate('/add-fuel-log')}>
+              <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 8v8M8 12h8" />
+              </svg>
+              <span>Add New Fuel Log</span>
+            </Button>
+          </div>
 
-          <Card className="shadow-sm border-0">
-            <Card.Header className="bg-white border-bottom d-flex justify-content-between align-items-center">
-              <span className="fw-semibold">My Fuel Logs</span>
-              <Badge bg="primary">Total: {pagination.totalCount}</Badge>
-            </Card.Header>
+          {/* Main table card */}
+          <Card className="fuel-logs-table-card shadow-sm border-0 mb-4">
             <Card.Body className="p-0">
               {loading ? (
                 <div className="py-5 text-center">
@@ -141,108 +273,241 @@ const FuelLogs = () => {
               ) : error ? (
                 <Alert variant="danger" className="m-3 mb-0">{error}</Alert>
               ) : fuelLogs.length === 0 ? (
-                <div className="py-5 text-center text-muted">No fuel logs found.</div>
+                <div className="py-5 text-center text-muted">
+                  <div style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>Még nem rögzítettél tankolást.</div>
+                  <Button variant="primary" onClick={() => navigate('/add-fuel-log')}>
+                    Add your first fuel log
+                  </Button>
+                </div>
               ) : (
-                <div className="p-3">
-                  <div className="fuel-log-list">
-                    {fuelLogs.map((log) => (
-                      <Card key={log.id || log.Id} className="fuel-log-card-new border-0" style={{ width: '100%', maxWidth: '100%', marginBottom: '1.5rem' }}>
-                        <Card.Body className="p-0">
-                          <div className="fuel-log-card-header">
-                            <div className="fuel-log-date-section">
-                              <div className="date-icon-wrapper">
-                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <>
+                  {/* Desktop Table View */}
+                  <div className="table-responsive desktop-table">
+                    <Table className="fuel-logs-table mb-0" hover responsive>
+                      <thead>
+                        <tr>
+                          <th className="fuel-log-header">DATE</th>
+                          <th className="fuel-log-header">VEHICLE</th>
+                          <th className="fuel-log-header">LOCATION</th>
+                          <th className="fuel-log-header">LITERS</th>
+                          <th className="fuel-log-header">TOTAL COST</th>
+                          <th className="fuel-log-header">ACTIONS</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {fuelLogs.map((log) => {
+                          const formatted = formatDateTime(log.date || log.Date);
+                          return (
+                            <tr key={log.id || log.Id} className="fuel-log-row">
+                              <td className="fuel-log-cell date-cell">
+                                <div className="date-main">{formatted.date || 'N/A'}</div>
+                                {formatted.time && <div className="date-time">{formatted.time}</div>}
+                              </td>
+                              <td className="fuel-log-cell vehicle-cell">
+                                <div className="vehicle-wrapper">
+                                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="vehicle-icon">
+                                    <rect x="3" y="8" width="18" height="10" rx="2" />
+                                    <path d="M7 8V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2" />
+                                    <circle cx="7.5" cy="13" r="1.5" />
+                                    <circle cx="16.5" cy="13" r="1.5" />
+                                  </svg>
+                                  <Badge bg="light" text="dark" className="vehicle-plate">
+                                    {log.licensePlate || log.LicensePlate || 'N/A'}
+                                  </Badge>
+                                </div>
+                              </td>
+                              <td className="fuel-log-cell location-cell">
+                                {log.stationName || log.StationName || 'N/A'}
+                              </td>
+                              <td className="fuel-log-cell liters-cell">
+                                {log.liters || log.Liters || 0} L
+                              </td>
+                              <td className="fuel-log-cell cost-cell">
+                                {(log.totalCostCur || log.TotalCostCur || '0.00')}
+                              </td>
+                              <td className="fuel-log-cell actions-cell">
+                                <Button
+                                  variant="link"
+                                  className="delete-btn"
+                                  title="Delete"
+                                  onClick={() => handleDeleteFuelLog(log.id || log.Id)}
+                                >
+                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M3 6h18" />
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                                    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                    <line x1="10" y1="11" x2="10" y2="17" />
+                                    <line x1="14" y1="11" x2="14" y2="17" />
+                                  </svg>
+                                </Button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </Table>
+                  </div>
+
+                  {/* Mobile Card View */}
+                  <div className="mobile-cards">
+                    {fuelLogs.map((log) => {
+                      const formatted = formatDateTime(log.date || log.Date);
+                      return (
+                        <Card key={log.id || log.Id} className="fuel-log-mobile-card mb-3">
+                          <Card.Body>
+                            <div className="mobile-card-header">
+                              <div className="mobile-date">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                   <rect x="3" y="4" width="18" height="18" rx="2" />
                                   <path d="M16 2v4M8 2v4M3 10h18" />
                                 </svg>
+                                <span>{formatted.date || 'N/A'} {formatted.time && <span className="mobile-time">{formatted.time}</span>}</span>
                               </div>
-                              <span className="fuel-log-date-text">{formatDateTime(log.date || log.Date)}</span>
-                            </div>
-                            <Button
-                              variant="outline-danger"
-                              size="sm"
-                              className="delete-fuel-log-btn"
-                              title="Törlés"
-                              onClick={() => handleDeleteFuelLog(log.id || log.Id)}
-                            >
-                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M3 6h18" />
-                                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
-                                <line x1="10" y1="11" x2="10" y2="17" />
-                                <line x1="14" y1="11" x2="14" y2="17" />
-                              </svg>
-                            </Button>
-                          </div>
-                          <div className="fuel-log-stats-grid">
-                            <div className="fuel-stat-item">
-                              <div className="fuel-stat-icon liters-icon">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                                  <path d="M12 2C12 2 5 11 5 16a7 7 0 0 0 14 0c0-5-7-14-7-14z" />
-                                </svg>
-                              </div>
-                              <div className="fuel-stat-content">
-                                <span className="fuel-stat-label">Liters</span>
-                                <span className="fuel-stat-value liters-value">{log.liters || log.Liters || 0} L</span>
-                              </div>
-                            </div>
-                            <div className="fuel-stat-item">
-                              <div className="fuel-stat-icon cost-icon">
+                              <Button
+                                variant="link"
+                                className="mobile-delete-btn"
+                                onClick={() => handleDeleteFuelLog(log.id || log.Id)}
+                              >
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                  <circle cx="12" cy="12" r="10" />
-                                  <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" />
-                                  <path d="M12 18V6" />
+                                  <path d="M3 6h18" />
+                                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                                  <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                  <line x1="10" y1="11" x2="10" y2="17" />
+                                  <line x1="14" y1="11" x2="14" y2="17" />
                                 </svg>
+                              </Button>
+                            </div>
+                            <div className="mobile-card-body">
+                              <div className="mobile-row">
+                                <span className="mobile-label">
+                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <rect x="3" y="8" width="18" height="10" rx="2" />
+                                    <path d="M7 8V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2" />
+                                  </svg>
+                                  Vehicle
+                                </span>
+                                <span className="mobile-value">
+                                  {log.vehicleName || log.VehicleName || 'N/A'}
+                                  <Badge bg="light" text="dark" className="mobile-plate">
+                                    {log.licensePlate || log.LicensePlate || 'N/A'}
+                                  </Badge>
+                                </span>
                               </div>
-                              <div className="fuel-stat-content">
-                                <span className="fuel-stat-label">Cost</span>
-                                <span className="fuel-stat-value cost-value">{log.totalCostCur || log.TotalCostCur || 'N/A'}</span>
+                              <div className="mobile-row">
+                                <span className="mobile-label">
+                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                                    <circle cx="12" cy="10" r="3" />
+                                  </svg>
+                                  Location
+                                </span>
+                                <span className="mobile-value">{log.stationName || log.StationName || 'N/A'}</span>
+                              </div>
+                              <div className="mobile-row">
+                                <span className="mobile-label">
+                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M3 22v-8a2 2 0 0 1 2-2h2.5" />
+                                    <circle cx="10" cy="17" r="2" />
+                                    <path d="M6.5 10V6a2 2 0 0 1 2-2h5a2 2 0 0 1 2 2v4" />
+                                    <rect x="14" y="8" width="7" height="6" rx="1" />
+                                  </svg>
+                                  Fuel Type
+                                </span>
+                                <Badge className="mobile-fuel-badge">
+                                  {formatFuelType(log.fuelType || log.FuelType) || 'N/A'}
+                                </Badge>
+                              </div>
+                              <div className="mobile-row">
+                                <span className="mobile-label">
+                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2C12 2 5 11 5 16a7 7 0 0 0 14 0c0-5-7-14-7-14z" />
+                                  </svg>
+                                  Liters
+                                </span>
+                                <span className="mobile-value">{log.liters || log.Liters || 0} L</span>
+                              </div>
+                              <div className="mobile-row">
+                                <span className="mobile-label">
+                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" />
+                                    <path d="M12 18V6" />
+                                  </svg>
+                                  Total Cost
+                                </span>
+                                <span className="mobile-value cost-value">
+                                  {(log.totalCostCur || log.TotalCostCur || '€0.00').replace(/^€?/, '€')}
+                                </span>
                               </div>
                             </div>
-                            <div className="fuel-stat-item">
-                              <div className="fuel-stat-icon plate-icon">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                  <rect x="3" y="8" width="18" height="10" rx="2" />
-                                  <path d="M7 8V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2" />
-                                  <circle cx="7.5" cy="13" r="1.5" />
-                                  <circle cx="16.5" cy="13" r="1.5" />
-                                </svg>
-                              </div>
-                              <div className="fuel-stat-content">
-                                <span className="fuel-stat-label">Plate</span>
-                                <span className="fuel-stat-value plate-value">{log.licensePlate || log.LicensePlate || 'N/A'}</span>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="fuel-log-station-section">
-                            <div className="station-icon-wrapper">
-                              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <rect x="3" y="11" width="18" height="5" rx="2" />
-                                <circle cx="7.5" cy="17" r="1.5" />
-                                <circle cx="16.5" cy="17" r="1.5" />
-                                <path d="M7 11V7a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v4" />
-                              </svg>
-                            </div>
-                            <span className="station-name-text">{log.stationName || log.StationName || 'N/A'}</span>
-                          </div>
-                        </Card.Body>
-                      </Card>
-                    ))}
+                          </Card.Body>
+                        </Card>
+                      );
+                    })}
                   </div>
-                </div>
+                </>
               )}
             </Card.Body>
-            <Card.Footer className="bg-white d-flex justify-content-between align-items-center flex-wrap gap-2">
-              <small className="text-muted">
-                Page {pagination.page} / {totalPages}
-              </small>
-              <Pagination className="mb-0">
-                <Pagination.Prev disabled={pagination.page <= 1 || loading} onClick={() => fetchFuelLogs(pagination.page - 1)} />
-                {buildPagination()}
-                <Pagination.Next disabled={pagination.page >= totalPages || loading} onClick={() => fetchFuelLogs(pagination.page + 1)} />
-              </Pagination>
-            </Card.Footer>
+            {fuelLogs.length > 0 && (
+              <Card.Footer className="bg-white border-0 py-3 px-4">
+                <Row className="align-items-center">
+                  <Col xs={12} md={6} className="text-muted text-center text-md-start mb-2 mb-md-0">
+                    Showing {displayedCount} of {totalCount} entries
+                  </Col>
+                  <Col xs={12} md={6} className="d-flex justify-content-center justify-content-md-end">
+                    <Pagination className="mb-0 fuel-logs-pagination">
+                      <Pagination.Prev
+                        disabled={pagination.page <= 1 || loading}
+                        onClick={() => fetchFuelLogs(pagination.page - 1)}
+                      />
+                      {buildPagination()}
+                      <Pagination.Next
+                        disabled={pagination.page >= totalPages || loading}
+                        onClick={() => fetchFuelLogs(pagination.page + 1)}
+                      />
+                    </Pagination>
+                  </Col>
+                </Row>
+              </Card.Footer>
+            )}
           </Card>
+
+          {/* Stats cards */}
+          <Row className="g-3 stats-row">
+            <Col xs={12} sm={6} lg={4}>
+              <Card className="stats-card border-0 shadow-sm h-100">
+                <Card.Body className="d-flex flex-column">
+                  <div className="stats-label">Total Spent (This Month)</div>
+                  <div className="stats-value">{stats.totalSpent}</div>
+                  <div className="stats-change negative mt-auto">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M23 18l-9.5-9.5-5 5L1 6" />
+                      <path d="M17 18h6v6" />
+                    </svg>
+                    {stats.totalSpentChange} less than last month
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col xs={12} sm={6} lg={4}>
+              <Card className="stats-card border-0 shadow-sm h-100">
+                <Card.Body className="d-flex flex-column">
+                  <div className="stats-label">Last Refuel</div>
+                  <div className="stats-value efficiency-value">{stats.daysSinceLastRefuel}</div>
+                  <div className="stats-subtext mt-auto">since your last fuel log</div>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col xs={12} sm={6} lg={4}>
+              <Card className="stats-card border-0 shadow-sm h-100">
+                <Card.Body className="d-flex flex-column">
+                  <div className="stats-label">Avg. Consumption</div>
+                  <div className="stats-value service-value">{tripsLoading ? '...' : stats.avgConsumption}</div>
+                  <div className="stats-subtext mt-auto">based on your trips</div>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
         </Container>
         <Footer/>
       </main>
