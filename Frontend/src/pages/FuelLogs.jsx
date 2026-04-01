@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Alert, Button, Card, Col, Container, Pagination, Row, Spinner, Table, Badge } from 'react-bootstrap';
+import { Alert, Button, Card, Col, Container, Pagination, Row, Spinner, Badge } from 'react-bootstrap';
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
 import '../styles/DriverDashboard.css';
@@ -253,7 +253,11 @@ const FuelLogs = () => {
           </div>
 
           {/* Main table card */}
-          <Card className="fuel-logs-table-card shadow-sm border-0 mb-4">
+          <Card className="fuel-logs-table-card mb-4">
+            <Card.Header className="fuel-logs-table-header">
+              <span className="fuel-logs-table-title">My Fuel Logs</span>
+              <span className="fuel-logs-total-badge">Total: {totalCount}</span>
+            </Card.Header>
             <Card.Body className="p-0">
               {loading ? (
                 <div className="py-5 text-center">
@@ -271,8 +275,8 @@ const FuelLogs = () => {
               ) : (
                 <>
                   {/* Desktop Table View */}
-                  <div className="table-responsive desktop-table">
-                    <Table className="fuel-logs-table mb-0" hover responsive>
+                  <div className="desktop-table" style={{ overflowX: 'auto' }}>
+                    <table className="fuel-logs-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                       <thead>
                         <tr>
                           <th className="fuel-log-header">DATE</th>
@@ -310,7 +314,7 @@ const FuelLogs = () => {
                               </td>
                               <td className="fuel-log-cell actions-cell">
                                 <Button
-                                  variant="link"
+                                  variant="outline-danger"
                                   className="delete-btn"
                                   title="Delete"
                                   onClick={() => handleDeleteFuelLog(log.id || log.Id)}
@@ -328,7 +332,7 @@ const FuelLogs = () => {
                           );
                         })}
                       </tbody>
-                    </Table>
+                    </table>
                   </div>
 
                   {/* Mobile Card View */}
@@ -363,14 +367,9 @@ const FuelLogs = () => {
                             <div className="mobile-card-body">
                               <div className="mobile-row">
                                 <span className="mobile-label">
-                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <rect x="3" y="8" width="18" height="10" rx="2" />
-                                    <path d="M7 8V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2" />
-                                  </svg>
                                   Vehicle
                                 </span>
                                 <span className="mobile-value">
-                                  {log.vehicleName || log.VehicleName || 'N/A'}
                                   <Badge bg="light" text="dark" className="mobile-plate">
                                     {log.licensePlate || log.LicensePlate || 'N/A'}
                                   </Badge>
@@ -378,44 +377,18 @@ const FuelLogs = () => {
                               </div>
                               <div className="mobile-row">
                                 <span className="mobile-label">
-                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                                    <circle cx="12" cy="10" r="3" />
-                                  </svg>
                                   Location
                                 </span>
                                 <span className="mobile-value">{log.stationName || log.StationName || 'N/A'}</span>
                               </div>
                               <div className="mobile-row">
                                 <span className="mobile-label">
-                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M3 22v-8a2 2 0 0 1 2-2h2.5" />
-                                    <circle cx="10" cy="17" r="2" />
-                                    <path d="M6.5 10V6a2 2 0 0 1 2-2h5a2 2 0 0 1 2 2v4" />
-                                    <rect x="14" y="8" width="7" height="6" rx="1" />
-                                  </svg>
-                                  Fuel Type
-                                </span>
-                                <Badge className="mobile-fuel-badge">
-                                  {formatFuelType(log.fuelType || log.FuelType) || 'N/A'}
-                                </Badge>
-                              </div>
-                              <div className="mobile-row">
-                                <span className="mobile-label">
-                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M12 2C12 2 5 11 5 16a7 7 0 0 0 14 0c0-5-7-14-7-14z" />
-                                  </svg>
                                   Liters
                                 </span>
                                 <span className="mobile-value">{log.liters || log.Liters || 0} L</span>
                               </div>
                               <div className="mobile-row">
                                 <span className="mobile-label">
-                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <circle cx="12" cy="12" r="10" />
-                                    <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" />
-                                    <path d="M12 18V6" />
-                                  </svg>
                                   Total Cost
                                 </span>
                                 <span className="mobile-value cost-value">
@@ -432,25 +405,21 @@ const FuelLogs = () => {
               )}
             </Card.Body>
             {fuelLogs.length > 0 && (
-              <Card.Footer className="bg-white border-0 py-3 px-4">
-                <Row className="align-items-center">
-                  <Col xs={12} md={6} className="text-muted text-center text-md-start mb-2 mb-md-0">
-                    Showing {displayedCount} of {totalCount} entries
-                  </Col>
-                  <Col xs={12} md={6} className="d-flex justify-content-center justify-content-md-end">
-                    <Pagination className="mb-0 fuel-logs-pagination">
-                      <Pagination.Prev
-                        disabled={pagination.page <= 1 || loading}
-                        onClick={() => fetchFuelLogs(pagination.page - 1)}
-                      />
-                      {buildPagination()}
-                      <Pagination.Next
-                        disabled={pagination.page >= totalPages || loading}
-                        onClick={() => fetchFuelLogs(pagination.page + 1)}
-                      />
-                    </Pagination>
-                  </Col>
-                </Row>
+              <Card.Footer className="fuel-logs-pagination-footer">
+                <span className="fuel-logs-page-info">
+                  Showing {displayedCount} of {totalCount} entries
+                </span>
+                <Pagination className="mb-0 fuel-logs-pagination">
+                  <Pagination.Prev
+                    disabled={pagination.page <= 1 || loading}
+                    onClick={() => fetchFuelLogs(pagination.page - 1)}
+                  />
+                  {buildPagination()}
+                  <Pagination.Next
+                    disabled={pagination.page >= totalPages || loading}
+                    onClick={() => fetchFuelLogs(pagination.page + 1)}
+                  />
+                </Pagination>
               </Card.Footer>
             )}
           </Card>

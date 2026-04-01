@@ -284,7 +284,7 @@ const ProfileSettings = () => {
 
           <Row className="g-4 h-100 align-items-stretch">
             {/* Left Column */}
-            <Col lg={4} xl={3} className="h-100 pe-lg-5 pe-xl-6">
+            <Col lg={4} xl={3}>
               <Row className="g-4">
                 {/* Profile Picture Card */}
                 <Col xs={12}>
@@ -359,7 +359,7 @@ const ProfileSettings = () => {
             </Col>
 
             {/* Right Column */}
-            <Col lg={8} xl={9} className="h-100 ps-lg-5 ps-xl-6">
+            <Col lg={8} xl={9}>
               <Row className="g-4">
                 {/* Personal Information Card */}
                 <Col xs={12}>

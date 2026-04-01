@@ -1,9 +1,10 @@
 /* Trips Page Styles - Responsive Design */
-
 .trips-page {
+  min-height: 80vh;
   background: #f8fafc;
   width: 100%;
   max-width: 100%;
+  padding: 20px;
   overflow-x: hidden;
 }
 
@@ -57,10 +58,35 @@
 
 /* Trips Table Card */
 .trips-table-card {
-  border-radius: 16px;
-  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
   background: #ffffff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.trips-table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.trips-table-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.trips-total-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #1d4ed8;
+  background: #dbeafe;
+  padding: 4px 12px;
+  border-radius: 12px;
 }
 
 /* Desktop Table */
@@ -74,24 +100,25 @@
 
 .trips-table {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
+  border-collapse: collapse;
+  table-layout: fixed;
 }
 
 .trips-table thead {
   background: #f8fafc;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 2px solid #e2e8f0;
 }
 
 .trip-header {
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.5px;
   color: #64748b;
-  padding: 16px 20px;
+  padding: 14px 10px;
   border: none;
   white-space: nowrap;
+  text-align: left;
 }
 
 .trip-row {
@@ -100,7 +127,7 @@
 }
 
 .trip-row:hover {
-  background-color: #f8fafc;
+  background-color: #faf7ff;
 }
 
 .trip-row:last-child {
@@ -108,18 +135,20 @@
 }
 
 .trip-cell {
-  padding: 20px 24px;
+  padding: 14px 10px;
   vertical-align: middle;
   font-size: 0.95rem;
   color: #334155;
   border: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Date Cell */
 .date-cell {
   font-weight: 600;
   color: #1e293b;
-  min-width: 120px;
+  overflow: hidden;
 }
 
 .date-main {
@@ -135,23 +164,29 @@
 
 /* Route Cell */
 .route-cell {
-  min-width: 280px;
-  text-align: center;
+  text-align: left;
+  overflow: hidden;
+  max-width: 0;
 }
 
 .route-wrapper {
   display: flex;
   align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  justify-content: center;
+  gap: 6px;
+  overflow: hidden;
+  width: 100%;
 }
 
 .route-from,
 .route-to {
   font-weight: 500;
   color: #1e293b;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
+  flex: 1 1 0;
+  min-width: 0;
+  display: block;
 }
 
 .route-arrow {
@@ -161,7 +196,7 @@
 
 /* Distance Cell */
 .distance-cell {
-  min-width: 100px;
+  overflow: hidden;
 }
 
 .distance-value {
@@ -173,7 +208,7 @@
 
 /* Vehicle Cell */
 .vehicle-cell {
-  min-width: 140px;
+  overflow: hidden;
 }
 
 .vehicle-wrapper {
@@ -189,7 +224,11 @@
 .vehicle-name {
   font-weight: 500;
   color: #1e293b;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
+  flex: 1 1 0;
+  min-width: 0;
 }
 
 /* Actions Cell */
@@ -199,28 +238,23 @@
 }
 
 .delete-btn {
-  background: transparent;
-  border: none;
-  padding: 8px;
-  color: #cbd5e1;
-  transition: all 0.2s ease;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px !important;
+  background: #fff !important;
+  border: 1.5px solid #ef4444 !important;
+  color: #ef4444 !important;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
+  transition: all 0.2s ease;
 }
 
 .delete-btn:hover {
-  color: #ef4444;
-  background: #fef2f2;
-  border-radius: 8px;
-}
-
-.delete-btn svg {
-  transition: transform 0.2s ease;
-}
-
-.delete-btn:hover svg {
-  transform: scale(1.1);
+  background: #fee2e2 !important;
+  border-color: #dc2626 !important;
+  color: #dc2626 !important;
 }
 
 /* Mobile Card Styles */
@@ -286,6 +320,11 @@
   gap: 12px;
 }
 
+.mobile-row.route-row {
+  align-items: flex-end;
+  gap: 6px;
+}
+
 .mobile-label {
   display: flex;
   align-items: center;
@@ -317,57 +356,44 @@
 .mobile-route {
   display: flex;
   align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
   justify-content: flex-end;
+  gap: 6px;
+  flex-wrap: wrap;
+  max-width: 100%;
 }
 
 .mobile-from,
 .mobile-to {
   font-weight: 500;
   color: #1e293b;
-  white-space: nowrap;
+  white-space: normal;
+  word-break: break-word;
+  text-align: right;
 }
 
 /* Pagination */
 .trips-pagination {
-  display: flex;
-  gap: 4px;
   flex-wrap: wrap;
   justify-content: center;
 }
 
-.trips-pagination .page-item {
-  margin: 0 2px;
-}
-
-.trips-pagination .page-link {
-  border: 1px solid #e2e8f0;
-  color: #475569;
-  padding: 8px 14px;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  background: #ffffff;
-}
-
-.trips-pagination .page-item:hover .page-link {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
-}
-
-.trips-pagination .page-item.active .page-link {
-  background: #0d6efd;
-  border-color: #0d6efd;
-  color: #ffffff;
-}
-
-.trips-pagination .page-item.disabled .page-link {
-  color: #cbd5e1;
+.trips-pagination-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
   background: #f8fafc;
-  border-color: #e2e8f0;
+  border-top: 1px solid #e2e8f0;
+  flex-wrap: wrap;
+  gap: 12px;
 }
+
+.trips-page-info {
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+
 
 /* Stats Cards */
 .stats-row {

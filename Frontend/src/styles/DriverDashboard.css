@@ -169,6 +169,7 @@
 .user-role {
   font-size: 12px;
   color: #6c757d;
+  text-align: center;
 }
 
 .sidebar-actions {
@@ -198,13 +199,11 @@
 /* Main Content */
 .main-content {
   flex: 1;
-  margin-left: 240px;
+  min-width: 0;
+  overflow-x: hidden;
   padding: 24px;
 }
 
-.main-content > * {
-  width: 100%;
-}
 
 /* Header - Bootstrap Row/Col handles layout */
 .header-title h1 {
@@ -638,13 +637,25 @@
 
 /* Responsive */
 @media (max-width: 1024px) {
+  .mobile-menu-btn {
+    display: flex;
+  }
+
+  .sidebar-overlay {
+    display: block;
+  }
+
   .sidebar {
-    width: 200px;
+    left: -240px;
+  }
+
+  .sidebar.open {
+    left: 0;
   }
 
   .main-content {
-    margin-left: 200px;
-    padding: 16px 20px;
+    padding: 24px;
+    padding-top: 80px;
   }
 
   .info-grid {
@@ -669,28 +680,6 @@
 }
 
 @media (max-width: 768px) {
-  .mobile-menu-btn {
-    display: flex;
-  }
-
-  .sidebar-overlay {
-    display: block;
-  }
-
-  .sidebar {
-    left: -240px;
-  }
-
-  .sidebar.open {
-    left: 0;
-  }
-
-  .main-content {
-    margin-left: 0;
-    padding: 24px;
-    padding-top: 80px;
-  }
-
   .header-title h1 {
     font-size: 22px;
   }

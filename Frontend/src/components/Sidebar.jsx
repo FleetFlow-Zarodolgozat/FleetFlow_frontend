@@ -85,6 +85,17 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, notificationRefresh }) => {
     };
   }, [profile.id]);
 
+  // Close sidebar when resizing to desktop
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 1024) {
+        setSidebarOpen(false);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [setSidebarOpen]);
+
   const getDisplayName = () => {
     if (profile.fullName) return profile.fullName;
     const emailPrefix = profile.email?.split('@')[0] || 'Driver';

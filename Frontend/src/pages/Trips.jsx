@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Container, Row, Col, Pagination, Badge, Alert, Spinner, Button, Table } from 'react-bootstrap';
+import { Card, Container, Row, Col, Pagination, Badge, Alert, Spinner, Button } from 'react-bootstrap';
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
 import '../styles/Trips.css';
@@ -114,7 +114,7 @@ const Trips = () => {
     <div className="trips-dashboard">
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       <main className="main-content">
-        <Container fluid className="trips-page py-4 px-4">
+        <Container fluid className="trips-page">
           {/* Header section */}
           <div className="trips-header mb-4">
             <div>
@@ -133,7 +133,11 @@ const Trips = () => {
           </div>
 
           {/* Main table card */}
-          <Card className="trips-table-card shadow-sm border-0 mb-4">
+          <Card className="trips-table-card mb-4">
+            <Card.Header className="trips-table-header">
+              <span className="trips-table-title">My Trips</span>
+              <span className="trips-total-badge">Total: {totalCount}</span>
+            </Card.Header>
             <Card.Body className="p-0">
               {loading ? (
                 <div className="py-5 text-center">
@@ -151,8 +155,15 @@ const Trips = () => {
               ) : (
                 <>
                   {/* Desktop Table View */}
-                  <div className="table-responsive desktop-table">
-                    <Table className="trips-table mb-0" hover responsive>
+                  <div className="desktop-table">
+                    <table className="trips-table">
+                      <colgroup>
+                        <col style={{ width: '15%' }} />
+                        <col style={{ width: '44%' }} />
+                        <col style={{ width: '12%' }} />
+                        <col style={{ width: '16%' }} />
+                        <col style={{ width: '13%' }} />
+                      </colgroup>
                       <thead>
                         <tr>
                           <th className="trip-header">DATE</th>
@@ -185,18 +196,12 @@ const Trips = () => {
                               </td>
                               <td className="trip-cell vehicle-cell">
                                 <div className="vehicle-wrapper">
-                                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="vehicle-icon">
-                                    <rect x="3" y="8" width="18" height="10" rx="2" />
-                                    <path d="M7 8V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2" />
-                                    <circle cx="7.5" cy="13" r="1.5" />
-                                    <circle cx="16.5" cy="13" r="1.5" />
-                                  </svg>
                                   <span className="vehicle-name">{trip.LicensePlate || trip.licensePlate || 'N/A'}</span>
                                 </div>
                               </td>
                               <td className="trip-cell actions-cell">
                                 <Button
-                                  variant="link"
+                                  variant="outline-danger"
                                   className="delete-btn"
                                   title="Delete"
                                   onClick={() => handleDeleteTrip(trip.Id || trip.id)}
@@ -214,7 +219,7 @@ const Trips = () => {
                           );
                         })}
                       </tbody>
-                    </Table>
+                    </table>
                   </div>
 
                   {/* Mobile Card View */}
@@ -249,10 +254,6 @@ const Trips = () => {
                             <div className="mobile-card-body">
                               <div className="mobile-row route-row">
                                 <span className="mobile-label">
-                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <circle cx="12" cy="12" r="3" />
-                                    <path d="M12 2v4m0 12v4M2 12h4m12 0h4" />
-                                  </svg>
                                   Route
                                 </span>
                                 <div className="mobile-route">
@@ -265,19 +266,12 @@ const Trips = () => {
                               </div>
                               <div className="mobile-row">
                                 <span className="mobile-label">
-                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                                  </svg>
                                   Distance
                                 </span>
                                 <span className="mobile-value distance-value">{formatDistance(trip.DistanceKm || trip.distanceKm)}</span>
                               </div>
                               <div className="mobile-row">
                                 <span className="mobile-label">
-                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <rect x="3" y="8" width="18" height="10" rx="2" />
-                                    <path d="M7 8V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2" />
-                                  </svg>
                                   Vehicle
                                 </span>
                                 <span className="mobile-value">{trip.LicensePlate || trip.licensePlate || 'N/A'}</span>
@@ -292,25 +286,21 @@ const Trips = () => {
               )}
             </Card.Body>
             {trips.length > 0 && (
-              <Card.Footer className="bg-white border-0 py-3 px-4">
-                <Row className="align-items-center">
-                  <Col xs={12} md={6} className="text-muted text-center text-md-start mb-2 mb-md-0">
-                    Showing {displayedCount} of {totalCount} entries
-                  </Col>
-                  <Col xs={12} md={6} className="d-flex justify-content-center justify-content-md-end">
-                    <Pagination className="mb-0 trips-pagination">
-                      <Pagination.Prev
-                        disabled={pagination.page <= 1 || loading}
-                        onClick={() => fetchTrips(pagination.page - 1)}
-                      />
-                      {buildPagination()}
-                      <Pagination.Next
-                        disabled={pagination.page >= totalPages || loading}
-                        onClick={() => fetchTrips(pagination.page + 1)}
-                      />
-                    </Pagination>
-                  </Col>
-                </Row>
+              <Card.Footer className="trips-pagination-footer">
+                <span className="trips-page-info">
+                  Showing {displayedCount} of {totalCount} entries
+                </span>
+                <Pagination className="mb-0 trips-pagination">
+                  <Pagination.Prev
+                    disabled={pagination.page <= 1 || loading}
+                    onClick={() => fetchTrips(pagination.page - 1)}
+                  />
+                  {buildPagination()}
+                  <Pagination.Next
+                    disabled={pagination.page >= totalPages || loading}
+                    onClick={() => fetchTrips(pagination.page + 1)}
+                  />
+                </Pagination>
               </Card.Footer>
             )}
           </Card>

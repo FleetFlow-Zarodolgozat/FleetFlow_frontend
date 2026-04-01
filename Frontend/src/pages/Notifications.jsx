@@ -300,6 +300,7 @@ const Notifications = () => {
             <Row className="align-items-center">
               <Col xs={12} lg={6}>
                 <h1 className="page-title">Notifications</h1>
+                <p className="sr-page-subtitle">Stay up to date with your latest notifications</p>
               </Col>
               <Col xs={12} lg={6} className="d-flex justify-content-end gap-2 mt-3 mt-lg-0">
                 <Button className="mark-all-read-btn" onClick={handleMarkAllAsRead} variant="link">

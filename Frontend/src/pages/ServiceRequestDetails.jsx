@@ -1,7 +1,9 @@
 
 
 import React, { useState, useEffect } from 'react';
-import { Card, Row, Col, Button, Alert, Form } from 'react-bootstrap';
+import { Card, Row, Col, Button, Alert, Form, Container, Spinner } from 'react-bootstrap';
+import '../styles/DriverDashboard.css';
+import '../styles/AddFuelLog.css';
 import '../styles/ServiceRequestDetails.css';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
@@ -18,6 +20,8 @@ const ServiceRequestDetails = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [invoiceImgUrl, setInvoiceImgUrl] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   // Kép letöltése authentikációval, ha van fileId
   useEffect(() => {
     const fileId = request.InvoiceFileId || request.invoiceFileId;
@@ -47,6 +51,16 @@ const ServiceRequestDetails = () => {
   const handleFileChange = (e) => {
     setFile(e.target.files[0] || null);
   };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const f = e.dataTransfer.files[0];
+    if (f && f.type.startsWith('image/')) setFile(f);
+  };
+
+  const handleDragOver = (e) => { e.preventDefault(); setIsDragging(true); };
+  const handleDragLeave = () => setIsDragging(false);
 
   const handleSave = async () => {
     setSaving(true);
@@ -88,128 +102,251 @@ const ServiceRequestDetails = () => {
     }
   };
   return (
-    <div className="service-request-details-dashboard">
-      <Sidebar sidebarOpen={false} setSidebarOpen={() => {}} />
-      <div className="main-content">
-        <Row className="justify-content-center">
-          <Col md={8} lg={6}>
-            <Card className="shadow-lg border-0 rounded-4 service-request-details-orange-outline">
-              <Card.Header className="bg-white rounded-top-4 d-flex align-items-center gap-3 border-bottom" style={{minHeight: 60}}>
-                <svg width="32" height="32" fill="none" stroke="#7c3aed" strokeWidth="2" viewBox="0 0 24 24">
-                  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                <div className="d-flex flex-column align-items-start">
-                  <span className="fs-5 fw-semibold text-purple">Edit Service Details</span>
-                  <span className="service-request-details-value">{request.title}</span>
-                </div>
-              </Card.Header>
-              <Card.Body className="p-4">
-                <Row className="g-3 align-items-end">
-                  <Col xs={12} md={12} lg={12}>
-                    <div className="service-request-details-row" style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:'2rem',background:'rgba(124,58,237,0.12)',border:'1.5px solid #7c3aed',borderRadius:'12px',padding:'0.75rem 0.9rem',marginBottom:'1rem',flexWrap:'wrap'}}>
-                      <span style={{display:'flex',alignItems:'center',gap:'8px'}}>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'middle'}}>
-                          <circle cx="12" cy="12" r="10" stroke="#7c3aed" strokeWidth="2" fill="#f3f4f6" />
-                          <path d="M9 12l2 2l4-4" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                        <span className="service-request-details-label" style={{color:'#1f2937'}}>Status</span>
-                        <span className="service-request-details-value" style={{color:'#7c3aed',fontWeight:600}}>{request.status}</span>
-                      </span>
-                      <span style={{display:'flex',alignItems:'center',gap:'8px'}}>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{ marginRight: 2, display: 'block' }}>
-                          <rect x="4" y="10" width="16" height="6" rx="2" fill="#2563eb" />
-                          <rect x="7" y="6" width="10" height="5" rx="2" fill="#3b82f6" />
-                          <rect x="9" y="8" width="6" height="2" rx="1" fill="#fff" />
-                          <circle cx="7" cy="18" r="1.5" fill="#2563eb" />
-                          <circle cx="17" cy="18" r="1.5" fill="#2563eb" />
-                          <rect x="6" y="16" width="2" height="2" rx="1" fill="#3b82f6" />
-                          <rect x="16" y="16" width="2" height="2" rx="1" fill="#3b82f6" />
-                          <rect x="10.5" y="13" width="3" height="1.5" rx="0.75" fill="#fff" />
-                        </svg>
-                        <span className="service-request-details-label" style={{color:'#1f2937'}}>License Plate</span>
-                        <span className="service-request-details-value" style={{color:'#2563eb',fontWeight:600}}>{request.licensePlate}</span>
-                      </span>
-                    </div>
-                  </Col>
-                  <Col xs={12} md={12} lg={12}>
-                      <Form.Group>
-                         <Form.Label className="fw-semibold text-start w-100 d-flex align-items-center gap-2">
-                             <span style={{display:'flex',alignItems:'center'}}>
-                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 2 }}><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /><line x1="12" y1="1" x2="12" y2="23" /></svg>
-                              </span>
-                              Driver cost <span className="text-muted">(Ft)</span>
-                          </Form.Label>
-                          <Form.Control type="number" value={driverCost} onChange={e => setDriverCost(e.target.value)} placeholder="0" min="0" step="1" required />
-                       </Form.Group>
-                  </Col>
-                  <Col xs={12} md={12} lg={12}>
-                      <Form.Group>
-                        <Form.Label className="fw-semibold text-start w-100 d-flex align-items-center gap-2">
-                          <span style={{display:'flex',alignItems:'center'}}>
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{marginRight:6}}>
-                              <rect x="4" y="3" width="16" height="18" rx="2" fill="#fb923c"/>
-                              <path d="M8 7h8M8 11h8M8 15h4" stroke="#fff" strokeWidth="2" strokeLinecap="round"/>
-                            </svg>
-                          </span>
-                          Close Note <span className="text-muted">(optional)</span>
-                        </Form.Label>
-                        <Form.Control type="text" value={closeNote} onChange={e => setCloseNote(e.target.value)} placeholder="Any notes about the service" />
-                      </Form.Group>
-                  </Col>
-                  <Col xs={12} md={12} lg={6}>
-                      <Form.Group className="add-fuel-log-file-input">
-                        <Form.Label className="fw-semibold text-start w-100">Invoice Photo</Form.Label>
-                        <div style={{display:'flex',alignItems:'center',gap:'12px'}}>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            id="receiptPhotoInput"
-                            style={{display:'none'}}
-                            onChange={handleFileChange}
-                          />
-                          <Button
-                            variant="primary"
-                            onClick={() => document.getElementById('receiptPhotoInput').click()}
-                            style={{minWidth:'120px',backgroundColor:'#7c3aed',borderColor:'#7c3aed',color:'#fff'}}
-                          >
-                            Choose File
-                          </Button>
-                          <span style={{fontSize:'0.95em',color:'#555'}}>{ file ? file.name : 'No file selected'}</span>
-                        </div>
-                        {/* Show image from database if exists */}
-                        {invoiceImgUrl ? (
-                          <div style={{marginTop:'16px',textAlign:'center'}}>
-                            <img
-                              src={invoiceImgUrl}
-                              alt="Invoice"
-                              className="invoice-image-purple-shadow"
-                            />
+    <div className="driver-dashboard">
+      <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+      <div className="main-content add-fuel-log-page srd-page">
+        <Container fluid className="px-4 py-4">
+
+          {/* Header */}
+          <div className="add-fuel-header mb-4">
+            <h1 className="add-fuel-title">Edit Service Details</h1>
+            <p className="add-fuel-subtitle">Submit your cost report and invoice for the completed service</p>
+          </div>
+
+          <Row className="g-4">
+            {/* Left Column - Form */}
+            <Col lg={7} xl={8}>
+              <Card className="fuel-form-card border-0 shadow-sm">
+                <Card.Body className="p-4 p-md-5">
+                  {error && <Alert variant="danger" className="mb-3">{error}</Alert>}
+                  {success && <Alert variant="success" className="mb-3">{success}</Alert>}
+
+                  <Row className="g-4">
+                    {/* Status + License Plate info */}
+                    <Col xs={12}>
+                      <Row className="g-3">
+                        <Col xs={6}>
+                          <div className="srd-meta-card">
+                            <div className="srd-meta-icon srd-meta-icon-status">
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <circle cx="12" cy="12" r="10" />
+                                <path d="M9 12l2 2 4-4" />
+                              </svg>
+                            </div>
+                            <div>
+                              <div className="srd-meta-label">Status</div>
+                              <div className="srd-meta-value srd-meta-value-status">{request.status || '—'}</div>
+                            </div>
                           </div>
-                        ) : null}
+                        </Col>
+                        <Col xs={6}>
+                          <div className="srd-meta-card">
+                            <div className="srd-meta-icon srd-meta-icon-plate">
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <rect x="2" y="7" width="20" height="10" rx="2" />
+                                <path d="M6 11h.01M18 11h.01" />
+                                <path d="M9 11h6" />
+                              </svg>
+                            </div>
+                            <div>
+                              <div className="srd-meta-label">License Plate</div>
+                              <div className="srd-meta-value srd-meta-value-plate">{request.licensePlate || '—'}</div>
+                            </div>
+                          </div>
+                        </Col>
+                      </Row>
+                    </Col>
+
+                    {/* Driver Cost */}
+                    <Col xs={12}>
+                      <Form.Group>
+                        <Form.Label className="form-label">
+                          Driver Cost <span className="srd-required">*</span>
+                        </Form.Label>
+                        <div className="input-with-suffix">
+                          <Form.Control
+                            type="number"
+                            value={driverCost}
+                            onChange={e => setDriverCost(e.target.value)}
+                            placeholder="0"
+                            min="0"
+                            step="1"
+                            className="form-control-lg"
+                            required
+                          />
+                          <span className="input-suffix">Ft</span>
+                        </div>
                       </Form.Group>
-                  </Col>
-                </Row>
-                <div className="d-flex justify-content-between align-items-center mt-4">
-                  <Button variant="outline-secondary" onClick={() => navigate(-1)} type="button">Back</Button>
-                  <Button
-                    className="details-btn-custom"
-                    style={{background:'#fff',color:'#7c3aed',borderColor:'#7c3aed',fontWeight:'600',minWidth:'120px',borderRadius:'8px',border:'1.5px solid #7c3aed'}}
-                    type="button"
-                    disabled={saving}
-                    onClick={handleSave}
+                    </Col>
+
+                    {/* Close Note */}
+                    <Col xs={12}>
+                      <Form.Group>
+                        <Form.Label className="form-label">
+                          Close Note <span className="text-muted" style={{ fontWeight: 400, fontSize: '0.85rem' }}>(optional)</span>
+                        </Form.Label>
+                        <Form.Control
+                          type="text"
+                          value={closeNote}
+                          onChange={e => setCloseNote(e.target.value)}
+                          placeholder="Any notes about the service"
+                          className="form-control-lg"
+                        />
+                      </Form.Group>
+                    </Col>
+                  </Row>
+
+                  {/* Action Buttons */}
+                  <div className="form-actions mt-5">
+                    <Button
+                      type="button"
+                      className="btn-save srd-submit-btn"
+                      disabled={saving}
+                      onClick={handleSave}
+                    >
+                      {saving ? (
+                        <><Spinner animation="border" size="sm" className="me-2" />Saving...</>
+                      ) : (
+                        <>
+                          <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" strokeLinecap="round" strokeLinejoin="round" />
+                            <polyline points="17 21 17 13 7 13 7 21" strokeLinecap="round" strokeLinejoin="round" />
+                            <polyline points="7 3 7 8 15 8" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                          Save Details
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      variant="light"
+                      type="button"
+                      className="btn-cancel"
+                      onClick={() => navigate(-1)}
+                      disabled={saving}
+                    >
+                      Back
+                    </Button>
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+
+            {/* Right Column */}
+            <Col lg={5} xl={4}>
+              {/* Invoice Upload Card */}
+              <Card className="receipt-card border-0 shadow-sm mb-4">
+                <Card.Body className="p-4">
+                  <div className="receipt-header mb-3">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="me-2">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                      <polyline points="14 2 14 8 20 8" />
+                      <line x1="12" y1="18" x2="12" y2="12" />
+                      <line x1="9" y1="15" x2="15" y2="15" />
+                    </svg>
+                    <span className="receipt-title">Invoice Photo</span>
+                  </div>
+
+                  <div
+                    className={`receipt-dropzone srd-dropzone ${isDragging ? 'dragging' : ''} ${file ? 'has-file' : ''}`}
+                    onDrop={handleDrop}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onClick={() => document.getElementById('invoiceFileInput').click()}
                   >
-                    {saving ? 'Saving...' : 'Save'}
-                  </Button>
-                </div>
-                {error && (
-                  <div className="alert alert-danger mt-3" style={{padding:'6px 12px',fontSize:'0.95em',textAlign:'center',maxWidth:'100%'}}>{error}</div>
-                )}
-                {success && <Alert variant="success" className="mt-3">{success}</Alert>}
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
-        <Footer/>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      id="invoiceFileInput"
+                      style={{ display: 'none' }}
+                      onChange={handleFileChange}
+                    />
+                    {file ? (
+                      <div className="receipt-file-selected">
+                        <div className="upload-icon" style={{ background: '#ede9fe' }}>
+                          <svg width="24" height="24" fill="none" stroke="#7c3aed" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                            <polyline points="14 2 14 8 20 8" />
+                          </svg>
+                        </div>
+                        <span className="file-name">{file.name}</span>
+                        <button
+                          className="remove-file"
+                          onClick={e => { e.stopPropagation(); setFile(null); }}
+                          type="button"
+                        >
+                          <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="upload-icon" style={{ background: '#ede9fe' }}>
+                          <svg width="24" height="24" fill="none" stroke="#7c3aed" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="16 16 12 12 8 16" />
+                            <line x1="12" y1="12" x2="12" y2="21" />
+                            <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3" />
+                          </svg>
+                        </div>
+                        <div className="upload-text">
+                          <strong>Click to upload</strong>
+                          <span>or drag and drop</span>
+                        </div>
+                        <span className="upload-hint">JPG, PNG, WEBP</span>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Existing invoice from DB */}
+                  {invoiceImgUrl && (
+                    <div className="srd-existing-invoice mt-4">
+                      <div className="srd-existing-header">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="3" y="3" width="18" height="18" rx="2" />
+                          <circle cx="8.5" cy="8.5" r="1.5" />
+                          <polyline points="21 15 16 10 5 21" />
+                        </svg>
+                        <span className="srd-existing-label">Current Invoice</span>
+                      </div>
+                      <div className="srd-invoice-preview">
+                        <img src={invoiceImgUrl} alt="Invoice" className="srd-invoice-img" />
+                      </div>
+                    </div>
+                  )}
+                </Card.Body>
+              </Card>
+
+              {/* Request Info Card */}
+              <Card className="pro-tip-card border-0 shadow-sm srd-info-card">
+                <Card.Body className="p-4">
+                  <div className="pro-tip-header mb-3">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#0d6efd" className="me-2">
+                      <path d="M9 18h6a2 2 0 0 1 2 2v2H7v-2a2 2 0 0 1 2-2z" />
+                      <path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2.26C17.81 13.47 19 11.38 19 9a7 7 0 0 0-7-7z" />
+                    </svg>
+                    <span className="pro-tip-title">Pro Tip</span>
+                  </div>
+                  <p className="pro-tip-text">
+                    Uploading a clear photo of your receipt helps automate data verification and ensures your expense claims are approved faster by fleet managers.
+                  </p>
+                  <ul className="pro-tip-list">
+                    <li>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="#0d6efd" className="me-2">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                      Ensure date is visible
+                    </li>
+                    <li>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="#0d6efd" className="me-2">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                      Liters & price must be sharp
+                    </li>
+                  </ul>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+        </Container>
+        <Footer />
       </div>
     </div>
   );

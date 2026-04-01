@@ -5,91 +5,7 @@
   padding: 3px 0;
   margin-bottom: 8px;
 }
-@media (max-width: 768px) {
-  .preference-item {
-    flex-direction: column;
-    gap: 12px;
-    align-items: center;
-    text-align: center;
-  }
-  .preference-icon {
-    margin: 0 auto 8px auto;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  .preference-action {
-    justify-content: center;
-    width: 100%;
-    margin-top: 8px;
-  }
-}
-/* --- Mobile Responsive Improvements --- */
-@media (max-width: 992px) {
-  .profile-settings-page {
-    flex-direction: column;
-  }
-  .profile-settings-page .main-content {
-    margin-left: 0;
-    padding: 16px 8px 16px 8px;
-  }
-  .profile-picture-card,
-  .security-card {
-    margin-left: 0;
-    margin-right: 0;
-    max-width: 100%;
-  }
-}
 
-@media (max-width: 768px) {
-  .profile-settings-page .main-content {
-    padding: 8px 2vw 8px 2vw;
-  }
-  .profile-picture-container {
-    width: 90px;
-    height: 90px;
-  }
-  .profile-picture-placeholder {
-    font-size: 28px;
-  }
-  .security-card .card-body,
-  .profile-picture-card .card-body,
-  .personal-info-card .card-body,
-  .preferences-card .card-body {
-    padding: 12px;
-  }
-  .form-label {
-    font-size: 12px;
-  }
-  .form-control {
-    font-size: 13px;
-    padding: 8px 10px;
-  }
-  .form-actions .btn {
-    padding: 8px 12px;
-    font-size: 14px;
-  }
-}
-
-@media (max-width: 576px) {
-  .profile-settings-page .main-content {
-    padding: 4px 0 24px 0;
-  }
-  .profile-picture-container {
-    width: 64px;
-    height: 64px;
-  }
-  .profile-picture-placeholder {
-    font-size: 18px;
-  }
-  .card {
-    border-radius: 8px;
-  }
-  .form-actions {
-    flex-direction: column;
-    gap: 8px;
-  }
-}
 /* Profile Settings Page Styles */
 .profile-settings-page {
   display: flex;
@@ -99,7 +15,7 @@
 
 .profile-settings-page .main-content {
   flex: 1;
-  margin-left: 100px;
+  min-width: 0;
   padding: 24px;
   background-color: #f8f9fa;
 }
@@ -157,14 +73,14 @@
 .profile-picture-card {
   background: #ffffff;
   width: 100%;
-  min-width: 260px;
-  max-width: 400px;
-  margin-left: 24px;
-  margin-right: 32px;
 }
 
 .profile-picture-card .card-body {
   padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
 .profile-picture-wrapper {
@@ -254,10 +170,6 @@
 .security-card {
   background: #ffffff;
   width: 100%;
-  min-width: 260px;
-  max-width: 400px;
-  margin-left: 24px;
-  margin-right: 32px;
   display: flex;
   flex-direction: column;
   justify-content: stretch;
@@ -545,14 +457,12 @@
 /* Responsive */
 @media (max-width: 1200px) {
   .profile-settings-page .main-content {
-    margin-left: 240px;
     padding: 20px;
   }
 }
 
-@media (max-width: 992px) {
+@media (max-width: 1024px) {
   .profile-settings-page .main-content {
-    margin-left: 0;
     padding: 24px;
     padding-top: 80px;
   }
@@ -586,23 +496,29 @@
     width: 40px;
     height: 40px;
   }
+
+  .form-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .form-actions .btn {
+    width: 100%;
+  }
 }
 
 @media (max-width: 576px) {
   .profile-settings-page .main-content {
     padding: 12px;
+    padding-top: 80px;
   }
 
   .profile-picture-container {
-    width: 120px;
-    height: 120px;
+    width: 100px;
+    height: 100px;
   }
 
   .profile-picture-placeholder {
-    font-size: 40px;
-  }
-
-  .form-actions .btn {
-    width: 100%;
+    font-size: 36px;
   }
 }

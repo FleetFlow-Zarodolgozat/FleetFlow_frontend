@@ -70,10 +70,35 @@
 
 /* Fuel Logs Table Card */
 .fuel-logs-table-card {
-  border-radius: 16px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
   overflow: hidden;
   background: #ffffff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.fuel-logs-table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.fuel-logs-table-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.fuel-logs-total-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #c2410c;
+  background: #ffedd5;
+  padding: 4px 12px;
+  border-radius: 12px;
 }
 
 /* Desktop Table */
@@ -87,24 +112,24 @@
 
 .fuel-logs-table {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
+  border-collapse: collapse;
 }
 
 .fuel-logs-table thead {
   background: #f8fafc;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 2px solid #e2e8f0;
 }
 
 .fuel-log-header {
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.5px;
   color: #64748b;
-  padding: 16px 20px;
+  padding: 14px 16px;
   border: none;
   white-space: nowrap;
+  text-align: left;
 }
 
 .fuel-log-row {
@@ -113,7 +138,7 @@
 }
 
 .fuel-log-row:hover {
-  background-color: #f8fafc;
+  background-color: #faf7ff;
 }
 
 .fuel-log-row:last-child {
@@ -121,7 +146,7 @@
 }
 
 .fuel-log-cell {
-  padding: 20px 24px;
+  padding: 16px;
   vertical-align: middle;
   font-size: 0.95rem;
   color: #334155;
@@ -247,28 +272,23 @@
 }
 
 .delete-btn {
-  background: transparent;
-  border: none;
-  padding: 8px;
-  color: #cbd5e1;
-  transition: all 0.2s ease;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px !important;
+  background: #fff !important;
+  border: 1.5px solid #ef4444 !important;
+  color: #ef4444 !important;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
+  transition: all 0.2s ease;
 }
 
 .delete-btn:hover {
-  color: #ef4444;
-  background: #fef2f2;
-  border-radius: 8px;
-}
-
-.delete-btn svg {
-  transition: transform 0.2s ease;
-}
-
-.delete-btn:hover svg {
-  transform: scale(1.1);
+  background: #fee2e2 !important;
+  border-color: #dc2626 !important;
+  color: #dc2626 !important;
 }
 
 /* Mobile Card Styles */
@@ -383,43 +403,27 @@
 
 /* Pagination */
 .fuel-logs-pagination {
-  display: flex;
-  gap: 4px;
   flex-wrap: wrap;
   justify-content: center;
 }
 
-.fuel-logs-pagination .page-item {
-  margin: 0 2px;
-}
-
-.fuel-logs-pagination .page-link {
-  border: 1px solid #e2e8f0;
-  color: #475569;
-  padding: 8px 14px;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  background: #ffffff;
-}
-
-.fuel-logs-pagination .page-item:hover .page-link {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
-}
-
-.fuel-logs-pagination .page-item.active .page-link {
-  background: #0d6efd;
-  border-color: #0d6efd;
-  color: #ffffff;
-}
-
-.fuel-logs-pagination .page-item.disabled .page-link {
-  color: #cbd5e1;
+.fuel-logs-pagination-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
   background: #f8fafc;
-  border-color: #e2e8f0;
+  border-top: 1px solid #e2e8f0;
+  flex-wrap: wrap;
+  gap: 12px;
 }
+
+.fuel-logs-page-info {
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+
 
 /* Stats Cards */
 .stats-row {
