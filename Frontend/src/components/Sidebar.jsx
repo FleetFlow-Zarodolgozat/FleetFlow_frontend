@@ -85,6 +85,17 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, notificationRefresh }) => {
     };
   }, [profile.id]);
 
+  // Close sidebar when resizing to desktop
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 1024) {
+        setSidebarOpen(false);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [setSidebarOpen]);
+
   const getDisplayName = () => {
     if (profile.fullName) return profile.fullName;
     const emailPrefix = profile.email?.split('@')[0] || 'Driver';
@@ -163,34 +174,84 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, notificationRefresh }) => {
         </div>
 
         <nav className="sidebar-nav">
-          <Link to="/dashboard" className={`nav-item${location.pathname === '/dashboard' ? ' active' : ''}`}> 
-            <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" strokeLinecap="round" strokeLinejoin="round"/>
-              <polyline points="9,22 9,12 15,12 15,22" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            Dashboard
-          </Link>
-          <Link to="/fuel-logs" className={`nav-item${location.pathname === '/fuel-logs' ? ' active' : ''}`}> 
-            <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path d="M3 22V8l4-4h6l4 4v14H3z" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M17 13h2a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M7 22V12h6v10" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            Fuel Logs
-          </Link>
-          <Link to="/trips" className={`nav-item${location.pathname === '/trips' ? ' active' : ''}`}> 
-            <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" strokeLinecap="round" strokeLinejoin="round"/>
-              <polyline points="14,2 14,8 20,8" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            Trips
-          </Link>
-          <Link to="/service-requests" className={`nav-item${location.pathname === '/service-requests' ? ' active' : ''}`}> 
-            <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            Service Requests
-          </Link>
+          {profile.role === 'ADMIN' ? (
+            <>
+              <Link to="/dashboard" className={`nav-item${location.pathname === '/dashboard' ? ' active' : ''}`}> 
+                <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" strokeLinecap="round" strokeLinejoin="round"/>
+                  <polyline points="9,22 9,12 15,12 15,22" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Dashboard
+              </Link>
+              <Link to="/drivers" className={`nav-item${location.pathname === '/drivers' ? ' active' : ''}`}> 
+                <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <circle cx="12" cy="7" r="4" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M5.5 21a7.5 7.5 0 0 1 13 0" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Drivers
+              </Link>
+              <Link to="/vehicles" className={`nav-item${location.pathname === '/vehicles' ? ' active' : ''}`}> 
+                <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <rect x="3" y="11" width="18" height="6" rx="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <circle cx="7.5" cy="17.5" r="1.5"/>
+                  <circle cx="16.5" cy="17.5" r="1.5"/>
+                </svg>
+                Vehicles
+              </Link>
+              <Link to="/fuel-logs" className={`nav-item${location.pathname === '/fuel-logs' ? ' active' : ''}`}> 
+                <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path d="M3 22V8l4-4h6l4 4v14H3z" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M17 13h2a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M7 22V12h6v10" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Fuel Logs
+              </Link>
+              <Link to="/trips" className={`nav-item${location.pathname === '/trips' ? ' active' : ''}`}> 
+                <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" strokeLinecap="round" strokeLinejoin="round"/>
+                  <polyline points="14,2 14,8 20,8" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Trips
+              </Link>
+              <Link to="/service-requests" className={`nav-item${location.pathname === '/service-requests' ? ' active' : ''}`}> 
+                <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Service Requests
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link to="/dashboard" className={`nav-item${location.pathname === '/dashboard' ? ' active' : ''}`}> 
+                <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" strokeLinecap="round" strokeLinejoin="round"/>
+                  <polyline points="9,22 9,12 15,12 15,22" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Dashboard
+              </Link>
+              <Link to="/fuel-logs" className={`nav-item${location.pathname === '/fuel-logs' ? ' active' : ''}`}> 
+                <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path d="M3 22V8l4-4h6l4 4v14H3z" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M17 13h2a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M7 22V12h6v10" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Fuel Logs
+              </Link>
+              <Link to="/trips" className={`nav-item${location.pathname === '/trips' ? ' active' : ''}`}> 
+                <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" strokeLinecap="round" strokeLinejoin="round"/>
+                  <polyline points="14,2 14,8 20,8" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Trips
+              </Link>
+              <Link to="/service-requests" className={`nav-item${location.pathname === '/service-requests' ? ' active' : ''}`}> 
+                <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Service Requests
+              </Link>
+            </>
+          )}
         </nav>
 
         <div className="sidebar-footer">

@@ -1,106 +1,184 @@
-/* Lila shadow a számlaképhez */
-.invoice-image-purple-shadow {
-  border: 2.5px solid #a78bfa;
-  border-radius: 10px;
-  max-width: 100%;
-  max-height: 220px;
-  background: #f5f3ff;
-  box-sizing: border-box;
-}
-/* Title balra igazítása a fejlécben */
-.service-details-title-left {
-  text-align: left;
-  width: 100%;
+/* =============================================
+   ServiceRequestDetails — purple overrides
+   on top of AddFuelLog base styles
+   ============================================= */
+
+/* Required asterisk */
+.srd-required {
+  color: #ef4444;
+  margin-left: 2px;
 }
 
-.service-request-details-dashboard {
-  min-height: 100vh;
-  background: transparent;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding-left: 24px;
-  padding-right: 24px;
-}
-
-.service-request-details-orange-outline {
-  border: 2px solid #7c3aed !important;
-  box-shadow: 0 6px 24px rgba(124,58,237,0.18), 0 1.5px 6px rgba(0,0,0,0.10), 0 0 0 4px #f5f3ff !important;
-}
-
-.service-request-details-row {
+/* ---- Status + License Plate meta cards ---- */
+.srd-meta-card {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 2rem;
-  padding: 0.75rem 0.9rem;
-  background: rgba(124, 58, 237, 0.12);
-  border: 1.5px solid #7c3aed;
+  gap: 14px;
+  padding: 14px 16px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
   border-radius: 12px;
-  min-width: 0;
-  flex-wrap: wrap;
-  margin-bottom: 1rem;
-  transition: all 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  height: 100%;
 }
 
-@media (max-width: 1024px) {
-  .service-request-details-dashboard {
-    max-width: 900px !important;
-    padding-left: 16px !important;
-    padding-right: 16px !important;
-  }
-  .service-request-details-row {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 1rem !important;
-    padding: 0.75rem 0.5rem !important;
-  }
-  .service-request-details-label,
-  .service-request-details-value {
-    min-width: 0 !important;
-    font-size: 1rem !important;
-    text-align: left !important;
-  }
+.srd-meta-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
-@media (max-width: 768px) {
-  .service-request-details-dashboard {
-    padding-left: 8px !important;
-    padding-right: 8px !important;
-  }
-  .service-request-details-row {
-    gap: 0.5rem !important;
-    padding: 0.5rem 0.25rem !important;
-  }
-  .service-request-details-label,
-  .service-request-details-value {
-    font-size: 0.95rem !important;
-  }
+.srd-meta-icon-status {
+  background: #ede9fe;
 }
 
-@media (max-width: 480px) {
-  .service-request-details-row {
-    gap: 0.25rem !important;
-    padding: 0.25rem 0.1rem !important;
-  }
-  .service-request-details-label,
-  .service-request-details-value {
-    font-size: 0.9rem !important;
-  }
+.srd-meta-icon-plate {
+  background: #dbeafe;
 }
 
-.service-request-details-label {
-  min-width: 60px;
+.srd-meta-label {
+  font-size: 0.75rem;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+  margin-bottom: 4px;
+}
+
+.srd-meta-value {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1e293b;
+  word-break: break-word;
+}
+
+.srd-meta-value-status {
+  color: #6d28d9;
+}
+
+.srd-meta-value-plate {
+  color: #1d4ed8;
+}
+
+/* ---- Submit button — purple gradient ---- */
+.srd-submit-btn {
+  background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%) !important;
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.3) !important;
+  border: none !important;
+  color: #ffffff !important;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.srd-submit-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #5b21b6 0%, #4c1d95 100%) !important;
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4) !important;
+  transform: translateY(-2px);
+}
+
+.srd-submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* ---- Purple focus ring on inputs ---- */
+.srd-page .form-control-lg:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+/* ---- Dropzone purple accent ---- */
+.srd-dropzone:hover,
+.srd-dropzone.dragging {
+  border-color: #7c3aed !important;
+  background: #f5f3ff !important;
+}
+
+/* ---- Current Invoice preview ---- */
+.srd-existing-invoice {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 16px;
+}
+
+.srd-existing-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.srd-existing-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   color: #7c3aed;
 }
 
-.service-request-details-value {
-  min-width: 80px;
-  text-align: center;
-  font-weight: 600;
-  color: #1f2937;
+.srd-invoice-preview {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1.5px solid #ddd6fe;
+  background: #f5f3ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
 }
 
-.text-purple {
-  color: #7c3aed !important;
+.srd-invoice-img {
+  display: block;
+  max-width: 100%;
+  max-height: 260px;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+/* ---- Request Info sidebar card — purple gradient ---- */
+.srd-info-card {
+  background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%) !important;
+}
+
+.srd-request-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 8px;
+}
+
+/* =============================================
+   RESPONSIVE BREAKPOINTS
+   ============================================= */
+
+@media (max-width: 767.98px) {
+  .srd-page .form-actions {
+    flex-direction: column;
+  }
+
+  .srd-page .srd-submit-btn,
+  .srd-page .btn-cancel {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 400px) {
+  .srd-meta-card {
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .srd-meta-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .srd-meta-value {
+    font-size: 0.85rem;
+  }
 }

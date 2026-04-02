@@ -1,3 +1,12 @@
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Container, Row, Col, Badge, Alert, Spinner, Button, Form } from 'react-bootstrap';
+import api from '../services/api';
+import Sidebar from '../components/Sidebar';
+import '../styles/Notifications.css';
+
+import Footer from '../components/Footer';
+import { authService } from '../services/authService';
 // Ikon háttérszín a notification típus alapján
 const getNotificationTypeIconBg = (notification) => {
   const type = (notification.type || '').toUpperCase();
@@ -16,15 +25,8 @@ const getNotificationTypeIconBg = (notification) => {
   // fallback: halvány szürke
   return 'rgba(107,114,128,0.12)';
 };
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Container, Row, Col, Badge, Alert, Spinner, Button, Form } from 'react-bootstrap';
-import api from '../services/api';
-import Sidebar from '../components/Sidebar';
-import '../styles/Notifications.css';
 
 const Notifications = () => {
-  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -68,24 +70,6 @@ const Notifications = () => {
     // fallback: szürke
     return 'rgba(107,114,128,0.18)';
   };
-  // Notification type label background color by type
-  const getNotificationTypeBgColor = (notification) => {
-    const type = (notification.type || '').toUpperCase();
-    if (type === 'ACCOUNT' || type === 'ASSIGNMENT') {
-      return '#22c55e'; // green-500
-    }
-    if (type === 'FUEL_LOG') {
-      return '#f59e0b'; // amber-500
-    }
-    if (type === 'TRIP') {
-      return '#2563eb'; // blue-600
-    }
-    if (type === 'SERVICE_REQUEST') {
-      return '#a21caf'; // purple-800
-    }
-    // fallback: szürke
-    return '#6b7280';
-  };
 
   const fetchNotifications = async () => {
     setLoading(true);
@@ -99,7 +83,7 @@ const Notifications = () => {
       });
       const payload = response.data || [];
       setNotifications(Array.isArray(payload) ? payload : []);
-    } catch (err) {
+    } catch {
       setError('Hiba történt az értesítések lekérésekor!');
     } finally {
       setLoading(false);
@@ -316,6 +300,7 @@ const Notifications = () => {
             <Row className="align-items-center">
               <Col xs={12} lg={6}>
                 <h1 className="page-title">Notifications</h1>
+                <p className="sr-page-subtitle">Stay up to date with your latest notifications</p>
               </Col>
               <Col xs={12} lg={6} className="d-flex justify-content-end gap-2 mt-3 mt-lg-0">
                 <Button className="mark-all-read-btn" onClick={handleMarkAllAsRead} variant="link">
@@ -417,6 +402,22 @@ const Notifications = () => {
                               {notification.title || 'Notification'}
                               {!isRead && <span className="unread-dot" style={{ backgroundColor: '#dc2626' }} />}
                             </h4>
+                            <button
+                              className="notification-delete-custom"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteNotification(notification.id);
+                              }}
+                              title="Törlés"
+                            >
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M3 6h18" />
+                                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                                <line x1="10" y1="11" x2="10" y2="17" />
+                                <line x1="14" y1="11" x2="14" y2="17" />
+                              </svg>
+                            </button>
                           </div>
                           <p className="notification-message">
                             {notification.message || notification.content || ''}
@@ -443,23 +444,8 @@ const Notifications = () => {
                               }}>{notification.type}</span>
                             )}
                           </div>
+                        {/* Delete button now in header */}
                         </div>
-                        <button
-                          className="notification-delete-custom"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteNotification(notification.id);
-                          }}
-                          title="Törlés"
-                        >
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M3 6h18" />
-                            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
-                            <line x1="10" y1="11" x2="10" y2="17" />
-                            <line x1="14" y1="11" x2="14" y2="17" />
-                          </svg>
-                        </button>
                       </div>
                     );
                   })}
@@ -768,6 +754,10 @@ const Notifications = () => {
             </div>
           )}
         </Container>
+        {/* Footer csak ha nem ADMIN */}
+        {authService.getCurrentUser()?.role !== 'ADMIN' && (
+          <Footer userType={authService.getCurrentUser()?.role} />
+        )}
       </main>
     </div>
   );

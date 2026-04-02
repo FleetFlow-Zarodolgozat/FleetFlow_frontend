@@ -1,0 +1,61 @@
+﻿/* Add Service Request Page - purple theme overrides over AddFuelLog base styles */
+
+/* Required field asterisk */
+.asr-required {
+  color: #ef4444;
+  margin-left: 2px;
+}
+
+/* Purple gradient for Pro Tip card */
+.add-service-request-page .pro-tip-card {
+  background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+}
+
+.add-service-request-page .pro-tip-header {
+  color: #7c3aed;
+}
+
+/* Submit button - purple theme */
+.asr-submit-btn {
+  background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%) !important;
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.3) !important;
+  border: none !important;
+  color: #ffffff !important;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.asr-submit-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #5b21b6 0%, #4c1d95 100%) !important;
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4) !important;
+  transform: translateY(-2px);
+}
+
+.asr-submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Purple focus ring for inputs */
+.add-service-request-page .form-control-lg:focus,
+.add-service-request-page .form-select-lg:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+/* ===========================================
+   RESPONSIVE BREAKPOINTS
+   =========================================== */
+
+@media (max-width: 767.98px) {
+  .add-service-request-page .form-actions {
+    flex-direction: column;
+  }
+
+  .add-service-request-page .asr-submit-btn,
+  .add-service-request-page .btn-cancel {
+    width: 100%;
+    justify-content: center;
+  }
+}

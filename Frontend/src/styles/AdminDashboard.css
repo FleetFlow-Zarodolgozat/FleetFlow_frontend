@@ -14,7 +14,7 @@
 /* Main Content */
 .admin-dashboard .main-content {
   flex: 1;
-  margin-left: 240px;
+  margin-left: var(--sidebar-width);
   padding: 24px;
   background-color: #f8f9fa;
 }
@@ -209,7 +209,6 @@
 }
 
 .admin-dashboard .quick-add-card .card-header {
-  background: #ffffff !important;
   border-bottom: 1px solid #dee2e6;
   padding: 14px 16px;
 }
@@ -387,41 +386,7 @@
 }
 
 /* Responsive */
-@media (max-width: 1200px) {
-  .sidebar {
-    left: -240px;
-    transition: left 0.3s;
-  }
-  .sidebar.open {
-    left: 0;
-    z-index: 200;
-  }
-  .sidebar-overlay {
-    display: block;
-  }
-  .mobile-menu-btn {
-    display: block;
-  }
-  .admin-dashboard .main-content {
-    margin-left: 0;
-  }
-}
-
-@media (max-width: 992px) {
-  .sidebar {
-    left: -240px;
-    transition: left 0.3s;
-  }
-  .sidebar.open {
-    left: 0;
-    z-index: 200;
-  }
-  .sidebar-overlay {
-    display: block;
-  }
-  .mobile-menu-btn {
-    display: block;
-  }
+@media (max-width: 1024px) {
   .admin-dashboard .main-content {
     margin-left: 0;
     padding: 24px;
@@ -430,7 +395,6 @@
   .admin-dashboard .stat-value {
     font-size: 28px;
   }
-
   .admin-dashboard .stat-icon {
     width: 48px;
     height: 48px;

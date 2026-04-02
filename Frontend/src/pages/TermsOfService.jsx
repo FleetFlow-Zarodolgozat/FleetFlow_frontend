@@ -1,8 +1,10 @@
+import React, { useState } from 'react';
 import { Container, Card } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import { authService } from '../services/authService';
 import '../styles/LegalPages.css';
+import Footer from '../components/Footer';
 
 const TermsOfService = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -135,16 +137,7 @@ const TermsOfService = () => {
             )}
           </Card.Body>
         </Card>
-
-        {/* Page Footer */}
-        <div className="page-footer">
-          <div className="footer-links">
-            <Link to="/privacy">PRIVACY POLICY</Link>
-            <Link to="/terms">TERMS OF SERVICE</Link>
-            <Link to="/help">HELP CENTER</Link>
-          </div>
-          <p className="copyright">© 2024 FleetFlow Systems Inc. All rights reserved.</p>
-        </div>
+        <Footer/>
       </div>
       </main>
     </div>

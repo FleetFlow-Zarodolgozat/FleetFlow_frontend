@@ -9,6 +9,7 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { authService } from '../services/authService';
 import api from '../services/api';
 import '../styles/DriverDashboard.css';
+import Footer from '../components/Footer';
 
 const localizer = dateFnsLocalizer({
   format,
@@ -934,16 +935,7 @@ const DriverDashboard = () => {
             </Card>
           </Col>
         </Row>
-        <div className="page-footer mt-4">
-          <div className="d-flex justify-content-center gap-3 mb-2 flex-wrap">
-            <a href="/privacy" className="text-decoration-none text-muted small fw-semibold">PRIVACY POLICY</a>
-            <span className="text-muted">•</span>
-            <a href="/terms" className="text-decoration-none text-muted small fw-semibold">TERMS OF SERVICE</a>
-            <span className="text-muted">•</span>
-            <a href="/help" className="text-decoration-none text-muted small fw-semibold">HELP CENTER</a>
-          </div>
-          <p className="text-center text-muted small mb-0">© 2024 FleetFlow Systems Inc. All rights reserved.</p>
-        </div>
+        <Footer/>
       </main>
     </div>
   );
