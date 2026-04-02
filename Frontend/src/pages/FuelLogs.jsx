@@ -211,18 +211,13 @@ const FuelLogs = () => {
 
   // Delete fuel log handler
   const handleDeleteFuelLog = async (id) => {
-    if (!window.confirm('Biztosan törlöd ezt a tankolást?')) return;
+    if (!window.confirm('Are you sure you want to delete this fuel log?')) return;
     try {
       await api.patch(`/fuellogs/delete/${id}`);
       await fetchFuelLogs(pagination.page);
     } catch (err) {
-      alert('Hiba történt a törlés során!');
-      if (err.response) {
-        alert('Részletes hiba: ' + (err.response.data?.message || JSON.stringify(err.response.data)));
-        console.log('Delete error:', err.response);
-      } else {
-        console.log('Delete error:', err);
-      }
+      const msg = err?.response?.data;
+      alert(typeof msg === 'string' ? msg : msg?.message || msg?.Message || 'Failed to delete fuel log.');
     }
   };
 
@@ -266,9 +261,14 @@ const FuelLogs = () => {
               ) : error ? (
                 <Alert variant="danger" className="m-3 mb-0">{error}</Alert>
               ) : fuelLogs.length === 0 ? (
-                <div className="py-5 text-center text-muted">
-                  <div style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>Még nem rögzítettél tankolást.</div>
-                  <Button variant="primary" onClick={() => navigate('/add-fuel-log')}>
+                <div className="sr-empty">
+                  <svg width="64" height="64" fill="none" stroke="#cbd5e1" strokeWidth="1.5" viewBox="0 0 24 24">
+                    <path d="M3 22V8l4-4h6l4 4v14H3z" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M17 13h2a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M7 22V12h6v10" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  <p>No fuel logs recorded yet</p>
+                  <Button variant="outline-primary" onClick={() => navigate('/add-fuel-log')}>
                     Add your first fuel log
                   </Button>
                 </div>
@@ -392,7 +392,7 @@ const FuelLogs = () => {
                                   Total Cost
                                 </span>
                                 <span className="mobile-value cost-value">
-                                  {(log.totalCostCur || log.TotalCostCur || '€0.00').replace(/^€?/, '€')}
+                                  {(log.totalCostCur || log.TotalCostCur || '€0.00').replace(/€/g, '')}
                                 </span>
                               </div>
                             </div>

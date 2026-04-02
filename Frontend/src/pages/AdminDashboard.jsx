@@ -40,6 +40,7 @@ const AdminDashboard = () => {
   const [calendarView, setCalendarView] = useState('month');
   const [scheduleEvents, setScheduleEvents] = useState([]);
   const [timeRange, setTimeRange] = useState('today');
+  const [fleetStats, setFleetStats] = useState({ total: 0, activePercent: 0 });
   const [stats, setStats] = useState({
     totalFleet: 0,
     fuelCosts: 0,
@@ -188,12 +189,31 @@ const AdminDashboard = () => {
     }
   };
 
+  const loadFleetStats = async () => {
+    try {
+      const [activeRes, maintenanceRes, retiredRes] = await Promise.all([
+        api.get('/admin/vehicles', { params: { page: 1, pageSize: 1, Status: 'ACTIVE' } }),
+        api.get('/admin/vehicles', { params: { page: 1, pageSize: 1, Status: 'MAINTENANCE' } }),
+        api.get('/admin/vehicles', { params: { page: 1, pageSize: 1, Status: 'RETIRED' } }),
+      ]);
+      const active = activeRes.data?.totalCount || 0;
+      const maintenance = maintenanceRes.data?.totalCount || 0;
+      const retired = retiredRes.data?.totalCount || 0;
+      const total = active + maintenance + retired;
+      const activePercent = total > 0 ? Math.round((active / total) * 100) : 0;
+      setFleetStats({ total, activePercent });
+    } catch (error) {
+      console.log('Could not fetch fleet stats:', error.message);
+    }
+  };
+
   useEffect(() => {
     loadCalendarEvents();
     loadStatistics();
     loadUpcomingEvents();
     loadVehicles();
     loadDrivers();
+    loadFleetStats();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -381,15 +401,14 @@ const AdminDashboard = () => {
                 <div className="d-flex justify-content-between align-items-start">
                   <div>
                     <span className="stat-label text-muted small">Total Fleet</span>
-                    <h3 className="stat-value mb-2">{stats.totalFleet}</h3>
+                    <h3 className="stat-value mb-2">{fleetStats.total}</h3>
                     <Badge bg="success-subtle" text="success" className="stat-change">
                       <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="me-1">
                         <polyline points="23,6 13.5,15.5 8.5,10.5 1,18" strokeLinecap="round" strokeLinejoin="round"/>
                         <polyline points="17,6 23,6 23,12" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
-                      12%
+                      {fleetStats.activePercent}% active
                     </Badge>
-                    <span className="stat-compare text-muted small ms-1">vs last month</span>
                   </div>
                   <div className="stat-icon fleet">
                     <svg width="28" height="28" fill="none" stroke="#0d6efd" strokeWidth="2" viewBox="0 0 24 24">

@@ -44,7 +44,7 @@ const Trips = () => {
         pageSize: payload.pageSize || pagination.pageSize,
       });
     } catch (err) {
-      setError('Hiba történt az utazások lekérésekor!');
+      setError('An error occurred while fetching trips.');
     } finally {
       setLoading(false);
     }
@@ -72,13 +72,13 @@ const Trips = () => {
   };
 
   const handleDeleteTrip = async (id) => {
-    if (!window.confirm('Biztosan törlöd ezt az utazást?')) return;
+    if (!window.confirm('Are you sure you want to delete this trip?')) return;
     setError('');
     try {
       await api.patch(`/trips/delete/${id}`);
       await fetchTrips(pagination.page);
     } catch (err) {
-      let msg = 'Hiba történt a törlés során!';
+      let msg = 'An error occurred while deleting the trip.';
       if (err.response && err.response.data) {
         const data = err.response.data;
         if (typeof data === 'string') msg = data;
@@ -146,9 +146,13 @@ const Trips = () => {
               ) : error ? (
                 <Alert variant="danger" className="m-3 mb-0">{error}</Alert>
               ) : trips.length === 0 ? (
-                <div className="py-5 text-center text-muted">
-                  <div style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>No trips recorded yet.</div>
-                  <Button variant="primary" onClick={() => navigate('/add-new-trip')}>
+                <div className="sr-empty">
+                  <svg width="64" height="64" fill="none" stroke="#cbd5e1" strokeWidth="1.5" viewBox="0 0 24 24">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" strokeLinecap="round" strokeLinejoin="round" />
+                    <polyline points="14,2 14,8 20,8" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  <p>No trips recorded yet</p>
+                  <Button variant="outline-primary" onClick={() => navigate('/add-new-trip')}>
                     Add your first trip
                   </Button>
                 </div>

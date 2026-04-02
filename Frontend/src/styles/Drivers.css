@@ -1,0 +1,471 @@
+/* Drivers Management Page Styles */
+
+/* Layout */
+.drivers-dashboard {
+  display: flex;
+  width: 100vw;
+  min-height: 100vh;
+  background: #f8fafc;
+}
+
+.drivers-dashboard .main-content {
+  flex: 1;
+  margin-left: var(--sidebar-width, 260px);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+.drivers-page {
+  flex: 1;
+  padding: 32px 28px 24px 28px;
+  max-width: 1300px;
+  width: 100%;
+}
+
+/* Header */
+.drivers-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.drivers-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+/* Add Driver Button */
+.add-driver-btn {
+  background: #16a34a !important;
+  border-color: #16a34a !important;
+  color: #fff !important;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 10px 22px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 14px rgba(22, 163, 74, 0.25);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.add-driver-btn:hover,
+.add-driver-btn:focus {
+  background: #15803d !important;
+  border-color: #15803d !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(22, 163, 74, 0.35) !important;
+}
+
+.add-driver-btn svg {
+  flex-shrink: 0;
+}
+
+/* Table Card */
+.drivers-table-card {
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
+  overflow: hidden;
+}
+
+/* Filters Row */
+.drivers-filters {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 20px;
+  border-bottom: 1px solid #f1f5f9;
+  flex-wrap: wrap;
+}
+
+/* Search */
+.drivers-search-form {
+  flex: 1;
+  min-width: 200px;
+  max-width: 560px;
+}
+
+.drivers-search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  color: #94a3b8;
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+.drivers-search-input {
+  width: 100%;
+  padding: 10px 14px 10px 42px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.9375rem;
+  color: #334155;
+  background: #f8fafc;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.drivers-search-input::placeholder {
+  color: #94a3b8;
+}
+
+.drivers-search-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+  background: #fff;
+}
+
+/* Status Filter */
+.drivers-status-filter {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.status-select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 10px 40px 10px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #1e293b;
+  background: #fff;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.status-select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+.select-chevron {
+  position: absolute;
+  right: 12px;
+  color: #64748b;
+  pointer-events: none;
+}
+
+/* Table */
+.drivers-table-wrapper {
+  overflow-x: auto;
+}
+
+.drivers-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 640px;
+}
+
+.drivers-table thead {
+  background: #f8fafc;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.drivers-table thead th {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #64748b;
+  padding: 14px 20px;
+  text-align: left;
+  white-space: nowrap;
+  border: none;
+}
+
+.drivers-table tbody tr {
+  border-bottom: 1px solid #f1f5f9;
+  transition: background-color 0.15s ease;
+}
+
+.drivers-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.drivers-table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+.drivers-table tbody td {
+  padding: 16px 20px;
+  font-size: 0.9375rem;
+  color: #334155;
+  border: none;
+  vertical-align: middle;
+}
+
+.driver-name-cell {
+  font-weight: 600;
+  color: #0f172a !important;
+}
+
+.driver-email-cell {
+  color: #64748b !important;
+}
+
+/* Status Badges */
+.status-badge {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.status-active {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.status-inactive {
+  background: #ffe4e6;
+  color: #be123c;
+}
+
+/* Action Buttons */
+.actions-cell {
+  white-space: nowrap;
+}
+
+.action-btn-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 8px;
+  transition: background 0.15s, color 0.15s, transform 0.15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-edit {
+  color: #d97706;
+}
+
+.action-edit:hover {
+  background: #fef3c7;
+  color: #b45309;
+  transform: scale(1.1);
+}
+
+.action-deactivate {
+  color: #ea580c;
+  margin-left: 4px;
+}
+
+.action-deactivate:hover {
+  background: #ffedd5;
+  color: #c2410c;
+  transform: scale(1.1);
+}
+
+.action-activate {
+  color: #16a34a;
+  margin-left: 4px;
+}
+
+.action-activate:hover {
+  background: #dcfce7;
+  color: #15803d;
+  transform: scale(1.1);
+}
+
+.action-delete {
+  color: #dc2626;
+  margin-left: 4px;
+}
+
+.action-delete:hover {
+  background: #fee2e2;
+  color: #b91c1c;
+  transform: scale(1.1);
+}
+
+/* Empty / Loading states */
+.drivers-loading-cell,
+.drivers-empty-cell {
+  text-align: center;
+  color: #94a3b8;
+  padding: 48px 20px !important;
+  font-size: 1rem;
+}
+
+/* Pagination */
+.drivers-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+  border-top: 1px solid #f1f5f9;
+  flex-wrap: wrap;
+}
+
+.pagination-info {
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.pagination-info strong {
+  color: #1e293b;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.page-btn {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  color: #334155;
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.page-btn:hover:not(:disabled) {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.page-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.page-num {
+  min-width: 36px;
+  padding: 6px 10px;
+  text-align: center;
+}
+
+.page-num.active {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
+}
+
+.page-num.active:hover {
+  background: #2563eb;
+  border-color: #2563eb;
+}
+
+.page-ellipsis {
+  padding: 6px 10px;
+  color: #94a3b8;
+  font-size: 0.875rem;
+}
+
+/* =====================
+   RESPONSIVE STYLES
+   ===================== */
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .drivers-dashboard .main-content {
+    margin-left: 0;
+  }
+
+  .drivers-page {
+    padding: 20px 16px;
+  }
+
+  .drivers-title {
+    font-size: 1.6rem;
+  }
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .drivers-page {
+    padding: 16px 12px;
+  }
+
+  .drivers-title {
+    font-size: 1.4rem;
+  }
+
+  .add-driver-btn {
+    font-size: 0.875rem;
+    padding: 9px 16px;
+  }
+
+  .drivers-filters {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 14px 14px;
+  }
+
+  .drivers-search-form {
+    max-width: 100%;
+  }
+
+  .drivers-status-filter {
+    width: 100%;
+  }
+
+  .status-select {
+    width: 100%;
+  }
+
+  .drivers-table thead th,
+  .drivers-table tbody td {
+    padding: 12px 12px;
+  }
+
+  .drivers-pagination {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px 14px;
+  }
+
+  .pagination-controls {
+    gap: 3px;
+  }
+
+  .page-btn {
+    padding: 5px 10px;
+    font-size: 0.82rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .drivers-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

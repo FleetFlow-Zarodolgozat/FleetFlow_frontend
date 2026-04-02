@@ -108,7 +108,7 @@ const ProfileSettings = () => {
         }
       }
     } catch (err) {
-      setFeedback({ type: 'danger', message: 'Hiba történt a profil adatok lekérésekor!' });
+      setFeedback({ type: 'danger', message: 'Failed to load profile data.' });
     } finally {
       setLoading(false);
     }
@@ -138,7 +138,7 @@ const ProfileSettings = () => {
       const response = await api.patch('/profile/edit', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      setFeedback({ type: 'success', message: 'Profil sikeresen frissítve!' });
+      setFeedback({ type: 'success', message: 'Profile updated successfully.' });
       setIsDirty(false);
       setEditMode(false);
       fetchProfile();
@@ -146,7 +146,7 @@ const ProfileSettings = () => {
       // Trigger Sidebar reload
       setSidebarOpen((prev) => !prev);
     } catch (err) {
-      let msg = 'Hiba történt a mentés során!';
+      let msg = 'Failed to save changes.';
       if (err.response && err.response.data) {
         const data = err.response.data;
         if (typeof data === 'string') msg = data;
@@ -187,12 +187,12 @@ const ProfileSettings = () => {
     // Validate file
     const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
     if (!validTypes.includes(file.type)) {
-      setFeedback({ type: 'danger', message: 'Csak JPEG, PNG vagy GIF fájlt tölthet fel!' });
+      setFeedback({ type: 'danger', message: 'Only JPEG, PNG or GIF files are allowed.' });
       return;
     }
 
     if (file.size > 10 * 1024 * 1024) {
-      setFeedback({ type: 'danger', message: 'A fájl mérete nem haladhatja meg a 10MB-ot!' });
+      setFeedback({ type: 'danger', message: 'File size must not exceed 10MB.' });
       return;
     }
 
@@ -203,7 +203,7 @@ const ProfileSettings = () => {
       await api.patch('/profile/edit', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      setFeedback({ type: 'success', message: 'Profilkép sikeresen feltöltve!' });
+      setFeedback({ type: 'success', message: 'Profile picture updated successfully.' });
 
       // Reload image
       const imgResponse = await api.get(`/files/thumbnail/${profile.id}`, { responseType: 'blob' });
@@ -212,20 +212,20 @@ const ProfileSettings = () => {
       setProfileImageError(false);
       setNotificationRefresh((prev) => prev + 1);
     } catch (err) {
-      setFeedback({ type: 'danger', message: 'Hiba történt a kép feltöltésekor!' });
+      setFeedback({ type: 'danger', message: 'Failed to upload profile picture.' });
     }
   };
 
   const handleRemovePicture = async () => {
     try {
       await api.patch('/profile/delete-profile-image');
-      setFeedback({ type: 'success', message: 'Profilkép sikeresen törölve!' });
+      setFeedback({ type: 'success', message: 'Profile picture removed successfully.' });
       setProfileImageUrl(null);
       setProfileImageError(true);
       fetchProfile();
       setNotificationRefresh((prev) => prev + 1);
     } catch (err) {
-      setFeedback({ type: 'danger', message: 'Hiba történt a kép törlésekor!' });
+      setFeedback({ type: 'danger', message: 'Failed to remove profile picture.' });
     }
   };
 

@@ -16,6 +16,12 @@ import AddNewTrip from './pages/AddNewTrip';
 import ServiceRequests from './pages/ServiceRequests';
 import ServiceRequestDetails from './pages/ServiceRequestDetails';
 import ProfileSettings from './pages/ProfileSettings';
+import Drivers from './pages/Drivers';
+import EditDriver from './pages/EditDriver';
+import AddDriver from './pages/AddDriver';
+import Vehicles from './pages/Vehicles';
+import EditVehicle from './pages/EditVehicle';
+import AddVehicle from './pages/AddVehicle';
 import { authService } from './services/authService';
 import './App.css';
 
@@ -94,6 +100,36 @@ function App() {
         <Route path="/profile-settings" element={
           <ProtectedRoute>
             <ProfileSettings />
+          </ProtectedRoute>
+        } />
+        <Route path="/drivers" element={
+          <ProtectedRoute>
+            <Drivers />
+          </ProtectedRoute>
+        } />
+        <Route path="/drivers/:id/edit" element={
+          <ProtectedRoute>
+            <EditDriver />
+          </ProtectedRoute>
+        } />
+        <Route path="/add-driver" element={
+          <ProtectedRoute>
+            <AddDriver />
+          </ProtectedRoute>
+        } />
+        <Route path="/vehicles" element={
+          <ProtectedRoute>
+            <Vehicles />
+          </ProtectedRoute>
+        } />
+        <Route path="/vehicles/:id/edit" element={
+          <ProtectedRoute>
+            <EditVehicle />
+          </ProtectedRoute>
+        } />
+        <Route path="/add-vehicle" element={
+          <ProtectedRoute>
+            <AddVehicle />
           </ProtectedRoute>
         } />
         <Route path="/" element={<HomeRoute />} />

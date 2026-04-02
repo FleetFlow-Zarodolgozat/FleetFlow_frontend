@@ -188,7 +188,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, notificationRefresh }) => {
                   <circle cx="12" cy="7" r="4" strokeLinecap="round" strokeLinejoin="round"/>
                   <path d="M5.5 21a7.5 7.5 0 0 1 13 0" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                Drivers
+                Sofőrök
               </Link>
               <Link to="/vehicles" className={`nav-item${location.pathname === '/vehicles' ? ' active' : ''}`}> 
                 <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -196,7 +196,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, notificationRefresh }) => {
                   <circle cx="7.5" cy="17.5" r="1.5"/>
                   <circle cx="16.5" cy="17.5" r="1.5"/>
                 </svg>
-                Vehicles
+                Járművek
               </Link>
               <Link to="/fuel-logs" className={`nav-item${location.pathname === '/fuel-logs' ? ' active' : ''}`}> 
                 <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">

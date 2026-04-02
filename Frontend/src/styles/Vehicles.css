@@ -1,0 +1,478 @@
+/* ─── Layout ─────────────────────────────────────────── */
+.vehicles-dashboard {
+  display: flex;
+  min-height: 100vh;
+  background: #f4f6fa;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.vehicles-page {
+  padding: 2rem 1.75rem;
+  flex: 1;
+}
+
+/* ─── Header ─────────────────────────────────────────── */
+.vehicles-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.vehicles-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0;
+}
+
+.add-vehicle-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #7c3aed;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1.1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.add-vehicle-btn:hover,
+.add-vehicle-btn:focus {
+  background: #6d28d9;
+  color: #fff;
+}
+
+/* ─── Table Card ─────────────────────────────────────── */
+.vehicles-table-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
+  overflow: hidden;
+}
+
+/* ─── Filters ────────────────────────────────────────── */
+.vehicles-filters {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #f0f0f5;
+  flex-wrap: wrap;
+}
+
+.vehicles-search-wrapper {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+  max-width: 380px;
+}
+
+.vsearch-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.vehicles-search-input {
+  width: 100%;
+  padding: 0.5rem 0.85rem 0.5rem 2.4rem;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  color: #374151;
+  outline: none;
+  transition: border-color 0.2s;
+  background: #fafafa;
+}
+
+.vehicles-search-input:focus {
+  border-color: #7c3aed;
+  background: #fff;
+}
+
+.vehicles-filter-group {
+  display: flex;
+  gap: 0.65rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.vehicles-status-filter {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.vstatus-select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 0.48rem 2.2rem 0.48rem 0.85rem;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  color: #374151;
+  background: #fafafa;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.vstatus-select:focus {
+  border-color: #7c3aed;
+  background: #fff;
+}
+
+.vselect-chevron {
+  position: absolute;
+  right: 0.55rem;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #6b7280;
+}
+
+/* ─── Table ──────────────────────────────────────────── */
+.vehicles-table-wrapper {
+  overflow-x: auto;
+}
+
+.vehicles-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.vehicles-table thead tr {
+  background: #f9fafb;
+  border-bottom: 2px solid #f0f0f5;
+}
+
+.vehicles-table th {
+  padding: 0.85rem 1rem;
+  text-align: left;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+.vehicles-table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid #f3f4f6;
+  color: #374151;
+  vertical-align: middle;
+}
+
+.vehicles-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.vehicles-table tbody tr:hover {
+  background: #faf8ff;
+}
+
+.vehicle-plate-cell {
+  font-weight: 700;
+  color: #1a1a2e !important;
+  font-family: monospace;
+  font-size: 0.95rem !important;
+}
+
+.vehicle-model-cell {
+  font-weight: 500;
+}
+
+.vehicle-driver-cell {
+  font-size: 0.85rem !important;
+  color: #6b7280 !important;
+}
+
+.vehicle-vin-cell {
+  font-size: 0.8rem;
+  font-family: monospace;
+  color: #6b7280;
+  letter-spacing: 0.03em;
+}
+
+/* ─── Status Badges ──────────────────────────────────── */
+.vstatus-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.28rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.vstatus-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.vstatus-active {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.vstatus-active .vstatus-dot {
+  background: #10b981;
+}
+
+.vstatus-maintenance {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.vstatus-maintenance .vstatus-dot {
+  background: #f59e0b;
+}
+
+.vstatus-inactive {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.vstatus-inactive .vstatus-dot {
+  background: #ef4444;
+}
+
+.vstatus-retired {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.vstatus-retired .vstatus-dot {
+  background: #ef4444;
+}
+
+/* ─── Action Buttons ─────────────────────────────────── */
+.vactions-cell {
+  display: flex;
+  gap: 0.45rem;
+  align-items: center;
+}
+
+.vaction-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background 0.18s, transform 0.12s;
+  padding: 0;
+  line-height: 1;
+}
+
+/* Override Bootstrap's svg { overflow: hidden } which clips strokes */
+.vaction-btn svg {
+  display: block;
+  flex-shrink: 0;
+  overflow: visible;
+}
+
+.vaction-btn:active {
+  transform: scale(0.93);
+}
+
+.vaction-btn.vaction-edit {
+  background: #ede9fe;
+  color: #7c3aed;
+}
+
+.vaction-btn.vaction-edit:hover {
+  background: #ddd6fe;
+}
+
+.vaction-btn.vaction-deactivate {
+  background: #ffedd5;
+  color: #ea580c;
+}
+
+.vaction-btn.vaction-deactivate:hover {
+  background: #fed7aa;
+}
+
+.vaction-btn.vaction-deactivate:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.vaction-btn.vaction-activate {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.vaction-btn.vaction-activate:hover {
+  background: #a7f3d0;
+}
+
+.vaction-btn.vaction-activate:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.vaction-btn.vaction-delete {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.vaction-btn.vaction-delete:hover {
+  background: #fecaca;
+}
+
+/* ─── Loading / Empty ────────────────────────────────── */
+.vehicles-loading-cell {
+  text-align: center;
+  padding: 3rem !important;
+  color: #6b7280;
+}
+
+.vehicles-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 3.5rem 1rem;
+  color: #9ca3af;
+}
+
+.vehicles-empty p {
+  margin: 0;
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+/* ─── Pagination ─────────────────────────────────────── */
+.vehicles-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 0.9rem 1.25rem;
+  border-top: 1px solid #f0f0f5;
+}
+
+.vpagination-info {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.vpagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.vpage-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  height: 34px;
+  padding: 0 0.45rem;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 7px;
+  background: #fff;
+  color: #374151;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+
+.vpage-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.vpage-btn.vpage-num:hover:not(.active):not(:disabled) {
+  background: #f5f3ff;
+  border-color: #c4b5fd;
+  color: #7c3aed;
+}
+
+.vpage-btn.vpage-num.active {
+  background: #7c3aed;
+  border-color: #7c3aed;
+  color: #fff;
+  font-weight: 700;
+}
+
+.vpage-ellipsis {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  color: #9ca3af;
+  font-size: 0.9rem;
+}
+
+/* ─── Responsive ─────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .vehicles-page {
+    padding: 1.5rem 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .vehicles-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .vehicles-search-wrapper {
+    max-width: 100%;
+  }
+
+  .vehicles-filter-group {
+    justify-content: flex-start;
+  }
+
+  .vehicles-pagination {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .vehicles-table th,
+  .vehicles-table td {
+    padding: 0.7rem 0.65rem;
+    font-size: 0.82rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .vehicles-title {
+    font-size: 1.3rem;
+  }
+
+  .add-vehicle-btn span {
+    display: none;
+  }
+}

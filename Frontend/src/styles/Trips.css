@@ -1,4 +1,25 @@
 /* Trips Page Styles - Responsive Design */
+
+/* Empty state */
+.sr-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #64748b;
+  gap: 16px;
+}
+
+.sr-empty svg {
+  opacity: 0.5;
+}
+
+.sr-empty p {
+  font-size: 1rem;
+  margin: 0;
+}
+
 .trips-page {
   min-height: 80vh;
   background: #f8fafc;
