@@ -152,13 +152,6 @@ const AddNewTrip = () => {
           <div className="trip-main-layout">
             {/* Left: Trip Details Form */}
             <div className="trip-details-card">
-              <div className="trip-details-header">
-                <svg width="24" height="24" fill="none" stroke="#2563eb" strokeWidth="2" viewBox="0 0 24 24">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" strokeLinecap="round" strokeLinejoin="round"/>
-                  <polyline points="14,2 14,8 20,8" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-                <span>Trip Details</span>
-              </div>
 
               <div className="trip-details-body">
                 {error && <Alert variant="danger">{error}</Alert>}

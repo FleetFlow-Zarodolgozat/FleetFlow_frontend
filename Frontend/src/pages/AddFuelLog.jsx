@@ -226,26 +226,7 @@ const AddFuelLog = () => {
                           </div>
                         </Form.Group>
                       </Col>
-
-                      {/* Vehicle */}
-                        <Col xs={12}>
-                        <Form.Group>
-                          <Form.Label className="form-label">Vehicle</Form.Label>
-                          <Form.Select
-                            value={selectedVehicle}
-                            onChange={e => setSelectedVehicle(e.target.value)}
-                            className="form-control-lg"
-                          >
-                            <option value="">Select a vehicle...</option>
-                            {vehicles.map(v => (
-                              <option key={v.id} value={v.id}>{v.name} {v.licensePlate && `(${v.licensePlate})`}</option>
-                            ))}
-                          </Form.Select>
-                        </Form.Group>
-                      </Col>
-
-
-
+                      
                       {/* Quantity */}
                         <Col xs={12}>
                         <Form.Group>
