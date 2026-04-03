@@ -188,7 +188,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, notificationRefresh }) => {
                   <circle cx="12" cy="7" r="4" strokeLinecap="round" strokeLinejoin="round"/>
                   <path d="M5.5 21a7.5 7.5 0 0 1 13 0" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                Sofőrök
+                Drivers
               </Link>
               <Link to="/vehicles" className={`nav-item${location.pathname === '/vehicles' ? ' active' : ''}`}> 
                 <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -196,9 +196,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, notificationRefresh }) => {
                   <circle cx="7.5" cy="17.5" r="1.5"/>
                   <circle cx="16.5" cy="17.5" r="1.5"/>
                 </svg>
-                Járművek
+                Vehicles
               </Link>
-              <Link to="/fuel-logs" className={`nav-item${location.pathname === '/fuel-logs' ? ' active' : ''}`}> 
+              <Link to="/admin-fuel-logs" className={`nav-item${location.pathname === '/admin-fuel-logs' ? ' active' : ''}`}> 
                 <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path d="M3 22V8l4-4h6l4 4v14H3z" strokeLinecap="round" strokeLinejoin="round"/>
                   <path d="M17 13h2a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -206,7 +206,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, notificationRefresh }) => {
                 </svg>
                 Fuel Logs
               </Link>
-              <Link to="/trips" className={`nav-item${location.pathname === '/trips' ? ' active' : ''}`}> 
+              <Link to="/admin-trips" className={`nav-item${location.pathname === '/admin-trips' ? ' active' : ''}`}> 
                 <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" strokeLinecap="round" strokeLinejoin="round"/>
                   <polyline points="14,2 14,8 20,8" strokeLinecap="round" strokeLinejoin="round"/>

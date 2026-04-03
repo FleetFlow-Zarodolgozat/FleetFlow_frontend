@@ -547,8 +547,11 @@ const EditVehicle = () => {
                           {drivers.active.map((d) => {
                             const uid = String(d.id ?? d.Id ?? d.userId ?? d.UserId);
                             const dName = d.fullName || d.FullName || d.email || d.Email || 'Unknown';
+                            const dEmail = d.email || d.Email || '';
                             return (
-                              <option key={uid} value={uid}>{dName}</option>
+                              <option key={uid} value={uid}>
+                                {dName}{dEmail && ` (${dEmail})`}
+                              </option>
                             );
                           })}
                         </Form.Select>

@@ -37,6 +37,15 @@ const Vehicles = () => {
   const debounceRef = useRef(null);
   const [statusFilter, setStatusFilter] = useState('');
   const [togglingId, setTogglingId] = useState(null);
+  const [driverImages, setDriverImages] = useState({});
+
+  const getDriverInitials = (email) => {
+    if (!email) return '?';
+    const name = email.split('@')[0];
+    const parts = name.split(/[._-]/);
+    if (parts.length >= 2) return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
+    return name.charAt(0).toUpperCase();
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -81,6 +90,32 @@ const Vehicles = () => {
     fetchVehicles(1);
     setPage(1);
   }, [searchQ, statusFilter]);
+
+  useEffect(() => {
+    if (vehicles.length === 0) return;
+    let cancelled = false;
+    const fetchImages = async () => {
+      const newImages = {};
+      await Promise.all(
+        vehicles.map(async (v) => {
+          const imgId = v.profileImgFileId ?? v.ProfileImgFileId;
+          if (imgId && driverImages[imgId] === undefined) {
+            try {
+              const res = await api.get(`/files/${imgId}`, { responseType: 'blob' });
+              newImages[imgId] = URL.createObjectURL(res.data);
+            } catch {
+              newImages[imgId] = null;
+            }
+          }
+        })
+      );
+      if (!cancelled && Object.keys(newImages).length > 0) {
+        setDriverImages((prev) => ({ ...prev, ...newImages }));
+      }
+    };
+    fetchImages();
+    return () => { cancelled = true; };
+  }, [vehicles]);
 
   const handleSearchInputChange = (e) => {
     const val = e.target.value;
@@ -166,7 +201,12 @@ const Vehicles = () => {
 
           {/* Header */}
           <div className="vehicles-header mb-4">
-            <h1 className="vehicles-title">Vehicles</h1>
+            <div className="vehicles-header-left">
+              <h1 className="vehicles-title">Vehicles</h1>
+              <div className="vehicles-subtitle">
+                Browse, search, and manage all vehicles in your fleet
+              </div>
+            </div>
             <Button
               className="add-vehicle-btn"
               onClick={() => navigate('/add-vehicle')}
@@ -229,11 +269,11 @@ const Vehicles = () => {
                   <tr>
                     <th>LICENSE PLATE</th>
                     <th>MODEL</th>
-                    <th>VIN</th>
-                    <th>STATUS</th>
                     <th>DRIVER</th>
+                    <th>VIN</th>
                     <th>MILEAGE</th>
                     <th>YEAR</th>
+                    <th>STATUS</th>
                     <th>ACTIONS</th>
                   </tr>
                 </thead>
@@ -268,23 +308,33 @@ const Vehicles = () => {
                       const assignedUserEmail = vehicle.userEmail || vehicle.UserEmail || null;
                       return (
                         <tr key={vid}>
-                          <td className="vehicle-plate-cell">
-                            {vehicle.licensePlate || vehicle.LicensePlate || '–'}
+                          <td>
+                            <span className="vehicle-plate-badge">
+                              {vehicle.licensePlate || vehicle.LicensePlate || '–'}
+                            </span>
                           </td>
                           <td className="vehicle-model-cell">
                             {vehicle.brandModel || vehicle.BrandModel || '–'}
                           </td>
+                          <td>
+                            {assignedUserEmail ? (() => {
+                              const imgId = vehicle.profileImgFileId ?? vehicle.ProfileImgFileId;
+                              const imgUrl = imgId != null ? driverImages[imgId] : null;
+                              return (
+                                <div className="v-driver-cell">
+                                  <div className="v-driver-avatar">
+                                    {imgUrl
+                                      ? <img src={imgUrl} alt={assignedUserEmail} />
+                                      : <span>{getDriverInitials(assignedUserEmail)}</span>
+                                    }
+                                  </div>
+                                  <span className="v-driver-email">{assignedUserEmail}</span>
+                                </div>
+                              );
+                            })() : <span className="v-driver-none">–</span>}
+                          </td>
                           <td className="vehicle-vin-cell">
                             {vehicle.vin || vehicle.Vin || '–'}
-                          </td>
-                          <td>
-                            <span className={`vstatus-badge ${STATUS_CLASSES[status] || 'vstatus-inactive'}`}>
-                              <span className="vstatus-dot" />
-                              {STATUS_LABELS[status] || status}
-                            </span>
-                          </td>
-                          <td className="vehicle-driver-cell">
-                            {vehicle.userEmail || vehicle.UserEmail || '–'}
                           </td>
                           <td>
                             {vehicle.currentMileageKm ?? vehicle.CurrentMileageKm
@@ -293,6 +343,12 @@ const Vehicles = () => {
                           </td>
                           <td>
                             {vehicle.year || vehicle.Year || '–'}
+                          </td>
+                          <td>
+                            <span className={`vstatus-badge ${STATUS_CLASSES[status] || 'vstatus-inactive'}`}>
+                              <span className="vstatus-dot" />
+                              {STATUS_LABELS[status] || status}
+                            </span>
                           </td>
                           <td className="vactions-cell">
                             <button

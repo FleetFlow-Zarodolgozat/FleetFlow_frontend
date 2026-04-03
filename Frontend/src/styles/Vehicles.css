@@ -27,10 +27,22 @@
   gap: 0.75rem;
 }
 
+.vehicles-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
 .vehicles-title {
   font-size: 1.6rem;
   font-weight: 700;
   color: #1a1a2e;
+  margin: 0;
+}
+
+.vehicles-subtitle {
+  font-size: 1.1rem;
+  color: #6c757d;
   margin: 0;
 }
 
@@ -58,8 +70,9 @@
 /* ─── Table Card ─────────────────────────────────────── */
 .vehicles-table-card {
   background: #fff;
+  border: 1px solid #e2e8f0;
   border-radius: 14px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
   overflow: hidden;
 }
 
@@ -189,11 +202,22 @@
   background: #faf8ff;
 }
 
-.vehicle-plate-cell {
+.vehicle-plate-badge {
+  display: inline-block;
+  font-size: 0.75rem;
   font-weight: 700;
-  color: #1a1a2e !important;
-  font-family: monospace;
-  font-size: 0.95rem !important;
+  letter-spacing: 0.4px;
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 3px 9px;
+  white-space: nowrap;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.vehicle-plate-cell {
+  /* kept for compat */
 }
 
 .vehicle-model-cell {
@@ -203,6 +227,48 @@
 .vehicle-driver-cell {
   font-size: 0.85rem !important;
   color: #6b7280 !important;
+}
+
+/* Driver cell with avatar */
+.v-driver-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.v-driver-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.v-driver-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.v-driver-email {
+  font-size: 0.87rem;
+  color: #334155;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
+
+.v-driver-none {
+  color: #94a3b8;
 }
 
 .vehicle-vin-cell {
@@ -468,6 +534,11 @@
 }
 
 @media (max-width: 480px) {
+  .vehicles-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
   .vehicles-title {
     font-size: 1.3rem;
   }

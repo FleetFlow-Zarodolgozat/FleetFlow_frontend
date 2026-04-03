@@ -57,8 +57,13 @@ const AddFuelLog = () => {
 
         // Fetch recent fuel logs
         try {
-          const logsResponse = await api.get('/fuellogs/mine', { params: { page: 1, pageSize: 3 } });
-          const logs = Array.isArray(logsResponse.data?.data) ? logsResponse.data.data : [];
+          const logsResponse = await api.get('/fuellogs/mine', { params: { page: 1, pageSize: 10 } });
+          const allLogs = Array.isArray(logsResponse.data?.data) ? logsResponse.data.data : [];
+          const cutoff = new Date();
+          cutoff.setDate(cutoff.getDate() - 30);
+          const logs = allLogs
+            .filter((l) => new Date(l.date || l.Date) >= cutoff)
+            .slice(0, 2);
           setRecentLogs(logs);
         } catch {
           console.log('Could not fetch recent logs');
@@ -291,7 +296,7 @@ const AddFuelLog = () => {
                           </div>
                           {vehicleCurrentMileageKm !== null && (
                             <div className="previous-odometer">
-                              Previous: {vehicleCurrentMileageKm.toLocaleString()} km
+                              Previous trip ended at: {vehicleCurrentMileageKm.toLocaleString()} km
                             </div>
                           )}
                         </Form.Group>

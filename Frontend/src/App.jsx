@@ -20,6 +20,9 @@ import Drivers from './pages/Drivers';
 import EditDriver from './pages/EditDriver';
 import AddDriver from './pages/AddDriver';
 import Vehicles from './pages/Vehicles';
+import AdminFuelLogs from './pages/AdminFuelLogs';
+import AdminFuelLogDetails from './pages/AdminFuelLogDetails';
+import AdminTrips from './pages/AdminTrips';
 import EditVehicle from './pages/EditVehicle';
 import AddVehicle from './pages/AddVehicle';
 import { authService } from './services/authService';
@@ -130,6 +133,21 @@ function App() {
         <Route path="/add-vehicle" element={
           <ProtectedRoute>
             <AddVehicle />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin-fuel-logs" element={
+          <ProtectedRoute>
+            <AdminFuelLogs />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin-fuel-log-details" element={
+          <ProtectedRoute>
+            <AdminFuelLogDetails />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin-trips" element={
+          <ProtectedRoute>
+            <AdminTrips />
           </ProtectedRoute>
         } />
         <Route path="/" element={<HomeRoute />} />

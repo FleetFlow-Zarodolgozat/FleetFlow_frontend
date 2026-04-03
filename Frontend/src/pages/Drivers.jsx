@@ -23,6 +23,7 @@ const Drivers = () => {
   const [searchQ, setSearchQ] = useState('');
   const debounceRef = useRef(null);
   const [isActiveFilter, setIsActiveFilter] = useState(true); // true = Aktív, false = Inaktív
+  const [driverImages, setDriverImages] = useState({});
 
   useEffect(() => {
     const handleResize = () => {
@@ -174,6 +175,38 @@ const Drivers = () => {
   const startItem = totalCount === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
   const endItem = Math.min(page * PAGE_SIZE, totalCount);
 
+  const getDriverInitials = (email) => {
+    if (!email) return '?';
+    const part = email.split('@')[0];
+    return part.slice(0, 2).toUpperCase();
+  };
+
+  useEffect(() => {
+    if (drivers.length === 0) return;
+    let cancelled = false;
+    const fetchImages = async () => {
+      const newImages = {};
+      await Promise.all(
+        drivers.map(async (d) => {
+          const imgId = d.profileImgFileId ?? d.ProfileImgFileId;
+          if (imgId && driverImages[imgId] === undefined) {
+            try {
+              const res = await api.get(`/files/${imgId}`, { responseType: 'blob' });
+              newImages[imgId] = URL.createObjectURL(res.data);
+            } catch {
+              newImages[imgId] = null;
+            }
+          }
+        })
+      );
+      if (!cancelled && Object.keys(newImages).length > 0) {
+        setDriverImages((prev) => ({ ...prev, ...newImages }));
+      }
+    };
+    fetchImages();
+    return () => { cancelled = true; };
+  }, [drivers]);
+
   return (
     <div className="drivers-dashboard">
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
@@ -181,7 +214,12 @@ const Drivers = () => {
         <Container fluid className="drivers-page">
           {/* Header */}
           <div className="drivers-header mb-4">
-            <h1 className="drivers-title">Driver Management</h1>
+            <div className="drivers-header-left">
+              <h1 className="drivers-title">Driver Management</h1>
+              <div className="drivers-subtitle">
+                View, search, and manage all drivers in your fleet
+              </div>
+            </div>
             <Button
               className="add-driver-btn"
               onClick={() => navigate('/add-driver')}
@@ -240,9 +278,9 @@ const Drivers = () => {
                 <thead>
                   <tr>
                     <th>NAME</th>
+                    <th>ASSIGNED VEHICLE</th>
                     <th>EMAIL</th>
                     <th>PHONE</th>
-                    <th>ASSIGNED VEHICLE</th>
                     <th>LICENSE NUMBER</th>
                     <th>STATUS</th>
                     <th>ACTIONS</th>
@@ -265,7 +303,19 @@ const Drivers = () => {
                     drivers.map((driver) => (
                       <tr key={driver.id || driver.Id}>
                         <td className="driver-name-cell">
-                          {driver.fullName || driver.FullName || '–'}
+                          <div className="driver-avatar-cell">
+                            <div className="driver-avatar">
+                              {driverImages[driver.profileImgFileId] ? (
+                                <img src={driverImages[driver.profileImgFileId]} alt={driver.fullName || driver.FullName} />
+                              ) : (
+                                <span>{getDriverInitials(driver.email || driver.Email)}</span>
+                              )}
+                            </div>
+                            <span className="driver-name">{driver.fullName || driver.FullName || '–'}</span>
+                          </div>
+                        </td>
+                        <td>
+                          <span className="assigned-vehicle-badge">{driver.assignedVehiclePlate || '–'}</span>
                         </td>
                         <td className="driver-email-cell">
                           {driver.email || driver.Email || '–'}
@@ -274,13 +324,11 @@ const Drivers = () => {
                           {driver.phone || driver.Phone || '–'}
                         </td>
                         <td>
-                          {driver.assignedVehiclePlate || '–'}
-                        </td>
-                        <td>
                           {driver.licenseNumber || driver.LicenseNumber || '–'}
                         </td>
                         <td>
                           <span className={`status-badge ${(driver.isActive ?? driver.IsActive) ? 'status-active' : 'status-inactive'}`}>
+                            <span className="status-dot" />
                             {(driver.isActive ?? driver.IsActive) ? 'Active' : 'Inactive'}
                           </span>
                         </td>
