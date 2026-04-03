@@ -23,6 +23,7 @@ import Vehicles from './pages/Vehicles';
 import AdminFuelLogs from './pages/AdminFuelLogs';
 import AdminFuelLogDetails from './pages/AdminFuelLogDetails';
 import AdminTrips from './pages/AdminTrips';
+import AdminTripDetails from './pages/AdminTripDetails';
 import EditVehicle from './pages/EditVehicle';
 import AddVehicle from './pages/AddVehicle';
 import { authService } from './services/authService';
@@ -148,6 +149,11 @@ function App() {
         <Route path="/admin-trips" element={
           <ProtectedRoute>
             <AdminTrips />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin-trip-details" element={
+          <ProtectedRoute>
+            <AdminTripDetails />
           </ProtectedRoute>
         } />
         <Route path="/" element={<HomeRoute />} />

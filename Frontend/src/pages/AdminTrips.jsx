@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Alert, Container, Spinner } from 'react-bootstrap';
 import JSZip from 'jszip';
 import api from '../services/api';
@@ -21,6 +22,7 @@ const getColorForEmail = (email) => {
 };
 
 const AdminTrips = () => {
+  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 1024);
 
   const [trips, setTrips] = useState([]);
@@ -754,7 +756,7 @@ ${tripCards}
                                 <button
                                   className="at-icon-btn at-icon-btn--view"
                                   title="Details"
-                                  onClick={() => {}}
+                                  onClick={() => navigate('/admin-trip-details', { state: { trip } })}
                                 >
                                   <svg width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" strokeLinecap="round" strokeLinejoin="round"/>
@@ -849,7 +851,7 @@ ${tripCards}
                           <button
                             className="at-icon-btn at-icon-btn--view"
                             title="Details"
-                            onClick={() => {}}
+                            onClick={() => navigate('/admin-trip-details', { state: { trip } })}
                           >
                             <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                               <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" strokeLinecap="round" strokeLinejoin="round"/>
