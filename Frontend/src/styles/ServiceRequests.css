@@ -1,10 +1,7 @@
 /* Service Requests Page - Table Design with Stats Cards */
 .service-requests-page {
-  min-height: 100vh;
-  background: #f8fafc;
   padding: 24px;
-  max-width: 1400px;
-  margin: 0 auto;
+  flex: 1;
 }
 
 /* Header Section */

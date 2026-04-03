@@ -1,5 +1,25 @@
 /* Fuel Logs Page Styles - Responsive Design */
 
+/* Empty state */
+.sr-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #64748b;
+  gap: 16px;
+}
+
+.sr-empty svg {
+  opacity: 0.5;
+}
+
+.sr-empty p {
+  font-size: 1rem;
+  margin: 0;
+}
+
 .fuel-logs-page {
   min-height: 80vh;
   background: #f8fafc;
@@ -260,7 +280,7 @@
 /* Cost Cell */
 .cost-cell {
   font-weight: 700;
-  color: #1e293b;
+  color: #16a34a;
   font-size: 0.95rem;
   white-space: nowrap;
 }
@@ -375,6 +395,11 @@
   gap: 8px;
   flex-wrap: wrap;
   justify-content: flex-end;
+}
+
+.mobile-value.cost-value {
+  color: #16a34a;
+  font-weight: 700;
 }
 
 .mobile-plate {

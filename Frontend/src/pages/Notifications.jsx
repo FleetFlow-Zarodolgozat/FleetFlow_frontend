@@ -84,21 +84,21 @@ const Notifications = () => {
       const payload = response.data || [];
       setNotifications(Array.isArray(payload) ? payload : []);
     } catch {
-      setError('Hiba történt az értesítések lekérésekor!');
+      setError('Failed to load notifications.');
     } finally {
       setLoading(false);
     }
   };
 
   const handleMarkAllAsRead = async () => {
-    if (!window.confirm('Biztosan megjelölöd az összes értesítést olvasottként?')) return;
+    if (!window.confirm('Mark all notifications as read?')) return;
     setError('');
     try {
       await api.patch('/notifications/read');
       await fetchNotifications();
       setNotificationRefresh(r => r + 1);
     } catch (err) {
-      let msg = 'Hiba történt a művelet során!';
+      let msg = 'An error occurred. Please try again.';
       if (err.response && err.response.data) {
         const data = err.response.data;
         if (typeof data === 'string') msg = data;
@@ -113,14 +113,14 @@ const Notifications = () => {
   };
 
   const handleDeleteNotification = async (id) => {
-    if (!window.confirm('Biztosan törlöd ezt az értesítést?')) return;
+    if (!window.confirm('Are you sure you want to delete this notification?')) return;
     setError('');
     try {
       await api.delete(`/notifications/${id}`);
       await fetchNotifications();
       setNotificationRefresh(r => r + 1);
     } catch (err) {
-      let msg = 'Hiba történt a törlés során!';
+      let msg = 'Failed to delete notification.';
       if (err.response && err.response.data) {
         const data = err.response.data;
         if (typeof data === 'string') msg = data;

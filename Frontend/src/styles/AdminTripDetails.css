@@ -1,0 +1,386 @@
+/* ─── AdminTripDetails Page Styles ───────────────────────────── */
+
+.atd-dashboard {
+  display: flex;
+  min-height: 100vh;
+  background: #f4f6fa;
+}
+
+.atd-main {
+  flex: 1;
+  margin-left: var(--sidebar-width, 260px);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+.atd-page {
+  flex: 1;
+  padding: 32px 28px 24px 28px;
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* ─── Top bar ─────────────────────────────────────────────────── */
+.atd-topbar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.atd-back-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: #fff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 9px;
+  padding: 8px 16px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.atd-back-btn:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #1e293b;
+}
+
+.atd-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.atd-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.atd-deleted-badge {
+  background: #fee2e2;
+  color: #dc2626;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 8px;
+  padding: 3px 10px;
+  border: 1px solid #fecaca;
+}
+
+/* ─── Route Banner ────────────────────────────────────────────── */
+.atd-route-banner {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 20px 28px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.atd-route-point {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 160px;
+}
+
+.atd-route-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.atd-route-dot--origin {
+  background: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.18);
+}
+
+.atd-route-dot--dest {
+  background: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239,68,68,0.18);
+}
+
+.atd-route-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.atd-route-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #94a3b8;
+}
+
+.atd-route-value {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.atd-route-line {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 0 12px;
+  flex-shrink: 0;
+}
+
+.atd-route-distance {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+/* ─── Layout ──────────────────────────────────────────────────── */
+.atd-layout {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.atd-left-col,
+.atd-right-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ─── Section card ────────────────────────────────────────────── */
+.atd-section-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+.atd-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 20px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #64748b;
+  border-bottom: 1px solid #f1f5f9;
+  background: #f8fafc;
+}
+
+/* ─── Driver row ──────────────────────────────────────────────── */
+.atd-driver-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+}
+
+.atd-driver-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.atd-driver-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.atd-driver-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.atd-driver-email {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #1e293b;
+  word-break: break-all;
+}
+
+/* ─── Stats grid ──────────────────────────────────────────────── */
+.atd-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+.atd-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 20px 12px;
+  border-right: 1px solid #f1f5f9;
+  text-align: center;
+}
+
+.atd-stat-item:last-child {
+  border-right: none;
+}
+
+.atd-stat-item--blue svg { stroke: #3b82f6; }
+.atd-stat-item--purple svg { stroke: #7c3aed; }
+
+.atd-stat-value {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1;
+}
+
+.atd-stat-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #94a3b8;
+}
+
+/* ─── Detail list ─────────────────────────────────────────────── */
+.atd-detail-list {
+  margin: 0;
+  padding: 0;
+}
+
+.atd-detail-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 20px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.atd-detail-row:last-child {
+  border-bottom: none;
+}
+
+.atd-detail-row--notes {
+  align-items: flex-start;
+}
+
+.atd-detail-row dt {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  flex-shrink: 0;
+  min-width: 90px;
+}
+
+.atd-detail-row dd {
+  font-size: 0.9rem;
+  color: #334155;
+  margin: 0;
+  text-align: right;
+  word-break: break-word;
+}
+
+.atd-highlight {
+  font-weight: 700;
+  color: #1d4ed8 !important;
+}
+
+.atd-muted {
+  color: #94a3b8 !important;
+  font-size: 0.85rem !important;
+}
+
+/* ─── Plate badge ─────────────────────────────────────────────── */
+.atd-plate-badge {
+  display: inline-block;
+  background: #f1f5f9;
+  color: #0f172a;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  border-radius: 6px;
+  padding: 3px 10px;
+  border: 1px solid #e2e8f0;
+}
+
+/* ─── Status badges ───────────────────────────────────────────── */
+.atd-status {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border-radius: 6px;
+  padding: 3px 10px;
+}
+
+.atd-status--active {
+  background: #dcfce7;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+}
+
+.atd-status--deleted {
+  background: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+/* ─── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .atd-main {
+    margin-left: 0;
+  }
+
+  .atd-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .atd-page {
+    padding: 20px 16px 24px 16px;
+  }
+
+  .atd-route-banner {
+    padding: 16px 18px;
+  }
+
+  .atd-route-value {
+    white-space: normal;
+  }
+}

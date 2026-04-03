@@ -243,7 +243,7 @@ const AddNewTrip = () => {
                           min="0"
                         />
                         <div className="previous-odometer" style={{fontSize: '0.95em', color: '#6b7280', marginTop: '2px'}}>
-                          Previous: {Number(previousOdometer).toLocaleString()} km
+                          Previous trip ended at: {Number(previousOdometer).toLocaleString()} km
                         </div>
                       </Form.Group>
                     </Col>
