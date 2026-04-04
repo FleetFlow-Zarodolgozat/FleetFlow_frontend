@@ -9,6 +9,35 @@
   margin-left: 2px;
 }
 
+/* ---- Info rows (Title, Description, Service Date) ---- */
+.srd-info-row {
+  padding: 10px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.srd-info-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #94a3b8;
+  margin-bottom: 4px;
+}
+
+.srd-info-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+  line-height: 1.4;
+}
+
+.srd-info-value--muted {
+  font-weight: 400;
+  font-size: 0.93rem;
+  color: #475569;
+  line-height: 1.55;
+}
+
 /* ---- Status + License Plate meta cards ---- */
 .srd-meta-card {
   display: flex;
@@ -56,8 +85,51 @@
   word-break: break-word;
 }
 
-.srd-meta-value-status {
-  color: #6d28d9;
+/* ---- Status badge (colored like ServiceRequests table) ---- */
+.srd-status-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  border-left: 3px solid transparent;
+}
+
+.srd-status-badge.status-requested {
+  background: #dbeafe;
+  color: #1e40af;
+  border-left-color: #0d6efd;
+}
+
+.srd-status-badge.status-approved {
+  background: #dcfce7;
+  color: #166534;
+  border-left-color: #198754;
+}
+
+.srd-status-badge.status-rejected {
+  background: #fee2e2;
+  color: #991b1b;
+  border-left-color: #dc3545;
+}
+
+.srd-status-badge.status-closed {
+  background: #e5e7eb;
+  color: #374151;
+  border-left-color: #6c757d;
+}
+
+.srd-status-badge.status-driver-cost {
+  background: #f3e8ff;
+  color: #6b21a8;
+  border-left-color: #7c3aed;
+}
+
+.srd-status-badge.status-default {
+  background: #f1f5f9;
+  color: #475569;
+  border-left-color: #94a3b8;
 }
 
 .srd-meta-value-plate {

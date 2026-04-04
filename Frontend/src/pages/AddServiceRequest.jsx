@@ -83,7 +83,7 @@ const AddServiceRequest = () => {
     <div className="driver-dashboard">
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       <div className="main-content add-fuel-log-page add-service-request-page">
-        <Container fluid className="px-4 py-4">
+        <Container className="px-4 py-4 asr-container">
 
           {/* Header */}
           <div className="add-fuel-header mb-4">
@@ -91,9 +91,9 @@ const AddServiceRequest = () => {
             <p className="add-fuel-subtitle">Submit a new service request for your vehicle</p>
           </div>
 
-          <Row className="g-4">
+          <Row className="g-4 justify-content-center">
             {/* Left Column - Form */}
-            <Col lg={7} xl={8}>
+            <Col lg={7} xl={6}>
               <Card className="fuel-form-card border-0 shadow-sm">
                 <Card.Body className="p-4 p-md-5">
                   {error && <Alert variant="danger" className="mb-3">{error}</Alert>}
@@ -203,15 +203,7 @@ const AddServiceRequest = () => {
                           <div style={{ flex: 1 }}>
                             <div className="recent-log-date">{r.title || r.Title}</div>
                           </div>
-                          <span style={{
-                            fontSize: '0.75rem',
-                            fontWeight: 600,
-                            padding: '2px 8px',
-                            borderRadius: '12px',
-                            background: (r.status || r.Status || '').toLowerCase().includes('progress') ? '#fef9c3' : '#ede9fe',
-                            color: (r.status || r.Status || '').toLowerCase().includes('progress') ? '#854d0e' : '#6d28d9',
-                            whiteSpace: 'nowrap',
-                          }}>
+                          <span className={`asr-status-badge asr-status-${(r.status || r.Status || '').toLowerCase().replace('_', '-')}`}>
                             {r.status || r.Status}
                           </span>
                         </div>

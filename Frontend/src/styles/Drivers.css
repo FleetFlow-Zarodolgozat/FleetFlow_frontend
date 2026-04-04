@@ -20,8 +20,6 @@
 .drivers-page {
   flex: 1;
   padding: 32px 28px 24px 28px;
-  max-width: 1300px;
-  width: 100%;
 }
 
 /* Header */
@@ -280,58 +278,66 @@
 }
 
 .action-btn-icon {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 6px 8px;
-  border-radius: 8px;
-  transition: background 0.15s, color 0.15s, transform 0.15s;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background 0.18s, transform 0.12s;
+  padding: 0;
+  line-height: 1;
+}
+
+.action-btn-icon svg {
+  display: block;
+  flex-shrink: 0;
+  overflow: visible;
+}
+
+.action-btn-icon:active {
+  transform: scale(0.93);
 }
 
 .action-edit {
+  background: #dcfce7;
   color: #16a34a;
 }
 
 .action-edit:hover {
-  background: #dcfce7;
-  color: #15803d;
-  transform: scale(1.1);
+  background: #bbf7d0;
 }
 
 .action-deactivate {
+  background: #ffedd5;
   color: #ea580c;
   margin-left: 4px;
 }
 
 .action-deactivate:hover {
-  background: #ffedd5;
-  color: #c2410c;
-  transform: scale(1.1);
+  background: #fed7aa;
 }
 
 .action-activate {
-  color: #16a34a;
+  background: #d1fae5;
+  color: #065f46;
   margin-left: 4px;
 }
 
 .action-activate:hover {
-  background: #dcfce7;
-  color: #15803d;
-  transform: scale(1.1);
+  background: #a7f3d0;
 }
 
 .action-delete {
+  background: #fee2e2;
   color: #dc2626;
   margin-left: 4px;
 }
 
 .action-delete:hover {
-  background: #fee2e2;
-  color: #b91c1c;
-  transform: scale(1.1);
+  background: #fecaca;
 }
 
 /* Empty / Loading states */

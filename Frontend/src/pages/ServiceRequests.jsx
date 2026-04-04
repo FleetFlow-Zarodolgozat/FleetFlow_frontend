@@ -29,6 +29,16 @@ const ServiceRequests = () => {
         return 'default';
     };
 
+    const getStatusColor = (status) => {
+        const s = status?.toUpperCase() || '';
+        if (s === 'REQUESTED') return 'status-requested';
+        if (s === 'APPROVED') return 'status-approved';
+        if (s === 'REJECTED') return 'status-rejected';
+        if (s === 'CLOSED') return 'status-closed';
+        if (s === 'DRIVER_COST') return 'status-driver-cost';
+        return 'status-default';
+    };
+
     const formatDateTimeFull = (value) => {
         if (!value) return 'N/A';
         const date = new Date(value);
@@ -172,9 +182,9 @@ const ServiceRequests = () => {
                             </div>
                             <div className="sr-stat-info">
                                 <span className="sr-stat-value">
-                                    {serviceRequests.filter(r => getStatusBadgeVariant(r.status) === 'completed').length}
+                                    {serviceRequests.filter(r => getStatusBadgeVariant(r.status) === 'closed').length}
                                 </span>
-                                <span className="sr-stat-label">Completed</span>
+                                <span className="sr-stat-label">Closed</span>
                             </div>
                         </Card>
                         <Card className="sr-stat-card">
@@ -228,9 +238,9 @@ const ServiceRequests = () => {
                                                     <tr>
                                                         <th className="sr-table-col-title">Title</th>
                                                         <th className="sr-table-col-vehicle">Vehicle</th>
-                                                        <th className="sr-table-col-status">Status</th>
                                                         <th className="sr-table-col-scheduled">Scheduled</th>
                                                         <th className="sr-table-col-cost">Driver Cost</th>
+                                                        <th className="sr-table-col-status">Status</th>
                                                         <th className="sr-table-col-actions">Actions</th>
                                                     </tr>
                                                 </thead>
@@ -249,15 +259,15 @@ const ServiceRequests = () => {
                                                                 <span className="sr-cell-vehicle">{request.licensePlate}</span>
                                                             </td>
                                                             <td className="sr-table-cell">
-                                                                <span className={`sr-status-badge status-${getStatusBadgeVariant(request.status)}`}>
-                                                                    {request.status}
-                                                                </span>
-                                                            </td>
-                                                            <td className="sr-table-cell">
                                                                 <span className="sr-cell-date">{formatDateTimeFull(request.scheduledStart)}</span>
                                                             </td>
                                                             <td className="sr-table-cell">
                                                                 <span className="sr-cell-cost">{request.driverReportCost || request.driverReportCost === 0 ? request.driverReportCost : '0'} Ft</span>
+                                                            </td>
+                                                            <td className="sr-table-cell">
+                                                                <span className={`sr-status-badge ${getStatusColor(request.status)}`}>
+                                                                    {request.status}
+                                                                </span>
                                                             </td>
                                                             <td className="sr-table-cell">
                                                                 <div className="sr-cell-actions">
@@ -303,7 +313,7 @@ const ServiceRequests = () => {
                                                             </svg>
                                                             <span>{request.title}</span>
                                                         </div>
-                                                        <span className={`sr-status-badge status-${getStatusBadgeVariant(request.status)}`}>
+                                                        <span className={`sr-status-badge ${getStatusColor(request.status)}`}>
                                                             {request.status}
                                                         </span>
                                                     </div>

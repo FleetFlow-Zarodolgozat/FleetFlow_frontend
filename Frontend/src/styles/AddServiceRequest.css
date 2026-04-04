@@ -1,5 +1,81 @@
 ﻿/* Add Service Request Page - purple theme overrides over AddFuelLog base styles */
 
+/* Centered narrow container */
+.asr-container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* Status badges — same colors as ServiceRequests table */
+.asr-status-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 6px;
+  border-left: 3px solid transparent;
+  white-space: nowrap;
+}
+
+.asr-status-badge.asr-status-requested {
+  background: #dbeafe;
+  color: #1e40af;
+  border-left-color: #0d6efd;
+}
+
+.asr-status-badge.asr-status-approved {
+  background: #dcfce7;
+  color: #166534;
+  border-left-color: #198754;
+}
+
+.asr-status-badge.asr-status-rejected {
+  background: #fee2e2;
+  color: #991b1b;
+  border-left-color: #dc3545;
+}
+
+.asr-status-badge.asr-status-closed {
+  background: #e5e7eb;
+  color: #374151;
+  border-left-color: #6c757d;
+}
+
+.asr-status-badge.asr-status-driver-cost {
+  background: #f3e8ff;
+  color: #6b21a8;
+  border-left-color: #7c3aed;
+}
+
+.asr-status-badge.asr-status-default {
+  background: #f1f5f9;
+  color: #475569;
+  border-left-color: #94a3b8;
+}
+
+
+/* Fix pending request item layout */
+.add-service-request-page .recent-log-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.add-service-request-page .recent-log-item > div {
+  flex: 1;
+  min-width: 0;
+}
+
+.add-service-request-page .recent-log-date {
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.4;
+}
+
+.add-service-request-page .asr-status-badge {
+  flex-shrink: 0;
+}
+
 /* Required field asterisk */
 .asr-required {
   color: #ef4444;

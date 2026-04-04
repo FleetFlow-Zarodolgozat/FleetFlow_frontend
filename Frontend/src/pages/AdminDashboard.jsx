@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import JSZip from 'jszip';
 import Sidebar from '../components/Sidebar';
 import { Card, Container, Row, Col, Badge, Button, Form } from 'react-bootstrap';
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
@@ -50,6 +51,16 @@ const AdminDashboard = () => {
     pendingMaintenance: 0,
     urgentRequests: 0,
   });
+  const [trStats, setTrStats] = useState({
+    fuelCost: 0,
+    fuelCostChange: null,
+    tripCount: 0,
+    utilizationRate: 0,
+    srCount: 0,
+    srWaiting: 0,
+  });
+  const [trStatsLoading, setTrStatsLoading] = useState(false);
+  const [exportLoading, setExportLoading] = useState(false);
   const [upcomingEvents, setUpcomingEvents] = useState([]);
   const [eventForm, setEventForm] = useState({
     title: '',
@@ -207,6 +218,95 @@ const AdminDashboard = () => {
     }
   };
 
+  const loadTimeRangeStats = async (range, totalVehicles) => {
+    setTrStatsLoading(true);
+    try {
+      const now = new Date();
+      let curFrom, curTo, prevFrom, prevTo;
+
+      if (range === 'today') {
+        curFrom = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+        curTo   = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+        prevFrom = new Date(curFrom); prevFrom.setDate(prevFrom.getDate() - 1);
+        prevTo   = new Date(curTo);   prevTo.setDate(prevTo.getDate() - 1);
+      } else if (range === 'week') {
+        // Current calendar week: Monday 00:00 → Sunday 23:59
+        const dayOfWeek = now.getDay(); // 0=Sun,1=Mon,...
+        const diffToMon = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek);
+        curFrom = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMon, 0, 0, 0);
+        curTo   = new Date(curFrom); curTo.setDate(curTo.getDate() + 6); curTo.setHours(23, 59, 59, 999);
+        // Previous calendar week
+        prevFrom = new Date(curFrom); prevFrom.setDate(prevFrom.getDate() - 7);
+        prevTo   = new Date(curFrom); prevTo.setMilliseconds(-1);
+      } else {
+        // Current calendar month: 1st 00:00 → last day 23:59
+        curFrom = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0);
+        curTo   = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+        // Previous calendar month
+        prevFrom = new Date(now.getFullYear(), now.getMonth() - 1, 1, 0, 0, 0);
+        prevTo   = new Date(curFrom); prevTo.setMilliseconds(-1);
+      }
+
+      const inRange = (dateStr, from, to) => {
+        if (!dateStr) return false;
+        const d = new Date(dateStr);
+        return d >= from && d <= to;
+      };
+
+      const parseCost = (val) =>
+        parseFloat(String(val ?? '0').replace(/[^0-9.,]/g, '').replace(',', '.')) || 0;
+
+      const [fuelRes, tripsRes, srRes] = await Promise.all([
+        api.get('/fuellogs/admin', { params: { page: 1, pageSize: 10000 } }),
+        api.get('/trips/admin',    { params: { page: 1, pageSize: 10000 } }),
+        api.get('/service-requests/admin', { params: { page: 1, pageSize: 10000 } }),
+      ]);
+
+      const fuelLogs = Array.isArray(fuelRes.data?.data)  ? fuelRes.data.data  : [];
+      const trips    = Array.isArray(tripsRes.data?.data) ? tripsRes.data.data : [];
+      const srs      = Array.isArray(srRes.data?.data)    ? srRes.data.data    : [];
+
+      // ── Fuel cost ──────────────────────────────────────────────────────
+      const curFuelLogs  = fuelLogs.filter(l => inRange(l.date ?? l.Date, curFrom, curTo));
+      const prevFuelLogs = fuelLogs.filter(l => inRange(l.date ?? l.Date, prevFrom, prevTo));
+      const fuelCost     = curFuelLogs.reduce((s, l) => s + parseCost(l.totalCostCur ?? l.TotalCostCur), 0);
+      const fuelCostPrev = prevFuelLogs.reduce((s, l) => s + parseCost(l.totalCostCur ?? l.TotalCostCur), 0);
+      const fuelCostChange = fuelCostPrev > 0
+        ? Math.round(((fuelCost - fuelCostPrev) / fuelCostPrev) * 100)
+        : null;
+
+      // ── Trips + utilization ────────────────────────────────────────────
+      const curTrips = trips.filter(t => inRange(t.startTime ?? t.StartTime, curFrom, curTo));
+      const tripCount = curTrips.length;
+      const uniqueVehIds = new Set(curTrips.map(t => t.licensePlate ?? t.LicensePlate ?? t.vehicleId ?? t.VehicleId).filter(Boolean));
+      const utilizationRate = (totalVehicles ?? 0) > 0
+        ? Math.round((uniqueVehIds.size / totalVehicles) * 100)
+        : 0;
+
+      // ── Service requests ───────────────────────────────────────────────
+      // Use scheduledStart if available, else closedAt, else treat as "now" (pending/new)
+      const curSrs = srs.filter(sr => {
+        const dateField = sr.scheduledStart ?? sr.ScheduledStart ?? sr.closedAt ?? sr.ClosedAt;
+        if (!dateField) {
+          // No date set = newly submitted REQUESTED, count it in current period
+          return true;
+        }
+        return inRange(dateField, curFrom, curTo);
+      });
+      const srCount = curSrs.length;
+      const srWaiting = srs.filter(sr => {
+        const s = sr.status ?? sr.Status;
+        return s === 'REQUESTED' || s === 'DRIVER_COST';
+      }).length;
+
+      setTrStats({ fuelCost, fuelCostChange, tripCount, utilizationRate, srCount, srWaiting });
+    } catch (e) {
+      console.log('Could not load time-range stats:', e.message);
+    } finally {
+      setTrStatsLoading(false);
+    }
+  };
+
   useEffect(() => {
     loadCalendarEvents();
     loadStatistics();
@@ -216,6 +316,331 @@ const AdminDashboard = () => {
     loadFleetStats();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    loadTimeRangeStats(timeRange, fleetStats.total);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeRange, fleetStats.total]);
+
+  // ── Export helpers ────────────────────────────────────────────────────────
+  const exportFormatDateTime = (value) => {
+    if (!value) return { date: 'N/A', time: '' };
+    const date = new Date(value);
+    if (isNaN(date.getTime())) return { date: 'N/A', time: '' };
+    return {
+      date: date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+      time: date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }),
+    };
+  };
+
+  const exportFormatDuration = (ts) => {
+    if (!ts) return '—';
+    if (typeof ts === 'string') {
+      const parts = ts.split(':');
+      if (parts.length >= 2) {
+        const h = parseInt(parts[0], 10);
+        const m = parseInt(parts[1], 10);
+        if (h > 0) return `${h}h ${m}m`;
+        return `${m}m`;
+      }
+    }
+    return '—';
+  };
+
+  const exportParseCost = (val) =>
+    parseFloat(String(val ?? '0').replace(/[^0-9.,]/g, '').replace(',', '.')) || 0;
+
+  const handleExportReport = async () => {
+    setExportLoading(true);
+    try {
+      const now = new Date();
+      let curFrom, curTo;
+      if (timeRange === 'today') {
+        curFrom = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+        curTo   = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+      } else if (timeRange === 'week') {
+        const dayOfWeek = now.getDay();
+        const diffToMon = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek);
+        curFrom = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMon, 0, 0, 0);
+        curTo   = new Date(curFrom); curTo.setDate(curTo.getDate() + 6); curTo.setHours(23, 59, 59, 999);
+      } else {
+        curFrom = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0);
+        curTo   = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+      }
+
+      const rangeLabel = timeRange === 'today' ? 'Today' : timeRange === 'week' ? 'This Week' : 'This Month';
+      const dateRange = `${curFrom.toLocaleDateString('hu-HU')} → ${curTo.toLocaleDateString('hu-HU')}`;
+      const exportDate = new Date().toLocaleString('hu-HU');
+      const fileDate = new Date().toISOString().slice(0, 10);
+
+      const inRange = (dateStr, from, to) => {
+        if (!dateStr) return false;
+        const d = new Date(dateStr);
+        return d >= from && d <= to;
+      };
+
+      const [fuelRes, tripsRes, srRes] = await Promise.all([
+        api.get('/fuellogs/admin', { params: { page: 1, pageSize: 10000 } }),
+        api.get('/trips/admin',    { params: { page: 1, pageSize: 10000 } }),
+        api.get('/service-requests/admin', { params: { page: 1, pageSize: 10000 } }),
+      ]);
+
+      const fuelLogs = (Array.isArray(fuelRes.data?.data) ? fuelRes.data.data : [])
+        .filter(l => inRange(l.date ?? l.Date, curFrom, curTo));
+      const trips = (Array.isArray(tripsRes.data?.data) ? tripsRes.data.data : [])
+        .filter(t => inRange(t.startTime ?? t.StartTime, curFrom, curTo));
+      const srs = (Array.isArray(srRes.data?.data) ? srRes.data.data : [])
+        .filter(sr => {
+          const dateField = sr.scheduledStart ?? sr.ScheduledStart ?? sr.closedAt ?? sr.ClosedAt;
+          if (!dateField) return true;
+          return inRange(dateField, curFrom, curTo);
+        });
+
+      if (fuelLogs.length === 0 && trips.length === 0 && srs.length === 0) {
+        setExportLoading(false);
+        return;
+      }
+
+      // ── Receipt files ─────────────────────────────────────────────────────
+      const receiptMap = {};
+      await Promise.all(fuelLogs.map(async (log) => {
+        const id = log.id ?? log.Id;
+        const rid = log.receiptFileId ?? log.ReceiptFileId;
+        if (!rid) return;
+        try {
+          const res = await api.get(`/files/${rid}`, { responseType: 'blob' });
+          const type = res.data.type && res.data.type.startsWith('image/') ? res.data.type : 'image/jpeg';
+          const blob = res.data.type === type ? res.data : new Blob([res.data], { type });
+          const ext = type.split('/')[1].replace('jpeg', 'jpg');
+          receiptMap[rid] = { blob, ext, filename: `receipt_${id}.${ext}` };
+        } catch { receiptMap[rid] = null; }
+      }));
+
+      // ── Invoice files ─────────────────────────────────────────────────────
+      const invoiceMap = {};
+      await Promise.all(srs.map(async (r) => {
+        const id = r.id ?? r.Id;
+        const fileId = r.invoiceFileId ?? r.InvoiceFileId;
+        if (!fileId) return;
+        try {
+          const res = await api.get(`/files/${fileId}`, { responseType: 'blob' });
+          const type = res.data.type || 'application/octet-stream';
+          const ext = type.includes('pdf') ? 'pdf' : type.includes('png') ? 'png' : (type.includes('jpg') || type.includes('jpeg')) ? 'jpg' : 'bin';
+          invoiceMap[id] = { blob: res.data, ext, filename: `invoice_${id}.${ext}` };
+        } catch { invoiceMap[id] = null; }
+      }));
+
+      // ══════════════════════════════════════════════════════════════════════
+      // TRIPS
+      // ══════════════════════════════════════════════════════════════════════
+      const tripTotal = trips.length;
+      const tripDist  = trips.reduce((s, t) => s + (parseFloat(t.distanceKm ?? t.DistanceKm) || 0), 0);
+      const tripAvg   = tripTotal > 0 ? tripDist / tripTotal : 0;
+
+      const tripCsvLines = [
+        `FleetFlow – Trips Export (${rangeLabel})`,
+        `Exported at:,${exportDate}`,
+        ``,
+        `Date range:,${dateRange}`,
+        ``,
+        `Total trips:,${tripTotal.toLocaleString('hu-HU')}`,
+        `Total distance:,"${tripDist.toLocaleString('hu-HU', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} km"`,
+        `Avg distance per trip:,"${tripAvg.toLocaleString('hu-HU', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} km"`,
+        ``,
+        ['ID', 'Start Date', 'Start Time', 'Vehicle', 'Driver Email', 'Origin', 'Destination', 'Distance (km)', 'Duration', 'Notes'].join(','),
+        ...trips.map((t) => {
+          const fmt = exportFormatDateTime(t.startTime ?? t.StartTime);
+          const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+          return [t.id ?? t.Id, fmt.date, fmt.time, esc(t.licensePlate ?? t.LicensePlate ?? ''), esc(t.userEmail ?? t.UserEmail ?? ''), esc(t.startLocation ?? t.StartLocation ?? ''), esc(t.endLocation ?? t.EndLocation ?? ''), (t.distanceKm ?? t.DistanceKm ?? 0).toString().replace('.', ','), esc(exportFormatDuration(t.long ?? t.Long)), esc(t.notes ?? t.Notes ?? '')].join(',');
+        }),
+      ];
+      const tripCsv = '\uFEFF' + tripCsvLines.join('\r\n');
+
+      const tripCards = trips.map((t) => {
+        const fmt = exportFormatDateTime(t.startTime ?? t.StartTime);
+        const dist = (parseFloat(t.distanceKm ?? t.DistanceKm) || 0).toLocaleString('hu-HU', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+        const dur = exportFormatDuration(t.long ?? t.Long);
+        const plate = t.licensePlate ?? t.LicensePlate ?? '—';
+        const driver = t.userEmail ?? t.UserEmail ?? '—';
+        const origin = t.startLocation ?? t.StartLocation ?? '—';
+        const dest = t.endLocation ?? t.EndLocation ?? '—';
+        const notes = t.notes ?? t.Notes ?? '';
+        const id = t.id ?? t.Id;
+        return `<div class="trip-card">
+  <div class="card-header"><div class="card-number">#${id}</div><div class="card-plate">${plate}</div><div class="card-date">${fmt.date} &nbsp; ${fmt.time}</div></div>
+  <div class="card-route"><div class="route-point"><span class="route-dot dot-origin"></span><span class="route-label">From</span><span class="route-value">${origin}</span></div><div class="route-arrow">&#8594;</div><div class="route-point"><span class="route-dot dot-dest"></span><span class="route-label">To</span><span class="route-value">${dest}</span></div></div>
+  <div class="card-stats"><div class="stat-pill">&#128205; ${dist} km</div><div class="stat-pill">&#128344; ${dur}</div></div>
+  <div class="card-footer"><span class="driver-label">Driver:</span> <span class="driver-email">${driver}</span>${notes ? ` &nbsp;|&nbsp; <span class="notes-text">${notes}</span>` : ''}</div>
+</div>`;
+      }).join('\n');
+
+      const tripHtml = `<!DOCTYPE html><html lang="hu"><head><meta charset="UTF-8"><title>FleetFlow - Trips Export</title><style>body{font-family:Calibri,Arial,sans-serif;margin:32px;color:#0f172a;font-size:13px;}h1{font-size:22px;color:#1d6ee6;margin-bottom:2px;}.subtitle{color:#64748b;font-size:12px;margin-bottom:4px;}.meta{color:#94a3b8;font-size:11px;margin-bottom:24px;}.section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;margin:20px 0 8px;border-bottom:1px solid #e2e8f0;padding-bottom:4px;}.stats-grid{display:flex;gap:16px;margin-bottom:24px;flex-wrap:wrap;}.stat-box{border:1px solid #e2e8f0;border-radius:8px;padding:12px 20px;min-width:130px;}.stat-box .label{font-size:10px;text-transform:uppercase;color:#94a3b8;}.stat-box .value{font-size:18px;font-weight:700;color:#0f172a;}.stat-box.blue{border-top:3px solid #3b82f6;}.stat-box.green{border-top:3px solid #16a34a;}.stat-box.purple{border-top:3px solid #7c3aed;}.trip-card{border:1px solid #e2e8f0;border-radius:10px;padding:16px 20px;margin-bottom:14px;background:#ffffff;page-break-inside:avoid;}.card-header{display:flex;align-items:center;gap:12px;margin-bottom:12px;border-bottom:1px solid #f1f5f9;padding-bottom:10px;}.card-number{font-size:11px;font-weight:700;color:#94a3b8;min-width:28px;}.card-plate{font-size:15px;font-weight:700;color:#1e293b;background:#f1f5f9;border-radius:5px;padding:2px 10px;letter-spacing:1px;}.card-date{font-size:12px;color:#64748b;margin-left:auto;}.card-route{display:flex;align-items:center;gap:16px;margin-bottom:12px;}.route-point{display:flex;align-items:center;gap:6px;flex:1;}.route-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}.dot-origin{background:#3b82f6;}.dot-dest{background:#ef4444;}.route-label{font-size:9px;text-transform:uppercase;color:#94a3b8;min-width:22px;}.route-value{font-size:12px;color:#1e293b;}.route-arrow{font-size:18px;color:#cbd5e1;}.card-stats{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;}.stat-pill{background:#f8fafc;border:1px solid #e2e8f0;border-radius:20px;padding:3px 12px;font-size:11px;color:#475569;}.card-footer{font-size:11px;color:#64748b;}.driver-label{font-weight:600;color:#475569;}.driver-email{color:#1d6ee6;}.notes-text{font-style:italic;}.footer{margin-top:32px;font-size:10px;color:#94a3b8;text-align:right;border-top:1px solid #f1f5f9;padding-top:12px;}</style></head><body>
+<h1>FleetFlow – Trips Export</h1><div class="subtitle">${rangeLabel} – ${dateRange}</div><div class="meta">Exported: ${exportDate}</div>
+<div class="section-title">Summary</div><div class="stats-grid"><div class="stat-box blue"><div class="label">Total Trips</div><div class="value">${tripTotal.toLocaleString('hu-HU')}</div></div><div class="stat-box green"><div class="label">Total Distance</div><div class="value">${tripDist.toLocaleString('hu-HU', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} km</div></div><div class="stat-box purple"><div class="label">Avg / Trip</div><div class="value">${tripAvg.toLocaleString('hu-HU', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} km</div></div></div>
+<div class="section-title">Trip Records (${tripTotal})</div>${tripCards}
+<div class="footer">FleetFlow – generated ${exportDate}</div></body></html>`;
+
+      // ══════════════════════════════════════════════════════════════════════
+      // FUEL LOGS
+      // ══════════════════════════════════════════════════════════════════════
+      const fuelTotal  = fuelLogs.length;
+      const fuelLiters = fuelLogs.reduce((s, l) => s + (parseFloat(l.liters ?? l.Liters) || 0), 0);
+      const fuelCost   = fuelLogs.reduce((s, l) => s + exportParseCost(l.totalCostCur ?? l.TotalCostCur), 0);
+      const fuelAvgCpl = fuelLiters > 0 ? Math.round(fuelCost / fuelLiters) : 0;
+
+      const fuelCsvLines = [
+        `FleetFlow – Fuel Logs Export (${rangeLabel})`,
+        `Exported at:,${exportDate}`,
+        ``,
+        `Date range:,${dateRange}`,
+        ``,
+        `Total records:,${fuelTotal.toLocaleString('hu-HU')}`,
+        `Total liters:,"${fuelLiters.toLocaleString('hu-HU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} L"`,
+        `Total cost:,"${Math.round(fuelCost).toLocaleString('hu-HU')} Ft"`,
+        `Avg cost/liter:,"${fuelAvgCpl} Ft/L"`,
+        ``,
+        ['ID', 'Date', 'Time', 'Vehicle', 'Driver Email', 'Station', 'Liters', 'Total Cost'].join(','),
+        ...fuelLogs.map((log) => {
+          const fmt = exportFormatDateTime(log.date ?? log.Date);
+          const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+          return [log.id ?? log.Id, fmt.date, fmt.time, esc(log.licensePlate ?? log.LicensePlate ?? ''), esc(log.userEmail ?? log.UserEmail ?? ''), esc(log.stationName ?? log.StationName ?? ''), (parseFloat(log.liters ?? log.Liters) || 0).toFixed(2).replace('.', ','), esc(log.totalCostCur ?? log.TotalCostCur ?? '')].join(',');
+        }),
+      ];
+      const fuelCsv = '\uFEFF' + fuelCsvLines.join('\r\n');
+
+      const fuelCards = fuelLogs.map((log) => {
+        const fmt = exportFormatDateTime(log.date ?? log.Date);
+        const plate = log.licensePlate ?? log.LicensePlate ?? '—';
+        const liters = (parseFloat(log.liters ?? log.Liters) || 0).toFixed(2);
+        const cost = log.totalCostCur ?? log.TotalCostCur ?? '—';
+        const station = log.stationName ?? log.StationName ?? '—';
+        const driver = log.userEmail ?? log.UserEmail ?? '—';
+        const id = log.id ?? log.Id;
+        const rid = log.receiptFileId ?? log.ReceiptFileId;
+        const receiptEntry = rid ? receiptMap[rid] : null;
+        const receiptHtml = receiptEntry
+          ? `<div class="receipt-section"><div class="receipt-label">Receipt</div><div class="receipt-filename">&#128206; ${receiptEntry.filename}</div></div>`
+          : `<div class="receipt-section receipt-missing">No receipt uploaded</div>`;
+        return `<div class="fuel-card">
+  <div class="card-header"><div class="card-number">#${id}</div><div class="card-plate">${plate}</div><div class="card-date">${fmt.date}&nbsp;&nbsp;${fmt.time}</div></div>
+  <div class="card-stats"><div class="stat-pill pill-orange">&#9650; ${liters} L</div><div class="stat-pill pill-green">&#128178; ${cost}</div><div class="stat-pill">&#128205; ${station}</div></div>
+  <div class="card-driver"><span class="driver-label">Driver:</span> <span class="driver-email">${driver}</span></div>
+  ${receiptHtml}
+</div>`;
+      }).join('\n');
+
+      const fuelHtml = `<!DOCTYPE html><html lang="hu"><head><meta charset="UTF-8"><title>FleetFlow - Fuel Logs Export</title><style>body{font-family:Calibri,Arial,sans-serif;margin:32px;color:#0f172a;font-size:13px;}h1{font-size:22px;color:#1d6ee6;margin-bottom:2px;}.subtitle{color:#64748b;font-size:12px;margin-bottom:4px;}.meta{color:#94a3b8;font-size:11px;margin-bottom:24px;}.section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;margin:20px 0 8px;border-bottom:1px solid #e2e8f0;padding-bottom:4px;}.stats-grid{display:flex;gap:16px;margin-bottom:24px;flex-wrap:wrap;}.stat-box{border:1px solid #e2e8f0;border-radius:8px;padding:12px 20px;min-width:130px;}.stat-box .label{font-size:10px;text-transform:uppercase;color:#94a3b8;}.stat-box .value{font-size:18px;font-weight:700;color:#0f172a;}.stat-box.blue{border-top:3px solid #3b82f6;}.stat-box.orange{border-top:3px solid #f97316;}.stat-box.green{border-top:3px solid #16a34a;}.stat-box.purple{border-top:3px solid #7c3aed;}.fuel-card{border:1px solid #e2e8f0;border-radius:10px;padding:16px 20px;margin-bottom:16px;background:#ffffff;page-break-inside:avoid;}.card-header{display:flex;align-items:center;gap:12px;margin-bottom:12px;border-bottom:1px solid #f1f5f9;padding-bottom:10px;}.card-number{font-size:11px;font-weight:700;color:#94a3b8;min-width:28px;}.card-plate{font-size:15px;font-weight:700;color:#1e293b;background:#f1f5f9;border-radius:5px;padding:2px 10px;letter-spacing:1px;}.card-date{font-size:12px;color:#64748b;margin-left:auto;}.card-stats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}.stat-pill{background:#f8fafc;border:1px solid #e2e8f0;border-radius:20px;padding:3px 12px;font-size:11px;color:#475569;}.pill-orange{background:#fff7ed;border-color:#fed7aa;color:#c2410c;}.pill-green{background:#f0fdf4;border-color:#bbf7d0;color:#15803d;}.card-driver{font-size:11px;color:#64748b;margin-bottom:12px;}.driver-label{font-weight:600;color:#475569;}.driver-email{color:#1d6ee6;}.receipt-section{margin-top:12px;border-top:1px solid #f1f5f9;padding-top:10px;}.receipt-label{font-size:10px;font-weight:700;text-transform:uppercase;color:#94a3b8;margin-bottom:6px;}.receipt-filename{font-size:12px;color:#1d6ee6;font-family:monospace;}.receipt-missing{font-size:11px;color:#94a3b8;font-style:italic;}.footer{margin-top:32px;font-size:10px;color:#94a3b8;text-align:right;border-top:1px solid #f1f5f9;padding-top:12px;}</style></head><body>
+<h1>FleetFlow – Fuel Logs Export</h1><div class="subtitle">${rangeLabel} – ${dateRange}</div><div class="meta">Exported: ${exportDate}</div>
+<div class="section-title">Summary</div><div class="stats-grid"><div class="stat-box blue"><div class="label">Total Records</div><div class="value">${fuelTotal.toLocaleString('hu-HU')}</div></div><div class="stat-box orange"><div class="label">Total Liters</div><div class="value">${fuelLiters.toLocaleString('hu-HU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} L</div></div><div class="stat-box green"><div class="label">Total Cost</div><div class="value">${Math.round(fuelCost).toLocaleString('hu-HU')} Ft</div></div><div class="stat-box purple"><div class="label">Avg / Liter</div><div class="value">${fuelAvgCpl} Ft/L</div></div></div>
+<div class="section-title">Fuel Log Records (${fuelTotal})</div>${fuelCards}
+<div class="footer">FleetFlow – generated ${exportDate}</div></body></html>`;
+
+      // ══════════════════════════════════════════════════════════════════════
+      // SERVICE REQUESTS
+      // ══════════════════════════════════════════════════════════════════════
+      const srTotal    = srs.length;
+      const srOngoing  = srs.filter(r => { const s = r.status ?? r.Status; return s !== 'REJECTED' && s !== 'CLOSED'; }).length;
+      const srApproved = srs.filter(r => (r.status ?? r.Status) === 'APPROVED').length;
+      const srWithCost = srs.filter(r => r.driverReportCost ?? r.DriverReportCost).length;
+
+      const srStatusLabels = { REQUESTED: 'Requested', APPROVED: 'Approved', REJECTED: 'Rejected', CLOSED: 'Closed', DRIVER_COST: 'Cost Report' };
+      const srStatusColors = {
+        REQUESTED:   { bg: '#dbeafe', text: '#1e40af', border: '#93c5fd' },
+        APPROVED:    { bg: '#dcfce7', text: '#166534', border: '#86efac' },
+        REJECTED:    { bg: '#fee2e2', text: '#991b1b', border: '#fca5a5' },
+        CLOSED:      { bg: '#e5e7eb', text: '#374151', border: '#d1d5db' },
+        DRIVER_COST: { bg: '#f3e8ff', text: '#6b21a8', border: '#d8b4fe' },
+      };
+
+      const srCsvLines = [
+        `FleetFlow – Service Requests Export (${rangeLabel})`,
+        `Exported at:,${exportDate}`,
+        ``,
+        `Date range:,${dateRange}`,
+        ``,
+        `Total records:,${srTotal}`,
+        ``,
+        ['ID', 'Title', 'Vehicle', 'Driver', 'Status', 'Scheduled', 'Reported Cost (Ft)', 'Closed At'].join(','),
+        ...srs.map(r => {
+          const scheduled = r.scheduledStart ?? r.ScheduledStart ?? '';
+          const closed = r.closedAt ?? r.ClosedAt ?? '';
+          const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+          return [r.id ?? r.Id ?? '', esc(r.title ?? r.Title ?? ''), r.licensePlate ?? r.LicensePlate ?? '', esc(r.userEmail ?? r.UserEmail ?? ''), r.status ?? r.Status ?? '', scheduled ? new Date(scheduled).toLocaleDateString('hu-HU') : '', r.driverReportCost ?? r.DriverReportCost ?? '', closed ? new Date(closed).toLocaleDateString('hu-HU') : ''].join(',');
+        }),
+      ];
+      const srCsv = '\uFEFF' + srCsvLines.join('\r\n');
+
+      const srCards = srs.map(r => {
+        const id = r.id ?? r.Id ?? '';
+        const title = r.title ?? r.Title ?? '—';
+        const plate = r.licensePlate ?? r.LicensePlate ?? '—';
+        const driver = r.userEmail ?? r.UserEmail ?? '—';
+        const rawStatus = r.status ?? r.Status ?? '';
+        const statusLbl = srStatusLabels[rawStatus] ?? rawStatus;
+        const sc = srStatusColors[rawStatus] ?? { bg: '#f1f5f9', text: '#475569', border: '#e2e8f0' };
+        const scheduled = r.scheduledStart ?? r.ScheduledStart ?? '';
+        const closed = r.closedAt ?? r.ClosedAt ?? '';
+        const cost = r.driverReportCost ?? r.DriverReportCost;
+        const scheduledFmt = scheduled ? new Date(scheduled).toLocaleDateString('hu-HU') : '—';
+        const closedFmt = closed ? new Date(closed).toLocaleDateString('hu-HU') : null;
+        const invoiceEntry = invoiceMap[id];
+        const invoiceHtml = invoiceEntry
+          ? `<div class="invoice-section"><div class="invoice-label">Invoice</div><div class="invoice-filename">&#128206; ${invoiceEntry.filename}</div></div>`
+          : '';
+        return `<div class="sr-card">
+  <div class="card-header"><div class="card-number">#${id}</div><div class="card-title">${title}</div><div class="status-badge" style="background:${sc.bg};color:${sc.text};border:1px solid ${sc.border}">${statusLbl}</div></div>
+  <div class="card-row"><div class="stat-pill pill-vehicle">&#128663; ${plate}</div><div class="stat-pill pill-date">&#128197; ${scheduledFmt}</div>${cost != null && cost !== '' ? `<div class="stat-pill pill-cost">&#128178; ${cost} Ft</div>` : ''}${closedFmt ? `<div class="stat-pill pill-closed">&#10003; Closed: ${closedFmt}</div>` : ''}</div>
+  <div class="card-driver"><span class="driver-label">Driver:</span> <span class="driver-email">${driver}</span></div>
+  ${invoiceHtml}
+</div>`;
+      }).join('\n');
+
+      const srHtml = `<!DOCTYPE html><html lang="hu"><head><meta charset="UTF-8"><title>FleetFlow - Service Requests Export</title><style>body{font-family:Calibri,Arial,sans-serif;margin:32px;color:#0f172a;font-size:13px;}h1{font-size:22px;color:#7c3aed;margin-bottom:2px;}.subtitle{color:#64748b;font-size:12px;margin-bottom:4px;}.meta{color:#94a3b8;font-size:11px;margin-bottom:24px;}.section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;margin:20px 0 8px;border-bottom:1px solid #e2e8f0;padding-bottom:4px;}.stats-grid{display:flex;gap:16px;margin-bottom:24px;flex-wrap:wrap;}.stat-box{border:1px solid #e2e8f0;border-radius:8px;padding:12px 20px;min-width:130px;}.stat-box .label{font-size:10px;text-transform:uppercase;color:#94a3b8;}.stat-box .value{font-size:18px;font-weight:700;color:#0f172a;}.stat-box.purple{border-top:3px solid #7c3aed;}.stat-box.blue{border-top:3px solid #3b82f6;}.stat-box.green{border-top:3px solid #16a34a;}.stat-box.orange{border-top:3px solid #f97316;}.sr-card{border:1px solid #e2e8f0;border-radius:10px;padding:16px 20px;margin-bottom:16px;background:#ffffff;page-break-inside:avoid;}.card-header{display:flex;align-items:center;gap:12px;margin-bottom:12px;border-bottom:1px solid #f1f5f9;padding-bottom:10px;}.card-number{font-size:11px;font-weight:700;color:#94a3b8;min-width:28px;}.card-title{font-size:14px;font-weight:700;color:#1e293b;flex:1;}.status-badge{font-size:10px;font-weight:700;border-radius:12px;padding:3px 10px;white-space:nowrap;}.card-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}.stat-pill{background:#f8fafc;border:1px solid #e2e8f0;border-radius:20px;padding:3px 12px;font-size:11px;color:#475569;}.pill-vehicle{background:#eff6ff;border-color:#bfdbfe;color:#1d4ed8;}.pill-date{background:#fefce8;border-color:#fde68a;color:#92400e;}.pill-cost{background:#f0fdf4;border-color:#bbf7d0;color:#15803d;}.pill-closed{background:#f1f5f9;border-color:#cbd5e1;color:#475569;}.card-driver{font-size:11px;color:#64748b;}.driver-label{font-weight:600;color:#475569;}.driver-email{color:#7c3aed;}.invoice-section{margin-top:12px;border-top:1px solid #f1f5f9;padding-top:10px;}.invoice-label{font-size:10px;font-weight:700;text-transform:uppercase;color:#94a3b8;margin-bottom:4px;}.invoice-filename{font-size:12px;color:#7c3aed;font-family:monospace;}.footer{margin-top:32px;font-size:10px;color:#94a3b8;text-align:right;border-top:1px solid #f1f5f9;padding-top:12px;}</style></head><body>
+<h1>FleetFlow – Service Requests Export</h1><div class="subtitle">${rangeLabel} – ${dateRange}</div><div class="meta">Exported: ${exportDate}</div>
+<div class="section-title">Summary</div><div class="stats-grid"><div class="stat-box purple"><div class="label">Total Records</div><div class="value">${srTotal.toLocaleString('hu-HU')}</div></div><div class="stat-box blue"><div class="label">Ongoing</div><div class="value">${srOngoing.toLocaleString('hu-HU')}</div></div><div class="stat-box green"><div class="label">Approved</div><div class="value">${srApproved.toLocaleString('hu-HU')}</div></div><div class="stat-box orange"><div class="label">With Cost Report</div><div class="value">${srWithCost.toLocaleString('hu-HU')}</div></div></div>
+<div class="section-title">Service Request Records (${srTotal})</div>${srCards}
+<div class="footer">FleetFlow – generated ${exportDate}</div></body></html>`;
+
+      // ══════════════════════════════════════════════════════════════════════
+      // BUILD ZIP
+      // ══════════════════════════════════════════════════════════════════════
+      const zip = new JSZip();
+
+      zip.file(`trips_${fileDate}.csv`, tripCsv);
+      zip.file(`trips_${fileDate}.doc`, tripHtml);
+
+      zip.file(`fuellogs_${fileDate}.csv`, fuelCsv);
+      zip.file(`fuellogs_${fileDate}.doc`, fuelHtml);
+      const receiptsFolder = zip.folder('receipts');
+      for (const entry of Object.values(receiptMap)) {
+        if (entry) receiptsFolder.file(entry.filename, entry.blob);
+      }
+
+      zip.file(`service_requests_${fileDate}.csv`, srCsv);
+      zip.file(`service_requests_${fileDate}.doc`, srHtml);
+      const invoiceEntries = Object.values(invoiceMap).filter(Boolean);
+      if (invoiceEntries.length > 0) {
+        const invoicesFolder = zip.folder('invoices');
+        for (const entry of invoiceEntries) {
+          invoicesFolder.file(entry.filename, entry.blob);
+        }
+      }
+
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const zipUrl = URL.createObjectURL(zipBlob);
+      const a = document.createElement('a');
+      a.href = zipUrl;
+      a.download = `fleetflow_report_${rangeLabel.replace(' ', '_').toLowerCase()}_${fileDate}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(zipUrl);
+    } catch (err) {
+      console.error('Export failed:', err);
+    } finally {
+      setExportLoading(false);
+    }
+  };
 
   const handleEventChange = (e) => {
     const { name, value } = e.target;
@@ -380,13 +805,13 @@ const AdminDashboard = () => {
                     Month
                   </button>
                 </div>
-                <Button className="export-report-btn">
+                <Button className="export-report-btn" onClick={handleExportReport} disabled={exportLoading}>
                   <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" strokeLinecap="round" strokeLinejoin="round"/>
                     <polyline points="7,10 12,15 17,10" strokeLinecap="round" strokeLinejoin="round"/>
                     <line x1="12" y1="15" x2="12" y2="3" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
-                  Export Report
+                  {exportLoading ? 'Exporting…' : 'Export Report'}
                 </Button>
               </div>
             </Col>
@@ -395,6 +820,7 @@ const AdminDashboard = () => {
 
         {/* Stats Cards */}
         <Row className="g-3 mb-4">
+          {/* Card 1: Total Fleet — always all-time */}
           <Col xl={3} lg={4} md={6}>
             <Card className="stat-card h-100">
               <Card.Body>
@@ -402,10 +828,16 @@ const AdminDashboard = () => {
                   <div>
                     <span className="stat-label text-muted small">Total Fleet</span>
                     <h3 className="stat-value mb-2">{fleetStats.total}</h3>
-                    <Badge bg="success-subtle" text="success" className="stat-change">
+                    <Badge
+                      bg={fleetStats.activePercent >= 50 ? 'success-subtle' : 'danger-subtle'}
+                      text={fleetStats.activePercent >= 50 ? 'success' : 'danger'}
+                      className="stat-change"
+                    >
                       <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="me-1">
-                        <polyline points="23,6 13.5,15.5 8.5,10.5 1,18" strokeLinecap="round" strokeLinejoin="round"/>
-                        <polyline points="17,6 23,6 23,12" strokeLinecap="round" strokeLinejoin="round"/>
+                        {fleetStats.activePercent >= 50
+                          ? <polyline points="23,6 13.5,15.5 8.5,10.5 1,18" strokeLinecap="round" strokeLinejoin="round"/>
+                          : <polyline points="23,18 13.5,8.5 8.5,13.5 1,6" strokeLinecap="round" strokeLinejoin="round"/>
+                        }
                       </svg>
                       {fleetStats.activePercent}% active
                     </Badge>
@@ -423,21 +855,42 @@ const AdminDashboard = () => {
             </Card>
           </Col>
 
+          {/* Card 2: Fuel Costs — filtered by timeRange */}
           <Col xl={3} lg={4} md={6}>
             <Card className="stat-card h-100">
               <Card.Body>
                 <div className="d-flex justify-content-between align-items-start">
                   <div>
-                    <span className="stat-label text-muted small">Fuel Costs</span>
-                    <h3 className="stat-value mb-2">${stats.fuelCosts.toLocaleString()}</h3>
-                    <Badge bg="danger-subtle" text="danger" className="stat-change">
-                      <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="me-1">
-                        <polyline points="23,18 13.5,8.5 8.5,13.5 1,6" strokeLinecap="round" strokeLinejoin="round"/>
-                        <polyline points="17,18 23,18 23,12" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                      {stats.fuelCostsChange}%
-                    </Badge>
-                    <span className="stat-compare text-muted small ms-1">vs last month</span>
+                    <span className="stat-label text-muted small">
+                      Fuel Costs ({timeRange === 'today' ? 'Today' : timeRange === 'week' ? 'This Week' : 'This Month'})
+                    </span>
+                    <h3 className="stat-value mb-2">
+                      {trStatsLoading ? '…' : `${Math.round(trStats.fuelCost).toLocaleString('hu-HU')} Ft`}
+                    </h3>
+                    {!trStatsLoading && trStats.fuelCost === 0 ? (
+                      <Badge bg="secondary-subtle" text="secondary" className="stat-change">
+                        <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="me-1">
+                          <path d="M12 8v8m-4-4h8M3 12a9 9 0 1 1 18 0 9 9 0 0 1-18 0z" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                        Cannot be compared
+                      </Badge>
+                    ) : !trStatsLoading && trStats.fuelCostChange !== null ? (
+                      <Badge
+                        bg={trStats.fuelCostChange <= 0 ? 'success-subtle' : 'danger-subtle'}
+                        text={trStats.fuelCostChange <= 0 ? 'success' : 'danger'}
+                        className="stat-change"
+                      >
+                        <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="me-1">
+                          {trStats.fuelCostChange <= 0
+                            ? <polyline points="23,18 13.5,8.5 8.5,13.5 1,6" strokeLinecap="round" strokeLinejoin="round"/>
+                            : <polyline points="23,6 13.5,15.5 8.5,10.5 1,18" strokeLinecap="round" strokeLinejoin="round"/>
+                          }
+                        </svg>
+                        {Math.abs(trStats.fuelCostChange)}% vs prev. {timeRange === 'today' ? 'day' : timeRange === 'week' ? 'week' : 'month'}
+                      </Badge>
+                    ) : !trStatsLoading ? (
+                      <span className="stat-extra text-muted small">No data for previous period</span>
+                    ) : null}
                   </div>
                   <div className="stat-icon fuel">
                     <svg width="28" height="28" fill="none" stroke="#fd7e14" strokeWidth="2" viewBox="0 0 24 24">
@@ -451,14 +904,33 @@ const AdminDashboard = () => {
             </Card>
           </Col>
 
+          {/* Card 3: Trips — filtered by timeRange */}
           <Col xl={3} lg={4} md={6}>
             <Card className="stat-card h-100">
               <Card.Body>
                 <div className="d-flex justify-content-between align-items-start">
                   <div>
-                    <span className="stat-label text-muted small">Active Trips</span>
-                    <h3 className="stat-value mb-2">{stats.activeTrips}</h3>
-                    <span className="stat-extra text-muted small">{stats.utilizationRate}% utilization rate</span>
+                    <span className="stat-label text-muted small">
+                      Trips ({timeRange === 'today' ? 'Today' : timeRange === 'week' ? 'This Week' : 'This Month'})
+                    </span>
+                    <h3 className="stat-value mb-2">
+                      {trStatsLoading ? '…' : trStats.tripCount}
+                    </h3>
+                    {!trStatsLoading && (
+                      <Badge
+                        bg={trStats.utilizationRate >= 50 ? 'success-subtle' : 'danger-subtle'}
+                        text={trStats.utilizationRate >= 50 ? 'success' : 'danger'}
+                        className="stat-change"
+                      >
+                        <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="me-1">
+                          {trStats.utilizationRate >= 50
+                            ? <polyline points="23,6 13.5,15.5 8.5,10.5 1,18" strokeLinecap="round" strokeLinejoin="round"/>
+                            : <polyline points="23,18 13.5,8.5 8.5,13.5 1,6" strokeLinecap="round" strokeLinejoin="round"/>
+                          }
+                        </svg>
+                        {trStats.utilizationRate}% utilization rate
+                      </Badge>
+                    )}
                   </div>
                   <div className="stat-icon trips">
                     <svg width="28" height="28" fill="none" stroke="#198754" strokeWidth="2" viewBox="0 0 24 24">
@@ -471,15 +943,22 @@ const AdminDashboard = () => {
             </Card>
           </Col>
 
+          {/* Card 4: Service Requests — filtered by timeRange */}
           <Col xl={3} lg={4} md={6}>
             <Card className="stat-card h-100">
               <Card.Body>
                 <div className="d-flex justify-content-between align-items-start">
                   <div>
-                    <span className="stat-label text-muted small">Pending Maintenance</span>
-                    <h3 className="stat-value mb-2">{stats.pendingMaintenance}</h3>
+                    <span className="stat-label text-muted small">
+                      Service Requests ({timeRange === 'today' ? 'Today' : timeRange === 'week' ? 'This Week' : 'This Month'})
+                    </span>
+                    <h3 className="stat-value mb-2">
+                      {trStatsLoading ? '…' : `${trStats.srCount} created`}
+                    </h3>
                     <span className="stat-extra text-muted small">
-                      <span className="text-danger fw-semibold">{stats.urgentRequests} Urgent</span> requests
+                      {trStatsLoading ? '…' : (
+                        <><span className={trStats.srWaiting === 0 ? 'text-success fw-semibold' : 'text-danger fw-semibold'}>{trStats.srWaiting}</span> Waiting for response</>
+                      )}
                     </span>
                   </div>
                   <div className="stat-icon maintenance">

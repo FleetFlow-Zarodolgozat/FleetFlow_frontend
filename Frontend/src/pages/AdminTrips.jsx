@@ -211,6 +211,12 @@ const AdminTrips = () => {
         });
       }
 
+      if (rows.length === 0) {
+        setError('No data to export for the selected filters.');
+        setCsvLoading(false);
+        return;
+      }
+
       const exportTotal = rows.length;
       const exportDistance = rows.reduce((s, t) => s + (parseFloat(t.distanceKm ?? t.DistanceKm) || 0), 0);
       const exportAvgDist = exportTotal > 0 ? exportDistance / exportTotal : 0;
