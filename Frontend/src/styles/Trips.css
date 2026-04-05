@@ -139,12 +139,11 @@
   table-layout: auto;
 }
 
-/* Explicit column widths to prevent Actions column from getting too much space */
-.trips-table th.trip-header:nth-child(1) { width: 130px; }  /* DATE */
-.trips-table th.trip-header:nth-child(2) { width: 120px; }  /* VEHICLE */
-.trips-table th.trip-header:nth-child(3) { }                /* ROUTE — fills remaining */
-.trips-table th.trip-header:nth-child(4) { width: 120px; }  /* DISTANCE */
-.trips-table th.trip-header:nth-child(5) { width: 64px; }   /* ACTIONS */
+.trips-table th.trip-header:nth-child(1) { width: 12%; text-align: center; }
+.trips-table th.trip-header:nth-child(2) { width: 18%; text-align: center; } 
+.trips-table th.trip-header:nth-child(3) { width: 38%; text-align: left;} 
+.trips-table th.trip-header:nth-child(4) { width: 14%; text-align: center;} 
+.trips-table th.trip-header:nth-child(5) { width: 18%; text-align: center;}  
 
 .trips-table thead {
   background: #f8fafc;
@@ -160,7 +159,7 @@
   padding: 14px 10px;
   border: none;
   white-space: nowrap;
-  text-align: left;
+  vertical-align: middle;
 }
 
 .trip-row {
@@ -184,6 +183,21 @@
   border: none;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-align: left;
+}
+
+/* Column-specific alignment */
+.trip-cell.date-cell { text-align: center; }
+.trip-cell.vehicle-cell { text-align: center; }
+.trip-cell.distance-cell { text-align: center; }
+.trip-cell.actions-cell { text-align: center; }
+
+/* Date Block */
+.trip-date-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
 /* Date Cell */
@@ -202,6 +216,16 @@
   font-size: 0.8rem;
   color: #94a3b8;
   margin-top: 2px;
+}
+
+.date-duration {
+  font-size: 0.72rem;
+  color: #64748b;
+  background: #f1f5f9;
+  border-radius: 4px;
+  padding: 1px 5px;
+  display: inline-block;
+  margin-top: 3px;
 }
 
 /* Route Cell */
@@ -285,28 +309,42 @@
   font-family: 'Courier New', Courier, monospace;
 }
 
-/* Actions Cell */
-.actions-cell {
-  text-align: center;
-  width: 64px;
+/* Duration Cell */
+.duration-cell {
+  overflow: hidden;
+}
+
+.duration-value {
+  font-weight: 600;
+  color: #8b5cf6;
+  font-size: 0.95rem;
   white-space: nowrap;
 }
 
-.delete-btn {
+.trip-actions-cell {
+  text-align: center;
+  width: 64px;
+  white-space: nowrap;
+  padding: 14px 10px;
+}
+
+.trip-delete-btn {
   width: 36px;
   height: 36px;
   border-radius: 8px !important;
   background: #fff !important;
   border: 1.5px solid #ef4444 !important;
   color: #ef4444 !important;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  margin: 0 auto;
+  vertical-align: middle;
   padding: 0;
   transition: all 0.2s ease;
 }
 
-.delete-btn:hover {
+.trip-delete-btn:hover {
   background: #fee2e2 !important;
   border-color: #dc2626 !important;
   color: #dc2626 !important;
@@ -349,6 +387,16 @@
   color: #94a3b8;
   font-weight: 400;
   font-size: 0.85rem;
+}
+
+.mobile-duration {
+  font-size: 0.72rem;
+  color: #64748b;
+  background: #f1f5f9;
+  border-radius: 4px;
+  padding: 1px 5px;
+  display: inline-block;
+  margin-top: 3px;
 }
 
 .mobile-delete-btn {

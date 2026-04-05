@@ -392,6 +392,22 @@ body.dark-mode .distance-value {
   color: #58a6ff !important;
 }
 
+/* Trips page - date duration in dark mode */
+body.dark-mode .date-duration {
+  background: #30363d !important;
+  color: #8b949e !important;
+}
+
+body.dark-mode .mobile-duration {
+  color: #8b949e !important;
+  font-size: 0.72rem !important;
+  background: #30363d !important;
+  border-radius: 4px;
+  padding: 1px 5px;
+  display: inline-block;
+  margin-top: 2px;
+}
+
 /* Table card headers */
 body.dark-mode .trips-table-title,
 body.dark-mode .fuel-logs-table-title,
@@ -1275,8 +1291,11 @@ body.dark-mode .notification-delete-custom:active {
 
 /* ---------- Fuel Logs & Service Requests cost columns in dark mode ---------- */
 /* Fuel Logs cost cells — green color like light mode */
-body.dark-mode .cost-cell {
-  color: #3fb950 !important;
+
+body.dark-mode .cost-cell,
+body.dark-mode td.cost-cell,
+body.dark-mode .mobile-value.cost-value {
+  color: #22c55e !important;
 }
 
 body.dark-mode .cost-value,

@@ -109,6 +109,20 @@ const Trips = () => {
     return `${Number(distance).toLocaleString('hu-HU', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} km`;
   };
 
+  const formatDuration = (ts) => {
+    if (!ts) return '—';
+    if (typeof ts === 'string') {
+      const parts = ts.split(':');
+      if (parts.length >= 2) {
+        const h = parseInt(parts[0], 10);
+        const m = parseInt(parts[1], 10);
+        if (h > 0) return `${h}h ${m}m`;
+        return `${m}m`;
+      }
+    }
+    return '—';
+  };
+
   const displayedCount = trips.length;
   const totalCount = pagination.totalCount || 0;
 
@@ -173,7 +187,7 @@ const Trips = () => {
                       <thead>
                         <tr>
                           <th className="trip-header">{t('trips.th.date')}</th>
-                          <th className="trip-header" style={{ textAlign: 'center' }}>{t('trips.th.vehicle')}</th>
+                          <th className="trip-header">{t('trips.th.vehicle')}</th>
                           <th className="trip-header">{t('trips.th.route')}</th>
                           <th className="trip-header">{t('trips.th.distance')}</th>
                           <th className="trip-header">{t('trips.th.actions')}</th>
@@ -185,8 +199,11 @@ const Trips = () => {
                           return (
                             <tr key={trip.Id || trip.id} className="trip-row">
                               <td className="trip-cell date-cell">
-                                <div className="date-main">{formatted.date}</div>
-                                {formatted.time && <div className="date-time">{formatted.time}</div>}
+                                <div className="trip-date-block">
+                                  <div className="date-main">{formatted.date}</div>
+                                  {formatted.time && <div className="date-time">{formatted.time}</div>}
+                                  {(trip.Long || trip.long) && <div className="date-duration">{formatDuration(trip.Long || trip.long)}</div>}
+                                </div>
                               </td>
                               <td className="trip-cell vehicle-cell">
                                 <div className="vehicle-wrapper">
@@ -203,10 +220,10 @@ const Trips = () => {
                               <td className="trip-cell distance-cell">
                                 <span className="distance-value">{formatDistance(trip.DistanceKm || trip.distanceKm)}</span>
                               </td>
-                              <td className="trip-cell actions-cell">
+                              <td className="trip-cell actions-cell trip-actions-cell">
                                 <Button
                                   variant="outline-danger"
-                                  className="delete-btn"
+                                  className="delete-btn trip-delete-btn"
                                   title="Delete"
                                   onClick={() => handleDeleteTrip(trip.Id || trip.id)}
                                 >
