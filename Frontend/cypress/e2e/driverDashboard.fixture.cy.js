@@ -11,27 +11,24 @@ describe('Driver Dashboard – fixture teszt', () => {
       }));
       const fakeToken = `header.${payload}.signature`;
 
-      cy.window().then((win) => {
-        win.localStorage.setItem('authToken', fakeToken);
-        win.localStorage.setItem('user', JSON.stringify({ email: driver.email, role: driver.role, id: '99' }));
-      });
-
       cy.intercept('GET', '**/profile/mine', { statusCode: 200, body: { fullName: driver.name, email: driver.email } });
-      cy.intercept('GET', '**/statistics**', { statusCode: 200, body: driver.statistics });
-      cy.intercept('GET', '**/calendarevents**', { statusCode: 200, body: [] });
-      cy.intercept('GET', '**/vehicles/mine**', { statusCode: 200, body: null });
-      cy.intercept('GET', '**/trips**', { statusCode: 200, body: [] });
-      cy.intercept('GET', '**/fuellogs**', { statusCode: 200, body: [] });
-      cy.intercept('GET', '**/notifications**', { statusCode: 200, body: [] });
-    });
+      cy.intercept('GET', '**/profile/assigned-vehicle', { statusCode: 200, body: null });
+      cy.intercept('GET', '**/statistics/mine*', { statusCode: 200, body: driver.statistics });
+      cy.intercept('GET', '**/calendarevents*', { statusCode: 200, body: [] });
 
-    cy.visit('/dashboard');
+      cy.visit('/dashboard', {
+        onBeforeLoad(win) {
+          win.localStorage.setItem('authToken', fakeToken);
+          win.localStorage.setItem('user', JSON.stringify({ email: driver.email, role: driver.role, id: '99' }));
+        },
+      });
+    });
   });
 
   it('a Total Trips értéke egyezik a fixture adatával', () => {
     cy.fixture('driver').then((driver) => {
-      // Az első kártya a Total Trips
-      cy.get('.stat-carousel-item.center .stat-value')
+      cy.contains('.stat-carousel-item.center .stat-label', 'Total Trips')
+        .siblings('.stat-value')
         .invoke('text')
         .should('contain', String(driver.statistics.totalTrips));
     });
