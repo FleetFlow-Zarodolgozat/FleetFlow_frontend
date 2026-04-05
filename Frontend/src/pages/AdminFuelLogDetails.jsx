@@ -29,10 +29,7 @@ const AdminFuelLogDetails = () => {
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // Fetch receipt
-  useEffect(() => {
+  }, []);  useEffect(() => {
     const receiptId = log.receiptFileId ?? log.ReceiptFileId;
     if (!receiptId) return;
     let objectUrl = null;
@@ -51,10 +48,7 @@ const AdminFuelLogDetails = () => {
     };
     fetch();
     return () => { if (objectUrl) URL.revokeObjectURL(objectUrl); };
-  }, [log.receiptFileId, log.ReceiptFileId]);
-
-  // Fetch driver profile image
-  useEffect(() => {
+  }, [log.receiptFileId, log.ReceiptFileId]);  useEffect(() => {
     const imgId = log.profileImgFileId ?? log.ProfileImgFileId;
     if (!imgId) return;
     let objectUrl = null;

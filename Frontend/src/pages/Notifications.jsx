@@ -148,10 +148,7 @@ const Notifications = () => {
 
   useEffect(() => {
     fetchNotifications();
-  }, []);
-
-  // Filter notifications
-  const getFilteredNotifications = () => {
+  }, []);  const getFilteredNotifications = () => {
     if (activeFilter === 'all') return notifications;
     if (activeFilter === 'unread') return notifications.filter(n => !n.isRead && !n.read);
     if (activeFilter === 'fuel_log') return notifications.filter(n => (n.type || '').toUpperCase() === 'FUEL_LOG');
@@ -183,25 +180,16 @@ const Notifications = () => {
       const dateVal = item.DateTime || item.date || item.createdAt || item.timestamp;
       if (!dateVal) return;
 
-      const itemDate = new Date(dateVal);
-
-      // Check if today
-      if (itemDate.toDateString() === today.toDateString()) {
+      const itemDate = new Date(dateVal);      if (itemDate.toDateString() === today.toDateString()) {
         groups['today'] = groups['today'] || [];
         groups['today'].push(item);
-      }
-      // Check if this week (after start of week)
-      else if (itemDate >= startOfWeek) {
+      }      else if (itemDate >= startOfWeek) {
         groups['thisWeek'] = groups['thisWeek'] || [];
         groups['thisWeek'].push(item);
-      }
-      // Check if this month (after start of month)
-      else if (itemDate >= startOfMonth) {
+      }      else if (itemDate >= startOfMonth) {
         groups['thisMonth'] = groups['thisMonth'] || [];
         groups['thisMonth'].push(item);
-      }
-      // Check if this year (after start of year)
-      else if (itemDate >= startOfYear) {
+      }      else if (itemDate >= startOfYear) {
         groups['thisYear'] = groups['thisYear'] || [];
         groups['thisYear'].push(item);
       }

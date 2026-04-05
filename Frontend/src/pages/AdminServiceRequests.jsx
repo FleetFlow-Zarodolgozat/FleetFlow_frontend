@@ -66,10 +66,7 @@ const AdminServiceRequests = () => {
 
         const response = await api.get('/service-requests/admin', { params });
         const payload = response.data || {};
-        let rawItems = Array.isArray(payload.data) ? payload.data : [];
-
-        // Calculate totals from all API data
-        const allItems = Array.isArray(payload.data) ? payload.data : [];
+        let rawItems = Array.isArray(payload.data) ? payload.data : [];        const allItems = Array.isArray(payload.data) ? payload.data : [];
         const totalOngoing = allItems.filter(r => {
           const status = r.status ?? r.Status;
           return status !== 'REJECTED' && status !== 'CLOSED';
@@ -125,10 +122,7 @@ const AdminServiceRequests = () => {
     debounceRef.current = setTimeout(() => {
       setSearchQ(val);
     }, 400);
-  };
-
-  // Fetch driver profile images
-  useEffect(() => {
+  };  useEffect(() => {
     if (requests.length === 0) return;
     let cancelled = false;
     const fetchImages = async () => {

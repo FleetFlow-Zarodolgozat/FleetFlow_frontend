@@ -57,9 +57,7 @@ const EditVehicle = () => {
     const fetchData = async () => {
       setLoading(true);
       setError('');
-      try {
-        // Load vehicle list and find by id
-        const res = await api.get('/admin/vehicles', {
+      try {        const res = await api.get('/admin/vehicles', {
           params: { page: 1, pageSize: 200 },
         });
         const payload = res.data || {};
@@ -87,20 +85,14 @@ const EditVehicle = () => {
           status: vehicle.status || vehicle.Status || 'ACTIVE',
           assignedUserId: '',
         });
-        setOriginalStatus(vehicle.status || vehicle.Status || 'ACTIVE');
-
-        // Load active drivers for assignment dropdown
-        const driversRes = await api.get('/admin/drivers', {
+        setOriginalStatus(vehicle.status || vehicle.Status || 'ACTIVE');        const driversRes = await api.get('/admin/drivers', {
           params: { page: 1, pageSize: 200 },
         });
         const driversPayload = driversRes.data || {};
         const driversList = Array.isArray(driversPayload.data) ? driversPayload.data : [];
         const activeDrivers = driversList.filter((d) => d.isActive ?? d.IsActive);
         // Store all drivers so we can inject an inactive assigned driver into the dropdown later
-        setDrivers({ active: activeDrivers, all: driversList });
-
-        // Find the currently assigned driver via the vehicle's userEmail field
-        let resolvedOriginalUserId = '';
+        setDrivers({ active: activeDrivers, all: driversList });        let resolvedOriginalUserId = '';
         const userEmail = vehicle.userEmail || vehicle.UserEmail;
         if (userEmail) {
           const emailLower = userEmail.toLowerCase();
@@ -114,10 +106,7 @@ const EditVehicle = () => {
             }
           }
         }
-        setOriginalAssignedUserId(resolvedOriginalUserId);
-
-        // Load assignment history (for the history card)
-        setHistoryLoading(true);
+        setOriginalAssignedUserId(resolvedOriginalUserId);        setHistoryLoading(true);
         try {
           const historyRes = await api.get(`/admin/assignment/history/${id}`);
           const history = Array.isArray(historyRes.data) ? historyRes.data : [];

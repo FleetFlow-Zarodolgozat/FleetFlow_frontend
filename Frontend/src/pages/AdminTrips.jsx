@@ -115,10 +115,7 @@ const AdminTrips = () => {
   useEffect(() => {
     fetchTrips(1);
     setPage(1);
-  }, [fetchTrips]);
-
-  // Fetch driver profile images
-  useEffect(() => {
+  }, [fetchTrips]);  useEffect(() => {
     if (trips.length === 0) return;
     let cancelled = false;
     const fetchImages = async () => {

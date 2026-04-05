@@ -115,10 +115,7 @@ const AdminFuelLogs = () => {
     debounceRef.current = setTimeout(() => {
       setSearchQ(val);
     }, 400);
-  };
-
-  // Fetch driver profile images
-  useEffect(() => {
+  };  useEffect(() => {
     if (fuelLogs.length === 0) return;
     let cancelled = false;
     const fetchImages = async () => {

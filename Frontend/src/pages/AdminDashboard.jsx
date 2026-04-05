@@ -15,10 +15,7 @@ import '../styles/AdminDashboard.css';
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const user = authService.getCurrentUser();
-  const { t, language } = useLanguage();
-  
-  // Create localizer based on current language
-  const localeMap = { hu, de, en: enUS };
+  const { t, language } = useLanguage();  const localeMap = { hu, de, en: enUS };
   const currentLocale = localeMap[language] || enUS;
   const localizer = dateFnsLocalizer({
     format,
@@ -91,10 +88,7 @@ const AdminDashboard = () => {
   const [eventSaving, setEventSaving] = useState(false);
   const [eventFeedback, setEventFeedback] = useState({ type: '', message: '' });
   const [vehicles, setVehicles] = useState([]);
-  const [drivers, setDrivers] = useState([]);
-
-  // Fetch calendar events
-  const loadCalendarEvents = async () => {
+  const [drivers, setDrivers] = useState([]);  const loadCalendarEvents = async () => {
     try {
       const calendarResponse = await api.get('/calendarevents');
       const calendarData = Array.isArray(calendarResponse.data) ? calendarResponse.data : [];
@@ -122,10 +116,7 @@ const AdminDashboard = () => {
     } catch (error) {
       console.log('Could not fetch calendar events:', error.message);
     }
-  };
-
-  // Fetch dashboard statistics
-  const loadStatistics = async () => {
+  };  const loadStatistics = async () => {
     try {
       const statsResponse = await api.get('/statistics/admin-dashboard');
       const data = statsResponse.data;
@@ -152,10 +143,7 @@ const AdminDashboard = () => {
         urgentRequests: 2,
       });
     }
-  };
-
-  // Fetch upcoming events
-  const loadUpcomingEvents = async () => {
+  };  const loadUpcomingEvents = async () => {
     try {
       // A scheduleEvents már tartalmazza a calendar eseményeket
       // Ha nincs, akkor API-ból töltjük be
@@ -187,10 +175,7 @@ const AdminDashboard = () => {
     } catch (error) {
       console.log('Could not fetch upcoming events:', error.message);
     }
-  };
-
-  // Fetch vehicles for dropdown
-  const loadVehicles = async () => {
+  };  const loadVehicles = async () => {
     try {
       const response = await api.get('/vehicles');
       const vList = Array.isArray(response.data) ? response.data : [];
@@ -202,10 +187,7 @@ const AdminDashboard = () => {
     } catch (error) {
       console.log('Could not fetch vehicles:', error.message);
     }
-  };
-
-  // Fetch drivers for dropdown
-  const loadDrivers = async () => {
+  };  const loadDrivers = async () => {
     try {
       const response = await api.get('/drivers');
       const dList = Array.isArray(response.data) ? response.data : [];

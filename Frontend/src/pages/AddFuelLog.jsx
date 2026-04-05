@@ -29,14 +29,9 @@ const AddFuelLog = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
-  const navigate = useNavigate();
-
-  // Fetch vehicles and recent logs
-  useEffect(() => {
+  const navigate = useNavigate();  useEffect(() => {
     const fetchData = async () => {
-      try {
-        // Fetch assigned vehicle
-        try {
+      try {        try {
           const vehicleResponse = await api.get('/profile/assigned-vehicle');
           const v = vehicleResponse.data;
           setVehicleCurrentMileageKm(v.currentMileageKm || v.CurrentMileageKm || 0);
@@ -55,10 +50,7 @@ const AddFuelLog = () => {
           } catch {
             // no vehicles available
           }
-        }
-
-        // Fetch recent fuel logs
-        try {
+        }        try {
           const logsResponse = await api.get('/fuellogs/mine', { params: { page: 1, pageSize: 10 } });
           const allLogs = Array.isArray(logsResponse.data?.data) ? logsResponse.data.data : [];
           const cutoff = new Date();

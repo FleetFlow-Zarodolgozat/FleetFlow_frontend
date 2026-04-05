@@ -12,14 +12,10 @@ import Footer from '../components/Footer';
 const AddServiceRequest = () => {
   const { t, language } = useLanguage();
   const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  // Removed file upload and other fields
-  const [error, setError] = useState('');
+  const [description, setDescription] = useState('');  const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  // Removed file upload and other fields
-  const [pendingRequests, setPendingRequests] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);  const [pendingRequests, setPendingRequests] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -37,10 +33,7 @@ const AddServiceRequest = () => {
       }
     };
     fetchPending();
-  }, []);
-
-  // Removed file upload and other fields
-
+  }, []);
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');

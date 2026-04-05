@@ -36,10 +36,7 @@ const EditDriver = () => {
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // Hide success message after 3s
-  useEffect(() => {
+  }, []);  useEffect(() => {
     if (success) {
       const t = setTimeout(() => setSuccess(''), 3000);
       return () => clearTimeout(t);
@@ -62,9 +59,7 @@ const EditDriver = () => {
         if (!driver) {
           setError('Driver not found.');
           return;
-        }
-        // Format date to yyyy-MM-dd for input[type=date]
-        const formatDate = (val) => {
+        }        const formatDate = (val) => {
           if (!val) return '';
           const d = new Date(val);
           if (isNaN(d.getTime())) return '';
@@ -79,10 +74,7 @@ const EditDriver = () => {
           notes: driver.notes || driver.Notes || '',
           isActive: driver.isActive ?? driver.IsActive ?? true,
         });
-        setOriginalIsActive(driver.isActive ?? driver.IsActive ?? true);
-
-        // Fetch profile image
-        try {
+        setOriginalIsActive(driver.isActive ?? driver.IsActive ?? true);        try {
           const imgRes = await api.get(`/files/thumbnail/${id}`, { responseType: 'blob' });
           setProfileImageUrl(URL.createObjectURL(imgRes.data));
           setProfileImageError(false);

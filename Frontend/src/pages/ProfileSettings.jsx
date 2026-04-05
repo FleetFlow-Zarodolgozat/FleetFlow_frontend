@@ -21,10 +21,7 @@ const ProfileSettings = () => {
   const [profileImageUrl, setProfileImageUrl] = useState(null);
   const [profileImageError, setProfileImageError] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [feedback, setFeedback] = useState({ type: '', message: '' });
-
-  // Hide feedback after 2 seconds
-  useEffect(() => {
+  const [feedback, setFeedback] = useState({ type: '', message: '' });  useEffect(() => {
     if (feedback.message) {
       const timer = setTimeout(() => {
         setFeedback({ type: '', message: '' });
@@ -93,10 +90,7 @@ const ProfileSettings = () => {
         phone: data.phone || data.Phone || '',
         password: '',
         confirmPassword: '',
-      });
-
-      // Fetch profile image
-      if (data.id || data.Id) {
+      });      if (data.id || data.Id) {
         try {
           const imgResponse = await api.get(`/files/thumbnail/${data.id || data.Id}`, { responseType: 'blob' });
           const objectUrl = URL.createObjectURL(imgResponse.data);
@@ -182,10 +176,7 @@ const ProfileSettings = () => {
 
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
-    if (!file) return;
-
-    // Validate file
-    const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    if (!file) return;    const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
     if (!validTypes.includes(file.type)) {
       setFeedback({ type: 'danger', message: 'Only JPEG, PNG or GIF files are allowed.' });
       return;

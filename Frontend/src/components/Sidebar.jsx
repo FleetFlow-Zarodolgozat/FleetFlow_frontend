@@ -19,7 +19,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, notificationRefresh }) => {
   const [profileImageUrl, setProfileImageUrl] = useState(null);
   const [profileImageError, setProfileImageError] = useState(false);
 
-  // Fetch profile data (and image) on mount and when notificationRefresh changes
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -38,7 +37,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, notificationRefresh }) => {
     fetchProfile();
   }, [notificationRefresh]);
 
-  // Fetch profile image when profile.id or notificationRefresh changes
   useEffect(() => {
     if (!profile.id) return;
     let objectUrl = null;
@@ -60,8 +58,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, notificationRefresh }) => {
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
   }, [profile.id, notificationRefresh]);
-
-  // Close sidebar when resizing to desktop
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth > 1024) {
@@ -93,11 +89,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, notificationRefresh }) => {
     const currentUser = authService.getCurrentUser();
     const currentLang = localStorage.getItem('fleetflow_language');
     if (currentUser?.role?.toLowerCase() === 'driver') {
-      // Save language preference for driver
       if (currentLang) {
         localStorage.setItem('fleetflow_language_driver', currentLang);
       }
-      // Save dark mode preference for driver so it's restored on next login
       const isDarkMode = localStorage.getItem('fleetflow_darkMode') === 'true';
       if (isDarkMode) {
         localStorage.setItem('fleetflow_darkModePreference', 'true');
@@ -107,16 +101,13 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, notificationRefresh }) => {
     }
     authService.logout();
     if (currentUser?.role?.toLowerCase() !== 'driver') {
-      // Remove language from localStorage (don't persist admin's language)
       localStorage.removeItem('fleetflow_language');
     }
     navigate('/login');
   };
 
-  // Notifications: fetch when sidebar opens and mark unread state
   const [hasUnreadNotification, setHasUnreadNotification] = useState(false);
 
-  // Always fetch notifications on mount, every 60s, and when notificationRefresh changes
   useEffect(() => {
     let cancelled = false;
     const fetchNotifications = async () => {

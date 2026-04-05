@@ -52,9 +52,7 @@ const DashboardRouter = () => {
   return isAdmin ? <AdminDashboard /> : <DriverDashboard />;
 };
 
-function App() {
-  // Initialize dark mode from localStorage on app load
-  useEffect(() => {
+function App() {  useEffect(() => {
     const isDarkMode = localStorage.getItem('fleetflow_darkMode') === 'true';
     if (isDarkMode) {
       document.body.classList.add('dark-mode');

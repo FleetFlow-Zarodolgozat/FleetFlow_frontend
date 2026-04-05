@@ -16,8 +16,6 @@ const DriverDashboard = () => {
   const navigate = useNavigate();
   const user = authService.getCurrentUser();
   const { t, language } = useLanguage();
-  
-  // Create localizer based on current language
   const localeMap = { hu, de, en: enUS };
   const currentLocale = localeMap[language] || enUS;
   const localizer = dateFnsLocalizer({
@@ -135,12 +133,9 @@ const DriverDashboard = () => {
       console.log('Could not fetch calendar events:', error.message);
     }
   };
-
-  // Fetch profile and statistics from API
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch profile data
         const profileResponse = await api.get('/profile/mine');
         const profileData = profileResponse.data;
         
@@ -178,7 +173,6 @@ const DriverDashboard = () => {
       await loadCalendarEvents();
 
       try {
-        // Get statistics for last 12 months
         const statsResponse = await api.get('/statistics/mine?months=12');
         const data = statsResponse.data;
         
@@ -387,8 +381,6 @@ const DriverDashboard = () => {
       minute: '2-digit',
     });
   };
-
-  // Get display name from profile
   const getDisplayName = () => {
     if (profile.fullName) {
       return profile.fullName;
@@ -408,8 +400,6 @@ const DriverDashboard = () => {
     }
     return profile.email?.charAt(0)?.toUpperCase() || 'D';
   };
-
-  // Format license expiry date
   const formatLicenseExpiry = () => {
     if (!profile.licenseExpiryDate) return 'N/A';
     const date = new Date(profile.licenseExpiryDate);

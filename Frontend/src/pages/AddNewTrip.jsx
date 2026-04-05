@@ -30,9 +30,7 @@ const AddNewTrip = () => {
 
   const smartTruncateAddress = (address) => {
     if (address.length <= 50) return address;
-    // Nominatim returns "Street, District, City, County, Country"
-    // Remove parts from the end (least specific) until it fits
-    const parts = address.split(', ');
+    // Nominatim returns "Street, District, City, County, Country"    const parts = address.split(', ');
     for (let i = parts.length - 1; i >= 1; i--) {
       const candidate = parts.slice(0, i).join(', ');
       if (candidate.length <= 50) return candidate;
@@ -54,13 +52,8 @@ const AddNewTrip = () => {
     const pad = n => n.toString().padStart(2, '0');
     const defaultDateTime = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
     setStartDateTime(defaultDateTime);
-    setEndDateTime(defaultDateTime);
-
-    // Fetch vehicle data for previous odometer and weekly stats
-    const fetchTripData = async () => {
-      try {
-        // Get vehicle current mileage
-        try {
+    setEndDateTime(defaultDateTime);    const fetchTripData = async () => {
+      try {        try {
           const vehicleRes = await api.get('/profile/assigned-vehicle');
           const vehicleData = vehicleRes.data || {};
           const currentMileage = vehicleData.currentMileageKm || vehicleData.CurrentMileageKm || 0;
@@ -68,10 +61,7 @@ const AddNewTrip = () => {
         } catch (err) {
           console.log('Could not fetch vehicle data:', err);
           setPreviousOdometer(0);
-        }
-
-        // Get weekly stats from trips
-        try {
+        }        try {
           const tripsRes = await api.get('/trips/mine', { params: { page: 1, pageSize: 100 } });
           const payload = tripsRes.data || {};
           const trips = Array.isArray(payload.data) ? payload.data : [];

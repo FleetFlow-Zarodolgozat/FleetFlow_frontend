@@ -69,16 +69,10 @@ export const authService = {
 
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
-  },
-
-  // Get current user
-  getCurrentUser() {
+  },  getCurrentUser() {
     const userStr = localStorage.getItem('user');
     return userStr ? JSON.parse(userStr) : null;
-  },
-
-  // Check if user is authenticated
-  isAuthenticated() {
+  },  isAuthenticated() {
     return !!localStorage.getItem('authToken');
   },
 };
