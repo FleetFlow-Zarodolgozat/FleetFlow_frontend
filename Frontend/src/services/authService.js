@@ -21,6 +21,16 @@ export const authService = {
           id: payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier']
         };
         localStorage.setItem('user', JSON.stringify(user));
+        
+        // Restore dark mode preference from previous session
+        const darkModePreference = localStorage.getItem('fleetflow_darkModePreference');
+        if (darkModePreference === 'true') {
+          localStorage.setItem('fleetflow_darkMode', 'true');
+          document.body.classList.add('dark-mode');
+        } else {
+          localStorage.removeItem('fleetflow_darkMode');
+          document.body.classList.remove('dark-mode');
+        }
       }
       return response.data;
     } catch (error) {
@@ -47,8 +57,18 @@ export const authService = {
 
   // Logout
   logout() {
+    // Save dark mode preference before clearing
+    const isDarkMode = localStorage.getItem('fleetflow_darkMode') === 'true';
+    if (isDarkMode) {
+      localStorage.setItem('fleetflow_darkModePreference', 'true');
+    } else {
+      localStorage.removeItem('fleetflow_darkModePreference');
+    }
+    
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
+    localStorage.removeItem('fleetflow_darkMode');
+    document.body.classList.remove('dark-mode');
   },
 
   // Get current user

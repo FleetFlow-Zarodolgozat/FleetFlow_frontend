@@ -171,7 +171,7 @@ const Notifications = () => {
     const groups = {};
     const today = new Date();
     const startOfWeek = new Date(today);
-    startOfWeek.setDate(today.getDate() - today.getDay()); // Sunday as week start
+    startOfWeek.setDate(today.getDate() - 7); // rolling 7-day window
     startOfWeek.setHours(0, 0, 0, 0);
 
     const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);

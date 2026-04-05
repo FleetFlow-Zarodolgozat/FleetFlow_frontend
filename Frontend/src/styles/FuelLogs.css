@@ -534,6 +534,10 @@
   color: #10b981;
 }
 
+.stats-change.positive {
+  color: #ef4444;
+}
+
 .stats-change svg {
   transform: rotate(45deg);
   flex-shrink: 0;

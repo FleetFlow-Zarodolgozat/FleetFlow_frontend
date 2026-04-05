@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import Login from './pages/Login';
 import ForgotPassword from './pages/ForgotPassword';
 import SetPassword from './pages/SetPassword';
@@ -52,6 +53,16 @@ const DashboardRouter = () => {
 };
 
 function App() {
+  // Initialize dark mode from localStorage on app load
+  useEffect(() => {
+    const isDarkMode = localStorage.getItem('fleetflow_darkMode') === 'true';
+    if (isDarkMode) {
+      document.body.classList.add('dark-mode');
+    } else {
+      document.body.classList.remove('dark-mode');
+    }
+  }, []);
+
   return (
     <Router>
       <Routes>

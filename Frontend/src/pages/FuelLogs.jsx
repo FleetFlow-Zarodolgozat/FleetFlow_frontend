@@ -402,12 +402,12 @@ const FuelLogs = () => {
                 <Card.Body className="d-flex flex-column">
                   <div className="stats-label">Total Spent (This Month)</div>
                   <div className="stats-value">{stats.totalSpent}</div>
-                  <div className="stats-change negative mt-auto">
+                  <div className={`stats-change ${spentChange < 0 ? 'negative' : 'positive'} mt-auto`}>
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M23 18l-9.5-9.5-5 5L1 6" />
                       <path d="M17 18h6v6" />
                     </svg>
-                    {stats.totalSpentChange} less than last month
+                    {stats.totalSpentChange} {spentChange < 0 ? 'less' : 'more'} than last month
                   </div>
                 </Card.Body>
               </Card>

@@ -326,6 +326,30 @@ body.dark-mode .stats-card {
   border-color: #30363d !important;
 }
 
+/* Stat carousel */
+body.dark-mode .stat-carousel-arrow {
+  background: #21262d !important;
+  border-color: #30363d !important;
+  color: #8b949e !important;
+}
+
+body.dark-mode .stat-carousel-arrow:hover {
+  background: #1c3a5e !important;
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .stat-carousel-dot {
+  background: #30363d !important;
+}
+
+body.dark-mode .stat-carousel-dot.active {
+  background: #58a6ff !important;
+}
+
+body.dark-mode .stat-card-center {
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4) !important;
+}
+
 body.dark-mode .stat-value,
 body.dark-mode .stats-value,
 body.dark-mode .sr-stat-value {
@@ -338,9 +362,25 @@ body.dark-mode .sr-stat-label {
   color: #8b949e !important;
 }
 
-body.dark-mode .stats-subtext,
+body.dark-mode .stats-subtext {
+  color: #8b949e !important;
+}
+
 body.dark-mode .stats-change {
   color: #8b949e !important;
+}
+
+body.dark-mode .stats-change.negative {
+  color: #3fb950 !important;
+}
+
+body.dark-mode .stats-change.positive {
+  color: #f85149 !important;
+}
+
+/* Trips page - distance value in blue */
+body.dark-mode .distance-value {
+  color: #58a6ff !important;
 }
 
 /* Table card headers */
@@ -355,6 +395,19 @@ body.dark-mode .fuel-logs-total-badge,
 body.dark-mode .sr-total-badge {
   background: #21262d !important;
   color: #8b949e !important;
+}
+
+/* Restore original badge colors in dark mode */
+body.dark-mode .trips-total-badge {
+  color: #1d4ed8 !important;
+}
+
+body.dark-mode .fuel-logs-total-badge {
+  color: #c2410c !important;
+}
+
+body.dark-mode .sr-total-badge {
+  color: #7c3aed !important;
 }
 
 /* License plate badges */
@@ -804,7 +857,7 @@ body.dark-mode .profile-settings-page .form-control[readonly] {
 /* Footer dark mode */
 body.dark-mode footer,
 body.dark-mode .footer {
-  background-color: #161b22 !important;
+  background-color: #0f1117 !important;
   border-top-color: #30363d !important;
   color: #8b949e !important;
 }
@@ -812,6 +865,46 @@ body.dark-mode .footer {
 body.dark-mode footer a,
 body.dark-mode .footer a {
   color: #58a6ff !important;
+}
+
+body.dark-mode .page-footer {
+  background: #0f1117 !important;
+  border-top-color: #30363d !important;
+  color: #8b949e !important;
+}
+
+body.dark-mode .page-footer a {
+  color: #58a6ff !important;
+}
+
+body.dark-mode .page-footer a:hover {
+  color: #79c0ff !important;
+  text-decoration: underline !important;
+}
+
+/* Legal pages footer — ensure consistency in dark mode */
+body.dark-mode .legal-page .page-footer {
+  background: #0f1117 !important;
+  border-top-color: #30363d !important;
+}
+
+body.dark-mode .legal-page .footer-links a {
+  color: #58a6ff !important;
+}
+
+body.dark-mode .legal-page .footer-links a:hover {
+  color: #79c0ff !important;
+  text-decoration: underline !important;
+}
+
+body.dark-mode .legal-page .copyright {
+  color: #8b949e !important;
+}
+
+/* Help Center footer — ensure consistency in dark mode */
+body.dark-mode .help-main .page-footer {
+  background: #0f1117 !important;
+  border-top-color: #30363d !important;
 }
 
 /* ---------- Add Fuel Log / Add New Trip / Add Service Request / Service Request Details ---------- */
@@ -1097,4 +1190,162 @@ body.dark-mode .rbc-wrapper .rbc-event {
 
 body.dark-mode .rbc-wrapper .rbc-event-content {
   color: #fff !important;
+}
+
+/* ---------- Notifications page delete button ---------- */
+body.dark-mode .notification-delete-custom {
+  background: #1c2230 !important;
+  border-color: #f85149 !important;
+  color: #f85149 !important;
+}
+
+body.dark-mode .notification-delete-custom:hover,
+body.dark-mode .notification-delete-custom:focus {
+  background: #3d1f1f !important;
+  border-color: #da3633 !important;
+  color: #ffa198 !important;
+}
+
+body.dark-mode .notification-delete-custom:active {
+  background: #5a1c1c !important;
+  border-color: #b91c1c !important;
+  color: #ff7b72 !important;
+}
+
+/* ---------- Fuel Logs & Service Requests cost columns in dark mode ---------- */
+/* Fuel Logs cost cells — green color like light mode */
+body.dark-mode .cost-cell {
+  color: #3fb950 !important;
+}
+
+body.dark-mode .cost-value,
+body.dark-mode .mobile-value.cost-value {
+  color: #3fb950 !important;
+}
+
+/* Service Requests cost cells — green color like light mode */
+body.dark-mode .sr-cell-cost {
+  color: #3fb950 !important;
+}
+
+body.dark-mode .sr-mobile-cost {
+  color: #3fb950 !important;
+}
+
+/* Mobile view labels and values in dark mode */
+/* Trips & Fuel Logs mobile view */
+body.dark-mode .mobile-label {
+  color: #8b949e !important;
+}
+
+body.dark-mode .mobile-value {
+  color: #e6edf3 !important;
+}
+
+/* Service Requests mobile view */
+body.dark-mode .sr-mobile-label {
+  color: #8b949e !important;
+}
+
+body.dark-mode .sr-mobile-value {
+  color: #e6edf3 !important;
+}
+
+/* Mobile cards styling in dark mode */
+/* Trips mobile cards */
+body.dark-mode .trip-mobile-card {
+  background: #1c2230 !important;
+  border-color: #30363d !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+body.dark-mode .trip-mobile-card .mobile-card-header {
+  border-bottom-color: #30363d !important;
+}
+
+body.dark-mode .mobile-date {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .mobile-date svg {
+  color: #8b949e !important;
+}
+
+body.dark-mode .mobile-time {
+  color: #6e7681 !important;
+}
+
+/* Fuel Logs mobile cards */
+body.dark-mode .fuel-log-mobile-card {
+  background: #1c2230 !important;
+  border-color: #30363d !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+body.dark-mode .fuel-log-mobile-card .mobile-card-header {
+  border-bottom-color: #30363d !important;
+}
+
+body.dark-mode .mobile-delete-btn {
+  color: #8b949e !important;
+}
+
+body.dark-mode .mobile-delete-btn:hover {
+  color: #f85149 !important;
+  background: #3d1f1f !important;
+}
+
+/* Service Requests mobile cards */
+body.dark-mode .sr-mobile-card {
+  background: #1c2230 !important;
+  border-color: #30363d !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+body.dark-mode .sr-mobile-card-header {
+  border-bottom-color: #30363d !important;
+}
+
+body.dark-mode .sr-mobile-card-title {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .mobile-card-body,
+body.dark-mode .sr-mobile-card-body {
+  border-bottom-color: #21262d !important;
+}
+
+/* Mobile plate badges in dark mode */
+body.dark-mode .mobile-plate {
+  background: #21262d !important;
+  color: #8b949e !important;
+  border-color: #30363d !important;
+}
+
+/* Service Requests mobile row and actions */
+body.dark-mode .sr-mobile-row {
+  color: #8b949e !important;
+}
+
+body.dark-mode .sr-mobile-details-btn {
+  background: #7c3aed !important;
+  border-color: #7c3aed !important;
+  color: #fff !important;
+}
+
+body.dark-mode .sr-mobile-details-btn:hover {
+  background: #5b21b6 !important;
+  border-color: #5b21b6 !important;
+}
+
+body.dark-mode .sr-mobile-delete-btn {
+  background: #1c2230 !important;
+  border-color: #f85149 !important;
+  color: #f85149 !important;
+}
+
+body.dark-mode .sr-mobile-delete-btn:hover {
+  background: #3d1f1f !important;
+  border-color: #da3633 !important;
+  color: #ffa198 !important;
 }

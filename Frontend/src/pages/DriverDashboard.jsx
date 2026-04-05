@@ -60,6 +60,31 @@ const DriverDashboard = () => {
   const [calendarDetailFeedback, setCalendarDetailFeedback] = useState({ type: '', message: '' });
   const [copiedField, setCopiedField] = useState('');
   const copyFeedbackTimeoutRef = useRef(null);
+  const [activeCardIndex, setActiveCardIndex] = useState(0);
+  const carouselIntervalRef = useRef(null);
+  const CARD_COUNT = 6;
+
+  const advanceCarousel = () => {
+    setActiveCardIndex(prev => (prev + 1) % CARD_COUNT);
+  };
+
+  const prevCard = () => {
+    setActiveCardIndex(prev => (prev - 1 + CARD_COUNT) % CARD_COUNT);
+  };
+
+  const nextCard = () => {
+    setActiveCardIndex(prev => (prev + 1) % CARD_COUNT);
+  };
+
+  useEffect(() => {
+    carouselIntervalRef.current = setInterval(advanceCarousel, 3000);
+    return () => clearInterval(carouselIntervalRef.current);
+  }, []);
+
+  const resetCarouselTimer = () => {
+    clearInterval(carouselIntervalRef.current);
+    carouselIntervalRef.current = setInterval(advanceCarousel, 3000);
+  };
 
   const loadCalendarEvents = async () => {
     try {
@@ -459,113 +484,102 @@ const DriverDashboard = () => {
           </Col>
         </Row>
 
-        {/* Stats Cards */}
-        <Row className="g-3 mb-4">
-          <Col lg={4} md={6} xs={12}>
-            <Card className="stat-card h-100">
-              <Card.Body className="d-flex align-items-center">
-                <div className="stat-icon trips me-3">
-                  <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="10" strokeLinecap="round" strokeLinejoin="round"/>
-                    <polygon points="16.24,7.76 14.12,14.12 7.76,16.24 9.88,9.88 16.24,7.76" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+        {/* Stats Cards Carousel */}
+        {(() => {
+          const allCards = [
+            {
+              icon: 'trips',
+              label: 'Total Trips',
+              value: statistics.totalTrips,
+              svg: (<svg width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" strokeLinecap="round" strokeLinejoin="round"/><polygon points="16.24,7.76 14.12,14.12 7.76,16.24 9.88,9.88 16.24,7.76" strokeLinecap="round" strokeLinejoin="round"/></svg>)
+            },
+            {
+              icon: 'distance',
+              label: 'Total Distance',
+              value: `${statistics.totalDistance.toLocaleString()} km`,
+              svg: (<svg width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 20L8 4" strokeLinecap="round" strokeLinejoin="round"/><path d="M21 20L16 4" strokeLinecap="round" strokeLinejoin="round"/><line x1="10" y1="16" x2="14" y2="16" strokeLinecap="round" strokeLinejoin="round"/><line x1="10.5" y1="12" x2="13.5" y2="12" strokeLinecap="round" strokeLinejoin="round"/><line x1="11" y1="8" x2="13" y2="8" strokeLinecap="round" strokeLinejoin="round"/></svg>)
+            },
+            {
+              icon: 'fuel',
+              label: 'Total Fuel Logs',
+              value: statistics.totalFuels,
+              svg: (<svg width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 22V8l4-4h6l4 4v14H3z" strokeLinecap="round" strokeLinejoin="round"/><path d="M17 13h2a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2" strokeLinecap="round" strokeLinejoin="round"/><path d="M7 22V12h6v10" strokeLinecap="round" strokeLinejoin="round"/></svg>)
+            },
+            {
+              icon: 'fuel-cost',
+              label: 'Total Fuel Cost',
+              value: `${statistics.totalFuelCost.toLocaleString()} Ft`,
+              svg: (<svg width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23" strokeLinecap="round" strokeLinejoin="round"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" strokeLinecap="round" strokeLinejoin="round"/></svg>)
+            },
+            {
+              icon: 'services',
+              label: 'Service Requests',
+              value: statistics.totalServices,
+              svg: (<svg width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" strokeLinecap="round" strokeLinejoin="round"/></svg>)
+            },
+            {
+              icon: 'service-cost',
+              label: 'Total Service Cost',
+              value: `${statistics.totalServicesCost.toLocaleString()} Ft`,
+              svg: (<svg width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23" strokeLinecap="round" strokeLinejoin="round"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" strokeLinecap="round" strokeLinejoin="round"/></svg>)
+            },
+          ];
+          const leftIdx = (activeCardIndex - 1 + CARD_COUNT) % CARD_COUNT;
+          const rightIdx = (activeCardIndex + 1) % CARD_COUNT;
+          const left = allCards[leftIdx];
+          const center = allCards[activeCardIndex];
+          const right = allCards[rightIdx];
+          return (
+            <div className="stat-carousel mb-4">
+              <button className="stat-carousel-arrow left" aria-label="Previous" onClick={() => { prevCard(); resetCarouselTimer(); }}>
+                <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </button>
+              <div className="stat-carousel-track">
+                <div className="stat-carousel-item side" onClick={() => { prevCard(); resetCarouselTimer(); }}>
+                  <Card className="stat-card h-100">
+                    <Card.Body className="d-flex align-items-center">
+                      <div className={`stat-icon ${left.icon} me-3`}>{left.svg}</div>
+                      <div className="stat-content">
+                        <span className="stat-label d-block text-muted small">{left.label}</span>
+                        <span className="stat-value fw-bold">{left.value}</span>
+                      </div>
+                    </Card.Body>
+                  </Card>
                 </div>
-                <div className="stat-content">
-                  <span className="stat-label d-block text-muted small">Total Trips</span>
-                  <span className="stat-value fs-4 fw-bold">{statistics.totalTrips}</span>
+                <div className="stat-carousel-item center">
+                  <Card className="stat-card stat-card-center h-100">
+                    <Card.Body className="d-flex align-items-center">
+                      <div className={`stat-icon stat-icon-lg ${center.icon} me-3`}>{center.svg}</div>
+                      <div className="stat-content">
+                        <span className="stat-label d-block text-muted small">{center.label}</span>
+                        <span className="stat-value fs-4 fw-bold">{center.value}</span>
+                      </div>
+                    </Card.Body>
+                  </Card>
                 </div>
-              </Card.Body>
-            </Card>
-          </Col>
-
-          <Col lg={4} md={6} xs={12}>
-            <Card className="stat-card h-100">
-              <Card.Body className="d-flex align-items-center">
-                <div className="stat-icon fuel me-3">
-                  <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                    <path d="M3 22V8l4-4h6l4 4v14H3z" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M17 13h2a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M7 22V12h6v10" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+                <div className="stat-carousel-item side" onClick={() => { nextCard(); resetCarouselTimer(); }}>
+                  <Card className="stat-card h-100">
+                    <Card.Body className="d-flex align-items-center">
+                      <div className={`stat-icon ${right.icon} me-3`}>{right.svg}</div>
+                      <div className="stat-content">
+                        <span className="stat-label d-block text-muted small">{right.label}</span>
+                        <span className="stat-value fw-bold">{right.value}</span>
+                      </div>
+                    </Card.Body>
+                  </Card>
                 </div>
-                <div className="stat-content">
-                  <span className="stat-label d-block text-muted small">Total Fuel Logs</span>
-                  <span className="stat-value fs-4 fw-bold">{statistics.totalFuels}</span>
-                </div>
-              </Card.Body>
-            </Card>
-          </Col>
-
-          <Col lg={4} md={6} xs={12}>
-            <Card className="stat-card h-100">
-              <Card.Body className="d-flex align-items-center">
-                <div className="stat-icon services me-3">
-                  <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </div>
-                <div className="stat-content">
-                  <span className="stat-label d-block text-muted small">Service Requests</span>
-                  <span className="stat-value fs-4 fw-bold">{statistics.totalServices}</span>
-                </div>
-              </Card.Body>
-            </Card>
-          </Col>
-
-          <Col lg={4} md={6} xs={12}>
-            <Card className="stat-card h-100">
-              <Card.Body className="d-flex align-items-center">
-                <div className="stat-icon distance me-3">
-                  <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                    <path d="M3 20L8 4" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M21 20L16 4" strokeLinecap="round" strokeLinejoin="round"/>
-                    <line x1="10" y1="16" x2="14" y2="16" strokeLinecap="round" strokeLinejoin="round"/>
-                    <line x1="10.5" y1="12" x2="13.5" y2="12" strokeLinecap="round" strokeLinejoin="round"/>
-                    <line x1="11" y1="8" x2="13" y2="8" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </div>
-                <div className="stat-content">
-                  <span className="stat-label d-block text-muted small">Total Distance</span>
-                  <span className="stat-value fs-4 fw-bold">{statistics.totalDistance.toLocaleString()} km</span>
-                </div>
-              </Card.Body>
-            </Card>
-          </Col>
-
-          <Col lg={4} md={6} xs={12}>
-            <Card className="stat-card h-100">
-              <Card.Body className="d-flex align-items-center">
-                <div className="stat-icon fuel-cost me-3">
-                  <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                    <line x1="12" y1="1" x2="12" y2="23" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </div>
-                <div className="stat-content">
-                  <span className="stat-label d-block text-muted small">Total Fuel Cost</span>
-                  <span className="stat-value fs-4 fw-bold">{statistics.totalFuelCost.toLocaleString()} Ft</span>
-                </div>
-              </Card.Body>
-            </Card>
-          </Col>
-
-          <Col lg={4} md={6} xs={12}>
-            <Card className="stat-card h-100">
-              <Card.Body className="d-flex align-items-center">
-                <div className="stat-icon service-cost me-3">
-                  <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                    <line x1="12" y1="1" x2="12" y2="23" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </div>
-                <div className="stat-content">
-                  <span className="stat-label d-block text-muted small"> Total Service Cost</span>
-                  <span className="stat-value fs-4 fw-bold">{statistics.totalServicesCost.toLocaleString()} Ft</span>
-                </div>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
+              </div>
+              <button className="stat-carousel-arrow right" aria-label="Next" onClick={() => { nextCard(); resetCarouselTimer(); }}>
+                <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </button>
+              <div className="stat-carousel-dots">
+                {allCards.map((_, i) => (
+                  <button key={i} className={`stat-carousel-dot${i === activeCardIndex ? ' active' : ''}`} onClick={() => { setActiveCardIndex(i); resetCarouselTimer(); }} aria-label={`Go to card ${i + 1}`} />
+                ))}
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Second Row - Quick Add Event + Calendar */}
         <Row className="g-3 mb-4">
