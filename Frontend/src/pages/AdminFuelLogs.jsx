@@ -756,14 +756,6 @@ ${fuelCards}
 
           {/* ── Table Card ─────────────────────────────── */}
           <div className="afl-table-card">
-            {/* Table header row */}
-            <div className="afl-table-header-row">
-              <span className="afl-table-title">Fuel Log Records</span>
-              <span className="afl-total-badge">
-                {totalCount} results
-              </span>
-            </div>
-
             {loading ? (
               <div className="afl-spinner-wrap">
                 <Spinner animation="border" role="status" />

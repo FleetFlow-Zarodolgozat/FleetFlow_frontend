@@ -58,32 +58,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, notificationRefresh }) => {
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
   }, [profile.id, notificationRefresh]);
-  // Fetch profile image
-  useEffect(() => {
-    if (!profile.id) return;
-
-    let objectUrl = null;
-
-    const fetchImage = async () => {
-      try {
-        const response = await api.get(`/files/thumbnail/${profile.id}`, {
-          responseType: 'blob',
-        });
-        objectUrl = URL.createObjectURL(response.data);
-        setProfileImageUrl(objectUrl);
-        setProfileImageError(false);
-      } catch (error) {
-        console.log('Sidebar: could not fetch profile image:', error.message);
-        setProfileImageError(true);
-      }
-    };
-
-    fetchImage();
-
-    return () => {
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
-    };
-  }, [profile.id]);
 
   // Close sidebar when resizing to desktop
   useEffect(() => {

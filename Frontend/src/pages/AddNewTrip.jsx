@@ -63,7 +63,6 @@ const AddNewTrip = () => {
           const vehicleData = vehicleRes.data || {};
           const currentMileage = vehicleData.currentMileageKm || vehicleData.CurrentMileageKm || 0;
           setPreviousOdometer(Number(currentMileage));
-          console.log('Current Mileage:', currentMileage);
         } catch (err) {
           console.log('Could not fetch vehicle data:', err);
           setPreviousOdometer(0);
@@ -74,8 +73,6 @@ const AddNewTrip = () => {
           const tripsRes = await api.get('/trips/mine', { params: { page: 1, pageSize: 100 } });
           const payload = tripsRes.data || {};
           const trips = Array.isArray(payload.data) ? payload.data : [];
-
-          console.log('Trips data:', trips);
 
           // Weekly stats: filter last 7 days
           const now = new Date();
@@ -95,7 +92,7 @@ const AddNewTrip = () => {
         setPreviousOdometer(0);
         setWeeklyStats({ totalDistance: 0, tripsLogged: 0 });
       }
-    };;
+    };
     fetchTripData();
   }, []);
 

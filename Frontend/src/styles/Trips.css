@@ -20,6 +20,20 @@
   margin: 0;
 }
 
+.trips-dashboard {
+  display: flex;
+  min-height: 100vh;
+  background: #f8f9fa;
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+.trips-dashboard .main-content {
+  flex: 1;
+  min-width: 0;
+  overflow-x: hidden;
+}
+
 .trips-page {
   min-height: 80vh;
   background: #f8fafc;
@@ -192,8 +206,8 @@
 
 .route-wrapper {
   display: flex;
-  align-items: center;
-  gap: 6px;
+  flex-direction: column;
+  gap: 2px;
   overflow: hidden;
   width: 100%;
 }
@@ -205,9 +219,20 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  flex: 1 1 0;
-  min-width: 0;
+  width: 100%;
   display: block;
+  font-size: 0.88rem;
+}
+
+.route-to {
+  color: #64748b;
+  font-weight: 400;
+}
+
+.route-divider {
+  font-size: 0.7rem;
+  color: #cbd5e1;
+  line-height: 1;
 }
 
 .route-arrow {
@@ -229,27 +254,28 @@
 
 /* Vehicle Cell */
 .vehicle-cell {
-  overflow: hidden;
+  text-align: center;
 }
 
 .vehicle-wrapper {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
 }
 
-.vehicle-icon {
-  flex-shrink: 0;
-}
-
-.vehicle-name {
-  font-weight: 500;
-  color: #1e293b;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.trip-plate {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 3px 9px;
   white-space: nowrap;
-  flex: 1 1 0;
-  min-width: 0;
+  font-family: 'Courier New', Courier, monospace;
 }
 
 /* Actions Cell */
@@ -418,6 +444,8 @@
 
 /* Stats Cards */
 .stats-row {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
   width: 100%;
 }
 

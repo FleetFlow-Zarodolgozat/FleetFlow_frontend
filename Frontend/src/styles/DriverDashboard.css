@@ -249,24 +249,40 @@
 
 .new-trip-btn,
 .new-fuel-btn {
+  border: none;
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-weight: 600;
+  font-size: 0.95rem;
   display: flex;
   align-items: center;
   gap: 8px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
-.new-trip-btn:hover,
-.new-fuel-btn:hover {
-  transform: translateY(-1px);
+.new-trip-btn {
+  background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+  box-shadow: 0 4px 14px rgba(13, 110, 253, 0.3);
+}
+
+.new-trip-btn:hover {
+  background: linear-gradient(135deg, #0b5ed7 0%, #0a58ca 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(13, 110, 253, 0.4);
 }
 
 .new-fuel-btn {
-  background: #fd7e14 !important;
-  border-color: #fd7e14 !important;
+  background: linear-gradient(135deg, #f97316 0%, #ea6c0a 100%) !important;
+  border-color: transparent !important;
+  box-shadow: 0 4px 14px rgba(249, 115, 22, 0.3);
 }
 
 .new-fuel-btn:hover {
-  background: #e8590c !important;
-  border-color: #e8590c !important;
+  background: linear-gradient(135deg, #ea6c0a 0%, #d95f06 100%) !important;
+  border-color: transparent !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(249, 115, 22, 0.4);
 }
 
 /* Stat Cards */

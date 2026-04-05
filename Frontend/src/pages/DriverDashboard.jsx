@@ -164,8 +164,6 @@ const DriverDashboard = () => {
         copyFeedbackTimeoutRef.current = setTimeout(() => {
           setCopiedField('');
         }, 1800);
-        // You could add a toast notification here
-        console.log(`${label} copied to clipboard: ${text}`);
       }).catch(err => {
         console.error('Failed to copy:', err);
       });
@@ -544,7 +542,7 @@ const DriverDashboard = () => {
                   </svg>
                 </div>
                 <div className="stat-content">
-                  <span className="stat-label d-block text-muted small">Fuel Cost</span>
+                  <span className="stat-label d-block text-muted small">Total Fuel Cost</span>
                   <span className="stat-value fs-4 fw-bold">{statistics.totalFuelCost.toLocaleString()} Ft</span>
                 </div>
               </Card.Body>
@@ -561,7 +559,7 @@ const DriverDashboard = () => {
                   </svg>
                 </div>
                 <div className="stat-content">
-                  <span className="stat-label d-block text-muted small">Service Cost</span>
+                  <span className="stat-label d-block text-muted small"> Total Service Cost</span>
                   <span className="stat-value fs-4 fw-bold">{statistics.totalServicesCost.toLocaleString()} Ft</span>
                 </div>
               </Card.Body>

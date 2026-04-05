@@ -60,7 +60,7 @@ const ProfileSettings = () => {
 
   // Preferences
   const [preferences, setPreferences] = useState({
-    darkMode: false,
+    darkMode: localStorage.getItem('fleetflow_darkMode') === 'true',
     emailNotifications: true,
   });
 
@@ -71,9 +71,6 @@ const ProfileSettings = () => {
       const data = response.data;
 
       const fullName = data.fullName || data.FullName || '';
-      const nameParts = fullName.trim().split(' ');
-      const firstName = nameParts[0] || '';
-      const lastName = nameParts.slice(1).join(' ') || '';
 
       setProfile({
         id: data.id || data.Id,
@@ -230,7 +227,15 @@ const ProfileSettings = () => {
   };
 
   const handlePreferenceChange = (key) => {
-    setPreferences(prev => ({ ...prev, [key]: !prev[key] }));
+    if (key === 'darkMode') {
+      if (user?.role?.toLowerCase() === 'admin') return;
+      const newVal = !preferences.darkMode;
+      setPreferences(prev => ({ ...prev, darkMode: newVal }));
+      localStorage.setItem('fleetflow_darkMode', String(newVal));
+      document.body.classList.toggle('dark-mode', newVal);
+    } else {
+      setPreferences(prev => ({ ...prev, [key]: !prev[key] }));
+    }
   };
 
   const getInitials = () => {
@@ -242,13 +247,6 @@ const ProfileSettings = () => {
       return profile.fullName.charAt(0).toUpperCase();
     }
     return 'U';
-  };
-
-  const getRoleDisplay = () => {
-    const role = profile?.role || '';
-    if (role.toLowerCase() === 'admin') return 'Fleet Administrator';
-    if (role.toLowerCase() === 'driver') return 'Driver';
-    return role;
   };
 
   if (loading) {
@@ -331,24 +329,27 @@ const ProfileSettings = () => {
                   </Card>
                 </Col>
 
-                {/* Security Check Card */}
+                {/* Help & Support Card */}
                 <Col xs={12}>
-                  <Card className="security-card">
-                    <Card.Body className="p-4">
-                      <div className="d-flex align-items-start gap-2">
-                        <div className="security-icon">
-                          <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
-                            <circle cx="12" cy="12" r="12" fill="#0d6efd" />
-                            <text x="12" y="17" textAnchor="middle" fontSize="16" fontWeight="bold" fill="#fff">?</text>
+                  <Card className="help-support-card">
+                    <Card.Body className="p-0">
+                      <div className="d-flex align-items-center gap-3" style={{ padding: '24px' }}>
+                        <div className="help-icon-wrapper">
+                          <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            {/* Background circle */}
+                            <circle cx="24" cy="24" r="22" fill="currentColor" fillOpacity="0.1" stroke="currentColor" strokeWidth="2"/>
+                            {/* Question mark */}
+                            <path d="M24 14C20.13 14 17 17.13 17 21H20C20 18.79 21.79 17 24 17C26.21 17 28 18.79 28 21C28 23.5 26 25 24 27V29H27V27C29 25 31 23.5 31 21C31 17.13 27.88 14 24 14Z" fill="currentColor"/>
+                            <circle cx="24" cy="33" r="1.5" fill="currentColor"/>
                           </svg>
                         </div>
-                        <div className="security-info">
-                          <h4 className="security-title">You need help?</h4>
-                          <p className="security-text">
-                            Write an email to our support.
+                        <div className="help-content" style={{ flex: 1 }}>
+                          <h4 className="help-title mb-1">You need help?</h4>
+                          <p className="help-description mb-2">
+                            Our support team is here to assist you.
                           </p>
-                          <Button variant="link" className="p-0" onClick={() => navigate('/help')}>
-                            Help Center
+                          <Button variant="link" className="help-link p-0" onClick={() => navigate('/help')} style={{ textDecoration: 'none' }}>
+                            Go to Help Center →
                           </Button>
                         </div>
                       </div>
@@ -527,9 +528,17 @@ const ProfileSettings = () => {
                             </p>
                           </div>
                           <div className="preference-action">
-                            <div className={`toggle-switch ${preferences.darkMode ? 'active' : ''}`} onClick={() => handlePreferenceChange('darkMode')}>
-                              <span className="toggle-slider"></span>
-                            </div>
+                            {user?.role?.toLowerCase() === 'admin' ? (
+                              <div title="Not available for admin page" style={{ cursor: 'not-allowed' }}>
+                                <div className="toggle-switch" style={{ opacity: 0.4, pointerEvents: 'none' }}>
+                                  <span className="toggle-slider"></span>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className={`toggle-switch ${preferences.darkMode ? 'active' : ''}`} onClick={() => handlePreferenceChange('darkMode')}>
+                                <span className="toggle-slider"></span>
+                              </div>
+                            )}
                           </div>
                         </div>
 
@@ -547,11 +556,15 @@ const ProfileSettings = () => {
                         <div className="danger-zone-text">
                           <h4 className="danger-zone-title">Danger Zone</h4>
                           <p className="danger-zone-description">
-                            Once you delete your account, there is no going back. Please be certain.
+                            Sign out from all active sessions on every device. You will need to log in again on all devices.
                           </p>
                         </div>
-                        <Button variant="outline-danger" className="delete-account-btn">
-                          Delete Account
+                        <Button
+                          variant="outline-danger"
+                          className="delete-account-btn"
+                          onClick={() => { authService.logout(); navigate('/login'); }}
+                        >
+                          Log Out Everywhere
                         </Button>
                       </div>
                     </Card.Body>

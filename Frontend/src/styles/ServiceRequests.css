@@ -214,7 +214,7 @@
 }
 
 .sr-table-header {
-  display: none;
+  display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
@@ -332,9 +332,17 @@
 }
 
 .sr-cell-vehicle {
-  font-weight: 500;
-  color: #475569;
-  font-size: 0.9375rem;
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 3px 9px;
+  white-space: nowrap;
+  font-family: 'Courier New', Courier, monospace;
 }
 
 /* Status Badge */
@@ -692,7 +700,11 @@
     font-size: 0.875rem;
   }
 
-  .sr-cell-vehicle,
+  .sr-cell-vehicle {
+    font-size: 0.7rem;
+    padding: 2px 7px;
+  }
+
   .sr-cell-date,
   .sr-cell-cost {
     font-size: 0.875rem;

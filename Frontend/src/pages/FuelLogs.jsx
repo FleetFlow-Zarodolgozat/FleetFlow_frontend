@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Alert, Button, Card, Col, Container, Pagination, Row, Spinner, Badge } from 'react-bootstrap';
+import { Alert, Button, Card, Col, Container, Pagination, Row, Spinner } from 'react-bootstrap';
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
 import '../styles/DriverDashboard.css';
@@ -20,18 +20,15 @@ const FuelLogs = () => {
   // Trips state for consumption calculation
   const [trips, setTrips] = useState([]);
   const [tripsLoading, setTripsLoading] = useState(true);
-  const [tripsError, setTripsError] = useState('');
   // Fetch trips for consumption calculation
   useEffect(() => {
     const fetchTrips = async () => {
       setTripsLoading(true);
-      setTripsError('');
       try {
         const response = await api.get('/trips/mine', { params: { page: 1, pageSize: 1000 } });
         const payload = response.data || {};
         setTrips(Array.isArray(payload.data) ? payload.data : []);
-      } catch{
-        setTripsError('Nem sikerült lekérni az utak adatait.');
+      } catch {
       } finally {
         setTripsLoading(false);
       }
@@ -48,12 +45,6 @@ const FuelLogs = () => {
 
   let totalSpent = 0;
   let lastMonthSpent = 0;
-  let nextServiceDue = 'N/A';
-  let nextServiceVehicle = '';
-
-  // Find the soonest service due (if available)
-  let soonestServiceDate = null;
-  let soonestServiceVehicle = '';
 
   fuelLogs.forEach(log => {
     // Parse date
@@ -72,14 +63,6 @@ const FuelLogs = () => {
       }
     }
 
-    // Service due (if present)
-    if (log.nextServiceDate || log.NextServiceDate) {
-      const serviceDate = new Date(log.nextServiceDate || log.NextServiceDate);
-      if (!soonestServiceDate || (serviceDate < soonestServiceDate && serviceDate > now)) {
-        soonestServiceDate = serviceDate;
-        soonestServiceVehicle = log.vehicleName || log.VehicleName || '';
-      }
-    }
   });
 
   // Calculate stats
@@ -98,11 +81,6 @@ const FuelLogs = () => {
       const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
       daysSinceLastRefuel = diffDays === 0 ? 'Today' : `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
     }
-  }
-
-  if (soonestServiceDate) {
-    nextServiceDue = soonestServiceDate.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
-    nextServiceVehicle = soonestServiceVehicle;
   }
 
   // Calculate average consumption (L/100km) from trips and fuelLogs
@@ -127,8 +105,6 @@ const FuelLogs = () => {
     totalSpent: `${Math.round(totalSpent)} Ft`,
     totalSpentChange: `${Math.abs(spentChange)}%${spentChange < 0 ? '' : ''}`,
     daysSinceLastRefuel,
-    nextServiceDue,
-    nextServiceVehicle,
     avgConsumption,
   };
 
@@ -148,11 +124,6 @@ const FuelLogs = () => {
         hour12: false,
       }),
     };
-  };
-
-  const formatFuelType = (type) => {
-    if (!type) return 'Unknown';
-    return type;
   };
 
   // Fetch fuel logs from API
@@ -280,7 +251,7 @@ const FuelLogs = () => {
                       <thead>
                         <tr>
                           <th className="fuel-log-header">DATE</th>
-                          <th className="fuel-log-header">VEHICLE</th>
+                          <th className="fuel-log-header" style={{ textAlign: 'center' }}>VEHICLE</th>
                           <th className="fuel-log-header">LOCATION</th>
                           <th className="fuel-log-header">LITERS</th>
                           <th className="fuel-log-header">TOTAL COST</th>
@@ -298,9 +269,9 @@ const FuelLogs = () => {
                               </td>
                               <td className="fuel-log-cell vehicle-cell">
                                 <div className="vehicle-wrapper">
-                                  <Badge bg="light" text="dark" className="vehicle-plate">
+                                  <span className="vehicle-plate">
                                     {log.licensePlate || log.LicensePlate || 'N/A'}
-                                  </Badge>
+                                  </span>
                                 </div>
                               </td>
                               <td className="fuel-log-cell location-cell">
@@ -370,9 +341,9 @@ const FuelLogs = () => {
                                   Vehicle
                                 </span>
                                 <span className="mobile-value">
-                                  <Badge bg="light" text="dark" className="mobile-plate">
+                                  <span className="mobile-plate">
                                     {log.licensePlate || log.LicensePlate || 'N/A'}
-                                  </Badge>
+                                  </span>
                                 </span>
                               </div>
                               <div className="mobile-row">

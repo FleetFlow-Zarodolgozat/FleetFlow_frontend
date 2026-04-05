@@ -36,7 +36,6 @@ const AdminDashboard = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-  const [currentDate] = useState(new Date());
   const [calendarDate, setCalendarDate] = useState(new Date());
   const [calendarView, setCalendarView] = useState('month');
   const [scheduleEvents, setScheduleEvents] = useState([]);
@@ -454,7 +453,73 @@ const AdminDashboard = () => {
           return [t.id ?? t.Id, fmt.date, fmt.time, esc(t.licensePlate ?? t.LicensePlate ?? ''), esc(t.userEmail ?? t.UserEmail ?? ''), esc(t.startLocation ?? t.StartLocation ?? ''), esc(t.endLocation ?? t.EndLocation ?? ''), (t.distanceKm ?? t.DistanceKm ?? 0).toString().replace('.', ','), esc(exportFormatDuration(t.long ?? t.Long)), esc(t.notes ?? t.Notes ?? '')].join(',');
         }),
       ];
-      const tripCsv = '\uFEFF' + tripCsvLines.join('\r\n');
+      // ══════════════════════════════════════════════════════════════════════
+      // COMBINED CSV
+      // ══════════════════════════════════════════════════════════════════════
+      const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+
+      const combinedCsvLines = [
+        `FleetFlow – Fleet Report (${rangeLabel})`,
+        `Exported at:,${exportDate}`,
+        `Date range:,${dateRange}`,
+        ``,
+        ``,
+        `════════════════════════════════════`,
+        `TRIPS`,
+        `════════════════════════════════════`,
+        ...tripCsvLines.slice(tripCsvLines.indexOf('')),   // reuse already built lines (skip header rows)
+        ``,
+        ``,
+        `════════════════════════════════════`,
+        `FUEL LOGS`,
+        `════════════════════════════════════`,
+      ];
+
+      // Fuel logs CSV rows (inline here for the combined file)
+      const fuelTotal  = fuelLogs.length;
+      const fuelLiters = fuelLogs.reduce((s, l) => s + (parseFloat(l.liters ?? l.Liters) || 0), 0);
+      const fuelCost   = fuelLogs.reduce((s, l) => s + exportParseCost(l.totalCostCur ?? l.TotalCostCur), 0);
+      const fuelAvgCpl = fuelLiters > 0 ? Math.round(fuelCost / fuelLiters) : 0;
+
+      combinedCsvLines.push(
+        `Total records:,${fuelTotal.toLocaleString('hu-HU')}`,
+        `Total liters:,"${fuelLiters.toLocaleString('hu-HU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} L"`,
+        `Total cost:,"${Math.round(fuelCost).toLocaleString('hu-HU')} Ft"`,
+        `Avg cost/liter:,"${fuelAvgCpl} Ft/L"`,
+        ``,
+        ['ID', 'Date', 'Time', 'Vehicle', 'Driver Email', 'Station', 'Liters', 'Total Cost'].join(','),
+        ...fuelLogs.map((log) => {
+          const fmt = exportFormatDateTime(log.date ?? log.Date);
+          return [log.id ?? log.Id, fmt.date, fmt.time, esc(log.licensePlate ?? log.LicensePlate ?? ''), esc(log.userEmail ?? log.UserEmail ?? ''), esc(log.stationName ?? log.StationName ?? ''), (parseFloat(log.liters ?? log.Liters) || 0).toFixed(2).replace('.', ','), esc(log.totalCostCur ?? log.TotalCostCur ?? '')].join(',');
+        }),
+        ``,
+        ``,
+        `════════════════════════════════════`,
+        `SERVICE REQUESTS`,
+        `════════════════════════════════════`,
+      );
+
+      const srTotal    = srs.length;
+      const srOngoing  = srs.filter(r => { const s = r.status ?? r.Status; return s !== 'REJECTED' && s !== 'CLOSED'; }).length;
+      const srApproved = srs.filter(r => (r.status ?? r.Status) === 'APPROVED').length;
+      const srWithCost = srs.filter(r => r.driverReportCost ?? r.DriverReportCost).length;
+
+      combinedCsvLines.push(
+        `Total records:,${srTotal}`,
+        ``,
+        ['ID', 'Title', 'Vehicle', 'Driver', 'Status', 'Scheduled', 'Reported Cost (Ft)', 'Closed At'].join(','),
+        ...srs.map(r => {
+          const scheduled = r.scheduledStart ?? r.ScheduledStart ?? '';
+          const closed = r.closedAt ?? r.ClosedAt ?? '';
+          return [r.id ?? r.Id ?? '', esc(r.title ?? r.Title ?? ''), r.licensePlate ?? r.LicensePlate ?? '', esc(r.userEmail ?? r.UserEmail ?? ''), r.status ?? r.Status ?? '', scheduled ? new Date(scheduled).toLocaleDateString('hu-HU') : '', r.driverReportCost ?? r.DriverReportCost ?? '', closed ? new Date(closed).toLocaleDateString('hu-HU') : ''].join(',');
+        }),
+      );
+
+      const combinedCsv = '\uFEFF' + combinedCsvLines.join('\r\n');
+
+      // ══════════════════════════════════════════════════════════════════════
+      // COMBINED WORD (HTML)
+      // ══════════════════════════════════════════════════════════════════════
 
       const tripCards = trips.map((t) => {
         const fmt = exportFormatDateTime(t.startTime ?? t.StartTime);
@@ -474,40 +539,9 @@ const AdminDashboard = () => {
 </div>`;
       }).join('\n');
 
-      const tripHtml = `<!DOCTYPE html><html lang="hu"><head><meta charset="UTF-8"><title>FleetFlow - Trips Export</title><style>body{font-family:Calibri,Arial,sans-serif;margin:32px;color:#0f172a;font-size:13px;}h1{font-size:22px;color:#1d6ee6;margin-bottom:2px;}.subtitle{color:#64748b;font-size:12px;margin-bottom:4px;}.meta{color:#94a3b8;font-size:11px;margin-bottom:24px;}.section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;margin:20px 0 8px;border-bottom:1px solid #e2e8f0;padding-bottom:4px;}.stats-grid{display:flex;gap:16px;margin-bottom:24px;flex-wrap:wrap;}.stat-box{border:1px solid #e2e8f0;border-radius:8px;padding:12px 20px;min-width:130px;}.stat-box .label{font-size:10px;text-transform:uppercase;color:#94a3b8;}.stat-box .value{font-size:18px;font-weight:700;color:#0f172a;}.stat-box.blue{border-top:3px solid #3b82f6;}.stat-box.green{border-top:3px solid #16a34a;}.stat-box.purple{border-top:3px solid #7c3aed;}.trip-card{border:1px solid #e2e8f0;border-radius:10px;padding:16px 20px;margin-bottom:14px;background:#ffffff;page-break-inside:avoid;}.card-header{display:flex;align-items:center;gap:12px;margin-bottom:12px;border-bottom:1px solid #f1f5f9;padding-bottom:10px;}.card-number{font-size:11px;font-weight:700;color:#94a3b8;min-width:28px;}.card-plate{font-size:15px;font-weight:700;color:#1e293b;background:#f1f5f9;border-radius:5px;padding:2px 10px;letter-spacing:1px;}.card-date{font-size:12px;color:#64748b;margin-left:auto;}.card-route{display:flex;align-items:center;gap:16px;margin-bottom:12px;}.route-point{display:flex;align-items:center;gap:6px;flex:1;}.route-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}.dot-origin{background:#3b82f6;}.dot-dest{background:#ef4444;}.route-label{font-size:9px;text-transform:uppercase;color:#94a3b8;min-width:22px;}.route-value{font-size:12px;color:#1e293b;}.route-arrow{font-size:18px;color:#cbd5e1;}.card-stats{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;}.stat-pill{background:#f8fafc;border:1px solid #e2e8f0;border-radius:20px;padding:3px 12px;font-size:11px;color:#475569;}.card-footer{font-size:11px;color:#64748b;}.driver-label{font-weight:600;color:#475569;}.driver-email{color:#1d6ee6;}.notes-text{font-style:italic;}.footer{margin-top:32px;font-size:10px;color:#94a3b8;text-align:right;border-top:1px solid #f1f5f9;padding-top:12px;}</style></head><body>
-<h1>FleetFlow – Trips Export</h1><div class="subtitle">${rangeLabel} – ${dateRange}</div><div class="meta">Exported: ${exportDate}</div>
-<div class="section-title">Summary</div><div class="stats-grid"><div class="stat-box blue"><div class="label">Total Trips</div><div class="value">${tripTotal.toLocaleString('hu-HU')}</div></div><div class="stat-box green"><div class="label">Total Distance</div><div class="value">${tripDist.toLocaleString('hu-HU', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} km</div></div><div class="stat-box purple"><div class="label">Avg / Trip</div><div class="value">${tripAvg.toLocaleString('hu-HU', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} km</div></div></div>
-<div class="section-title">Trip Records (${tripTotal})</div>${tripCards}
-<div class="footer">FleetFlow – generated ${exportDate}</div></body></html>`;
+      const tripHtml_cards = tripCards; // already built above
 
-      // ══════════════════════════════════════════════════════════════════════
-      // FUEL LOGS
-      // ══════════════════════════════════════════════════════════════════════
-      const fuelTotal  = fuelLogs.length;
-      const fuelLiters = fuelLogs.reduce((s, l) => s + (parseFloat(l.liters ?? l.Liters) || 0), 0);
-      const fuelCost   = fuelLogs.reduce((s, l) => s + exportParseCost(l.totalCostCur ?? l.TotalCostCur), 0);
-      const fuelAvgCpl = fuelLiters > 0 ? Math.round(fuelCost / fuelLiters) : 0;
-
-      const fuelCsvLines = [
-        `FleetFlow – Fuel Logs Export (${rangeLabel})`,
-        `Exported at:,${exportDate}`,
-        ``,
-        `Date range:,${dateRange}`,
-        ``,
-        `Total records:,${fuelTotal.toLocaleString('hu-HU')}`,
-        `Total liters:,"${fuelLiters.toLocaleString('hu-HU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} L"`,
-        `Total cost:,"${Math.round(fuelCost).toLocaleString('hu-HU')} Ft"`,
-        `Avg cost/liter:,"${fuelAvgCpl} Ft/L"`,
-        ``,
-        ['ID', 'Date', 'Time', 'Vehicle', 'Driver Email', 'Station', 'Liters', 'Total Cost'].join(','),
-        ...fuelLogs.map((log) => {
-          const fmt = exportFormatDateTime(log.date ?? log.Date);
-          const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
-          return [log.id ?? log.Id, fmt.date, fmt.time, esc(log.licensePlate ?? log.LicensePlate ?? ''), esc(log.userEmail ?? log.UserEmail ?? ''), esc(log.stationName ?? log.StationName ?? ''), (parseFloat(log.liters ?? log.Liters) || 0).toFixed(2).replace('.', ','), esc(log.totalCostCur ?? log.TotalCostCur ?? '')].join(',');
-        }),
-      ];
-      const fuelCsv = '\uFEFF' + fuelCsvLines.join('\r\n');
-
+      // Fuel cards (for combined Word)
       const fuelCards = fuelLogs.map((log) => {
         const fmt = exportFormatDateTime(log.date ?? log.Date);
         const plate = log.licensePlate ?? log.LicensePlate ?? '—';
@@ -529,20 +563,7 @@ const AdminDashboard = () => {
 </div>`;
       }).join('\n');
 
-      const fuelHtml = `<!DOCTYPE html><html lang="hu"><head><meta charset="UTF-8"><title>FleetFlow - Fuel Logs Export</title><style>body{font-family:Calibri,Arial,sans-serif;margin:32px;color:#0f172a;font-size:13px;}h1{font-size:22px;color:#1d6ee6;margin-bottom:2px;}.subtitle{color:#64748b;font-size:12px;margin-bottom:4px;}.meta{color:#94a3b8;font-size:11px;margin-bottom:24px;}.section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;margin:20px 0 8px;border-bottom:1px solid #e2e8f0;padding-bottom:4px;}.stats-grid{display:flex;gap:16px;margin-bottom:24px;flex-wrap:wrap;}.stat-box{border:1px solid #e2e8f0;border-radius:8px;padding:12px 20px;min-width:130px;}.stat-box .label{font-size:10px;text-transform:uppercase;color:#94a3b8;}.stat-box .value{font-size:18px;font-weight:700;color:#0f172a;}.stat-box.blue{border-top:3px solid #3b82f6;}.stat-box.orange{border-top:3px solid #f97316;}.stat-box.green{border-top:3px solid #16a34a;}.stat-box.purple{border-top:3px solid #7c3aed;}.fuel-card{border:1px solid #e2e8f0;border-radius:10px;padding:16px 20px;margin-bottom:16px;background:#ffffff;page-break-inside:avoid;}.card-header{display:flex;align-items:center;gap:12px;margin-bottom:12px;border-bottom:1px solid #f1f5f9;padding-bottom:10px;}.card-number{font-size:11px;font-weight:700;color:#94a3b8;min-width:28px;}.card-plate{font-size:15px;font-weight:700;color:#1e293b;background:#f1f5f9;border-radius:5px;padding:2px 10px;letter-spacing:1px;}.card-date{font-size:12px;color:#64748b;margin-left:auto;}.card-stats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}.stat-pill{background:#f8fafc;border:1px solid #e2e8f0;border-radius:20px;padding:3px 12px;font-size:11px;color:#475569;}.pill-orange{background:#fff7ed;border-color:#fed7aa;color:#c2410c;}.pill-green{background:#f0fdf4;border-color:#bbf7d0;color:#15803d;}.card-driver{font-size:11px;color:#64748b;margin-bottom:12px;}.driver-label{font-weight:600;color:#475569;}.driver-email{color:#1d6ee6;}.receipt-section{margin-top:12px;border-top:1px solid #f1f5f9;padding-top:10px;}.receipt-label{font-size:10px;font-weight:700;text-transform:uppercase;color:#94a3b8;margin-bottom:6px;}.receipt-filename{font-size:12px;color:#1d6ee6;font-family:monospace;}.receipt-missing{font-size:11px;color:#94a3b8;font-style:italic;}.footer{margin-top:32px;font-size:10px;color:#94a3b8;text-align:right;border-top:1px solid #f1f5f9;padding-top:12px;}</style></head><body>
-<h1>FleetFlow – Fuel Logs Export</h1><div class="subtitle">${rangeLabel} – ${dateRange}</div><div class="meta">Exported: ${exportDate}</div>
-<div class="section-title">Summary</div><div class="stats-grid"><div class="stat-box blue"><div class="label">Total Records</div><div class="value">${fuelTotal.toLocaleString('hu-HU')}</div></div><div class="stat-box orange"><div class="label">Total Liters</div><div class="value">${fuelLiters.toLocaleString('hu-HU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} L</div></div><div class="stat-box green"><div class="label">Total Cost</div><div class="value">${Math.round(fuelCost).toLocaleString('hu-HU')} Ft</div></div><div class="stat-box purple"><div class="label">Avg / Liter</div><div class="value">${fuelAvgCpl} Ft/L</div></div></div>
-<div class="section-title">Fuel Log Records (${fuelTotal})</div>${fuelCards}
-<div class="footer">FleetFlow – generated ${exportDate}</div></body></html>`;
-
-      // ══════════════════════════════════════════════════════════════════════
-      // SERVICE REQUESTS
-      // ══════════════════════════════════════════════════════════════════════
-      const srTotal    = srs.length;
-      const srOngoing  = srs.filter(r => { const s = r.status ?? r.Status; return s !== 'REJECTED' && s !== 'CLOSED'; }).length;
-      const srApproved = srs.filter(r => (r.status ?? r.Status) === 'APPROVED').length;
-      const srWithCost = srs.filter(r => r.driverReportCost ?? r.DriverReportCost).length;
-
+      // Service request cards (for combined Word)
       const srStatusLabels = { REQUESTED: 'Requested', APPROVED: 'Approved', REJECTED: 'Rejected', CLOSED: 'Closed', DRIVER_COST: 'Cost Report' };
       const srStatusColors = {
         REQUESTED:   { bg: '#dbeafe', text: '#1e40af', border: '#93c5fd' },
@@ -551,25 +572,6 @@ const AdminDashboard = () => {
         CLOSED:      { bg: '#e5e7eb', text: '#374151', border: '#d1d5db' },
         DRIVER_COST: { bg: '#f3e8ff', text: '#6b21a8', border: '#d8b4fe' },
       };
-
-      const srCsvLines = [
-        `FleetFlow – Service Requests Export (${rangeLabel})`,
-        `Exported at:,${exportDate}`,
-        ``,
-        `Date range:,${dateRange}`,
-        ``,
-        `Total records:,${srTotal}`,
-        ``,
-        ['ID', 'Title', 'Vehicle', 'Driver', 'Status', 'Scheduled', 'Reported Cost (Ft)', 'Closed At'].join(','),
-        ...srs.map(r => {
-          const scheduled = r.scheduledStart ?? r.ScheduledStart ?? '';
-          const closed = r.closedAt ?? r.ClosedAt ?? '';
-          const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
-          return [r.id ?? r.Id ?? '', esc(r.title ?? r.Title ?? ''), r.licensePlate ?? r.LicensePlate ?? '', esc(r.userEmail ?? r.UserEmail ?? ''), r.status ?? r.Status ?? '', scheduled ? new Date(scheduled).toLocaleDateString('hu-HU') : '', r.driverReportCost ?? r.DriverReportCost ?? '', closed ? new Date(closed).toLocaleDateString('hu-HU') : ''].join(',');
-        }),
-      ];
-      const srCsv = '\uFEFF' + srCsvLines.join('\r\n');
-
       const srCards = srs.map(r => {
         const id = r.id ?? r.Id ?? '';
         const title = r.title ?? r.Title ?? '—';
@@ -595,29 +597,140 @@ const AdminDashboard = () => {
 </div>`;
       }).join('\n');
 
-      const srHtml = `<!DOCTYPE html><html lang="hu"><head><meta charset="UTF-8"><title>FleetFlow - Service Requests Export</title><style>body{font-family:Calibri,Arial,sans-serif;margin:32px;color:#0f172a;font-size:13px;}h1{font-size:22px;color:#7c3aed;margin-bottom:2px;}.subtitle{color:#64748b;font-size:12px;margin-bottom:4px;}.meta{color:#94a3b8;font-size:11px;margin-bottom:24px;}.section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;margin:20px 0 8px;border-bottom:1px solid #e2e8f0;padding-bottom:4px;}.stats-grid{display:flex;gap:16px;margin-bottom:24px;flex-wrap:wrap;}.stat-box{border:1px solid #e2e8f0;border-radius:8px;padding:12px 20px;min-width:130px;}.stat-box .label{font-size:10px;text-transform:uppercase;color:#94a3b8;}.stat-box .value{font-size:18px;font-weight:700;color:#0f172a;}.stat-box.purple{border-top:3px solid #7c3aed;}.stat-box.blue{border-top:3px solid #3b82f6;}.stat-box.green{border-top:3px solid #16a34a;}.stat-box.orange{border-top:3px solid #f97316;}.sr-card{border:1px solid #e2e8f0;border-radius:10px;padding:16px 20px;margin-bottom:16px;background:#ffffff;page-break-inside:avoid;}.card-header{display:flex;align-items:center;gap:12px;margin-bottom:12px;border-bottom:1px solid #f1f5f9;padding-bottom:10px;}.card-number{font-size:11px;font-weight:700;color:#94a3b8;min-width:28px;}.card-title{font-size:14px;font-weight:700;color:#1e293b;flex:1;}.status-badge{font-size:10px;font-weight:700;border-radius:12px;padding:3px 10px;white-space:nowrap;}.card-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}.stat-pill{background:#f8fafc;border:1px solid #e2e8f0;border-radius:20px;padding:3px 12px;font-size:11px;color:#475569;}.pill-vehicle{background:#eff6ff;border-color:#bfdbfe;color:#1d4ed8;}.pill-date{background:#fefce8;border-color:#fde68a;color:#92400e;}.pill-cost{background:#f0fdf4;border-color:#bbf7d0;color:#15803d;}.pill-closed{background:#f1f5f9;border-color:#cbd5e1;color:#475569;}.card-driver{font-size:11px;color:#64748b;}.driver-label{font-weight:600;color:#475569;}.driver-email{color:#7c3aed;}.invoice-section{margin-top:12px;border-top:1px solid #f1f5f9;padding-top:10px;}.invoice-label{font-size:10px;font-weight:700;text-transform:uppercase;color:#94a3b8;margin-bottom:4px;}.invoice-filename{font-size:12px;color:#7c3aed;font-family:monospace;}.footer{margin-top:32px;font-size:10px;color:#94a3b8;text-align:right;border-top:1px solid #f1f5f9;padding-top:12px;}</style></head><body>
-<h1>FleetFlow – Service Requests Export</h1><div class="subtitle">${rangeLabel} – ${dateRange}</div><div class="meta">Exported: ${exportDate}</div>
-<div class="section-title">Summary</div><div class="stats-grid"><div class="stat-box purple"><div class="label">Total Records</div><div class="value">${srTotal.toLocaleString('hu-HU')}</div></div><div class="stat-box blue"><div class="label">Ongoing</div><div class="value">${srOngoing.toLocaleString('hu-HU')}</div></div><div class="stat-box green"><div class="label">Approved</div><div class="value">${srApproved.toLocaleString('hu-HU')}</div></div><div class="stat-box orange"><div class="label">With Cost Report</div><div class="value">${srWithCost.toLocaleString('hu-HU')}</div></div></div>
-<div class="section-title">Service Request Records (${srTotal})</div>${srCards}
-<div class="footer">FleetFlow – generated ${exportDate}</div></body></html>`;
+      // ── Dashboard KPI sub-labels (for Word summary cards) ──────────────────
+      const kpiFuelSub = fuelCost === 0 || trStats.fuelCostChange === null
+        ? `<span class="hl-grey">Cannot be compared</span>`
+        : `<span class="${trStats.fuelCostChange >= 0 ? 'hl-red' : 'hl-green'}">${trStats.fuelCostChange >= 0 ? '+' : ''}${trStats.fuelCostChange}%</span> vs previous period`;
+      const kpiActiveColor = fleetStats.activePercent >= 50 ? 'hl-green' : 'hl-red';
+      const kpiUtilColor = trStats.utilizationRate >= 50 ? 'hl-green' : 'hl-red';
+      const kpiSrWaitColor = trStats.srWaiting === 0 ? 'hl-green' : 'hl-red';
+
+      // ── Combined Word (single HTML document) ─────────────────────────────
+      const combinedHtml = `<!DOCTYPE html><html lang="hu"><head><meta charset="UTF-8"><title>FleetFlow - Fleet Report</title><style>
+body{font-family:Calibri,Arial,sans-serif;margin:32px;color:#0f172a;font-size:13px;}
+h1{font-size:24px;color:#1d6ee6;margin-bottom:2px;}
+h2{font-size:16px;font-weight:700;margin:32px 0 4px;padding-bottom:6px;border-bottom:2px solid currentColor;}
+h2.trips-title{color:#1d6ee6;}h2.fuel-title{color:#f97316;}h2.sr-title{color:#7c3aed;}
+.subtitle{color:#64748b;font-size:12px;margin-bottom:4px;}.meta{color:#94a3b8;font-size:11px;margin-bottom:24px;}
+.section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;margin:16px 0 6px;border-bottom:1px solid #e2e8f0;padding-bottom:4px;}
+.stats-grid{display:flex;gap:14px;margin-bottom:20px;flex-wrap:wrap;}
+.stat-box{border:1px solid #e2e8f0;border-radius:8px;padding:10px 16px;min-width:120px;}
+.stat-box .label{font-size:10px;text-transform:uppercase;color:#94a3b8;}
+.stat-box .value{font-size:17px;font-weight:700;color:#0f172a;}
+.stat-box.blue{border-top:3px solid #3b82f6;}.stat-box.green{border-top:3px solid #16a34a;}.stat-box.purple{border-top:3px solid #7c3aed;}.stat-box.orange{border-top:3px solid #f97316;}
+.trip-card,.fuel-card,.sr-card{border:1px solid #e2e8f0;border-radius:10px;padding:14px 18px;margin-bottom:12px;background:#ffffff;page-break-inside:avoid;}
+.card-header{display:flex;align-items:center;gap:12px;margin-bottom:10px;border-bottom:1px solid #f1f5f9;padding-bottom:8px;}
+.card-number{font-size:11px;font-weight:700;color:#94a3b8;min-width:28px;}
+.card-plate{font-size:14px;font-weight:700;color:#1e293b;background:#f1f5f9;border-radius:5px;padding:2px 10px;letter-spacing:1px;}
+.card-title{font-size:13px;font-weight:700;color:#1e293b;flex:1;}
+.card-date{font-size:12px;color:#64748b;margin-left:auto;}
+.status-badge{font-size:10px;font-weight:700;border-radius:12px;padding:3px 10px;white-space:nowrap;}
+.card-route{display:flex;align-items:center;gap:14px;margin-bottom:10px;}
+.route-point{display:flex;align-items:center;gap:6px;flex:1;}
+.route-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+.dot-origin{background:#3b82f6;}.dot-dest{background:#ef4444;}
+.route-label{font-size:9px;text-transform:uppercase;color:#94a3b8;min-width:22px;}
+.route-value{font-size:12px;color:#1e293b;}.route-arrow{font-size:16px;color:#cbd5e1;}
+.card-stats,.card-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;}
+.stat-pill{background:#f8fafc;border:1px solid #e2e8f0;border-radius:20px;padding:3px 10px;font-size:11px;color:#475569;}
+.pill-orange{background:#fff7ed;border-color:#fed7aa;color:#c2410c;}
+.pill-green{background:#f0fdf4;border-color:#bbf7d0;color:#15803d;}
+.pill-vehicle{background:#eff6ff;border-color:#bfdbfe;color:#1d4ed8;}
+.pill-date{background:#fefce8;border-color:#fde68a;color:#92400e;}
+.pill-cost{background:#f0fdf4;border-color:#bbf7d0;color:#15803d;}
+.pill-closed{background:#f1f5f9;border-color:#cbd5e1;color:#475569;}
+.card-footer,.card-driver{font-size:11px;color:#64748b;margin-bottom:2px;}
+.driver-label{font-weight:600;color:#475569;}.driver-email{color:#1d6ee6;}.notes-text{font-style:italic;}
+.receipt-section,.invoice-section{margin-top:10px;border-top:1px solid #f1f5f9;padding-top:8px;}
+.receipt-label,.invoice-label{font-size:10px;font-weight:700;text-transform:uppercase;color:#94a3b8;margin-bottom:4px;}
+.receipt-filename{font-size:12px;color:#1d6ee6;font-family:monospace;}
+.invoice-filename{font-size:12px;color:#7c3aed;font-family:monospace;}
+.receipt-missing{font-size:11px;color:#94a3b8;font-style:italic;}
+.footer{margin-top:32px;font-size:10px;color:#94a3b8;text-align:right;border-top:1px solid #f1f5f9;padding-top:10px;}
+.kpi-grid{display:flex;gap:16px;margin:12px 0 28px;flex-wrap:wrap;}
+.kpi-card{border:1px solid #e2e8f0;border-radius:10px;padding:14px 18px;flex:1;min-width:150px;background:#fafafa;}
+.kpi-label{font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:#94a3b8;font-weight:700;margin-bottom:6px;}
+.kpi-value{font-size:22px;font-weight:700;color:#0f172a;margin-bottom:4px;}
+.kpi-sub{font-size:12px;color:#64748b;}
+.kpi-card.kpi-blue{border-top:3px solid #1d6ee6;}.kpi-card.kpi-orange{border-top:3px solid #f97316;}.kpi-card.kpi-green{border-top:3px solid #16a34a;}.kpi-card.kpi-purple{border-top:3px solid #7c3aed;}
+.hl-green{color:#16a34a;font-weight:700;}.hl-red{color:#dc2626;font-weight:700;}.hl-grey{color:#94a3b8;}
+</style></head><body>
+<h1>FleetFlow – Fleet Report</h1>
+<div class="subtitle">${rangeLabel} – ${dateRange}</div>
+<div class="meta">Exported: ${exportDate}</div>
+
+<h2 style="color:#1e293b;margin-top:20px;border-bottom:2px solid #e2e8f0;">&#128202; Dashboard Summary</h2>
+<div class="kpi-grid">
+  <div class="kpi-card kpi-blue">
+    <div class="kpi-label">Total Fleet</div>
+    <div class="kpi-value">${fleetStats.total}</div>
+    <div class="kpi-sub"><span class="${kpiActiveColor}">${fleetStats.activePercent}%</span> active</div>
+  </div>
+  <div class="kpi-card kpi-orange">
+    <div class="kpi-label">Fuel Costs</div>
+    <div class="kpi-value">${Math.round(fuelCost).toLocaleString('hu-HU')} Ft</div>
+    <div class="kpi-sub">${kpiFuelSub}</div>
+  </div>
+  <div class="kpi-card kpi-green">
+    <div class="kpi-label">Trips / Utilization</div>
+    <div class="kpi-value">${tripTotal}</div>
+    <div class="kpi-sub"><span class="${kpiUtilColor}">${trStats.utilizationRate}%</span> utilization rate</div>
+  </div>
+  <div class="kpi-card kpi-purple">
+    <div class="kpi-label">Service Requests</div>
+    <div class="kpi-value">${trStats.srCount}</div>
+    <div class="kpi-sub"><span class="${kpiSrWaitColor}">${trStats.srWaiting}</span> waiting for response</div>
+  </div>
+</div>
+
+<h2 class="trips-title">&#128663; Trips</h2>
+<div class="section-title">Summary</div>
+<div class="stats-grid">
+  <div class="stat-box blue"><div class="label">Total Trips</div><div class="value">${tripTotal.toLocaleString('hu-HU')}</div></div>
+  <div class="stat-box green"><div class="label">Total Distance</div><div class="value">${tripDist.toLocaleString('hu-HU', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} km</div></div>
+  <div class="stat-box purple"><div class="label">Avg / Trip</div><div class="value">${tripAvg.toLocaleString('hu-HU', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} km</div></div>
+</div>
+<div class="section-title">Trip Records (${tripTotal})</div>
+${tripHtml_cards}
+
+<h2 class="fuel-title">&#9981; Fuel Logs</h2>
+<div class="section-title">Summary</div>
+<div class="stats-grid">
+  <div class="stat-box blue"><div class="label">Total Records</div><div class="value">${fuelTotal.toLocaleString('hu-HU')}</div></div>
+  <div class="stat-box orange"><div class="label">Total Liters</div><div class="value">${fuelLiters.toLocaleString('hu-HU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} L</div></div>
+  <div class="stat-box green"><div class="label">Total Cost</div><div class="value">${Math.round(fuelCost).toLocaleString('hu-HU')} Ft</div></div>
+  <div class="stat-box purple"><div class="label">Avg / Liter</div><div class="value">${fuelAvgCpl} Ft/L</div></div>
+</div>
+<div class="section-title">Fuel Log Records (${fuelTotal})</div>
+${fuelCards}
+
+<h2 class="sr-title">&#128295; Service Requests</h2>
+<div class="section-title">Summary</div>
+<div class="stats-grid">
+  <div class="stat-box purple"><div class="label">Total Records</div><div class="value">${srTotal.toLocaleString('hu-HU')}</div></div>
+  <div class="stat-box blue"><div class="label">Ongoing</div><div class="value">${srOngoing.toLocaleString('hu-HU')}</div></div>
+  <div class="stat-box green"><div class="label">Approved</div><div class="value">${srApproved.toLocaleString('hu-HU')}</div></div>
+  <div class="stat-box orange"><div class="label">With Cost</div><div class="value">${srWithCost.toLocaleString('hu-HU')}</div></div>
+</div>
+<div class="section-title">Service Request Records (${srTotal})</div>
+${srCards}
+
+<div class="footer">FleetFlow – generated ${exportDate}</div>
+</body></html>`;
 
       // ══════════════════════════════════════════════════════════════════════
-      // BUILD ZIP
+      // BUILD ZIP (1 CSV + 1 Word + attachment folders)
       // ══════════════════════════════════════════════════════════════════════
       const zip = new JSZip();
 
-      zip.file(`trips_${fileDate}.csv`, tripCsv);
-      zip.file(`trips_${fileDate}.doc`, tripHtml);
+      zip.file(`fleetflow_report_${fileDate}.csv`, combinedCsv);
+      zip.file(`fleetflow_report_${fileDate}.doc`, combinedHtml);
 
-      zip.file(`fuellogs_${fileDate}.csv`, fuelCsv);
-      zip.file(`fuellogs_${fileDate}.doc`, fuelHtml);
       const receiptsFolder = zip.folder('receipts');
       for (const entry of Object.values(receiptMap)) {
         if (entry) receiptsFolder.file(entry.filename, entry.blob);
       }
 
-      zip.file(`service_requests_${fileDate}.csv`, srCsv);
-      zip.file(`service_requests_${fileDate}.doc`, srHtml);
       const invoiceEntries = Object.values(invoiceMap).filter(Boolean);
       if (invoiceEntries.length > 0) {
         const invoicesFolder = zip.folder('invoices');

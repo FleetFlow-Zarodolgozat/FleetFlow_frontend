@@ -49,8 +49,25 @@ const RouteMap = ({ startLocation, endLocation, activeField = 'start', onLocatio
             { headers: { 'Accept-Language': 'en' } }
           );
           const data = await res.json();
-          const address = data.display_name || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+          const a = data.address || {};
 
+          // City: prefer most specific populated place
+          const city = a.city || a.town || a.municipality || a.village || a.hamlet || a.suburb || '';
+          // Street: try all road-like fields
+          const street = a.road || a.pedestrian || a.footway || a.path || a.cycleway || a.residential || '';
+
+          let address;
+          if (city && street) {
+            address = `${city}, ${street}`;
+          } else if (city) {
+            address = city;
+          } else if (street) {
+            address = street;
+          } else {
+            // last resort: first 2 parts of display_name
+            const parts = (data.display_name || '').split(', ');
+            address = parts.slice(0, 2).join(', ') || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+          }
           // Remove previous click marker
           if (clickMarkerRef.current) {
             clickMarkerRef.current.remove();

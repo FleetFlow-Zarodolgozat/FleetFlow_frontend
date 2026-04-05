@@ -51,7 +51,7 @@ const AddFuelLog = () => {
               setSelectedVehicle(vehicleList[0].id || vehicleList[0].Id);
             }
           } catch {
-            console.log('Could not fetch vehicles');
+            // no vehicles available
           }
         }
 
@@ -66,10 +66,10 @@ const AddFuelLog = () => {
             .slice(0, 2);
           setRecentLogs(logs);
         } catch {
-          console.log('Could not fetch recent logs');
+          // could not fetch recent logs
         }
       } catch (err) {
-        console.log('Error fetching data:', err);
+        // error fetching data
       }
     };
     fetchData();
@@ -139,7 +139,6 @@ const AddFuelLog = () => {
       setSuccess(true);
       setTimeout(() => navigate('/fuel-logs'), 1200);
     } catch (err) {
-      console.log('FuelLog POST error:', err);
       let msg = 'An error occurred while saving!';
       if (err.response) {
         if (err.response.status === 403) {
@@ -339,7 +338,12 @@ const AddFuelLog = () => {
                         type="submit"
                         className="btn-save"
                       >
-                        Save Fuel Log
+                        <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                          <path d="M3 22V8l4-4h6l4 4v14H3z" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M17 13h2a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M7 22V12h6v10" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                        Submit Fuel Log
                       </Button>
                       <Button
                         variant="light"

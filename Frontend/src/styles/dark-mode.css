@@ -1,0 +1,1100 @@
+/* ============================================================
+   DARK MODE — applies only to driver-facing pages
+   Activated by: document.body.classList.add('dark-mode')
+   Admin pages (.admin-dashboard) are NOT targeted here.
+   ============================================================ */
+
+/* ---------- Page backgrounds ---------- */
+body.dark-mode .driver-dashboard,
+body.dark-mode .trips-dashboard {
+  background-color: #0f1117 !important;
+}
+
+body.dark-mode .add-fuel-log-page,
+body.dark-mode .add-new-trip-page {
+  background: #0f1117 !important;
+}
+
+body.dark-mode .profile-settings-page,
+body.dark-mode .profile-settings-page .main-content {
+  background-color: #0f1117 !important;
+}
+
+/* ---------- Sidebar ---------- */
+body.dark-mode .sidebar {
+  background: #161b22 !important;
+  border-right-color: #30363d !important;
+}
+
+body.dark-mode .sidebar-header {
+  border-bottom-color: #30363d !important;
+}
+
+body.dark-mode .brand-name {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .brand-tagline {
+  color: #8b949e !important;
+}
+
+body.dark-mode .nav-item {
+  color: #8b949e !important;
+}
+
+body.dark-mode .nav-item:hover {
+  background: #21262d !important;
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .nav-item.active {
+  background: #1c3a5e !important;
+  color: #58a6ff !important;
+}
+
+body.dark-mode .sidebar-footer {
+  border-top-color: #30363d !important;
+}
+
+body.dark-mode .user-name {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .user-role {
+  color: #8b949e !important;
+}
+
+body.dark-mode .action-btn {
+  color: #8b949e !important;
+  background: #21262d !important;
+  border: none !important;
+}
+
+body.dark-mode .action-btn svg {
+  color: #8b949e !important;
+  stroke: #8b949e !important;
+}
+
+body.dark-mode .action-btn:hover {
+  background: #21262d !important;
+}
+
+/* ---------- Cards ---------- */
+body.dark-mode .driver-dashboard .card,
+body.dark-mode .trips-dashboard .card,
+body.dark-mode .profile-settings-page .card {
+  background-color: #1c2230 !important;
+  border-color: #30363d !important;
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .driver-dashboard .card-header,
+body.dark-mode .trips-dashboard .card-header,
+body.dark-mode .profile-settings-page .card-header {
+  background-color: #161b22 !important;
+  border-bottom-color: #30363d !important;
+}
+
+body.dark-mode .driver-dashboard .card-footer,
+body.dark-mode .trips-dashboard .card-footer,
+body.dark-mode .profile-settings-page .card-footer {
+  background-color: #161b22 !important;
+  border-top-color: #30363d !important;
+}
+
+/* ---------- Text ---------- */
+body.dark-mode .driver-dashboard h1,
+body.dark-mode .driver-dashboard h2,
+body.dark-mode .driver-dashboard h3,
+body.dark-mode .driver-dashboard h4,
+body.dark-mode .driver-dashboard h5,
+body.dark-mode .trips-dashboard h1,
+body.dark-mode .trips-dashboard h2,
+body.dark-mode .trips-dashboard h3,
+body.dark-mode .trips-dashboard h4,
+body.dark-mode .trips-dashboard h5,
+body.dark-mode .profile-settings-page h1,
+body.dark-mode .profile-settings-page h2,
+body.dark-mode .profile-settings-page h3,
+body.dark-mode .profile-settings-page h4,
+body.dark-mode .profile-settings-page h5 {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .driver-dashboard .text-muted,
+body.dark-mode .trips-dashboard .text-muted,
+body.dark-mode .profile-settings-page .text-muted {
+  color: #8b949e !important;
+}
+
+/* ---------- Tables ---------- */
+body.dark-mode .driver-dashboard table,
+body.dark-mode .trips-dashboard table {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .driver-dashboard thead,
+body.dark-mode .trips-dashboard thead {
+  background-color: #21262d !important;
+}
+
+body.dark-mode .driver-dashboard th,
+body.dark-mode .trips-dashboard th {
+  color: #8b949e !important;
+  border-color: #30363d !important;
+}
+
+body.dark-mode .driver-dashboard tbody tr,
+body.dark-mode .trips-dashboard tbody tr {
+  border-color: #21262d !important;
+}
+
+body.dark-mode .driver-dashboard tbody tr:hover,
+body.dark-mode .trips-dashboard tbody tr:hover {
+  background-color: #21262d !important;
+}
+
+body.dark-mode .driver-dashboard td,
+body.dark-mode .trips-dashboard td {
+  color: #e6edf3 !important;
+  border-color: #21262d !important;
+}
+
+/* ---------- Form controls ---------- */
+body.dark-mode .driver-dashboard .form-control,
+body.dark-mode .trips-dashboard .form-control,
+body.dark-mode .profile-settings-page .form-control {
+  background-color: #21262d !important;
+  border-color: #30363d !important;
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .driver-dashboard .form-control:focus,
+body.dark-mode .trips-dashboard .form-control:focus,
+body.dark-mode .profile-settings-page .form-control:focus {
+  background-color: #21262d !important;
+  color: #e6edf3 !important;
+  border-color: #1f6feb !important;
+  box-shadow: 0 0 0 0.25rem rgba(31, 111, 235, 0.25) !important;
+}
+
+body.dark-mode .driver-dashboard .form-control::placeholder,
+body.dark-mode .trips-dashboard .form-control::placeholder,
+body.dark-mode .profile-settings-page .form-control::placeholder {
+  color: #6e7681 !important;
+}
+
+body.dark-mode .driver-dashboard .form-label,
+body.dark-mode .trips-dashboard .form-label,
+body.dark-mode .profile-settings-page .form-label {
+  color: #8b949e !important;
+}
+
+body.dark-mode .driver-dashboard .form-select,
+body.dark-mode .trips-dashboard .form-select,
+body.dark-mode .profile-settings-page .form-select {
+  background-color: #21262d !important;
+  border-color: #30363d !important;
+  color: #e6edf3 !important;
+}
+
+/* ---------- Buttons (light/secondary/cancel) ---------- */
+body.dark-mode .driver-dashboard .btn-light,
+body.dark-mode .trips-dashboard .btn-light,
+body.dark-mode .profile-settings-page .btn-light {
+  background-color: #21262d !important;
+  border-color: #30363d !important;
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .driver-dashboard .btn-outline-secondary,
+body.dark-mode .trips-dashboard .btn-outline-secondary,
+body.dark-mode .profile-settings-page .btn-outline-secondary {
+  border-color: #30363d !important;
+  color: #8b949e !important;
+}
+
+body.dark-mode .driver-dashboard .btn-outline-secondary:hover,
+body.dark-mode .trips-dashboard .btn-outline-secondary:hover,
+body.dark-mode .profile-settings-page .btn-outline-secondary:hover {
+  background-color: #21262d !important;
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .btn-cancel,
+body.dark-mode .btn-cancel-trip {
+  background-color: #21262d !important;
+  border-color: #30363d !important;
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .driver-dashboard .btn-outline-danger,
+body.dark-mode .trips-dashboard .btn-outline-danger {
+  border-color: #da3633 !important;
+  color: #f85149 !important;
+}
+
+body.dark-mode .driver-dashboard .btn-outline-danger:hover,
+body.dark-mode .trips-dashboard .btn-outline-danger:hover {
+  background-color: #da3633 !important;
+  color: #fff !important;
+}
+
+/* ---------- Pagination ---------- */
+body.dark-mode .driver-dashboard .page-link,
+body.dark-mode .trips-dashboard .page-link {
+  background-color: #21262d !important;
+  border-color: #30363d !important;
+  color: #8b949e !important;
+}
+
+body.dark-mode .driver-dashboard .page-item.active .page-link,
+body.dark-mode .trips-dashboard .page-item.active .page-link {
+  background-color: #1f6feb !important;
+  border-color: #1f6feb !important;
+  color: #fff !important;
+}
+
+body.dark-mode .driver-dashboard .page-item.disabled .page-link,
+body.dark-mode .trips-dashboard .page-item.disabled .page-link {
+  background-color: #161b22 !important;
+  color: #6e7681 !important;
+}
+
+/* FuelLogs: active page number — orange */
+body.dark-mode .fuel-logs-pagination .page-item.active .page-link {
+  background-color: #f97316 !important;
+  border-color: #f97316 !important;
+  color: #fff !important;
+}
+
+/* ServiceRequests: active page number — purple */
+body.dark-mode .service-requests-page .page-item.active .page-link {
+  background-color: #7c3aed !important;
+  border-color: #7c3aed !important;
+  color: #fff !important;
+}
+
+/* ---------- Alerts ---------- */
+body.dark-mode .driver-dashboard .alert-danger,
+body.dark-mode .trips-dashboard .alert-danger,
+body.dark-mode .profile-settings-page .alert-danger {
+  background-color: #3d1f1f !important;
+  border-color: #da3633 !important;
+  color: #ffa198 !important;
+}
+
+body.dark-mode .driver-dashboard .alert-success,
+body.dark-mode .trips-dashboard .alert-success,
+body.dark-mode .profile-settings-page .alert-success {
+  background-color: #1f3d2b !important;
+  border-color: #238636 !important;
+  color: #56d364 !important;
+}
+
+/* ---------- bg-light utility override ---------- */
+body.dark-mode .driver-dashboard .bg-light,
+body.dark-mode .trips-dashboard .bg-light,
+body.dark-mode .profile-settings-page .bg-light {
+  background-color: #21262d !important;
+}
+
+/* ---------- Custom page elements ---------- */
+
+/* Page titles / subtitles */
+body.dark-mode .trips-title,
+body.dark-mode .fuel-logs-title,
+body.dark-mode .sr-page-title,
+body.dark-mode .trip-page-title,
+body.dark-mode .page-title {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .trips-subtitle,
+body.dark-mode .fuel-logs-subtitle,
+body.dark-mode .sr-page-subtitle,
+body.dark-mode .trip-page-subtitle,
+body.dark-mode .page-subtitle {
+  color: #8b949e !important;
+}
+
+/* Stat cards */
+body.dark-mode .stat-card,
+body.dark-mode .sr-stat-card,
+body.dark-mode .stats-card {
+  background-color: #1c2230 !important;
+  border-color: #30363d !important;
+}
+
+body.dark-mode .stat-value,
+body.dark-mode .stats-value,
+body.dark-mode .sr-stat-value {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .stat-label,
+body.dark-mode .stats-label,
+body.dark-mode .sr-stat-label {
+  color: #8b949e !important;
+}
+
+body.dark-mode .stats-subtext,
+body.dark-mode .stats-change {
+  color: #8b949e !important;
+}
+
+/* Table card headers */
+body.dark-mode .trips-table-title,
+body.dark-mode .fuel-logs-table-title,
+body.dark-mode .sr-table-title {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .trips-total-badge,
+body.dark-mode .fuel-logs-total-badge,
+body.dark-mode .sr-total-badge {
+  background: #21262d !important;
+  color: #8b949e !important;
+}
+
+/* License plate badges */
+body.dark-mode .trip-plate,
+body.dark-mode .vehicle-plate,
+body.dark-mode .mobile-plate,
+body.dark-mode .sr-cell-vehicle {
+  background: #21262d !important;
+  border-color: #30363d !important;
+  color: #a0aec0 !important;
+}
+
+/* Route text */
+body.dark-mode .route-from {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .route-to,
+body.dark-mode .route-divider {
+  color: #8b949e !important;
+}
+
+/* Empty state */
+body.dark-mode .sr-empty p {
+  color: #8b949e !important;
+}
+
+/* Date cells */
+body.dark-mode .date-main {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .date-time {
+  color: #6e7681 !important;
+}
+
+/* Location, cost, liters cells */
+body.dark-mode .location-cell,
+body.dark-mode .cost-cell,
+body.dark-mode .liters-cell {
+  color: #8b949e !important;
+}
+
+/* Service request status badges */
+body.dark-mode .sr-status-badge {
+  opacity: 0.9;
+}
+
+/* SR cell date / cost */
+body.dark-mode .sr-cell-date,
+body.dark-mode .sr-cell-cost {
+  color: #8b949e !important;
+}
+
+/* SR cell title */
+body.dark-mode .sr-cell-title span {
+  color: #e6edf3 !important;
+}
+
+/* Add New Trip form */
+body.dark-mode .trip-section-title {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .trip-section-divider {
+  border-color: #30363d !important;
+}
+
+body.dark-mode .trip-info-card {
+  background: #1c2230 !important;
+  border-color: #30363d !important;
+  color: #8b949e !important;
+}
+
+/* Fuel log table card header */
+body.dark-mode .fuel-logs-table-header,
+body.dark-mode .trips-table-header,
+body.dark-mode .sr-table-header {
+  background: #161b22 !important;
+  border-bottom-color: #30363d !important;
+}
+
+/* Profile Settings specific */
+body.dark-mode .profile-settings-page .card-title {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .profile-settings-page .card-subtitle {
+  color: #8b949e !important;
+}
+
+body.dark-mode .profile-settings-page .preference-title {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .profile-settings-page .preference-description {
+  color: #8b949e !important;
+}
+
+body.dark-mode .profile-settings-page .preference-divider {
+  background-color: #30363d !important;
+}
+
+body.dark-mode .profile-settings-page .security-title {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .profile-settings-page .security-text {
+  color: #8b949e !important;
+}
+
+body.dark-mode .profile-settings-page .picture-hint {
+  color: #8b949e !important;
+}
+
+/* Help & Support Card dark mode */
+body.dark-mode .help-support-card {
+  background: linear-gradient(135deg, #1c3a5e 0%, #1f2e47 100%) !important;
+  border-color: #1f6feb !important;
+}
+
+body.dark-mode .help-support-card:hover {
+  box-shadow: 0 4px 12px rgba(31, 111, 235, 0.25) !important;
+}
+
+body.dark-mode .help-icon-wrapper {
+  color: #58a6ff !important;
+}
+
+body.dark-mode .help-title {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .help-description {
+  color: #8b949e !important;
+}
+
+body.dark-mode .help-link {
+  color: #58a6ff !important;
+}
+
+body.dark-mode .help-link:hover {
+  color: #79b8ff !important;
+}
+
+/* ---------- Legal Pages (Privacy Policy, Terms of Service) ---------- */
+body.dark-mode .legal-page {
+  background-color: #0f1117 !important;
+}
+
+body.dark-mode .legal-card {
+  background: #1c2230 !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3), 0 10px 15px rgba(0, 0, 0, 0.2) !important;
+}
+
+body.dark-mode .legal-header {
+  border-bottom-color: #30363d !important;
+}
+
+body.dark-mode .legal-page .logo-title {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .page-title {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .last-updated {
+  color: #8b949e !important;
+}
+
+body.dark-mode .legal-section h3 {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .legal-section p {
+  color: #8b949e !important;
+}
+
+body.dark-mode .legal-section li {
+  color: #8b949e !important;
+}
+
+body.dark-mode .legal-section a {
+  color: #58a6ff !important;
+}
+
+body.dark-mode .legal-section a:hover {
+  color: #79b8ff !important;
+}
+
+/* ---------- Help Center ---------- */
+body.dark-mode .help-page {
+  background-color: #0f1117 !important;
+}
+
+body.dark-mode .help-page .help-card {
+  background: #1c2230 !important;
+  border-color: #30363d !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3) !important;
+}
+
+body.dark-mode .help-page .help-card.bg-light {
+  background: #1f3d2b !important;
+}
+
+body.dark-mode .help-page .logo-title {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .help-page h2,
+body.dark-mode .help-page h3 {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .help-page h4 {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .help-page .text-muted {
+  color: #8b949e !important;
+}
+
+body.dark-mode .help-page .faq-item {
+  background: #1c2230 !important;
+  border-color: #30363d !important;
+}
+
+body.dark-mode .help-page .faq-item.border-primary {
+  border-color: #1f6feb !important;
+}
+
+body.dark-mode .help-page .faq-item .card-header,
+body.dark-mode .help-page .faq-item .bg-white {
+  background: #161b22 !important;
+  border-color: #30363d !important;
+}
+
+body.dark-mode .help-page .faq-item .card-header span {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .help-page .faq-item .card-header svg {
+  stroke: #8b949e !important;
+}
+
+body.dark-mode .help-page .faq-item .card-body p {
+  color: #8b949e !important;
+}
+
+body.dark-mode .help-page .bg-light {
+  background: #21262d !important;
+}
+
+body.dark-mode .help-page .text-dark,
+body.dark-mode .help-page strong.text-dark {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .help-page a.text-primary {
+  color: #58a6ff !important;
+}
+
+body.dark-mode .help-page .border-top {
+  border-color: #30363d !important;
+}
+
+body.dark-mode .page-footer {
+  border-top-color: #30363d !important;
+  color: #8b949e !important;
+}
+
+body.dark-mode .page-footer a {
+  color: #58a6ff !important;
+}
+
+body.dark-mode .copyright {
+  color: #6e7681 !important;
+}
+
+/* ---------- Inner page backgrounds (trips-page, fuel-logs-page) ---------- */
+body.dark-mode .trips-page,
+body.dark-mode .fuel-logs-page {
+  background-color: #0f1117 !important;
+}
+
+/* ---------- Info items (copyable dashboard cards) ---------- */
+body.dark-mode .info-item {
+  background: #21262d !important;
+  border-color: #30363d !important;
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .info-item:hover {
+  background: #21262d !important;
+  border-color: #30363d !important;
+  cursor: pointer;
+}
+
+body.dark-mode .info-item.bg-success-subtle {
+  background: #1f3d2b !important;
+  border-color: #238636 !important;
+}
+
+body.dark-mode .info-item.bg-success-subtle.border-success {
+  border-color: #238636 !important;
+}
+
+body.dark-mode .info-icon {
+  background: #21262d !important;
+  border-color: #1f6feb !important;
+  color: #58a6ff !important;
+}
+
+body.dark-mode .info-label {
+  color: #8b949e !important;
+}
+
+body.dark-mode .info-value {
+  color: #e6edf3 !important;
+}
+
+/* ---------- Calendar (driver dashboard) ---------- */
+body.dark-mode .calendar-day {
+  color: #e6edf3 !important;
+  background-color: transparent !important;
+}
+
+body.dark-mode .calendar-day:hover {
+  background-color: #21262d !important;
+}
+
+body.dark-mode .calendar-day.other-month {
+  color: #484f58 !important;
+}
+
+body.dark-mode .calendar-day.today {
+  color: #58a6ff !important;
+}
+
+body.dark-mode .calendar-body {
+  background-color: transparent !important;
+}
+
+body.dark-mode .calendar-header,
+body.dark-mode .calendar-header span {
+  color: #8b949e !important;
+}
+
+body.dark-mode .calendar-nav button {
+  color: #8b949e !important;
+  background: transparent !important;
+  border-color: #30363d !important;
+}
+
+body.dark-mode .calendar-nav button:hover {
+  background: #21262d !important;
+  color: #e6edf3 !important;
+}
+
+/* ---------- Notifications page ---------- */
+body.dark-mode .notifications-page,
+body.dark-mode .notifications-page .main-content {
+  background-color: #0f1117 !important;
+}
+
+body.dark-mode .notifications-page .notifications-header .page-title {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .notifications-page .filter-tab {
+  background: #1c2230 !important;
+  border-color: #30363d !important;
+  color: #8b949e !important;
+}
+
+body.dark-mode .notifications-page .filter-tab:hover {
+  background: #21262d !important;
+  border-color: #484f58 !important;
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .notifications-page .filter-tab.active {
+  background: #1f6feb !important;
+  border-color: #1f6feb !important;
+  color: #ffffff !important;
+}
+
+body.dark-mode .notifications-page .filter-tab .unread-count {
+  background: rgba(255, 255, 255, 0.15) !important;
+  color: inherit !important;
+}
+
+body.dark-mode .notifications-page .notifications-list {
+  background: transparent !important;
+}
+
+body.dark-mode .notifications-page .section-title {
+  color: #8b949e !important;
+}
+
+body.dark-mode .notifications-page .notification-card {
+  background: #1c2230 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .notifications-page .notification-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+  background: #21262d !important;
+}
+
+body.dark-mode .notifications-page .notification-title {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .notifications-page .notification-message {
+  color: #8b949e !important;
+}
+
+body.dark-mode .notifications-page .mark-all-read-btn {
+  color: #58a6ff !important;
+}
+
+body.dark-mode .notifications-page .mark-all-read-btn:hover {
+  background: #1c3a5e !important;
+  color: #79b8ff !important;
+}
+
+body.dark-mode .profile-settings-page .danger-zone-title {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .profile-settings-page .danger-zone-description {
+  color: #8b949e !important;
+}
+
+body.dark-mode .profile-settings-page .border-top {
+  border-color: #30363d !important;
+}
+
+body.dark-mode .profile-settings-page .form-control[readonly] {
+  background-color: #161b22 !important;
+  color: #8b949e !important;
+}
+
+/* Footer dark mode */
+body.dark-mode footer,
+body.dark-mode .footer {
+  background-color: #161b22 !important;
+  border-top-color: #30363d !important;
+  color: #8b949e !important;
+}
+
+body.dark-mode footer a,
+body.dark-mode .footer a {
+  color: #58a6ff !important;
+}
+
+/* ---------- Add Fuel Log / Add New Trip / Add Service Request / Service Request Details ---------- */
+
+/* Header text */
+body.dark-mode .add-fuel-title {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .add-fuel-subtitle {
+  color: #8b949e !important;
+}
+
+/* Pro Tip card — override light gradient backgrounds */
+body.dark-mode .pro-tip-card {
+  background: #1c2230 !important;
+}
+
+body.dark-mode .pro-tip-text {
+  color: #8b949e !important;
+}
+
+body.dark-mode .pro-tip-list li,
+body.dark-mode .pro-tip-list span {
+  color: #8b949e !important;
+}
+
+/* Receipt card dropzone */
+body.dark-mode .receipt-dropzone {
+  background: #21262d !important;
+  border-color: #30363d !important;
+}
+
+body.dark-mode .receipt-dropzone:hover {
+  background: #1c3a5e !important;
+  border-color: #1f6feb !important;
+}
+
+body.dark-mode .receipt-title {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .upload-text strong {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .upload-text span,
+body.dark-mode .upload-hint {
+  color: #8b949e !important;
+}
+
+/* Input suffix (L, Ft, km labels) */
+body.dark-mode .input-suffix {
+  background: #21262d !important;
+  color: #8b949e !important;
+}
+
+/* Fuel type buttons */
+body.dark-mode .fuel-type-btn {
+  background: #21262d !important;
+  border-color: #30363d !important;
+  color: #8b949e !important;
+}
+
+body.dark-mode .fuel-type-btn:hover {
+  background: #1c3a5e !important;
+  border-color: #1f6feb !important;
+  color: #e6edf3 !important;
+}
+
+/* Trip details card (plain div, not Bootstrap Card) */
+body.dark-mode .trip-details-card {
+  background: #1c2230 !important;
+  border-color: #30363d !important;
+}
+
+body.dark-mode .trip-details-header {
+  background: #161b22 !important;
+  border-color: #30363d !important;
+}
+
+body.dark-mode .trip-details-header span {
+  color: #58a6ff !important;
+}
+
+body.dark-mode .trip-form-label {
+  color: #8b949e !important;
+}
+
+body.dark-mode .trip-helper-text {
+  color: #6e7681 !important;
+}
+
+/* Location / date / odo inputs */
+body.dark-mode .trip-location-input,
+body.dark-mode .trip-date-input,
+body.dark-mode .trip-odo-input,
+body.dark-mode .trip-notes-textarea {
+  background: #21262d !important;
+  border-color: #30363d !important;
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .trip-location-input::placeholder,
+body.dark-mode .trip-date-input::placeholder,
+body.dark-mode .trip-odo-input::placeholder,
+body.dark-mode .trip-notes-textarea::placeholder {
+  color: #6e7681 !important;
+}
+
+/* Duration / distance input groups */
+body.dark-mode .trip-duration-input-group,
+body.dark-mode .trip-distance-input-group {
+  background: #21262d !important;
+  border-color: #30363d !important;
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .trip-distance-suffix {
+  color: #6e7681 !important;
+}
+
+/* Route preview header */
+body.dark-mode .route-preview-header {
+  background: #161b22 !important;
+  border-color: #30363d !important;
+}
+
+body.dark-mode .route-preview-title {
+  color: #e6edf3 !important;
+}
+
+/* Route info (distance info box below the map) */
+body.dark-mode .route-info {
+  background: #1c3a5e !important;
+  border-color: #1f6feb !important;
+}
+
+body.dark-mode .route-info p {
+  color: #8b949e !important;
+}
+
+/* SRD — Edit Service Details meta cards (STATUS, LICENSE PLATE) */
+body.dark-mode .srd-meta-card {
+  background: #1c2230 !important;
+  border-color: #30363d !important;
+}
+
+body.dark-mode .srd-meta-value {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .srd-meta-icon-status {
+  background: #2d1b69 !important;
+}
+
+body.dark-mode .srd-meta-icon-plate {
+  background: #1c3a5e !important;
+}
+
+/* SRD info rows (title/description/service date display) */
+body.dark-mode .srd-info-row {
+  border-color: #30363d !important;
+}
+
+body.dark-mode .srd-info-value {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .srd-info-value--muted {
+  color: #8b949e !important;
+}
+
+/* ---------- Recent Logs / Pending Requests sidebar cards ---------- */
+body.dark-mode .recent-logs-card {
+  background: #1c2230 !important;
+  border-color: #30363d !important;
+}
+
+body.dark-mode .recent-logs-header {
+  border-color: #30363d !important;
+}
+
+body.dark-mode .recent-logs-title {
+  color: #8b949e !important;
+}
+
+body.dark-mode .recent-log-date {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .recent-log-vehicle {
+  color: #8b949e !important;
+}
+
+body.dark-mode .recent-log-cost {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .view-all-link {
+  border-color: #30363d !important;
+  color: #58a6ff !important;
+}
+
+/* ---------- Schedule card dark mode ---------- */
+body.dark-mode .schedule-card {
+  background: #1c2230 !important;
+  border-color: #30363d !important;
+}
+
+body.dark-mode .schedule-card .card-header {
+  background: #161b22 !important;
+  border-color: #30363d !important;
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .schedule-card .card-header h3 {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .rbc-wrapper .rbc-toolbar {
+  background: transparent !important;
+}
+
+body.dark-mode .rbc-wrapper .rbc-toolbar-label {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .rbc-wrapper .rbc-toolbar button {
+  background: #21262d !important;
+  border-color: #30363d !important;
+  color: #8b949e !important;
+}
+
+body.dark-mode .rbc-wrapper .rbc-toolbar button:hover {
+  background: #1c3a5e !important;
+  border-color: #1f6feb !important;
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .rbc-wrapper .rbc-toolbar button.rbc-active {
+  background: #1f6feb !important;
+  border-color: #1f6feb !important;
+  color: #fff !important;
+}
+
+body.dark-mode .rbc-wrapper .rbc-header {
+  background: #161b22 !important;
+  border-color: #30363d !important;
+  color: #8b949e !important;
+}
+
+body.dark-mode .rbc-wrapper .rbc-month-view,
+body.dark-mode .rbc-wrapper .rbc-time-view {
+  background: #21262d !important;
+  border-color: #30363d !important;
+}
+
+body.dark-mode .rbc-wrapper .rbc-off-range {
+  background: transparent !important;
+}
+
+body.dark-mode .rbc-wrapper .rbc-off-range-bg {
+  background: #1a1f26 !important;
+}
+
+body.dark-mode .rbc-wrapper .rbc-date-cell {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .rbc-wrapper .rbc-off-range-bg .rbc-date-cell {
+  color: #484f58 !important;
+}
+
+body.dark-mode .rbc-wrapper .rbc-date-cell.rbc-off-range-bg {
+  color: #484f58 !important;
+}
+
+body.dark-mode .rbc-wrapper .rbc-event {
+  background: #1f6feb !important;
+  color: #fff !important;
+}
+
+body.dark-mode .rbc-wrapper .rbc-event-content {
+  color: #fff !important;
+}

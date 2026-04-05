@@ -15,7 +15,7 @@ const PrivacyPolicy = () => {
       {isAuthenticated && (
         <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} notificationRefresh={notificationRefresh} />
       )}
-      <main className="main-content">
+      <main className={`legal-main${isAuthenticated ? ' legal-main--with-sidebar' : ''}`}>
         <div className="legal-content">
           <Card className="legal-card">
             <Card.Body>

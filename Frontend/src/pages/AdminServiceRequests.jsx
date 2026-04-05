@@ -677,11 +677,6 @@ ${serviceCards}
 
           {/* ── Table Card ─────────────────────────────── */}
           <div className="asr-table-card">
-            <div className="asr-table-header-row">
-              <span className="asr-table-title">Service Request Records</span>
-              <span className="asr-total-badge">{totalCount} results</span>
-            </div>
-
             {loading ? (
               <div className="asr-spinner-wrap">
                 <Spinner animation="border" role="status" />

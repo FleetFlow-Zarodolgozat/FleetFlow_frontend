@@ -162,18 +162,18 @@ const Trips = () => {
                   <div className="desktop-table">
                     <table className="trips-table">
                       <colgroup>
-                        <col style={{ width: '15%' }} />
-                        <col style={{ width: '44%' }} />
                         <col style={{ width: '12%' }} />
-                        <col style={{ width: '16%' }} />
-                        <col style={{ width: '13%' }} />
+                        <col style={{ width: '18%' }} />
+                        <col style={{ width: '38%' }} />
+                        <col style={{ width: '14%' }} />
+                        <col style={{ width: '18%' }} />
                       </colgroup>
                       <thead>
                         <tr>
                           <th className="trip-header">DATE</th>
+                          <th className="trip-header" style={{ textAlign: 'center' }}>VEHICLE</th>
                           <th className="trip-header">ROUTE</th>
                           <th className="trip-header">DISTANCE</th>
-                          <th className="trip-header">VEHICLE</th>
                           <th className="trip-header">ACTIONS</th>
                         </tr>
                       </thead>
@@ -186,22 +186,20 @@ const Trips = () => {
                                 <div className="date-main">{formatted.date}</div>
                                 {formatted.time && <div className="date-time">{formatted.time}</div>}
                               </td>
+                              <td className="trip-cell vehicle-cell">
+                                <div className="vehicle-wrapper">
+                                  <span className="trip-plate">{trip.LicensePlate || trip.licensePlate || 'N/A'}</span>
+                                </div>
+                              </td>
                               <td className="trip-cell route-cell">
                                 <div className="route-wrapper">
                                   <span className="route-from">{trip.StartLocation || trip.startLocation || 'N/A'}</span>
-                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="route-arrow">
-                                    <path d="M5 12h14M12 5l7 7-7 7" />
-                                  </svg>
+                                  <span className="route-divider">↓</span>
                                   <span className="route-to">{trip.EndLocation || trip.endLocation || 'N/A'}</span>
                                 </div>
                               </td>
                               <td className="trip-cell distance-cell">
                                 <span className="distance-value">{formatDistance(trip.DistanceKm || trip.distanceKm)}</span>
-                              </td>
-                              <td className="trip-cell vehicle-cell">
-                                <div className="vehicle-wrapper">
-                                  <span className="vehicle-name">{trip.LicensePlate || trip.licensePlate || 'N/A'}</span>
-                                </div>
                               </td>
                               <td className="trip-cell actions-cell">
                                 <Button

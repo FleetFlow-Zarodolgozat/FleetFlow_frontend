@@ -22,43 +22,53 @@ const HelpCenter = () => {
   const faqs = [
     {
       id: 1,
-      question: "How do I add a new vehicle to my fleet?",
-      answer: "To add a new vehicle, navigate to the Dashboard and click on 'Add Vehicle'. Fill in the required information including vehicle identification number (VIN), license plate, make, model, and year. Once submitted, the vehicle will appear in your fleet list."
+      question: "How do I log a new trip?",
+      answer: "Go to the 'Log New Trip' page from your dashboard. Fill in the departure and arrival date/time, start and end location, distance (km), and odometer readings. You can click anywhere on the map to automatically fill in the location fields — it will extract the city and street name. Once all fields are filled in, click 'Log Trip' to save."
     },
     {
       id: 2,
-      question: "How does real-time tracking work?",
-      answer: "FleetFlow uses GPS technology to track your vehicles in real-time. Each vehicle must have a compatible GPS device installed. Once connected, you can view live locations, routes, and movement history through the dashboard map view."
+      question: "How do I use the map to select trip locations?",
+      answer: "On the 'Log New Trip' page, there is an interactive map. First select which field you want to fill (Departure or Arrival) by clicking the corresponding input field — it will be highlighted in blue. Then click on the desired location on the map. The city and street name will be automatically filled into the selected field."
     },
     {
       id: 3,
-      question: "How do I assign a driver to a vehicle?",
-      answer: "Go to the Drivers section in your dashboard, select the driver you want to assign, and click 'Assign Vehicle'. Choose the vehicle from the dropdown list and confirm the assignment. You can also do this from the Vehicles section by selecting a vehicle and assigning a driver."
+      question: "How do I add a fuel log entry?",
+      answer: "Navigate to 'Fuel Logs' and click 'Add New Fuel Log'. Fill in the date, fuel station name, number of liters refueled, and the total cost. The system will automatically associate the entry with your assigned vehicle. After saving, the entry will appear in your fuel log table and will be included in the consumption statistics."
     },
     {
       id: 4,
-      question: "How can I set up maintenance alerts?",
-      answer: "Navigate to Settings > Maintenance Alerts. You can configure alerts based on mileage intervals, time periods, or specific dates. FleetFlow will automatically notify you via email and dashboard notifications when maintenance is due."
+      question: "How do I submit a service request?",
+      answer: "Go to 'Service Requests' and click 'Add New Request'. Enter a title describing the issue, select a scheduled date, and provide any additional notes or estimated cost. The request will be sent to the administrator for review. You can track the status of your request (Requested → Approved / Rejected → Closed) in the Service Requests list."
     },
     {
       id: 5,
-      question: "Can I export my fleet data?",
-      answer: "Yes! Go to Reports > Export Data. You can export vehicle information, trip history, driver logs, and maintenance records in CSV, Excel, or PDF formats. Select the date range and data types you need, then click Export."
+      question: "What do the service request statuses mean?",
+      answer: "REQUESTED: the request has been submitted and is awaiting admin review. APPROVED: the admin has approved the request and maintenance is being scheduled. DRIVER_COST: the driver has reported the actual cost. CLOSED: the service has been completed and the case is closed. REJECTED: the admin has rejected the request."
     },
     {
       id: 6,
-      question: "How do I reset my password?",
-      answer: "Click on 'Forgot password?' on the login page. Enter your registered email address, and we'll send you a password reset link. The link is valid for 24 hours. If you don't receive the email, check your spam folder or contact support."
+      question: "Where can I see my assigned vehicle?",
+      answer: "Your assigned vehicle information is displayed on the Driver Dashboard — look for the 'My Vehicle' card which shows the license plate, make/model, and current mileage. You can also see your vehicle's license plate when logging trips and fuel entries."
     },
     {
       id: 7,
-      question: "What browsers are supported?",
-      answer: "FleetFlow works best on modern browsers including Google Chrome (recommended), Mozilla Firefox, Microsoft Edge, and Safari. We recommend keeping your browser updated to the latest version for optimal performance and security."
+      question: "How is fuel consumption calculated?",
+      answer: "The average consumption (L/100km) on the Fuel Logs page is calculated automatically from your recorded trips and fuel log entries. It divides the total liters refueled by the total kilometers driven across all your trips and fuel logs. The more data you enter, the more accurate this figure becomes."
     },
     {
       id: 8,
-      question: "How do I add additional users to my account?",
-      answer: "Go to Settings > User Management > Add User. Enter the new user's email address and select their role (Admin, Manager, or Viewer). They will receive an invitation email to set up their account. You can manage user permissions at any time."
+      question: "How do I update my profile or profile picture?",
+      answer: "Go to 'Profile Settings' from the sidebar. You can update your phone number and driver's license details here. To change your profile picture, click on the avatar image at the top of the settings page and upload a new photo. Changes are saved immediately after clicking 'Save Changes'."
+    },
+    {
+      id: 9,
+      question: "How do I reset my password?",
+      answer: "On the login page, click 'Forgot password?'. Enter your registered email address and you will receive a password reset link. Click the link in the email and set a new password. If you do not receive the email, check your spam/junk folder or contact support at fleetflow.info@gmail.com."
+    },
+    {
+      id: 10,
+      question: "How do notifications work?",
+      answer: "The bell icon in the sidebar shows the number of unread notifications. Notifications are sent for events such as an admin approving or rejecting your service request, or other system messages. Click the bell icon to open the Notifications page and view all your messages."
     }
   ];
 
@@ -72,7 +82,7 @@ const HelpCenter = () => {
       {isAuthenticated && (
         <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} notificationRefresh={notificationRefresh} />
       )}
-      <main className="main-content">
+      <main className={`help-main${isAuthenticated ? ' help-main--with-sidebar' : ''}`}>
         <div className="help-content">
           <Card className="help-card shadow-sm">
             <Card.Body className="p-4 p-md-5">

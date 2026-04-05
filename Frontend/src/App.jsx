@@ -30,6 +30,7 @@ import EditVehicle from './pages/EditVehicle';
 import AddVehicle from './pages/AddVehicle';
 import { authService } from './services/authService';
 import './App.css';
+import './styles/dark-mode.css';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {

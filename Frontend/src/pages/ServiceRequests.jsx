@@ -9,17 +9,6 @@ import '../styles/ServiceRequests.css';
 import Footer from '../components/Footer';
 
 const ServiceRequests = () => {
-    const formatDateTime = (value) => {
-        if (!value) return 'N/A';
-        const date = new Date(value);
-        if (Number.isNaN(date.getTime())) return 'N/A';
-        return date.toLocaleDateString('hu-HU', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-        });
-    };
-
     const getStatusBadgeVariant = (status) => {
         const s = status?.toUpperCase() || '';
         if (s === 'REQUESTED') return 'pending';

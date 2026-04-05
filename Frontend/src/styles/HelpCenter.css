@@ -2,6 +2,9 @@
 .help-page {
   min-height: 100vh;
   background-color: #f8f9fa;
+}
+
+.help-main {
   padding: 40px 20px;
 }
 
@@ -55,7 +58,13 @@
 }
 
 @media (max-width: 768px) {
-  .help-page {
+  .help-main {
     padding: 20px 16px;
+  }
+}
+
+@media (min-width: 1025px) {
+  .help-main--with-sidebar {
+    margin-left: 240px;
   }
 }

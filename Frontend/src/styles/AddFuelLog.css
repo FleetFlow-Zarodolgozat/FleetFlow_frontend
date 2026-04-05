@@ -170,21 +170,24 @@
 }
 
 .btn-save {
-  background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+  background: linear-gradient(135deg, #f97316 0%, #ea6c0a 100%);
   border: none;
   border-radius: 10px;
   padding: 14px 32px;
   font-size: 1rem;
   font-weight: 600;
   color: #ffffff;
-  box-shadow: 0 4px 14px rgba(13, 110, 253, 0.3);
+  box-shadow: 0 4px 14px rgba(249, 115, 22, 0.3);
   transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .btn-save:hover {
-  background: linear-gradient(135deg, #0b5ed7 0%, #0a58ca 100%);
+  background: linear-gradient(135deg, #ea6c0a 0%, #d95f06 100%);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(13, 110, 253, 0.4);
+  box-shadow: 0 6px 20px rgba(249, 115, 22, 0.4);
 }
 
 .btn-cancel {
