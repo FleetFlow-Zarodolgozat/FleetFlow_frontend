@@ -26,7 +26,8 @@ const RouteMap = ({ startLocation, endLocation, activeField = 'start', onLocatio
   useEffect(() => { activeFieldRef.current = activeField; }, [activeField]);
   useEffect(() => { onDistanceCalculatedRef.current = onDistanceCalculated; }, [onDistanceCalculated]);
 
-  useEffect(() => {    if (!mapInstanceRef.current) {
+  useEffect(() => {
+    if (!mapInstanceRef.current) {
       mapInstanceRef.current = L.map(mapRef.current, {
         center: [47.4979, 19.0402], // Budapest default
         zoom: 7,
@@ -65,7 +66,8 @@ const RouteMap = ({ startLocation, endLocation, activeField = 'start', onLocatio
             // last resort: first 2 parts of display_name
             const parts = (data.display_name || '').split(', ');
             address = parts.slice(0, 2).join(', ') || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-          }          if (clickMarkerRef.current) {
+          }
+          if (clickMarkerRef.current) {
             clickMarkerRef.current.remove();
           }
           clickMarkerRef.current = L.marker([lat, lng], {
@@ -159,13 +161,15 @@ const RouteMap = ({ startLocation, endLocation, activeField = 'start', onLocatio
         const [start, end] = await Promise.all([
           geocode(startLocation),
           geocode(endLocation),
-        ]);        const startMarker = L.marker([start.lat, start.lng])
+        ]);
+        const startMarker = L.marker([start.lat, start.lng])
           .bindPopup(`<b>Start:</b> ${startLocation}`)
           .addTo(map);
         const endMarker = L.marker([end.lat, end.lng])
           .bindPopup(`<b>End:</b> ${endLocation}`)
           .addTo(map);
-        markersRef.current = [startMarker, endMarker];        const routeRes = await fetch(
+        markersRef.current = [startMarker, endMarker];
+        const routeRes = await fetch(
           `https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${end.lng},${end.lat}?overview=full&geometries=geojson`
         );
         const routeData = await routeRes.json();
@@ -207,8 +211,8 @@ const RouteMap = ({ startLocation, endLocation, activeField = 'start', onLocatio
   }, [startLocation, endLocation]);
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '250px' }}>
-      <div ref={mapRef} style={{ width: '100%', height: '100%', borderRadius: '8px' }} />
+    <div className="route-map">
+      <div ref={mapRef} className="route-map__canvas" />
       {/* Active field hint */}
       <div style={{
         position: 'absolute',

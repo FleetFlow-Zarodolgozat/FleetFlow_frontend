@@ -11,7 +11,7 @@
   position: fixed;
   top: 16px;
   left: 16px;
-  z-index: 150;
+  z-index: 1230;
   width: 48px;
   height: 48px;
   background: #0d6efd;
@@ -48,7 +48,7 @@
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
-  z-index: 90;
+  z-index: 1210;
 }
 
 /* Sidebar */
@@ -62,7 +62,7 @@
   left: 0;
   top: 0;
   height: 100vh;
-  z-index: 100;
+  z-index: 1220;
   transition: left 0.3s ease;
 }
 
