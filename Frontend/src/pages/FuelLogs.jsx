@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Alert, Button, Card, Col, Container, Pagination, Row, Spinner, Badge } from 'react-bootstrap';
+import { useLanguage } from '../contexts/LanguageContext';
+import { Alert, Button, Card, Col, Container, Pagination, Row, Spinner } from 'react-bootstrap';
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
 import '../styles/DriverDashboard.css';
@@ -10,6 +11,7 @@ import Footer from '../components/Footer';
 
 const FuelLogs = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [fuelLogs, setFuelLogs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -19,28 +21,20 @@ const FuelLogs = () => {
 
   // Trips state for consumption calculation
   const [trips, setTrips] = useState([]);
-  const [tripsLoading, setTripsLoading] = useState(true);
-  const [tripsError, setTripsError] = useState('');
-  // Fetch trips for consumption calculation
-  useEffect(() => {
+  const [tripsLoading, setTripsLoading] = useState(true);  useEffect(() => {
     const fetchTrips = async () => {
       setTripsLoading(true);
-      setTripsError('');
       try {
         const response = await api.get('/trips/mine', { params: { page: 1, pageSize: 1000 } });
         const payload = response.data || {};
         setTrips(Array.isArray(payload.data) ? payload.data : []);
-      } catch{
-        setTripsError('Nem sikerült lekérni az utak adatait.');
+      } catch {
       } finally {
         setTripsLoading(false);
       }
     };
     fetchTrips();
-  }, []);
-
-  // Calculate stats based on fuelLogs
-  const now = new Date();
+  }, []);  const now = new Date();
   const thisMonth = now.getMonth();
   const thisYear = now.getFullYear();
   const lastMonth = thisMonth === 0 ? 11 : thisMonth - 1;
@@ -48,16 +42,8 @@ const FuelLogs = () => {
 
   let totalSpent = 0;
   let lastMonthSpent = 0;
-  let nextServiceDue = 'N/A';
-  let nextServiceVehicle = '';
 
-  // Find the soonest service due (if available)
-  let soonestServiceDate = null;
-  let soonestServiceVehicle = '';
-
-  fuelLogs.forEach(log => {
-    // Parse date
-    const dateObj = new Date(log.date || log.Date);
+  fuelLogs.forEach(log => {    const dateObj = new Date(log.date || log.Date);
     const costStr = log.totalCostCur || log.TotalCostCur || '0';
     const cost = parseFloat(costStr.replace(/[^0-9.,]/g, '').replace(',', '.')) || 0;
 
@@ -72,41 +58,17 @@ const FuelLogs = () => {
       }
     }
 
-    // Service due (if present)
-    if (log.nextServiceDate || log.NextServiceDate) {
-      const serviceDate = new Date(log.nextServiceDate || log.NextServiceDate);
-      if (!soonestServiceDate || (serviceDate < soonestServiceDate && serviceDate > now)) {
-        soonestServiceDate = serviceDate;
-        soonestServiceVehicle = log.vehicleName || log.VehicleName || '';
-      }
-    }
-  });
-
-  // Calculate stats
-  const spentChange = lastMonthSpent === 0 ? 0 : Math.round(((totalSpent - lastMonthSpent) / lastMonthSpent) * 100);
-
-  // Calculate days since last refuel
-  let daysSinceLastRefuel = 'N/A';
-  if (fuelLogs.length > 0) {
-    // Find the latest log date
-    const latestLog = fuelLogs.reduce((latest, log) => {
+  });  const spentChange = lastMonthSpent === 0 ? 0 : Math.round(((totalSpent - lastMonthSpent) / lastMonthSpent) * 100);  let daysSinceLastRefuel = 'N/A';
+  if (fuelLogs.length > 0) {    const latestLog = fuelLogs.reduce((latest, log) => {
       const dateObj = new Date(log.date || log.Date);
       return (!latest || dateObj > latest) ? dateObj : latest;
     }, null);
     if (latestLog && !isNaN(latestLog.getTime())) {
       const diffMs = now - latestLog;
       const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-      daysSinceLastRefuel = diffDays === 0 ? 'Today' : `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
+      daysSinceLastRefuel = diffDays === 0 ? t('fuelLogs.stat.today') : t(diffDays === 1 ? 'fuelLogs.stat.dayAgo' : 'fuelLogs.stat.daysAgo', { n: diffDays });
     }
-  }
-
-  if (soonestServiceDate) {
-    nextServiceDue = soonestServiceDate.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
-    nextServiceVehicle = soonestServiceVehicle;
-  }
-
-  // Calculate average consumption (L/100km) from trips and fuelLogs
-  let avgConsumption = 'N/A';
+  }  let avgConsumption = 'N/A';
   if (trips.length > 0 && fuelLogs.length > 0) {
     // Sum total distance from trips
     const totalTripDistance = trips.reduce((sum, trip) => {
@@ -127,8 +89,6 @@ const FuelLogs = () => {
     totalSpent: `${Math.round(totalSpent)} Ft`,
     totalSpentChange: `${Math.abs(spentChange)}%${spentChange < 0 ? '' : ''}`,
     daysSinceLastRefuel,
-    nextServiceDue,
-    nextServiceVehicle,
     avgConsumption,
   };
 
@@ -148,15 +108,7 @@ const FuelLogs = () => {
         hour12: false,
       }),
     };
-  };
-
-  const formatFuelType = (type) => {
-    if (!type) return 'Unknown';
-    return type;
-  };
-
-  // Fetch fuel logs from API
-  const fetchFuelLogs = async (pageToLoad = 1) => {
+  };  const fetchFuelLogs = async (pageToLoad = 1) => {
     setLoading(true);
     setError('');
     try {
@@ -207,10 +159,7 @@ const FuelLogs = () => {
     }
 
     return items;
-  };
-
-  // Delete fuel log handler
-  const handleDeleteFuelLog = async (id) => {
+  };  const handleDeleteFuelLog = async (id) => {
     if (!window.confirm('Are you sure you want to delete this fuel log?')) return;
     try {
       await api.patch(`/fuellogs/delete/${id}`);
@@ -233,9 +182,9 @@ const FuelLogs = () => {
           {/* Header section */}
           <div className="fuel-logs-header">
             <div>
-              <h1 className="fuel-logs-title mb-1">My Fuel Logs</h1>
+              <h1 className="fuel-logs-title mb-1">{t('fuelLogs.title')}</h1>
               <p className="fuel-logs-subtitle text-muted mb-0">
-                Review your historical fuel consumption and add new entries.
+                {t('fuelLogs.subtitle')}
               </p>
             </div>
             <Button className="add-new-fuel-log-btn" onClick={() => navigate('/add-fuel-log')}>
@@ -243,15 +192,15 @@ const FuelLogs = () => {
                 <circle cx="12" cy="12" r="10" />
                 <path d="M12 8v8M8 12h8" />
               </svg>
-              <span>Add New Fuel Log</span>
+              <span>{t('fuelLogs.btn.addNew')}</span>
             </Button>
           </div>
 
           {/* Main table card */}
           <Card className="fuel-logs-table-card mb-4">
             <Card.Header className="fuel-logs-table-header">
-              <span className="fuel-logs-table-title">My Fuel Logs</span>
-              <span className="fuel-logs-total-badge">Total: {totalCount}</span>
+              <span className="fuel-logs-table-title">{t('fuelLogs.card.title')}</span>
+              <span className="fuel-logs-total-badge">{t('fuelLogs.total')}: {totalCount}</span>
             </Card.Header>
             <Card.Body className="p-0">
               {loading ? (
@@ -267,9 +216,9 @@ const FuelLogs = () => {
                     <path d="M17 13h2a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2" strokeLinecap="round" strokeLinejoin="round" />
                     <path d="M7 22V12h6v10" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
-                  <p>No fuel logs recorded yet</p>
+                  <p>{t('fuelLogs.empty')}</p>
                   <Button variant="outline-primary" onClick={() => navigate('/add-fuel-log')}>
-                    Add your first fuel log
+                    {t('fuelLogs.addFirst')}
                   </Button>
                 </div>
               ) : (
@@ -279,12 +228,12 @@ const FuelLogs = () => {
                     <table className="fuel-logs-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                       <thead>
                         <tr>
-                          <th className="fuel-log-header">DATE</th>
-                          <th className="fuel-log-header">VEHICLE</th>
-                          <th className="fuel-log-header">LOCATION</th>
-                          <th className="fuel-log-header">LITERS</th>
-                          <th className="fuel-log-header">TOTAL COST</th>
-                          <th className="fuel-log-header">ACTIONS</th>
+                          <th className="fuel-log-header">{t('fuelLogs.th.date')}</th>
+                          <th className="fuel-log-header" style={{ textAlign: 'center' }}>{t('fuelLogs.th.vehicle')}</th>
+                          <th className="fuel-log-header">{t('fuelLogs.th.location')}</th>
+                          <th className="fuel-log-header">{t('fuelLogs.th.liters')}</th>
+                          <th className="fuel-log-header">{t('fuelLogs.th.totalCost')}</th>
+                          <th className="fuel-log-header">{t('fuelLogs.th.actions')}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -298,9 +247,9 @@ const FuelLogs = () => {
                               </td>
                               <td className="fuel-log-cell vehicle-cell">
                                 <div className="vehicle-wrapper">
-                                  <Badge bg="light" text="dark" className="vehicle-plate">
+                                  <span className="vehicle-plate">
                                     {log.licensePlate || log.LicensePlate || 'N/A'}
-                                  </Badge>
+                                  </span>
                                 </div>
                               </td>
                               <td className="fuel-log-cell location-cell">
@@ -367,29 +316,29 @@ const FuelLogs = () => {
                             <div className="mobile-card-body">
                               <div className="mobile-row">
                                 <span className="mobile-label">
-                                  Vehicle
+                                  {t('fuelLogs.mobile.vehicle')}
                                 </span>
                                 <span className="mobile-value">
-                                  <Badge bg="light" text="dark" className="mobile-plate">
+                                  <span className="mobile-plate">
                                     {log.licensePlate || log.LicensePlate || 'N/A'}
-                                  </Badge>
+                                  </span>
                                 </span>
                               </div>
                               <div className="mobile-row">
                                 <span className="mobile-label">
-                                  Location
+                                  {t('fuelLogs.mobile.location')}
                                 </span>
                                 <span className="mobile-value">{log.stationName || log.StationName || 'N/A'}</span>
                               </div>
                               <div className="mobile-row">
                                 <span className="mobile-label">
-                                  Liters
+                                  {t('fuelLogs.mobile.liters')}
                                 </span>
                                 <span className="mobile-value">{log.liters || log.Liters || 0} L</span>
                               </div>
                               <div className="mobile-row">
                                 <span className="mobile-label">
-                                  Total Cost
+                                  {t('fuelLogs.mobile.totalCost')}
                                 </span>
                                 <span className="mobile-value cost-value">
                                   {(log.totalCostCur || log.TotalCostCur || '€0.00').replace(/€/g, '')}
@@ -407,7 +356,7 @@ const FuelLogs = () => {
             {fuelLogs.length > 0 && (
               <Card.Footer className="fuel-logs-pagination-footer">
                 <span className="fuel-logs-page-info">
-                  Showing {displayedCount} of {totalCount} entries
+                  {t('fuelLogs.showing', { count: displayedCount, total: totalCount })}
                 </span>
                 <Pagination className="mb-0 fuel-logs-pagination">
                   <Pagination.Prev
@@ -429,14 +378,14 @@ const FuelLogs = () => {
             <Col xs={12} sm={6} lg={4}>
               <Card className="stats-card border-0 shadow-sm h-100">
                 <Card.Body className="d-flex flex-column">
-                  <div className="stats-label">Total Spent (This Month)</div>
+                  <div className="stats-label">{t('fuelLogs.stat.totalSpent')}</div>
                   <div className="stats-value">{stats.totalSpent}</div>
-                  <div className="stats-change negative mt-auto">
+                  <div className={`stats-change ${spentChange < 0 ? 'negative' : 'positive'} mt-auto`}>
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M23 18l-9.5-9.5-5 5L1 6" />
                       <path d="M17 18h6v6" />
                     </svg>
-                    {stats.totalSpentChange} less than last month
+                    {t(spentChange < 0 ? 'fuelLogs.stat.lessLastMonth' : 'fuelLogs.stat.moreLastMonth', { pct: Math.abs(spentChange) })}
                   </div>
                 </Card.Body>
               </Card>
@@ -444,18 +393,18 @@ const FuelLogs = () => {
             <Col xs={12} sm={6} lg={4}>
               <Card className="stats-card border-0 shadow-sm h-100">
                 <Card.Body className="d-flex flex-column">
-                  <div className="stats-label">Last Refuel</div>
+                  <div className="stats-label">{t('fuelLogs.stat.lastRefuel')}</div>
                   <div className="stats-value efficiency-value">{stats.daysSinceLastRefuel}</div>
-                  <div className="stats-subtext mt-auto">since your last fuel log</div>
+                  <div className="stats-subtext mt-auto">{t('fuelLogs.stat.sinceLastLog')}</div>
                 </Card.Body>
               </Card>
             </Col>
             <Col xs={12} sm={6} lg={4}>
               <Card className="stats-card border-0 shadow-sm h-100">
                 <Card.Body className="d-flex flex-column">
-                  <div className="stats-label">Avg. Consumption</div>
+                  <div className="stats-label">{t('fuelLogs.stat.avgConsumption')}</div>
                   <div className="stats-value service-value">{tripsLoading ? '...' : stats.avgConsumption}</div>
-                  <div className="stats-subtext mt-auto">based on your trips</div>
+                  <div className="stats-subtext mt-auto">{t('fuelLogs.stat.basedOnTrips')}</div>
                 </Card.Body>
               </Card>
             </Col>

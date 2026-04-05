@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
+import { useLanguage } from '../contexts/LanguageContext';
 import { Container, Card, Form, Button, Alert } from 'react-bootstrap';
+import Footer from '../components/Footer';
 import '../styles/Login.css';
 
 const Login = () => {
+  const { t, setLanguage } = useLanguage();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -20,6 +23,14 @@ const Login = () => {
     try {
       await authService.login(email, password);
       const user = authService.getCurrentUser();
+      if (user?.role?.toLowerCase() === 'admin') {
+        setLanguage('en');
+      } else if (user?.role?.toLowerCase() === 'driver') {
+        const savedDriverLang = localStorage.getItem('fleetflow_language_driver');
+        if (savedDriverLang) {
+          setLanguage(savedDriverLang);
+        }
+      }
       if (user?.role && user.role.toLowerCase() === 'admin') {
         navigate('/dashboard'); // DashboardRouter automatikusan AdminDashboard-ot ad
       } else {
@@ -46,8 +57,8 @@ const Login = () => {
                 <img src="/fleetflow_logo.png" alt="FleetFlow Logo" style={{ height: '48px', width: 'auto' }} />
                 <h1 className="logo-title">FleetFlow</h1>
               </div>
-              <h2 className="welcome-title">Welcome back</h2>
-              <p className="welcome-subtitle">Sign in to manage your fleet operations</p>
+              <h2 className="welcome-title">{t('login.title')}</h2>
+              <p className="welcome-subtitle">{t('login.subtitle')}</p>
             </div>
 
             {/* Error Alert */}
@@ -60,10 +71,10 @@ const Login = () => {
             {/* Login Form */}
             <Form onSubmit={handleSubmit}>
               <Form.Group className="mb-3">
-                <Form.Label>Email Address</Form.Label>
+                <Form.Label>{t('login.email')}</Form.Label>
                 <Form.Control
                   type="email"
-                  placeholder="e.g. name@company.com"
+                  placeholder={t('login.emailPlaceholder')}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -73,8 +84,8 @@ const Login = () => {
 
               <Form.Group className="mb-3">
                 <div className="password-label-row">
-                  <Form.Label>Password</Form.Label>
-                  <a href="/forgot-password" className="forgot-link">Forgot password?</a>
+                  <Form.Label>{t('login.password')}</Form.Label>
+                  <a href="/forgot-password" className="forgot-link">{t('login.forgotPassword')}</a>
                 </div>
                 <div className="password-input-wrapper">
                   <Form.Control
@@ -113,23 +124,13 @@ const Login = () => {
                 disabled={loading}
                 className="w-100 sign-in-btn"
               >
-                {loading ? 'Signing In...' : 'Sign In'}
+                {loading ? t('login.signingIn') : t('login.signIn')}
               </Button>
             </Form>
           </Card.Body>
         </Card>
 
-        {/* Page Footer */}
-        <div className="page-footer mt-4">
-          <div className="d-flex justify-content-center gap-3 mb-2 flex-wrap">
-            <a href="/privacy" className="text-decoration-none text-muted small fw-semibold">PRIVACY POLICY</a>
-            <span className="text-muted">•</span>
-            <a href="/terms" className="text-decoration-none text-muted small fw-semibold">TERMS OF SERVICE</a>
-            <span className="text-muted">•</span>
-            <a href="/help" className="text-decoration-none text-muted small fw-semibold">HELP CENTER</a>
-          </div>
-          <p className="text-center text-muted small mb-0">© 2024 FleetFlow Systems Inc. All rights reserved.</p>
-        </div>
+        <Footer />
       </div>
     </div>
   );

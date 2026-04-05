@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../contexts/LanguageContext';
 import { Container, Row, Col, Badge, Alert, Spinner, Button, Form } from 'react-bootstrap';
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
@@ -27,6 +28,7 @@ const getNotificationTypeIconBg = (notification) => {
 };
 
 const Notifications = () => {
+  const { t } = useLanguage();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -146,10 +148,7 @@ const Notifications = () => {
 
   useEffect(() => {
     fetchNotifications();
-  }, []);
-
-  // Filter notifications
-  const getFilteredNotifications = () => {
+  }, []);  const getFilteredNotifications = () => {
     if (activeFilter === 'all') return notifications;
     if (activeFilter === 'unread') return notifications.filter(n => !n.isRead && !n.read);
     if (activeFilter === 'fuel_log') return notifications.filter(n => (n.type || '').toUpperCase() === 'FUEL_LOG');
@@ -171,7 +170,7 @@ const Notifications = () => {
     const groups = {};
     const today = new Date();
     const startOfWeek = new Date(today);
-    startOfWeek.setDate(today.getDate() - today.getDay()); // Sunday as week start
+    startOfWeek.setDate(today.getDate() - 7); // rolling 7-day window
     startOfWeek.setHours(0, 0, 0, 0);
 
     const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -181,25 +180,16 @@ const Notifications = () => {
       const dateVal = item.DateTime || item.date || item.createdAt || item.timestamp;
       if (!dateVal) return;
 
-      const itemDate = new Date(dateVal);
-
-      // Check if today
-      if (itemDate.toDateString() === today.toDateString()) {
+      const itemDate = new Date(dateVal);      if (itemDate.toDateString() === today.toDateString()) {
         groups['today'] = groups['today'] || [];
         groups['today'].push(item);
-      }
-      // Check if this week (after start of week)
-      else if (itemDate >= startOfWeek) {
+      }      else if (itemDate >= startOfWeek) {
         groups['thisWeek'] = groups['thisWeek'] || [];
         groups['thisWeek'].push(item);
-      }
-      // Check if this month (after start of month)
-      else if (itemDate >= startOfMonth) {
+      }      else if (itemDate >= startOfMonth) {
         groups['thisMonth'] = groups['thisMonth'] || [];
         groups['thisMonth'].push(item);
-      }
-      // Check if this year (after start of year)
-      else if (itemDate >= startOfYear) {
+      }      else if (itemDate >= startOfYear) {
         groups['thisYear'] = groups['thisYear'] || [];
         groups['thisYear'].push(item);
       }
@@ -299,15 +289,15 @@ const Notifications = () => {
           <div className="notifications-header mb-4">
             <Row className="align-items-center">
               <Col xs={12} lg={6}>
-                <h1 className="page-title">Notifications</h1>
-                <p className="sr-page-subtitle">Stay up to date with your latest notifications</p>
+                <h1 className="page-title">{t('notif.title')}</h1>
+                <p className="sr-page-subtitle">{t('notif.subtitle')}</p>
               </Col>
               <Col xs={12} lg={6} className="d-flex justify-content-end gap-2 mt-3 mt-lg-0">
                 <Button className="mark-all-read-btn" onClick={handleMarkAllAsRead} variant="link">
                   <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                     <polyline points="20,6 9,17 4,12" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
-                  Mark all as read
+                  {t('notif.markAllRead')}
                 </Button>
               </Col>
             </Row>
@@ -319,38 +309,38 @@ const Notifications = () => {
               className={`filter-tab ${activeFilter === 'all' ? 'active' : ''}`}
               onClick={() => setActiveFilter('all')}
             >
-              All
+              {t('notif.filter.all')}
             </button>
             <button
               className={`filter-tab ${activeFilter === 'unread' ? 'active' : ''}`}
               onClick={() => setActiveFilter('unread')}
             >
-              Unread
+              {t('notif.filter.unread')}
               {unreadCount > 0 && <span className="unread-count">{unreadCount}</span>}
             </button>
             <button
               className={`filter-tab ${activeFilter === 'service' ? 'active' : ''}`}
               onClick={() => setActiveFilter('service')}
             >
-              Service
+              {t('notif.filter.service')}
             </button>
             <button
               className={`filter-tab ${activeFilter === 'fuel_log' ? 'active' : ''}`}
               onClick={() => setActiveFilter('fuel_log')}
             >
-              Fuel Log
+              {t('notif.filter.fuelLog')}
             </button>
             <button
               className={`filter-tab ${activeFilter === 'trip' ? 'active' : ''}`}
               onClick={() => setActiveFilter('trip')}
             >
-              Trip
+              {t('notif.filter.trip')}
             </button>
             <button
               className={`filter-tab ${activeFilter === 'system' ? 'active' : ''}`}
               onClick={() => setActiveFilter('system')}
             >
-              System
+              {t('notif.filter.system')}
             </button>
           </div>
 
@@ -372,14 +362,14 @@ const Notifications = () => {
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" strokeLinecap="round" strokeLinejoin="round" />
                 <path d="M13.73 21a2 2 0 0 1-3.46 0" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-              <p className="mb-0">No notifications found.</p>
+              <p className="mb-0">{t('notif.empty')}</p>
             </div>
           ) : (
             <div className="notifications-list">
               {/* Today Section */}
               {groupedNotifications['today'] && groupedNotifications['today'].length > 0 && (
                 <div className="notifications-section mb-4">
-                  <h3 className="section-title">TODAY</h3>
+                  <h3 className="section-title">{t('notif.group.today')}</h3>
                   {groupedNotifications['today'].map(notification => {
                     const iconData = getNotificationIcon(notification);
                     const styleData = getNotificationStyle(notification);
@@ -455,7 +445,7 @@ const Notifications = () => {
               {/* This Week Section */}
               {groupedNotifications['thisWeek'] && groupedNotifications['thisWeek'].length > 0 && (
                 <div className="notifications-section mb-4">
-                  <h3 className="section-title">THIS WEEK</h3>
+                  <h3 className="section-title">{t('notif.group.thisWeek')}</h3>
                   {groupedNotifications['thisWeek'].map(notification => {
                     const iconData = getNotificationIcon(notification);
                     const styleData = getNotificationStyle(notification);
@@ -530,7 +520,7 @@ const Notifications = () => {
               {/* This Month Section */}
               {groupedNotifications['thisMonth'] && groupedNotifications['thisMonth'].length > 0 && (
                 <div className="notifications-section mb-4">
-                  <h3 className="section-title">THIS MONTH</h3>
+                  <h3 className="section-title">{t('notif.group.thisMonth')}</h3>
                   {groupedNotifications['thisMonth'].map(notification => {
                     const iconData = getNotificationIcon(notification);
                     const styleData = getNotificationStyle(notification);
@@ -605,7 +595,7 @@ const Notifications = () => {
               {/* This Year Section */}
               {groupedNotifications['thisYear'] && groupedNotifications['thisYear'].length > 0 && (
                 <div className="notifications-section mb-4">
-                  <h3 className="section-title">THIS YEAR</h3>
+                  <h3 className="section-title">{t('notif.group.thisYear')}</h3>
                   {groupedNotifications['thisYear'].map(notification => {
                     const iconData = getNotificationIcon(notification);
                     const styleData = getNotificationStyle(notification);
@@ -680,7 +670,7 @@ const Notifications = () => {
               {/* Over 1 Year Ago Section */}
               {groupedNotifications['overOneYear'] && groupedNotifications['overOneYear'].length > 0 && (
                 <div className="notifications-section mb-4">
-                  <h3 className="section-title">OVER 1 YEAR AGO</h3>
+                  <h3 className="section-title">{t('notif.group.over1Year')}</h3>
                   {groupedNotifications['overOneYear'].map(notification => {
                     const iconData = getNotificationIcon(notification);
                     const styleData = getNotificationStyle(notification);

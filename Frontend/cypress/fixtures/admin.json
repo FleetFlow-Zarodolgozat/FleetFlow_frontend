@@ -1,0 +1,11 @@
+{
+  "email": "admin@fleetflow.hu",
+  "name": "Fleet Admin",
+  "role": "Admin",
+  "fleetStats": {
+    "total": 10,
+    "activePercent": 70
+  },
+  "drivers": 5,
+  "trips": 42
+}

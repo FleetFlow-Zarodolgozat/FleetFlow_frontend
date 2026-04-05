@@ -46,10 +46,7 @@ const AdminServiceRequestDetails = () => {
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // Fetch invoice image
-  useEffect(() => {
+  }, []);  useEffect(() => {
     const invoiceId = request.invoiceFileId ?? request.InvoiceFileId;
     if (!invoiceId) return;
     let objectUrl = null;
@@ -68,10 +65,7 @@ const AdminServiceRequestDetails = () => {
     };
     fetchInvoice();
     return () => { if (objectUrl) URL.revokeObjectURL(objectUrl); };
-  }, [request.invoiceFileId, request.InvoiceFileId]);
-
-  // Fetch driver profile image
-  useEffect(() => {
+  }, [request.invoiceFileId, request.InvoiceFileId]);  useEffect(() => {
     const imgId = request.profileImgFileId ?? request.ProfileImgFileId;
     if (!imgId) return;
     let objectUrl = null;

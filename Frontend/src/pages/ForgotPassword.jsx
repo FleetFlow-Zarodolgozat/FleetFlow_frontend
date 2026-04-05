@@ -2,9 +2,12 @@ import { useState } from 'react';
 import { Card, Form, Button, Alert } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { authService } from '../services/authService';
+import { useLanguage } from '../contexts/LanguageContext';
+import Footer from '../components/Footer';
 import '../styles/ForgotPassword.css';
 
 const ForgotPassword = () => {
+  const { t } = useLanguage();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -41,9 +44,9 @@ const ForgotPassword = () => {
                   <h1 className="logo-title">FleetFlow</h1>
                 </div>
               </Link>
-              <h2 className="page-title">Forgot Password?</h2>
+              <h2 className="page-title">{t('forgot.title')}</h2>
               <p className="page-subtitle">
-                No worries, we'll send you reset instructions.
+                {t('forgot.subtitle')}
               </p>
             </div>
 
@@ -56,9 +59,9 @@ const ForgotPassword = () => {
                     <path d="M22 4L12 14.01l-3-3" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </div>
-                <h3>Check your email</h3>
+                <h3>{t('forgot.checkEmail')}</h3>
                 <p>
-                  We sent a password reset link to<br />
+                  {t('forgot.sentTo')}<br />
                   <strong>{email}</strong>
                 </p>
                 <Button
@@ -66,10 +69,10 @@ const ForgotPassword = () => {
                   className="w-100 reset-btn"
                   onClick={() => window.location.href = 'mailto:'}
                 >
-                  Open email app
+                  {t('forgot.openEmailApp')}
                 </Button>
                 <p className="resend-text">
-                  Didn't receive the email?{' '}
+                  {t('forgot.didntReceive')}{' '}
                   <button 
                     className="resend-link"
                     onClick={() => {
@@ -77,7 +80,7 @@ const ForgotPassword = () => {
                       setEmail('');
                     }}
                   >
-                    Click to resend
+                    {t('forgot.clickResend')}
                   </button>
                 </p>
               </div>
@@ -94,10 +97,10 @@ const ForgotPassword = () => {
                 {/* Forgot Password Form */}
                 <Form onSubmit={handleSubmit}>
                   <Form.Group className="mb-4">
-                    <Form.Label>Email Address</Form.Label>
+                    <Form.Label>{t('forgot.email')}</Form.Label>
                     <Form.Control
                       type="email"
-                      placeholder="Enter your email"
+                      placeholder={t('forgot.emailPlaceholder')}
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
@@ -111,7 +114,7 @@ const ForgotPassword = () => {
                     disabled={loading}
                     className="w-100 reset-btn mb-4"
                   >
-                    {loading ? 'Sending...' : 'Reset Password'}
+                    {loading ? t('forgot.sending') : t('forgot.submit')}
                   </Button>
                 </Form>
               </>
@@ -123,23 +126,13 @@ const ForgotPassword = () => {
                 <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path d="M19 12H5M12 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                Back to login
+                {t('forgot.backToLogin')}
               </Link>
             </div>
           </Card.Body>
         </Card>
 
-        {/* Page Footer */}
-        <div className="page-footer mt-4">
-          <div className="d-flex justify-content-center gap-3 mb-2 flex-wrap">
-            <Link to="/privacy" className="text-decoration-none text-muted small fw-semibold">PRIVACY POLICY</Link>
-            <span className="text-muted">•</span>
-            <Link to="/terms" className="text-decoration-none text-muted small fw-semibold">TERMS OF SERVICE</Link>
-            <span className="text-muted">•</span>
-            <Link to="/help" className="text-decoration-none text-muted small fw-semibold">HELP CENTER</Link>
-          </div>
-          <p className="text-center text-muted small mb-0">© 2024 FleetFlow Systems Inc. All rights reserved.</p>
-        </div>
+        <Footer />
       </div>
     </div>
   );

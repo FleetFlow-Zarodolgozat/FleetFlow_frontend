@@ -11,7 +11,7 @@
   position: fixed;
   top: 16px;
   left: 16px;
-  z-index: 150;
+  z-index: 1230;
   width: 48px;
   height: 48px;
   background: #0d6efd;
@@ -48,7 +48,7 @@
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
-  z-index: 90;
+  z-index: 1210;
 }
 
 /* Sidebar */
@@ -62,7 +62,7 @@
   left: 0;
   top: 0;
   height: 100vh;
-  z-index: 100;
+  z-index: 1220;
   transition: left 0.3s ease;
 }
 
@@ -249,24 +249,182 @@
 
 .new-trip-btn,
 .new-fuel-btn {
+  border: none;
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-weight: 600;
+  font-size: 0.95rem;
   display: flex;
   align-items: center;
   gap: 8px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
-.new-trip-btn:hover,
-.new-fuel-btn:hover {
-  transform: translateY(-1px);
+.new-trip-btn {
+  background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+  box-shadow: 0 4px 14px rgba(13, 110, 253, 0.3);
+}
+
+.new-trip-btn:hover {
+  background: linear-gradient(135deg, #0b5ed7 0%, #0a58ca 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(13, 110, 253, 0.4);
 }
 
 .new-fuel-btn {
-  background: #fd7e14 !important;
-  border-color: #fd7e14 !important;
+  background: linear-gradient(135deg, #f97316 0%, #ea6c0a 100%) !important;
+  border-color: transparent !important;
+  box-shadow: 0 4px 14px rgba(249, 115, 22, 0.3);
 }
 
 .new-fuel-btn:hover {
-  background: #e8590c !important;
-  border-color: #e8590c !important;
+  background: linear-gradient(135deg, #ea6c0a 0%, #d95f06 100%) !important;
+  border-color: transparent !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(249, 115, 22, 0.4);
+}
+
+/* Stat Cards Carousel */
+.stat-carousel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 24px;
+}
+
+.stat-carousel-track {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.stat-carousel-item {
+  flex: 1;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  min-width: 0;
+}
+
+.stat-carousel-item.side {
+  transform: scale(0.88);
+  opacity: 0.65;
+  cursor: pointer;
+}
+
+.stat-carousel-item.side:hover {
+  opacity: 0.85;
+  transform: scale(0.9);
+}
+
+.stat-carousel-item.center {
+  flex: 1.4;
+  transform: scale(1);
+  opacity: 1;
+}
+
+.stat-card-center {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12) !important;
+}
+
+.stat-icon-lg {
+  width: 56px !important;
+  height: 56px !important;
+}
+
+.stat-carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-60%);
+  z-index: 10;
+  background: #fff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #475569;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  padding: 0;
+}
+
+.stat-carousel-arrow:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+
+.stat-carousel-arrow.left {
+  left: -4px;
+}
+
+.stat-carousel-arrow.right {
+  right: -4px;
+}
+
+.stat-carousel-dots {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.stat-carousel-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #cbd5e1;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.stat-carousel-dot.active {
+  background: #3b82f6;
+  transform: scale(1.3);
+}
+
+@media (max-width: 576px) {
+  .stat-carousel {
+    padding: 8px 40px;
+  }
+
+  .stat-carousel-track {
+    gap: 8px;
+  }
+
+  .stat-carousel-item.side {
+    display: none;
+  }
+
+  .stat-carousel-item.center {
+    flex: 1;
+  }
+
+  .stat-carousel-arrow {
+    width: 30px;
+    height: 30px;
+  }
+
+  .stat-carousel-arrow.left {
+    left: 0px;
+  }
+
+  .stat-carousel-arrow.right {
+    right: 0px;
+  }
+
+  .stat-icon-lg {
+    width: 48px !important;
+    height: 48px !important;
+  }
 }
 
 /* Stat Cards */
@@ -349,6 +507,10 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.profile-info {
+  text-align: center;
 }
 
 .profile-info h4 {

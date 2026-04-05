@@ -27,7 +27,6 @@ const RouteMap = ({ startLocation, endLocation, activeField = 'start', onLocatio
   useEffect(() => { onDistanceCalculatedRef.current = onDistanceCalculated; }, [onDistanceCalculated]);
 
   useEffect(() => {
-    // Initialize map only once
     if (!mapInstanceRef.current) {
       mapInstanceRef.current = L.map(mapRef.current, {
         center: [47.4979, 19.0402], // Budapest default
@@ -49,9 +48,25 @@ const RouteMap = ({ startLocation, endLocation, activeField = 'start', onLocatio
             { headers: { 'Accept-Language': 'en' } }
           );
           const data = await res.json();
-          const address = data.display_name || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+          const a = data.address || {};
 
-          // Remove previous click marker
+          // City: prefer most specific populated place
+          const city = a.city || a.town || a.municipality || a.village || a.hamlet || a.suburb || '';
+          // Street: try all road-like fields
+          const street = a.road || a.pedestrian || a.footway || a.path || a.cycleway || a.residential || '';
+
+          let address;
+          if (city && street) {
+            address = `${city}, ${street}`;
+          } else if (city) {
+            address = city;
+          } else if (street) {
+            address = street;
+          } else {
+            // last resort: first 2 parts of display_name
+            const parts = (data.display_name || '').split(', ');
+            address = parts.slice(0, 2).join(', ') || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+          }
           if (clickMarkerRef.current) {
             clickMarkerRef.current.remove();
           }
@@ -147,8 +162,6 @@ const RouteMap = ({ startLocation, endLocation, activeField = 'start', onLocatio
           geocode(startLocation),
           geocode(endLocation),
         ]);
-
-        // Add markers
         const startMarker = L.marker([start.lat, start.lng])
           .bindPopup(`<b>Start:</b> ${startLocation}`)
           .addTo(map);
@@ -156,8 +169,6 @@ const RouteMap = ({ startLocation, endLocation, activeField = 'start', onLocatio
           .bindPopup(`<b>End:</b> ${endLocation}`)
           .addTo(map);
         markersRef.current = [startMarker, endMarker];
-
-        // Fetch OSRM route
         const routeRes = await fetch(
           `https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${end.lng},${end.lat}?overview=full&geometries=geojson`
         );
@@ -200,8 +211,8 @@ const RouteMap = ({ startLocation, endLocation, activeField = 'start', onLocatio
   }, [startLocation, endLocation]);
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '250px' }}>
-      <div ref={mapRef} style={{ width: '100%', height: '100%', borderRadius: '8px' }} />
+    <div className="route-map">
+      <div ref={mapRef} className="route-map__canvas" />
       {/* Active field hint */}
       <div style={{
         position: 'absolute',

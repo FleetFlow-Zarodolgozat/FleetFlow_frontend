@@ -6,11 +6,13 @@ import '../styles/DriverDashboard.css';
 import '../styles/AddFuelLog.css';
 import '../styles/ServiceRequestDetails.css';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useLanguage } from '../contexts/LanguageContext';
 import Sidebar from '../components/Sidebar';
 import Footer from '../components/Footer';
 import api from '../services/api';
 
 const ServiceRequestDetails = () => {
+  const { t, language } = useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
   const request = location.state?.request || {};
@@ -152,8 +154,8 @@ const ServiceRequestDetails = () => {
 
           {/* Header */}
           <div className="add-fuel-header mb-4">
-            <h1 className="add-fuel-title">Edit Service Details</h1>
-            <p className="add-fuel-subtitle">Submit your cost report and invoice for the completed service</p>
+            <h1 className="add-fuel-title">{t('srDetails.title')}</h1>
+            <p className="add-fuel-subtitle">{t('srDetails.subtitle')}</p>
           </div>
 
           <Row className={`g-4${request.status === 'REQUESTED' ? ' justify-content-center' : ''}`}>
@@ -166,7 +168,7 @@ const ServiceRequestDetails = () => {
 
                   {request.status === 'REQUESTED' && (
                     <Alert variant="info" className="mb-4">
-                      <strong>Read Only:</strong> Service requests with "requested" status cannot be edited. Wait for admin approval before making changes.
+                      <strong>{t('srDetails.readOnly')}</strong> {t('srDetails.readOnlyMsg')}
                     </Alert>
                   )}
 
@@ -174,7 +176,7 @@ const ServiceRequestDetails = () => {
                     {/* Title - always shown */}
                     <Col xs={12}>
                       <div className="srd-info-row">
-                        <div className="srd-info-label">Title</div>
+                          <div className="srd-info-label">{t('srDetails.label.title')}</div>
                         <div className="srd-info-value">{request.title || '—'}</div>
                       </div>
                     </Col>
@@ -183,7 +185,7 @@ const ServiceRequestDetails = () => {
                     {(request.description) && (
                       <Col xs={12}>
                         <div className="srd-info-row">
-                          <div className="srd-info-label">Description</div>
+                          <div className="srd-info-label">{t('srDetails.label.description')}</div>
                           <div className="srd-info-value srd-info-value--muted">{request.description}</div>
                         </div>
                       </Col>
@@ -193,7 +195,7 @@ const ServiceRequestDetails = () => {
                     {request.scheduledStart && (
                       <Col xs={12}>
                         <div className="srd-info-row">
-                          <div className="srd-info-label">Service Date</div>
+                          <div className="srd-info-label">{t('srDetails.label.serviceDate')}</div>
                           <div className="srd-info-value">{new Date(request.scheduledStart).toLocaleString('hu-HU', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</div>
                         </div>
                       </Col>
@@ -211,7 +213,7 @@ const ServiceRequestDetails = () => {
                               </svg>
                             </div>
                             <div>
-                              <div className="srd-meta-label">Status</div>
+                              <div className="srd-meta-label">{t('srDetails.label.status')}</div>
                               <span className={`srd-status-badge status-${getStatusClass(request.status)}`}>{request.status || '—'}</span>
                             </div>
                           </div>
@@ -226,7 +228,7 @@ const ServiceRequestDetails = () => {
                               </svg>
                             </div>
                             <div>
-                              <div className="srd-meta-label">License Plate</div>
+                              <div className="srd-meta-label">{t('srDetails.label.licensePlate')}</div>
                               <div className="srd-meta-value srd-meta-value-plate">{request.licensePlate || '—'}</div>
                             </div>
                           </div>
@@ -238,7 +240,7 @@ const ServiceRequestDetails = () => {
                     {request.status !== 'REQUESTED' && (request.serviceLocation || request.ServiceLocation) && (
                       <Col xs={12}>
                         <div className="srd-info-row">
-                          <div className="srd-info-label">Location</div>
+                          <div className="srd-info-label">{t('srDetails.label.location')}</div>
                           <div className="srd-info-value">{request.serviceLocation || request.ServiceLocation}</div>
                         </div>
                       </Col>
@@ -249,7 +251,7 @@ const ServiceRequestDetails = () => {
                       <Col xs={12}>
                         <Form.Group>
                           <Form.Label className="form-label">
-                            Driver Cost <span className="srd-required">*</span>
+                            {t('srDetails.label.driverCost')} <span className="srd-required">*</span>
                           </Form.Label>
                           <div className="input-with-suffix">
                             <Form.Control
@@ -258,7 +260,7 @@ const ServiceRequestDetails = () => {
                               onChange={e => setDriverCost(e.target.value)}
                               placeholder="0"
                               min="0"
-                              step="1"
+                              step="100"
                               className="form-control-lg"
                               required
                             />
@@ -273,16 +275,24 @@ const ServiceRequestDetails = () => {
                       <Col xs={12}>
                         <Form.Group>
                           <Form.Label className="form-label">
-                            Close Note <span className="text-muted" style={{ fontWeight: 400, fontSize: '0.85rem' }}>(optional)</span>
+                            {t('srDetails.label.closeNote')} <span className="text-muted" style={{ fontWeight: 400, fontSize: '0.85rem' }}>{t('srDetails.closeNoteOptional')}</span>
                           </Form.Label>
                           <Form.Control
-                            type="text"
-                            value={closeNote}
-                            onChange={e => setCloseNote(e.target.value)}
-                            placeholder="Any notes about the service"
+                              type="text"
+                              value={closeNote}
+                              onChange={e => setCloseNote(e.target.value)}
+                              placeholder={t('srDetails.placeholder.closeNote')}
                             className="form-control-lg"
-                          />
-                        </Form.Group>
+                          />                            {language !== 'en' && (
+                              <Form.Text style={{ color: '#b45309', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
+                                <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+                                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" strokeLinecap="round" strokeLinejoin="round"/>
+                                  <line x1="12" y1="9" x2="12" y2="13" strokeLinecap="round"/>
+                                  <line x1="12" y1="17" x2="12.01" y2="17" strokeLinecap="round"/>
+                                </svg>
+                                {t('common.writeInEnglish')}
+                              </Form.Text>
+                            )}                        </Form.Group>
                       </Col>
                     )}
                   </Row>
@@ -297,7 +307,7 @@ const ServiceRequestDetails = () => {
                         onClick={handleSave}
                       >
                         {saving ? (
-                          <><Spinner animation="border" size="sm" className="me-2" />Saving...</>
+                          <><Spinner animation="border" size="sm" className="me-2" />{t('srDetails.btn.saving')}</>
                         ) : (
                           <>
                             <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -305,7 +315,7 @@ const ServiceRequestDetails = () => {
                               <polyline points="17 21 17 13 7 13 7 21" strokeLinecap="round" strokeLinejoin="round" />
                               <polyline points="7 3 7 8 15 8" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
-                            Save Details
+                            {t('srDetails.btn.save')}
                           </>
                         )}
                       </Button>
@@ -318,9 +328,9 @@ const ServiceRequestDetails = () => {
                         onClick={handleCancel}
                       >
                         {cancelling ? (
-                          <><Spinner animation="border" size="sm" className="me-2" />Cancelling...</>
+                          <><Spinner animation="border" size="sm" className="me-2" />{t('srDetails.btn.cancelling')}</>
                         ) : (
-                          <>Cancel Request</>
+                          <>{t('srDetails.btn.cancel')}</>
                         )}
                       </Button>
                     )}
@@ -331,7 +341,7 @@ const ServiceRequestDetails = () => {
                       onClick={() => navigate(-1)}
                       disabled={saving || cancelling}
                     >
-                      Back
+                      {t('srDetails.btn.back')}
                     </Button>
                   </div>
                 </Card.Body>
@@ -351,7 +361,7 @@ const ServiceRequestDetails = () => {
                       <line x1="12" y1="18" x2="12" y2="12" />
                       <line x1="9" y1="15" x2="15" y2="15" />
                     </svg>
-                    <span className="receipt-title">Invoice Photo</span>
+                    <span className="receipt-title">{t('srDetails.invoice.title')}</span>
                   </div>
 
                   <div
@@ -395,10 +405,10 @@ const ServiceRequestDetails = () => {
                           </svg>
                         </div>
                         <div className="upload-text">
-                          <strong>Click to upload</strong>
-                          <span>or drag and drop</span>
+                          <strong>{t('srDetails.invoice.click')}</strong>
+                          <span>{t('srDetails.invoice.drag')}</span>
                         </div>
-                        <span className="upload-hint">JPG, PNG, WEBP</span>
+                        <span className="upload-hint">{t('srDetails.invoice.hint')}</span>
                       </>
                     )}
                   </div>
@@ -412,7 +422,7 @@ const ServiceRequestDetails = () => {
                           <circle cx="8.5" cy="8.5" r="1.5" />
                           <polyline points="21 15 16 10 5 21" />
                         </svg>
-                        <span className="srd-existing-label">Current Invoice</span>
+                        <span className="srd-existing-label">{t('srDetails.invoice.current')}</span>
                       </div>
                       <div className="srd-invoice-preview">
                         <img src={invoiceImgUrl} alt="Invoice" className="srd-invoice-img" />
@@ -430,23 +440,23 @@ const ServiceRequestDetails = () => {
                       <path d="M9 18h6a2 2 0 0 1 2 2v2H7v-2a2 2 0 0 1 2-2z" />
                       <path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2.26C17.81 13.47 19 11.38 19 9a7 7 0 0 0-7-7z" />
                     </svg>
-                    <span className="pro-tip-title">Pro Tip</span>
+                    <span className="pro-tip-title">{t('srDetails.proTip.title')}</span>
                   </div>
                   <p className="pro-tip-text">
-                    Uploading a clear photo of your receipt helps automate data verification and ensures your expense claims are approved faster by fleet managers.
+                    {t('srDetails.proTip.text')}
                   </p>
                   <ul className="pro-tip-list">
                     <li>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="#0d6efd" className="me-2">
                         <polyline points="20 6 9 17 4 12" />
                       </svg>
-                      Ensure date is visible
+                      {t('srDetails.proTip.1')}
                     </li>
                     <li>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="#0d6efd" className="me-2">
                         <polyline points="20 6 9 17 4 12" />
                       </svg>
-                      Liters & price must be sharp
+                      {t('srDetails.proTip.2')}
                     </li>
                   </ul>
                 </Card.Body>

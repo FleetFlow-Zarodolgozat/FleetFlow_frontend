@@ -2,15 +2,17 @@
 .legal-page {
   min-height: 100vh;
   background-color: #f8f9fa;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding: 40px 20px;
 }
 
 .legal-content {
   width: 100%;
   max-width: 800px;
+  margin: 0 auto;
+}
+
+.legal-main {
+  padding: 40px 20px;
+  min-height: 100vh;
 }
 
 .legal-card {
@@ -193,7 +195,7 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .legal-page {
+  .legal-main {
     padding: 20px 16px;
   }
 
@@ -217,5 +219,11 @@
   .legal-page .footer-links {
     flex-direction: column;
     gap: 12px;
+  }
+}
+
+@media (min-width: 1025px) {
+  .legal-main--with-sidebar {
+    margin-left: 240px;
   }
 }

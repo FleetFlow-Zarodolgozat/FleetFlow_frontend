@@ -1,0 +1,13 @@
+{
+  "email": "driver@fleetflow.hu",
+  "name": "Test Driver",
+  "role": "DRIVER",
+  "statistics": {
+    "totalTrips": 12,
+    "totalDistance": 1540,
+    "totalFuels": 8,
+    "totalFuelCost": 45000,
+    "totalServices": 3,
+    "totalServicesCost": 12000
+  }
+}

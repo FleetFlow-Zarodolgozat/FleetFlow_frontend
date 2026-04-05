@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { authService } from '../services/authService';
+import { useLanguage } from '../contexts/LanguageContext';
 import api from '../services/api';
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen, notificationRefresh }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const user = authService.getCurrentUser();
+  const { t, setLanguage } = useLanguage();
 
   const [profile, setProfile] = useState({
     id: user?.id || 0,
@@ -17,7 +19,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, notificationRefresh }) => {
   const [profileImageUrl, setProfileImageUrl] = useState(null);
   const [profileImageError, setProfileImageError] = useState(false);
 
-  // Fetch profile data (and image) on mount and when notificationRefresh changes
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -36,7 +37,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, notificationRefresh }) => {
     fetchProfile();
   }, [notificationRefresh]);
 
-  // Fetch profile image when profile.id or notificationRefresh changes
   useEffect(() => {
     if (!profile.id) return;
     let objectUrl = null;
@@ -58,34 +58,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, notificationRefresh }) => {
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
   }, [profile.id, notificationRefresh]);
-  // Fetch profile image
-  useEffect(() => {
-    if (!profile.id) return;
-
-    let objectUrl = null;
-
-    const fetchImage = async () => {
-      try {
-        const response = await api.get(`/files/thumbnail/${profile.id}`, {
-          responseType: 'blob',
-        });
-        objectUrl = URL.createObjectURL(response.data);
-        setProfileImageUrl(objectUrl);
-        setProfileImageError(false);
-      } catch (error) {
-        console.log('Sidebar: could not fetch profile image:', error.message);
-        setProfileImageError(true);
-      }
-    };
-
-    fetchImage();
-
-    return () => {
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
-    };
-  }, [profile.id]);
-
-  // Close sidebar when resizing to desktop
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth > 1024) {
@@ -114,14 +86,28 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, notificationRefresh }) => {
   };
 
   const handleLogout = () => {
+    const currentUser = authService.getCurrentUser();
+    const currentLang = localStorage.getItem('fleetflow_language');
+    if (currentUser?.role?.toLowerCase() === 'driver') {
+      if (currentLang) {
+        localStorage.setItem('fleetflow_language_driver', currentLang);
+      }
+      const isDarkMode = localStorage.getItem('fleetflow_darkMode') === 'true';
+      if (isDarkMode) {
+        localStorage.setItem('fleetflow_darkModePreference', 'true');
+      } else {
+        localStorage.removeItem('fleetflow_darkModePreference');
+      }
+    }
     authService.logout();
+    if (currentUser?.role?.toLowerCase() !== 'driver') {
+      localStorage.removeItem('fleetflow_language');
+    }
     navigate('/login');
   };
 
-  // Notifications: fetch when sidebar opens and mark unread state
   const [hasUnreadNotification, setHasUnreadNotification] = useState(false);
 
-  // Always fetch notifications on mount, every 60s, and when notificationRefresh changes
   useEffect(() => {
     let cancelled = false;
     const fetchNotifications = async () => {
@@ -167,8 +153,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, notificationRefresh }) => {
           <div className="sidebar-logo">
             <img src="/fleetflow_logo.png" alt="FleetFlow Logo" className="logo-image" />
             <div className="sidebar-brand">
-              <span className="brand-name">FleetFlow</span>
-              <span className="brand-tagline">Fleet Management</span>
+              <span className="brand-name">{t('sidebar.brand')}</span>
+              <span className="brand-tagline">{t('sidebar.tagline')}</span>
             </div>
           </div>
         </div>
@@ -181,14 +167,14 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, notificationRefresh }) => {
                   <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" strokeLinecap="round" strokeLinejoin="round"/>
                   <polyline points="9,22 9,12 15,12 15,22" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                Dashboard
+                {t('sidebar.nav.dashboard')}
               </Link>
               <Link to="/drivers" className={`nav-item${location.pathname === '/drivers' ? ' active' : ''}`}> 
                 <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <circle cx="12" cy="7" r="4" strokeLinecap="round" strokeLinejoin="round"/>
                   <path d="M5.5 21a7.5 7.5 0 0 1 13 0" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                Drivers
+                {t('sidebar.nav.drivers')}
               </Link>
               <Link to="/vehicles" className={`nav-item${location.pathname === '/vehicles' ? ' active' : ''}`}> 
                 <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -196,7 +182,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, notificationRefresh }) => {
                   <circle cx="7.5" cy="17.5" r="1.5"/>
                   <circle cx="16.5" cy="17.5" r="1.5"/>
                 </svg>
-                Vehicles
+                {t('sidebar.nav.vehicles')}
               </Link>
               <Link to="/admin-fuel-logs" className={`nav-item${location.pathname === '/admin-fuel-logs' ? ' active' : ''}`}> 
                 <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -204,20 +190,20 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, notificationRefresh }) => {
                   <path d="M17 13h2a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2" strokeLinecap="round" strokeLinejoin="round"/>
                   <path d="M7 22V12h6v10" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                Fuel Logs
+                {t('sidebar.nav.fuelLogs')}
               </Link>
               <Link to="/admin-trips" className={`nav-item${location.pathname === '/admin-trips' ? ' active' : ''}`}> 
                 <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" strokeLinecap="round" strokeLinejoin="round"/>
                   <polyline points="14,2 14,8 20,8" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                Trips
+                {t('sidebar.nav.trips')}
               </Link>
               <Link to="/admin-service-requests" className={`nav-item${location.pathname === '/admin-service-requests' ? ' active' : ''}`}> 
                 <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                Service Requests
+                {t('sidebar.nav.serviceRequests')}
               </Link>
             </>
           ) : (
@@ -227,7 +213,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, notificationRefresh }) => {
                   <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" strokeLinecap="round" strokeLinejoin="round"/>
                   <polyline points="9,22 9,12 15,12 15,22" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                Dashboard
+                {t('sidebar.nav.dashboard')}
               </Link>
               <Link to="/fuel-logs" className={`nav-item${location.pathname === '/fuel-logs' ? ' active' : ''}`}> 
                 <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -235,20 +221,20 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, notificationRefresh }) => {
                   <path d="M17 13h2a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2" strokeLinecap="round" strokeLinejoin="round"/>
                   <path d="M7 22V12h6v10" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                Fuel Logs
+                {t('sidebar.nav.fuelLogs')}
               </Link>
               <Link to="/trips" className={`nav-item${location.pathname === '/trips' ? ' active' : ''}`}> 
                 <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" strokeLinecap="round" strokeLinejoin="round"/>
                   <polyline points="14,2 14,8 20,8" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                Trips
+                {t('sidebar.nav.trips')}
               </Link>
               <Link to="/service-requests" className={`nav-item${location.pathname === '/service-requests' ? ' active' : ''}`}> 
                 <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                Service Requests
+                {t('sidebar.nav.serviceRequests')}
               </Link>
             </>
           )}
@@ -271,8 +257,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, notificationRefresh }) => {
           <div className="sidebar-actions">
             <button
               className="action-btn"
-              title="Notifications"
-              aria-label="Notifications"
+              title={t('sidebar.nav.notifications')}
+              aria-label={t('sidebar.nav.notifications')}
               style={{ position: 'relative' }}
               onClick={() => navigate('/notifications')}
             >
@@ -300,8 +286,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, notificationRefresh }) => {
             </button>
             <button
               className="action-btn"
-              title="Logout"
-              aria-label="Logout"
+              title={t('sidebar.logout')}
+              aria-label={t('sidebar.logout')}
               onClick={handleLogout}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

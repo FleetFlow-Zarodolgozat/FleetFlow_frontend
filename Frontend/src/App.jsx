@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import Login from './pages/Login';
 import ForgotPassword from './pages/ForgotPassword';
 import SetPassword from './pages/SetPassword';
@@ -30,6 +31,7 @@ import EditVehicle from './pages/EditVehicle';
 import AddVehicle from './pages/AddVehicle';
 import { authService } from './services/authService';
 import './App.css';
+import './styles/dark-mode.css';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -50,7 +52,15 @@ const DashboardRouter = () => {
   return isAdmin ? <AdminDashboard /> : <DriverDashboard />;
 };
 
-function App() {
+function App() {  useEffect(() => {
+    const isDarkMode = localStorage.getItem('fleetflow_darkMode') === 'true';
+    if (isDarkMode) {
+      document.body.classList.add('dark-mode');
+    } else {
+      document.body.classList.remove('dark-mode');
+    }
+  }, []);
+
   return (
     <Router>
       <Routes>

@@ -5,6 +5,7 @@ import { Card, Container, Row, Col, Alert, Spinner, Button, Form, Badge } from '
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
 import { authService } from '../services/authService';
+import { useLanguage } from '../contexts/LanguageContext';
 import '../styles/ProfileSettings.css';
 
 import Footer from '../components/Footer';
@@ -20,10 +21,7 @@ const ProfileSettings = () => {
   const [profileImageUrl, setProfileImageUrl] = useState(null);
   const [profileImageError, setProfileImageError] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [feedback, setFeedback] = useState({ type: '', message: '' });
-
-  // Hide feedback after 2 seconds
-  useEffect(() => {
+  const [feedback, setFeedback] = useState({ type: '', message: '' });  useEffect(() => {
     if (feedback.message) {
       const timer = setTimeout(() => {
         setFeedback({ type: '', message: '' });
@@ -58,9 +56,11 @@ const ProfileSettings = () => {
     }
   }, [location.state]);
 
+  const { t, language, setLanguage } = useLanguage();
+
   // Preferences
   const [preferences, setPreferences] = useState({
-    darkMode: false,
+    darkMode: localStorage.getItem('fleetflow_darkMode') === 'true',
     emailNotifications: true,
   });
 
@@ -71,9 +71,6 @@ const ProfileSettings = () => {
       const data = response.data;
 
       const fullName = data.fullName || data.FullName || '';
-      const nameParts = fullName.trim().split(' ');
-      const firstName = nameParts[0] || '';
-      const lastName = nameParts.slice(1).join(' ') || '';
 
       setProfile({
         id: data.id || data.Id,
@@ -93,10 +90,7 @@ const ProfileSettings = () => {
         phone: data.phone || data.Phone || '',
         password: '',
         confirmPassword: '',
-      });
-
-      // Fetch profile image
-      if (data.id || data.Id) {
+      });      if (data.id || data.Id) {
         try {
           const imgResponse = await api.get(`/files/thumbnail/${data.id || data.Id}`, { responseType: 'blob' });
           const objectUrl = URL.createObjectURL(imgResponse.data);
@@ -182,10 +176,7 @@ const ProfileSettings = () => {
 
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
-    if (!file) return;
-
-    // Validate file
-    const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    if (!file) return;    const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
     if (!validTypes.includes(file.type)) {
       setFeedback({ type: 'danger', message: 'Only JPEG, PNG or GIF files are allowed.' });
       return;
@@ -230,7 +221,15 @@ const ProfileSettings = () => {
   };
 
   const handlePreferenceChange = (key) => {
-    setPreferences(prev => ({ ...prev, [key]: !prev[key] }));
+    if (key === 'darkMode') {
+      if (user?.role?.toLowerCase() === 'admin') return;
+      const newVal = !preferences.darkMode;
+      setPreferences(prev => ({ ...prev, darkMode: newVal }));
+      localStorage.setItem('fleetflow_darkMode', String(newVal));
+      document.body.classList.toggle('dark-mode', newVal);
+    } else {
+      setPreferences(prev => ({ ...prev, [key]: !prev[key] }));
+    }
   };
 
   const getInitials = () => {
@@ -242,13 +241,6 @@ const ProfileSettings = () => {
       return profile.fullName.charAt(0).toUpperCase();
     }
     return 'U';
-  };
-
-  const getRoleDisplay = () => {
-    const role = profile?.role || '';
-    if (role.toLowerCase() === 'admin') return 'Fleet Administrator';
-    if (role.toLowerCase() === 'driver') return 'Driver';
-    return role;
   };
 
   if (loading) {
@@ -272,8 +264,8 @@ const ProfileSettings = () => {
         <Container fluid className="px-4 py-4" style={{ maxWidth: '1400px' }}>
           {/* Page Header */}
           <div className="page-header mb-4">
-            <h1 className="page-title">Profile Settings</h1>
-            <p className="page-subtitle">Manage your account details and application preferences.</p>
+            <h1 className="page-title">{t('profile.title')}</h1>
+            <p className="page-subtitle">{t('profile.subtitle')}</p>
           </div>
 
           {feedback.message && (
@@ -290,7 +282,7 @@ const ProfileSettings = () => {
                 <Col xs={12}>
                   <Card className="profile-picture-card h-100">
                     <Card.Body className="p-4">
-                      <h3 className="card-title mb-4">Profile Picture</h3>
+                      <h3 className="card-title mb-4">{t('profile.picture.title')}</h3>
 
                       <div className="profile-picture-wrapper text-center mb-3">
                         <div className="profile-picture-container">
@@ -320,35 +312,38 @@ const ProfileSettings = () => {
                       <h3 className="card-title text-muted mb-4">{profile.fullName}</h3>
                       <div className="remove-picture-bg">
                         <Button variant="link" className="w-100 text-danger" onClick={handleRemovePicture}>
-                          Remove Picture
+                          {t('profile.picture.remove')}
                         </Button>
                       </div>
 
                       <p className="picture-hint text-center mt-3">
-                        Must be JPEG, PNG, or GIF and cannot exceed 20MB.
+                        {t('profile.picture.hint')}
                       </p>
                     </Card.Body>
                   </Card>
                 </Col>
 
-                {/* Security Check Card */}
+                {/* Help & Support Card */}
                 <Col xs={12}>
-                  <Card className="security-card">
-                    <Card.Body className="p-4">
-                      <div className="d-flex align-items-start gap-2">
-                        <div className="security-icon">
-                          <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
-                            <circle cx="12" cy="12" r="12" fill="#0d6efd" />
-                            <text x="12" y="17" textAnchor="middle" fontSize="16" fontWeight="bold" fill="#fff">?</text>
+                  <Card className="help-support-card">
+                    <Card.Body className="p-0">
+                      <div className="d-flex align-items-center gap-3" style={{ padding: '24px' }}>
+                        <div className="help-icon-wrapper">
+                          <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            {/* Background circle */}
+                            <circle cx="24" cy="24" r="22" fill="currentColor" fillOpacity="0.1" stroke="currentColor" strokeWidth="2"/>
+                            {/* Question mark */}
+                            <path d="M24 14C20.13 14 17 17.13 17 21H20C20 18.79 21.79 17 24 17C26.21 17 28 18.79 28 21C28 23.5 26 25 24 27V29H27V27C29 25 31 23.5 31 21C31 17.13 27.88 14 24 14Z" fill="currentColor"/>
+                            <circle cx="24" cy="33" r="1.5" fill="currentColor"/>
                           </svg>
                         </div>
-                        <div className="security-info">
-                          <h4 className="security-title">You need help?</h4>
-                          <p className="security-text">
-                            Write an email to our support.
+                        <div className="help-content" style={{ flex: 1 }}>
+                          <h4 className="help-title mb-1">{t('profile.help.title')}</h4>
+                          <p className="help-description mb-2">
+                            {t('profile.help.description')}
                           </p>
-                          <Button variant="link" className="p-0" onClick={() => navigate('/help')}>
-                            Help Center
+                          <Button variant="link" className="help-link p-0" onClick={() => navigate('/help')} style={{ textDecoration: 'none' }}>
+                            {t('profile.help.link')}
                           </Button>
                         </div>
                       </div>
@@ -365,8 +360,8 @@ const ProfileSettings = () => {
                 <Col xs={12}>
                   <Card className="personal-info-card">
                     <Card.Header className="bg-white">
-                      <h3 className="card-title mb-0" ref={personalInfoRef}>Personal Information</h3>
-                      <p className="card-subtitle mb-0">Update your personal details and contact information.</p>
+                      <h3 className="card-title mb-0" ref={personalInfoRef}>{t('profile.personal.title')}</h3>
+                      <p className="card-subtitle mb-0">{t('profile.personal.subtitle')}</p>
                     </Card.Header>
                     <Card.Body className="p-4">
                       <Form>
@@ -377,7 +372,7 @@ const ProfileSettings = () => {
                                 <>
                                   <Col md={6}>
                                     <Form.Group>
-                                      <Form.Label className="form-label">License Number</Form.Label>
+                                      <Form.Label className="form-label">{t('profile.label.licenseNumber')}</Form.Label>
                                       <Form.Control
                                         type="text"
                                         name="licenseNumber"
@@ -389,7 +384,7 @@ const ProfileSettings = () => {
                                   </Col>
                                   <Col md={6}>
                                     <Form.Group>
-                                      <Form.Label className="form-label">License Expiry</Form.Label>
+                                      <Form.Label className="form-label">{t('profile.label.licenseExpiry')}</Form.Label>
                                       <Form.Control
                                         type="text"
                                         name="licenseExpiryDate"
@@ -406,7 +401,7 @@ const ProfileSettings = () => {
                             <>
                               <Col md={6}>
                                 <Form.Group>
-                                  <Form.Label className="form-label">New Password</Form.Label>
+                                  <Form.Label className="form-label">{t('profile.label.password')}</Form.Label>
                                   <Form.Control
                                     type="password"
                                     name="password"
@@ -418,7 +413,7 @@ const ProfileSettings = () => {
                               </Col>
                               <Col md={6}>
                                 <Form.Group>
-                                  <Form.Label className="form-label">Confirm Password</Form.Label>
+                                  <Form.Label className="form-label">{t('profile.label.confirmPassword')}</Form.Label>
                                   <Form.Control
                                     type="password"
                                     name="confirmPassword"
@@ -433,7 +428,7 @@ const ProfileSettings = () => {
                           {editMode ? (
                             <Col md={12}>
                               <Form.Group>
-                                <Form.Label className="form-label">Full Name</Form.Label>
+                                <Form.Label className="form-label">{t('profile.label.fullName')}</Form.Label>
                                 <Form.Control
                                   type="text"
                                   name="fullName"
@@ -447,7 +442,7 @@ const ProfileSettings = () => {
                           ) : (
                             <Col md={12}>
                               <Form.Group>
-                                <Form.Label className="form-label">Email address</Form.Label>
+                                <Form.Label className="form-label">{t('profile.label.email')}</Form.Label>
                                 <div className="input-with-icon">
                                   <svg className="input-icon" width="20" height="20" fill="none" stroke="#6c757d" strokeWidth="2" viewBox="0 0 24 24">
                                     <rect x="2" y="4" width="20" height="16" rx="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -466,7 +461,7 @@ const ProfileSettings = () => {
                           )}
                           <Col md={12}>
                             <Form.Group>
-                              <Form.Label className="form-label">Phone Number</Form.Label>
+                              <Form.Label className="form-label">{t('profile.label.phone')}</Form.Label>
                               <Form.Control
                                 type="text"
                                 name="phone"
@@ -484,18 +479,18 @@ const ProfileSettings = () => {
                         <div>
                           {editMode && (
                             <Button variant="outline-secondary" onClick={handleCancel}>
-                              Cancel
+                              {t('profile.btn.cancel')}
                             </Button>
                           )}
                         </div>
                         <div className="ms-auto">
                           {!editMode ? (
                             <Button variant="primary" onClick={() => setEditMode(true)}>
-                              Edit
+                              {t('profile.btn.edit')}
                             </Button>
                           ) : (
                             <Button variant="primary" onClick={handleSave}>
-                              Save Changes
+                              {t('profile.btn.save')}
                             </Button>
                           )}
                         </div>
@@ -508,8 +503,8 @@ const ProfileSettings = () => {
                 <Col xs={12}>
                   <Card className="preferences-card">
                     <Card.Header className="bg-white">
-                      <h3 className="card-title mb-0">Preferences</h3>
-                      <p className="card-subtitle mb-0">Customize your interface experience.</p>
+                      <h3 className="card-title mb-0">{t('profile.pref.title')}</h3>
+                      <p className="card-subtitle mb-0">{t('profile.pref.subtitle')}</p>
                     </Card.Header>
                     <Card.Body className="p-4">
                       <div className="preferences-list">
@@ -521,15 +516,73 @@ const ProfileSettings = () => {
                             </svg>
                           </div>
                           <div className="preference-content">
-                            <h4 className="preference-title">Dark Mode</h4>
+                            <h4 className="preference-title">{t('profile.pref.darkMode')}</h4>
                             <p className="preference-description">
-                              Adjust the appearance of the application to reduce eye strain in low-light environments.
+                              {t('profile.pref.darkModeDesc')}
                             </p>
                           </div>
                           <div className="preference-action">
-                            <div className={`toggle-switch ${preferences.darkMode ? 'active' : ''}`} onClick={() => handlePreferenceChange('darkMode')}>
-                              <span className="toggle-slider"></span>
-                            </div>
+                            {user?.role?.toLowerCase() === 'admin' ? (
+                              <div title="Not available for admin page" style={{ cursor: 'not-allowed' }}>
+                                <div className="toggle-switch" style={{ opacity: 0.4, pointerEvents: 'none' }}>
+                                  <span className="toggle-slider"></span>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className={`toggle-switch ${preferences.darkMode ? 'active' : ''}`} onClick={() => handlePreferenceChange('darkMode')}>
+                                <span className="toggle-slider"></span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="preference-divider"></div>
+
+                        {/* Language Selector */}
+                        <div className="preference-item">
+                          <div className="preference-icon">
+                            <svg width="20" height="20" fill="none" stroke="#6c757d" strokeWidth="2" viewBox="0 0 24 24">
+                              <circle cx="12" cy="12" r="10" strokeLinecap="round" strokeLinejoin="round" />
+                              <line x1="2" y1="12" x2="22" y2="12" strokeLinecap="round" strokeLinejoin="round" />
+                              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          </div>
+                          <div className="preference-content">
+                            <h4 className="preference-title">{t('profile.pref.language')}</h4>
+                            <p className="preference-description">
+                              {t('profile.pref.languageDesc')}
+                            </p>
+                          </div>
+                          <div className="preference-action">
+                            {user?.role?.toLowerCase() === 'admin' ? (
+                              <div
+                                title={t('profile.pref.languageNotAvailable')}
+                                style={{ cursor: 'not-allowed' }}
+                              >
+                                <Form.Select
+                                  size="sm"
+                                  disabled
+                                  style={{ opacity: 0.4, pointerEvents: 'none', minWidth: 130 }}
+                                  value="en"
+                                  readOnly
+                                >
+                                  <option value="en">English</option>
+                                  <option value="hu">Hungarian</option>
+                                  <option value="de">German</option>
+                                </Form.Select>
+                              </div>
+                            ) : (
+                              <Form.Select
+                                size="sm"
+                                value={language}
+                                onChange={(e) => setLanguage(e.target.value)}
+                                style={{ minWidth: 130 }}
+                              >
+                                <option value="en">English</option>
+                                <option value="hu">Hungarian</option>
+                                <option value="de">German</option>
+                              </Form.Select>
+                            )}
                           </div>
                         </div>
 
@@ -545,13 +598,17 @@ const ProfileSettings = () => {
                     <Card.Body className="p-4">
                       <div className="danger-zone-content">
                         <div className="danger-zone-text">
-                          <h4 className="danger-zone-title">Danger Zone</h4>
+                          <h4 className="danger-zone-title">{t('profile.danger.title')}</h4>
                           <p className="danger-zone-description">
-                            Once you delete your account, there is no going back. Please be certain.
+                            {t('profile.danger.description')}
                           </p>
                         </div>
-                        <Button variant="outline-danger" className="delete-account-btn">
-                          Delete Account
+                        <Button
+                          variant="outline-danger"
+                          className="delete-account-btn"
+                          onClick={() => { authService.logout(); navigate('/login'); }}
+                        >
+                          {t('profile.danger.btn')}
                         </Button>
                       </div>
                     </Card.Body>

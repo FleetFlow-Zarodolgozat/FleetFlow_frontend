@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Container, Card } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
+import { useLanguage } from '../contexts/LanguageContext';
 import Sidebar from '../components/Sidebar';
 import { authService } from '../services/authService';
 import '../styles/LegalPages.css';
 import Footer from '../components/Footer';
 
 const TermsOfService = () => {
+  const { t } = useLanguage();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notificationRefresh] = useState(0);
   const isAuthenticated = authService.isAuthenticated();
@@ -15,7 +17,7 @@ const TermsOfService = () => {
       {isAuthenticated && (
         <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} notificationRefresh={notificationRefresh} />
       )}
-      <main className="main-content">
+      <main className={`legal-main${isAuthenticated ? ' legal-main--with-sidebar' : ''}`}>
         <div className="legal-content">
           <Card className="legal-card">
             <Card.Body>
@@ -27,104 +29,104 @@ const TermsOfService = () => {
                     <h1 className="logo-title">FleetFlow</h1>
                   </div>
                 </Link>
-                <h2 className="page-title">Terms of Service</h2>
-                <p className="last-updated">Last updated: March 9, 2026</p>
+                <h2 className="page-title">{t('terms.title')}</h2>
+                <p className="last-updated">{t('terms.lastUpdated')}</p>
               </div>
 
             {/* Content */}
             <div className="legal-body">
               <section className="legal-section">
-                <h3>1. Acceptance of Terms</h3>
+                <h3>{t('terms.section1.title')}</h3>
                 <p>
-                  By accessing and using FleetFlow's fleet management services, you accept and agree to be bound by the terms and provisions of this agreement. If you do not agree to abide by these terms, please do not use this service.
+                  {t('terms.section1.text')}
                 </p>
               </section>
 
               <section className="legal-section">
-                <h3>2. Description of Service</h3>
+                <h3>{t('terms.section2.title')}</h3>
                 <p>
-                  FleetFlow provides a comprehensive fleet management platform that enables businesses to track, manage, and optimize their vehicle fleets. Our services include but are not limited to:
+                  {t('terms.section2.intro')}
                 </p>
                 <ul>
-                  <li>Real-time vehicle tracking and monitoring</li>
-                  <li>Fleet analytics and reporting</li>
-                  <li>Driver management and scheduling</li>
-                  <li>Maintenance tracking and alerts</li>
-                  <li>Route optimization</li>
+                  <li>{t('terms.section2.li1')}</li>
+                  <li>{t('terms.section2.li2')}</li>
+                  <li>{t('terms.section2.li3')}</li>
+                  <li>{t('terms.section2.li4')}</li>
+                  <li>{t('terms.section2.li5')}</li>
                 </ul>
               </section>
 
               <section className="legal-section">
-                <h3>3. User Accounts</h3>
+                <h3>{t('terms.section3.title')}</h3>
                 <p>
-                  To access certain features of the service, you must register for an account. You agree to:
+                  {t('terms.section3.intro')}
                 </p>
                 <ul>
-                  <li>Provide accurate and complete information during registration</li>
-                  <li>Maintain the security of your account credentials</li>
-                  <li>Notify us immediately of any unauthorized access</li>
-                  <li>Accept responsibility for all activities under your account</li>
+                  <li>{t('terms.section3.li1')}</li>
+                  <li>{t('terms.section3.li2')}</li>
+                  <li>{t('terms.section3.li3')}</li>
+                  <li>{t('terms.section3.li4')}</li>
                 </ul>
               </section>
 
               <section className="legal-section">
-                <h3>4. Acceptable Use</h3>
+                <h3>{t('terms.section4.title')}</h3>
                 <p>
-                  You agree not to use the service to:
+                  {t('terms.section4.intro')}
                 </p>
                 <ul>
-                  <li>Violate any applicable laws or regulations</li>
-                  <li>Infringe on the rights of others</li>
-                  <li>Transmit harmful or malicious code</li>
-                  <li>Attempt to gain unauthorized access to our systems</li>
-                  <li>Interfere with the proper functioning of the service</li>
+                  <li>{t('terms.section4.li1')}</li>
+                  <li>{t('terms.section4.li2')}</li>
+                  <li>{t('terms.section4.li3')}</li>
+                  <li>{t('terms.section4.li4')}</li>
+                  <li>{t('terms.section4.li5')}</li>
                 </ul>
               </section>
 
               <section className="legal-section">
-                <h3>5. Data and Privacy</h3>
+                <h3>{t('terms.section5.title')}</h3>
                 <p>
-                  Your use of FleetFlow is also governed by our Privacy Policy. By using our service, you consent to the collection and use of your data as described in our <Link to="/privacy">Privacy Policy</Link>.
+                  {t('terms.section5.text')}
                 </p>
               </section>
 
               <section className="legal-section">
-                <h3>6. Intellectual Property</h3>
+                <h3>{t('terms.section6.title')}</h3>
                 <p>
-                  All content, features, and functionality of the FleetFlow service, including but not limited to text, graphics, logos, and software, are the exclusive property of FleetFlow Systems Inc. and are protected by international copyright, trademark, and other intellectual property laws.
+                  {t('terms.section6.text')}
                 </p>
               </section>
 
               <section className="legal-section">
-                <h3>7. Limitation of Liability</h3>
+                <h3>{t('terms.section7.title')}</h3>
                 <p>
-                  FleetFlow shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of or inability to use the service. Our total liability shall not exceed the amount paid by you for the service in the twelve months preceding the claim.
+                  {t('terms.section7.text')}
                 </p>
               </section>
 
               <section className="legal-section">
-                <h3>8. Termination</h3>
+                <h3>{t('terms.section8.title')}</h3>
                 <p>
-                  We reserve the right to terminate or suspend your account and access to the service at our sole discretion, without notice, for conduct that we believe violates these Terms of Service or is harmful to other users, us, or third parties.
+                  {t('terms.section8.text')}
                 </p>
               </section>
 
               <section className="legal-section">
-                <h3>9. Changes to Terms</h3>
+                <h3>{t('terms.section9.title')}</h3>
                 <p>
-                  We reserve the right to modify these terms at any time. We will notify users of any material changes via email or through the service. Your continued use of the service after such modifications constitutes your acceptance of the updated terms.
+                  {t('terms.section9.text')}
                 </p>
               </section>
 
               <section className="legal-section">
-                <h3>10. Contact Information</h3>
+                <h3>{t('terms.section10.title')}</h3>
                 <p>
-                  If you have any questions about these Terms of Service, please contact us at:
+                  {t('terms.section10.intro')}
                 </p>
                 <p className="contact-info">
-                  <strong>FleetFlow Systems Inc.</strong><br />
-                  Email: fleetflow.info@gmail.com<br />
-                  Address: 123 Fleet Street, Budapest, Hungary
+                  <strong>{t('terms.contact.company')}</strong><br />
+                  {t('terms.contact.email')}<br />
+                  {t('terms.contact.address')}
                 </p>
               </section>
             </div>

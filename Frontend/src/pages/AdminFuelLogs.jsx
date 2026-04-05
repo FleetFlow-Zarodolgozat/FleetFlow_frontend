@@ -115,10 +115,7 @@ const AdminFuelLogs = () => {
     debounceRef.current = setTimeout(() => {
       setSearchQ(val);
     }, 400);
-  };
-
-  // Fetch driver profile images
-  useEffect(() => {
+  };  useEffect(() => {
     if (fuelLogs.length === 0) return;
     let cancelled = false;
     const fetchImages = async () => {
@@ -756,14 +753,6 @@ ${fuelCards}
 
           {/* ── Table Card ─────────────────────────────── */}
           <div className="afl-table-card">
-            {/* Table header row */}
-            <div className="afl-table-header-row">
-              <span className="afl-table-title">Fuel Log Records</span>
-              <span className="afl-total-badge">
-                {totalCount} results
-              </span>
-            </div>
-
             {loading ? (
               <div className="afl-spinner-wrap">
                 <Spinner animation="border" role="status" />

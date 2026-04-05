@@ -47,10 +47,7 @@ const Drivers = () => {
 
       const response = await api.get('/admin/drivers', { params });
       const payload = response.data || {};
-      const rawDrivers = Array.isArray(payload.data) ? payload.data : [];
-
-      // Fetch assigned vehicle for each driver in parallel
-      const enriched = await Promise.all(
+      const rawDrivers = Array.isArray(payload.data) ? payload.data : [];      const enriched = await Promise.all(
         rawDrivers.map(async (d) => {
           const driverId = d.id ?? d.Id;
           try {

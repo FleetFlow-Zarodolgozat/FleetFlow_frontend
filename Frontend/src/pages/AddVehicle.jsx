@@ -159,7 +159,7 @@ const AddVehicle = () => {
                       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" strokeLinecap="round" strokeLinejoin="round" />
                       <circle cx="12" cy="7" r="4" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
-                    You can reassign drivers later from the main dashboard.
+                    You can reassign drivers later.
                   </li>
                 </ul>
               </div>
@@ -318,9 +318,10 @@ const AddVehicle = () => {
                       {drivers.map((d) => {
                         const uid = String(d.userId ?? d.UserId ?? d.id ?? d.Id);
                         const dName = d.fullName || d.FullName || d.email || d.Email || 'Unknown';
+                        const dEmail = d.email || d.Email || '';
                         return (
                           <option key={uid} value={uid}>
-                            {dName}
+                            {dName}{dEmail && ` (${dEmail})`}
                           </option>
                         );
                       })}

@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { authService } from '../services/authService';
+import { useLanguage } from '../contexts/LanguageContext';
 import { Container, Card, Form, Button, Alert } from 'react-bootstrap';
+import Footer from '../components/Footer';
 import '../styles/SetPassword.css';
 
 const SetPassword = () => {
+  const { t } = useLanguage();
   const [searchParams] = useSearchParams();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -75,9 +78,9 @@ const SetPassword = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                   </svg>
                 </div>
-                <h2 className="page-title">Invalid Link</h2>
+                <h2 className="page-title">{t('setpwd.invalidLink')}</h2>
                 <p className="page-subtitle">
-                  This password reset link is invalid or missing. Please request a new password reset.
+                  {t('setpwd.invalidMsg')}
                 </p>
               </div>
               <Button
@@ -85,16 +88,17 @@ const SetPassword = () => {
                 className="w-100"
                 onClick={() => navigate('/forgot-password')}
               >
-                Request New Link
+                {t('setpwd.requestNewLink')}
               </Button>
               <div className="card-footer-text">
                 <p>
-                  Remember your password?{' '}
-                  <a href="/login">Back to Sign In</a>
+                  {t('setpwd.rememberPassword')}{' '}
+                  <a href="/login">{t('setpwd.backToSignIn')}</a>
                 </p>
               </div>
             </Card.Body>
           </Card>
+          <Footer />
         </div>
       </div>
     );
@@ -116,9 +120,9 @@ const SetPassword = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
-                <h2 className="page-title">Password Set Successfully!</h2>
+                <h2 className="page-title">{t('setpwd.successTitle')}</h2>
                 <p className="page-subtitle">
-                  Your password has been set. You can now sign in with your new password.
+                  {t('setpwd.successMsg')}
                 </p>
               </div>
               <Button
@@ -126,10 +130,11 @@ const SetPassword = () => {
                 className="w-100"
                 onClick={() => navigate('/login')}
               >
-                Go to Sign In
+                {t('setpwd.goToSignIn')}
               </Button>
             </Card.Body>
           </Card>
+          <Footer />
         </div>
       </div>
     );
@@ -151,9 +156,9 @@ const SetPassword = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
               </div>
-              <h2 className="page-title">Set Your Password</h2>
+              <h2 className="page-title">{t('setpwd.title')}</h2>
               <p className="page-subtitle">
-                Create a secure password for your FleetFlow account.
+                {t('setpwd.subtitle')}
               </p>
             </div>
 
@@ -167,11 +172,11 @@ const SetPassword = () => {
             {/* Set Password Form */}
             <Form onSubmit={handleSubmit}>
               <Form.Group className="mb-3">
-                <Form.Label>New Password</Form.Label>
+                <Form.Label>{t('setpwd.newPassword')}</Form.Label>
                 <div className="password-input-wrapper">
                   <Form.Control
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="Enter your new password"
+                    placeholder={t('setpwd.newPasswordPlaceholder')}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -199,16 +204,16 @@ const SetPassword = () => {
                   </button>
                 </div>
                 <Form.Text className="text-muted">
-                  Password must be at least 5 characters long.
+                  {t('setpwd.passwordHint')}
                 </Form.Text>
               </Form.Group>
 
               <Form.Group className="mb-4">
-                <Form.Label>Confirm Password</Form.Label>
+                <Form.Label>{t('setpwd.confirmPassword')}</Form.Label>
                 <div className="password-input-wrapper">
                   <Form.Control
                     type={showConfirmPassword ? 'text' : 'password'}
-                    placeholder="Confirm your new password"
+                    placeholder={t('setpwd.confirmPasswordPlaceholder')}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
@@ -243,29 +248,21 @@ const SetPassword = () => {
                 disabled={loading}
                 className="w-100"
               >
-                {loading ? 'Setting Password...' : 'Set Password'}
+                {loading ? t('setpwd.setting') : t('setpwd.submit')}
               </Button>
             </Form>
 
             {/* Footer */}
             <div className="card-footer-text">
               <p>
-                Remember your password?{' '}
-                <a href="/login">Back to Sign In</a>
+                {t('setpwd.rememberPassword')}{' '}
+                <a href="/login">{t('setpwd.backToSignIn')}</a>
               </p>
             </div>
           </Card.Body>
         </Card>
 
-        {/* Page Footer */}
-        <div className="page-footer">
-          <div className="footer-links">
-            <a href="/privacy">PRIVACY POLICY</a>
-            <a href="/terms">TERMS OF SERVICE</a>
-            <a href="/help">HELP CENTER</a>
-          </div>
-          <p className="copyright">© 2024 FleetFlow Systems Inc. All rights reserved.</p>
-        </div>
+        <Footer />
       </div>
     </div>
   );
