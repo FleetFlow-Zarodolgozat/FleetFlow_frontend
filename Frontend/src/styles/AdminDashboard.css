@@ -101,6 +101,10 @@
   padding: 20px;
 }
 
+.admin-dashboard .stat-card .card-body > div {
+  align-items: center !important;
+}
+
 .admin-dashboard .stat-label {
   font-size: 13px;
   font-weight: 500;

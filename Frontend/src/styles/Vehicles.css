@@ -34,14 +34,14 @@
 }
 
 .vehicles-title {
-  font-size: 1.6rem;
+  font-size: 2rem;
   font-weight: 700;
-  color: #1a1a2e;
+  color: #0f172a;
   margin: 0;
 }
 
 .vehicles-subtitle {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   color: #6c757d;
   margin: 0;
 }
@@ -50,21 +50,25 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  background: #7c3aed;
+  background: #0d6efd;
   border: none;
-  border-radius: 8px;
-  padding: 0.5rem 1.1rem;
-  font-size: 0.9rem;
+  border-radius: 10px;
+  padding: 10px 22px;
+  font-size: 0.95rem;
   font-weight: 600;
   color: #fff;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(13, 110, 253, 0.25);
 }
 
 .add-vehicle-btn:hover,
 .add-vehicle-btn:focus {
-  background: #6d28d9;
+  background: #0b5ed7;
   color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(13, 110, 253, 0.35);
 }
 
 /* ─── Table Card ─────────────────────────────────────── */
@@ -366,12 +370,12 @@
 }
 
 .vaction-btn.vaction-edit {
-  background: #ede9fe;
-  color: #7c3aed;
+  background: #dbeafe;
+  color: #1d4ed8;
 }
 
 .vaction-btn.vaction-edit:hover {
-  background: #ddd6fe;
+  background: #bfdbfe;
 }
 
 .vaction-btn.vaction-deactivate {
@@ -479,14 +483,14 @@
 }
 
 .vpage-btn.vpage-num:hover:not(.active):not(:disabled) {
-  background: #f5f3ff;
-  border-color: #c4b5fd;
-  color: #7c3aed;
+  background: #eff6ff;
+  border-color: #93c5fd;
+  color: #1d4ed8;
 }
 
 .vpage-btn.vpage-num.active {
-  background: #7c3aed;
-  border-color: #7c3aed;
+  background: #0d6efd;
+  border-color: #0d6efd;
   color: #fff;
   font-weight: 700;
 }

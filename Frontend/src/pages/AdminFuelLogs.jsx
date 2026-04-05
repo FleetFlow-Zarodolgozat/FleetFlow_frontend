@@ -223,6 +223,12 @@ const AdminFuelLogs = () => {
         });
       }
 
+      if (rows.length === 0) {
+        setError('No data to export for the selected filters.');
+        setExportLoading(false);
+        return;
+      }
+
       const exportTotal = rows.length;
       const exportLiters = rows.reduce((s, log) => s + (parseFloat(log.liters ?? log.Liters) || 0), 0);
       const exportCost = rows.reduce((s, log) => {
@@ -310,7 +316,7 @@ const AdminFuelLogs = () => {
         const receiptHtml = receiptEntry
           ? `<div class="receipt-section">
               <div class="receipt-label">Receipt</div>
-              <img class="receipt-img" src="receipts/${receiptEntry.filename}" alt="Receipt #${id}" />
+              <div class="receipt-filename">&#128206; ${receiptEntry.filename}</div>
             </div>`
           : `<div class="receipt-section receipt-missing">No receipt uploaded</div>`;
 
@@ -373,7 +379,7 @@ const AdminFuelLogs = () => {
   .driver-email { color: #1d6ee6; }
   .receipt-section { margin-top: 12px; border-top: 1px solid #f1f5f9; padding-top: 10px; }
   .receipt-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: #94a3b8; margin-bottom: 6px; }
-  .receipt-img { max-width: 100%; max-height: 320px; border-radius: 6px; border: 1px solid #e2e8f0; display: block; }
+  .receipt-filename { font-size: 12px; color: #1d6ee6; font-family: monospace; }
   .receipt-missing { font-size: 11px; color: #94a3b8; font-style: italic; }
   .footer { margin-top: 32px; font-size: 10px; color: #94a3b8; text-align: right; border-top: 1px solid #f1f5f9; padding-top: 12px; }
 </style>

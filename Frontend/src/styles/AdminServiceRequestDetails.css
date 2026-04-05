@@ -1,0 +1,662 @@
+/* ─── AdminServiceRequestDetails Page Styles ────────────────────── */
+
+.asrd-dashboard {
+  display: flex;
+  min-height: 100vh;
+  background: #f4f6fa;
+}
+
+.asrd-main {
+  flex: 1;
+  margin-left: var(--sidebar-width, 260px);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+.asrd-page {
+  flex: 1;
+  padding: 32px 28px 24px 28px;
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* ─── Top bar ─────────────────────────────────────────────────── */
+.asrd-topbar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.asrd-back-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: #fff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 9px;
+  padding: 8px 16px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.asrd-back-btn:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #1e293b;
+}
+
+.asrd-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.asrd-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+/* ─── Page layout (2 columns) ─────────────────────────────────── */
+.asrd-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: stretch;
+}
+
+.asrd-invoice-col,
+.asrd-details-col {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── Section card ────────────────────────────────────────────── */
+.asrd-section-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+}
+
+.asrd-details-col .asrd-section-card {
+  margin-bottom: 18px;
+}
+
+.asrd-details-col .asrd-section-card:last-child {
+  margin-bottom: 0;
+}
+
+/* ─── Card header ─────────────────────────────────────────────── */
+.asrd-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 20px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #64748b;
+  border-bottom: 1px solid #f1f5f9;
+  background: #f8fafc;
+}
+
+.asrd-card-header--invoice {
+  justify-content: space-between;
+}
+
+.asrd-card-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ─── Invoice card ────────────────────────────────────────────── */
+.asrd-invoice-card {
+  height: 100%;
+}
+
+.asrd-invoice-frame {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8fafc;
+  min-height: 200px;
+}
+
+.asrd-invoice-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 60px 24px;
+  color: #94a3b8;
+  font-size: 0.9rem;
+  width: 100%;
+}
+
+.asrd-invoice-img-btn {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  position: relative;
+}
+
+.asrd-invoice-img {
+  width: 100%;
+  max-height: 540px;
+  object-fit: contain;
+  display: block;
+  border-radius: 0 0 14px 14px;
+}
+
+.asrd-invoice-zoom-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 0 0 14px 14px;
+  transition: background 0.2s;
+  opacity: 0;
+}
+
+.asrd-invoice-img-btn:hover .asrd-invoice-zoom-overlay {
+  background: rgba(15, 23, 42, 0.45);
+  opacity: 1;
+}
+
+/* ─── Download button ─────────────────────────────────────────── */
+.asrd-download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: #7c3aed;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.12s, box-shadow 0.15s;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);
+  flex-shrink: 0;
+}
+
+.asrd-download-btn:hover {
+  background: #6d28d9;
+  transform: translateY(-1px);
+  box-shadow: 0 5px 16px rgba(124, 58, 237, 0.4);
+}
+
+.asrd-download-btn:active {
+  transform: translateY(0);
+}
+
+/* ─── Driver row ──────────────────────────────────────────────── */
+.asrd-driver-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+}
+
+.asrd-driver-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.asrd-driver-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.asrd-driver-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.asrd-driver-email {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #1e293b;
+  word-break: break-all;
+}
+
+/* ─── Detail list ─────────────────────────────────────────────── */
+.asrd-detail-list {
+  margin: 0;
+  padding: 0;
+}
+
+.asrd-detail-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 20px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.asrd-detail-row:last-child {
+  border-bottom: none;
+}
+
+.asrd-detail-row dt {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+}
+
+.asrd-detail-row dd {
+  font-size: 0.93rem;
+  color: #334155;
+  font-weight: 500;
+  margin: 0;
+  text-align: right;
+}
+
+.asrd-highlight {
+  font-size: 1.05rem !important;
+  font-weight: 700 !important;
+  color: #0f172a !important;
+}
+
+.asrd-highlight--cost {
+  color: #059669 !important;
+}
+
+.asrd-muted {
+  color: #94a3b8 !important;
+  font-size: 0.84rem !important;
+}
+
+.asrd-na {
+  color: #cbd5e1;
+  font-style: italic;
+}
+
+/* ─── Plate badge ─────────────────────────────────────────────── */
+.asrd-plate-badge {
+  display: inline-block;
+  font-size: 0.77rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 3px 10px;
+  font-family: 'Courier New', Courier, monospace;
+  white-space: nowrap;
+}
+
+/* ─── Description body ────────────────────────────────────────── */
+.asrd-description-body {
+  padding: 16px 20px;
+  font-size: 0.93rem;
+  color: #334155;
+  line-height: 1.65;
+  border-left: 3px solid #7c3aed;
+  background: #faf5ff;
+  margin: 0 20px 20px 20px;
+  border-radius: 0 8px 8px 0;
+}
+
+/* ─── Status badges ───────────────────────────────────────────── */
+.asrd-status-badge {
+  display: inline-block;
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 10px;
+  white-space: nowrap;
+  letter-spacing: 0.2px;
+}
+
+.asrd-status--requested   { background: #dbeafe; color: #1d4ed8; }
+.asrd-status--approved    { background: #dcfce7; color: #166534; }
+.asrd-status--rejected    { background: #fee2e2; color: #991b1b; }
+.asrd-status--driver-cost { background: #ede9fe; color: #5b21b6; }
+.asrd-status--closed      { background: #f1f5f9; color: #475569; }
+.asrd-status--default     { background: #f1f5f9; color: #64748b; }
+
+/* ─── Lightbox ────────────────────────────────────────────────── */
+.asrd-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+}
+
+.asrd-lightbox-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.asrd-lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.asrd-lightbox-img {
+  max-width: 90vw;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: 10px;
+  cursor: default;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+/* ─── Layout single column (no invoice) ──────────────────────── */
+.asrd-layout--single {
+  grid-template-columns: 1fr;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+/* ─── Description inside Request Details card ─────────────────── */
+.asrd-detail-description {
+  padding: 14px 20px 18px 20px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.asrd-detail-description-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #94a3b8;
+  margin-bottom: 8px;
+}
+
+.asrd-detail-description-text {
+  font-size: 0.93rem;
+  color: #334155;
+  line-height: 1.65;
+  border-left: 3px solid #7c3aed;
+  background: #faf5ff;
+  padding: 10px 14px;
+  border-radius: 0 8px 8px 0;
+}
+
+/* ─── Actions card ────────────────────────────────────────────── */
+.asrd-actions-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.asrd-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 11px 20px;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.12s, box-shadow 0.15s;
+}
+
+.asrd-action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.asrd-action-btn--approve {
+  background: #16a34a;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.25);
+}
+
+.asrd-action-btn--approve:hover:not(:disabled) {
+  background: #15803d;
+  transform: translateY(-1px);
+  box-shadow: 0 5px 16px rgba(22, 163, 74, 0.35);
+}
+
+.asrd-action-btn--reject {
+  background: #dc2626;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.25);
+}
+
+.asrd-action-btn--reject:hover:not(:disabled) {
+  background: #b91c1c;
+  transform: translateY(-1px);
+  box-shadow: 0 5px 16px rgba(220, 38, 38, 0.35);
+}
+
+.asrd-action-btn--close {
+  background: #16a34a;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.25);
+}
+
+.asrd-action-btn--close:hover:not(:disabled) {
+  background: #15803d;
+  transform: translateY(-1px);
+  box-shadow: 0 5px 16px rgba(22, 163, 74, 0.35);
+}
+
+.asrd-action-alert {
+  font-size: 0.85rem;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.asrd-action-alert--error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.asrd-action-alert--success {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.asrd-no-actions {
+  padding: 8px 0;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 0.9rem;
+  font-style: italic;
+  margin: 0;
+}
+
+/* ─── Approve form ────────────────────────────────────────────── */
+.asrd-approve-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.asrd-approve-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #64748b;
+  margin: 0;
+}
+
+.asrd-approve-datepicker {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 9px;
+  font-size: 0.93rem;
+  color: #1e293b;
+  background: #f8fafc;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.asrd-approve-datepicker:focus {
+  border-color: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);
+  background: #fff;
+}
+
+.asrd-approve-location {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 9px;
+  font-size: 0.93rem;
+  color: #1e293b;
+  background: #f8fafc;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.asrd-approve-location:focus {
+  border-color: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);
+  background: #fff;
+}
+
+.asrd-approve-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.asrd-action-btn--save {
+  background: #16a34a;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.25);
+  flex: 2;
+}
+
+.asrd-action-btn--save:hover:not(:disabled) {
+  background: #15803d;
+  transform: translateY(-1px);
+  box-shadow: 0 5px 16px rgba(22, 163, 74, 0.35);
+}
+
+.asrd-action-btn--cancel-approve {
+  background: #f1f5f9;
+  color: #475569;
+  box-shadow: none;
+  flex: 1;
+}
+
+.asrd-action-btn--cancel-approve:hover:not(:disabled) {
+  background: #e2e8f0;
+  transform: translateY(-1px);
+}
+
+/* ─── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .asrd-main {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .asrd-page {
+    padding: 20px 16px;
+  }
+
+  .asrd-title {
+    font-size: 1.4rem;
+  }
+
+  .asrd-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .asrd-invoice-card {
+    height: auto;
+    min-height: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .asrd-detail-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .asrd-detail-row dd {
+    text-align: left;
+  }
+
+  .asrd-topbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

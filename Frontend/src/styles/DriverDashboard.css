@@ -12,17 +12,33 @@
   top: 16px;
   left: 16px;
   z-index: 150;
-  width: 52px;
-  height: 52px;
+  width: 48px;
+  height: 48px;
   background: #0d6efd;
   border: none;
   border-radius: 12px;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);
+  box-shadow: 0 4px 14px rgba(13, 110, 253, 0.4);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  transition: background 0.15s, transform 0.12s, box-shadow 0.15s;
+}
+
+.mobile-menu-btn__bar {
+  display: block;
+  width: 22px;
+  height: 2.5px;
+  background: #ffffff;
+  border-radius: 2px;
+  transition: transform 0.2s, opacity 0.2s;
 }
 
 .mobile-menu-btn:hover {
   background: #0b5ed7;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(13, 110, 253, 0.5);
 }
 
 /* Sidebar Overlay */

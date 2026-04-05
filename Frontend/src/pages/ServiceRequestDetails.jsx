@@ -8,6 +8,7 @@ import '../styles/ServiceRequestDetails.css';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Footer from '../components/Footer';
+import api from '../services/api';
 
 const ServiceRequestDetails = () => {
   const location = useLocation();
@@ -22,6 +23,7 @@ const ServiceRequestDetails = () => {
   const [invoiceImgUrl, setInvoiceImgUrl] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
   // Kép letöltése authentikációval, ha van fileId
   useEffect(() => {
     const fileId = request.InvoiceFileId || request.invoiceFileId;
@@ -61,6 +63,47 @@ const ServiceRequestDetails = () => {
 
   const handleDragOver = (e) => { e.preventDefault(); setIsDragging(true); };
   const handleDragLeave = () => setIsDragging(false);
+
+  const handleCancel = async () => {
+    if (!window.confirm('Are you sure you want to cancel this service request?')) return;
+    setCancelling(true);
+    setError('');
+    try {
+      await api.delete(`/service-requests/cancel/${request.id || request.Id}`);
+      navigate(-1);
+    } catch (err) {
+      const apiMessage = err?.response?.data;
+      const message =
+        typeof apiMessage === 'string'
+          ? apiMessage
+          : apiMessage?.message || apiMessage?.Message || 'Could not cancel service request.';
+      setError(message);
+    } finally {
+      setCancelling(false);
+    }
+  };
+
+  const getStatusClass = (status) => {
+    switch ((status || '').toUpperCase()) {
+      case 'REQUESTED': return 'requested';
+      case 'APPROVED': return 'approved';
+      case 'REJECTED': return 'rejected';
+      case 'CLOSED': return 'closed';
+      case 'DRIVER_COST': return 'driver-cost';
+      default: return 'default';
+    }
+  };
+
+  const getStatusIconStyle = (status) => {
+    switch ((status || '').toUpperCase()) {
+      case 'REQUESTED': return { bg: '#dbeafe', stroke: '#1e40af' };
+      case 'APPROVED':  return { bg: '#dcfce7', stroke: '#166534' };
+      case 'REJECTED':  return { bg: '#fee2e2', stroke: '#991b1b' };
+      case 'CLOSED':    return { bg: '#e5e7eb', stroke: '#374151' };
+      case 'DRIVER_COST': return { bg: '#f3e8ff', stroke: '#6b21a8' };
+      default:          return { bg: '#f1f5f9', stroke: '#475569' };
+    }
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -113,7 +156,7 @@ const ServiceRequestDetails = () => {
             <p className="add-fuel-subtitle">Submit your cost report and invoice for the completed service</p>
           </div>
 
-          <Row className="g-4">
+          <Row className={`g-4${request.status === 'REQUESTED' ? ' justify-content-center' : ''}`}>
             {/* Left Column - Form */}
             <Col lg={7} xl={8}>
               <Card className="fuel-form-card border-0 shadow-sm">
@@ -121,21 +164,55 @@ const ServiceRequestDetails = () => {
                   {error && <Alert variant="danger" className="mb-3">{error}</Alert>}
                   {success && <Alert variant="success" className="mb-3">{success}</Alert>}
 
+                  {request.status === 'REQUESTED' && (
+                    <Alert variant="info" className="mb-4">
+                      <strong>Read Only:</strong> Service requests with "requested" status cannot be edited. Wait for admin approval before making changes.
+                    </Alert>
+                  )}
+
                   <Row className="g-4">
+                    {/* Title - always shown */}
+                    <Col xs={12}>
+                      <div className="srd-info-row">
+                        <div className="srd-info-label">Title</div>
+                        <div className="srd-info-value">{request.title || '—'}</div>
+                      </div>
+                    </Col>
+
+                    {/* Description - always shown */}
+                    {(request.description) && (
+                      <Col xs={12}>
+                        <div className="srd-info-row">
+                          <div className="srd-info-label">Description</div>
+                          <div className="srd-info-value srd-info-value--muted">{request.description}</div>
+                        </div>
+                      </Col>
+                    )}
+
+                    {/* Service Date - always shown if available */}
+                    {request.scheduledStart && (
+                      <Col xs={12}>
+                        <div className="srd-info-row">
+                          <div className="srd-info-label">Service Date</div>
+                          <div className="srd-info-value">{new Date(request.scheduledStart).toLocaleString('hu-HU', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</div>
+                        </div>
+                      </Col>
+                    )}
+
                     {/* Status + License Plate info */}
                     <Col xs={12}>
                       <Row className="g-3">
                         <Col xs={6}>
                           <div className="srd-meta-card">
-                            <div className="srd-meta-icon srd-meta-icon-status">
-                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <div className="srd-meta-icon" style={{ background: getStatusIconStyle(request.status).bg }}>
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={getStatusIconStyle(request.status).stroke} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <circle cx="12" cy="12" r="10" />
                                 <path d="M9 12l2 2 4-4" />
                               </svg>
                             </div>
                             <div>
                               <div className="srd-meta-label">Status</div>
-                              <div className="srd-meta-value srd-meta-value-status">{request.status || '—'}</div>
+                              <span className={`srd-status-badge status-${getStatusClass(request.status)}`}>{request.status || '—'}</span>
                             </div>
                           </div>
                         </Col>
@@ -157,72 +234,102 @@ const ServiceRequestDetails = () => {
                       </Row>
                     </Col>
 
-                    {/* Driver Cost */}
-                    <Col xs={12}>
-                      <Form.Group>
-                        <Form.Label className="form-label">
-                          Driver Cost <span className="srd-required">*</span>
-                        </Form.Label>
-                        <div className="input-with-suffix">
-                          <Form.Control
-                            type="number"
-                            value={driverCost}
-                            onChange={e => setDriverCost(e.target.value)}
-                            placeholder="0"
-                            min="0"
-                            step="1"
-                            className="form-control-lg"
-                            required
-                          />
-                          <span className="input-suffix">Ft</span>
+                    {/* Location - shown when NOT requested and available */}
+                    {request.status !== 'REQUESTED' && (request.serviceLocation || request.ServiceLocation) && (
+                      <Col xs={12}>
+                        <div className="srd-info-row">
+                          <div className="srd-info-label">Location</div>
+                          <div className="srd-info-value">{request.serviceLocation || request.ServiceLocation}</div>
                         </div>
-                      </Form.Group>
-                    </Col>
+                      </Col>
+                    )}
 
-                    {/* Close Note */}
-                    <Col xs={12}>
-                      <Form.Group>
-                        <Form.Label className="form-label">
-                          Close Note <span className="text-muted" style={{ fontWeight: 400, fontSize: '0.85rem' }}>(optional)</span>
-                        </Form.Label>
-                        <Form.Control
-                          type="text"
-                          value={closeNote}
-                          onChange={e => setCloseNote(e.target.value)}
-                          placeholder="Any notes about the service"
-                          className="form-control-lg"
-                        />
-                      </Form.Group>
-                    </Col>
+                    {/* Driver Cost - Only show when NOT requested */}
+                    {request.status !== 'REQUESTED' && (
+                      <Col xs={12}>
+                        <Form.Group>
+                          <Form.Label className="form-label">
+                            Driver Cost <span className="srd-required">*</span>
+                          </Form.Label>
+                          <div className="input-with-suffix">
+                            <Form.Control
+                              type="number"
+                              value={driverCost}
+                              onChange={e => setDriverCost(e.target.value)}
+                              placeholder="0"
+                              min="0"
+                              step="1"
+                              className="form-control-lg"
+                              required
+                            />
+                            <span className="input-suffix">Ft</span>
+                          </div>
+                        </Form.Group>
+                      </Col>
+                    )}
+
+                    {/* Close Note - Only show when NOT requested */}
+                    {request.status !== 'REQUESTED' && (
+                      <Col xs={12}>
+                        <Form.Group>
+                          <Form.Label className="form-label">
+                            Close Note <span className="text-muted" style={{ fontWeight: 400, fontSize: '0.85rem' }}>(optional)</span>
+                          </Form.Label>
+                          <Form.Control
+                            type="text"
+                            value={closeNote}
+                            onChange={e => setCloseNote(e.target.value)}
+                            placeholder="Any notes about the service"
+                            className="form-control-lg"
+                          />
+                        </Form.Group>
+                      </Col>
+                    )}
                   </Row>
 
                   {/* Action Buttons */}
                   <div className="form-actions mt-5">
-                    <Button
-                      type="button"
-                      className="btn-save srd-submit-btn"
-                      disabled={saving}
-                      onClick={handleSave}
-                    >
-                      {saving ? (
-                        <><Spinner animation="border" size="sm" className="me-2" />Saving...</>
-                      ) : (
-                        <>
-                          <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" strokeLinecap="round" strokeLinejoin="round" />
-                            <polyline points="17 21 17 13 7 13 7 21" strokeLinecap="round" strokeLinejoin="round" />
-                            <polyline points="7 3 7 8 15 8" strokeLinecap="round" strokeLinejoin="round" />
-                          </svg>
-                          Save Details
-                        </>
-                      )}
-                    </Button>
+                    {request.status !== 'REQUESTED' && (
+                      <Button
+                        type="button"
+                        className="btn-save srd-submit-btn"
+                        disabled={saving}
+                        onClick={handleSave}
+                      >
+                        {saving ? (
+                          <><Spinner animation="border" size="sm" className="me-2" />Saving...</>
+                        ) : (
+                          <>
+                            <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" strokeLinecap="round" strokeLinejoin="round" />
+                              <polyline points="17 21 17 13 7 13 7 21" strokeLinecap="round" strokeLinejoin="round" />
+                              <polyline points="7 3 7 8 15 8" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                            Save Details
+                          </>
+                        )}
+                      </Button>
+                    )}
+                    {request.status === 'REQUESTED' && (
+                      <Button
+                        variant="danger"
+                        type="button"
+                        disabled={cancelling}
+                        onClick={handleCancel}
+                      >
+                        {cancelling ? (
+                          <><Spinner animation="border" size="sm" className="me-2" />Cancelling...</>
+                        ) : (
+                          <>Cancel Request</>
+                        )}
+                      </Button>
+                    )}
                     <Button
                       variant="light"
                       type="button"
                       className="btn-cancel"
                       onClick={() => navigate(-1)}
-                      disabled={saving}
+                      disabled={saving || cancelling}
                     >
                       Back
                     </Button>
@@ -232,9 +339,10 @@ const ServiceRequestDetails = () => {
             </Col>
 
             {/* Right Column */}
-            <Col lg={5} xl={4}>
-              {/* Invoice Upload Card */}
-              <Card className="receipt-card border-0 shadow-sm mb-4">
+            {request.status !== 'REQUESTED' && (
+              <Col lg={5} xl={4}>
+                {/* Invoice Upload Card */}
+                <Card className="receipt-card border-0 shadow-sm mb-4">
                 <Card.Body className="p-4">
                   <div className="receipt-header mb-3">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="me-2">
@@ -344,6 +452,7 @@ const ServiceRequestDetails = () => {
                 </Card.Body>
               </Card>
             </Col>
+            )}
           </Row>
         </Container>
         <Footer />

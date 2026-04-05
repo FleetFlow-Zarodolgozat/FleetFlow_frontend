@@ -24,6 +24,8 @@ import AdminFuelLogs from './pages/AdminFuelLogs';
 import AdminFuelLogDetails from './pages/AdminFuelLogDetails';
 import AdminTrips from './pages/AdminTrips';
 import AdminTripDetails from './pages/AdminTripDetails';
+import AdminServiceRequests from './pages/AdminServiceRequests';
+import AdminServiceRequestDetails from './pages/AdminServiceRequestDetails';
 import EditVehicle from './pages/EditVehicle';
 import AddVehicle from './pages/AddVehicle';
 import { authService } from './services/authService';
@@ -154,6 +156,16 @@ function App() {
         <Route path="/admin-trip-details" element={
           <ProtectedRoute>
             <AdminTripDetails />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin-service-requests" element={
+          <ProtectedRoute>
+            <AdminServiceRequests />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin-service-request-details" element={
+          <ProtectedRoute>
+            <AdminServiceRequestDetails />
           </ProtectedRoute>
         } />
         <Route path="/" element={<HomeRoute />} />

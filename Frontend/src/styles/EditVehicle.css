@@ -407,3 +407,19 @@
     justify-content: center;
   }
 }
+
+/* Save button blue override for vehicle pages */
+.ev-form-actions .action-save-btn,
+.ev-form-actions .action-save-btn:hover:not(:disabled),
+.ev-form-actions .action-save-btn:focus:not(:disabled) {
+  background: #0d6efd !important;
+  border-color: #0d6efd !important;
+  box-shadow: 0 4px 14px rgba(13, 110, 253, 0.25) !important;
+}
+
+.ev-form-actions .action-save-btn:hover:not(:disabled),
+.ev-form-actions .action-save-btn:focus:not(:disabled) {
+  background: #0b5ed7 !important;
+  border-color: #0b5ed7 !important;
+  box-shadow: 0 6px 18px rgba(13, 110, 253, 0.35) !important;
+}

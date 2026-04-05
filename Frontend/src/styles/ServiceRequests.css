@@ -214,7 +214,7 @@
 }
 
 .sr-table-header {
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
@@ -374,10 +374,52 @@
   color: #475569;
 }
 
+/* New colored status badges */
+.sr-status-badge.status-requested {
+  background: #dbeafe;
+  color: #1e40af;
+  border-left: 3px solid #0d6efd;
+}
+
+.sr-status-badge.status-approved {
+  background: #dcfce7;
+  color: #166534;
+  border-left: 3px solid #198754;
+}
+
+.sr-status-badge.status-rejected {
+  background: #fee2e2;
+  color: #991b1b;
+  border-left: 3px solid #dc3545;
+}
+
+.sr-status-badge.status-closed {
+  background: #e5e7eb;
+  color: #374151;
+  border-left: 3px solid #6c757d;
+}
+
+.sr-status-badge.status-driver-cost {
+  background: #f3e8ff;
+  color: #6b21a8;
+  border-left: 3px solid #7c3aed;
+}
+
 .sr-cell-date {
   font-weight: 500;
   color: #475569;
   font-size: 0.9375rem;
+}
+
+.sr-cell-location {
+  font-weight: 500;
+  color: #475569;
+  font-size: 0.9375rem;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
 }
 
 .sr-cell-cost {
@@ -449,6 +491,27 @@
   padding: 16px 20px;
   background: #f8fafc;
   border-top: 1px solid #e2e8f0;
+}
+
+.sr-pagination-footer .page-item .page-link {
+  color: #7c3aed;
+  border-color: #e2e8f0;
+}
+
+.sr-pagination-footer .page-item .page-link:hover {
+  background: #f5f3ff;
+  color: #5b21b6;
+  border-color: #7c3aed;
+}
+
+.sr-pagination-footer .page-item.active .page-link {
+  background: #7c3aed;
+  border-color: #7c3aed;
+  color: #fff;
+}
+
+.sr-pagination-footer .page-item.disabled .page-link {
+  color: #cbd5e1;
 }
 
 .sr-page-info {
