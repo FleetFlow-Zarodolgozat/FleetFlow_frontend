@@ -57,7 +57,8 @@ const EditVehicle = () => {
     const fetchData = async () => {
       setLoading(true);
       setError('');
-      try {        const res = await api.get('/admin/vehicles', {
+      try {
+        const res = await api.get('/admin/vehicles', {
           params: { page: 1, pageSize: 200 },
         });
         const payload = res.data || {};
@@ -85,35 +86,69 @@ const EditVehicle = () => {
           status: vehicle.status || vehicle.Status || 'ACTIVE',
           assignedUserId: '',
         });
-        setOriginalStatus(vehicle.status || vehicle.Status || 'ACTIVE');        const driversRes = await api.get('/admin/drivers', {
-          params: { page: 1, pageSize: 200 },
-        });
-        const driversPayload = driversRes.data || {};
-        const driversList = Array.isArray(driversPayload.data) ? driversPayload.data : [];
-        const activeDrivers = driversList.filter((d) => d.isActive ?? d.IsActive);
-        // Store all drivers so we can inject an inactive assigned driver into the dropdown later
-        setDrivers({ active: activeDrivers, all: driversList });        let resolvedOriginalUserId = '';
-        const userEmail = vehicle.userEmail || vehicle.UserEmail;
-        if (userEmail) {
-          const emailLower = userEmail.toLowerCase();
-          const found = driversList.find(
-            (d) => (d.email || d.Email || '').toLowerCase() === emailLower
-          );
-          if (found) {
-            resolvedOriginalUserId = String(found.id ?? found.Id ?? found.userId ?? found.UserId ?? '');
-            if (resolvedOriginalUserId) {
-              setForm((prev) => ({ ...prev, assignedUserId: resolvedOriginalUserId }));
+        setOriginalStatus(vehicle.status || vehicle.Status || 'ACTIVE');
+        
+        // Fetch free/assigned drivers for this vehicle using the new endpoint
+        let resolvedOriginalUserId = '';
+        let availableDriversList = [];
+        
+        try {
+          const assignRes = await api.get(`/admin/assign/vehicle/${id}`);
+          const assignData = assignRes.data || {};
+          
+          if (assignData.isAssigned) {
+            // Vehicle is assigned to a driver
+            const assignedDriver = assignData.assignedDriver;
+            if (assignedDriver && assignedDriver.id) {
+              resolvedOriginalUserId = String(assignedDriver.id);
+              availableDriversList = [assignedDriver];
+            }
+          } else {
+            // Vehicle is not assigned, get free drivers
+            availableDriversList = Array.isArray(assignData.freeDrivers) ? assignData.freeDrivers : [];
+          }
+        } catch (err) {
+          console.log('Could not fetch available drivers from assign endpoint, falling back to all drivers');
+          // Fallback: fetch all active drivers
+          try {
+            const driversRes = await api.get('/admin/drivers', {
+              params: { page: 1, pageSize: 200 },
+            });
+            const driversPayload = driversRes.data || {};
+            const driversList = Array.isArray(driversPayload.data) ? driversPayload.data : [];
+            availableDriversList = driversList.filter((d) => d.isActive ?? d.IsActive);
+          } catch {
+            availableDriversList = [];
+          }
+        }
+        
+        // Store drivers for dropdown
+        setDrivers({ active: availableDriversList, all: availableDriversList });
+        
+        // Try to resolve original assigned user ID from vehicle email if not set
+        if (!resolvedOriginalUserId) {
+          const userEmail = vehicle.userEmail || vehicle.UserEmail;
+          if (userEmail) {
+            const emailLower = userEmail.toLowerCase();
+            const found = availableDriversList.find(
+              (d) => (d.email || d.Email || '').toLowerCase() === emailLower
+            );
+            if (found) {
+              resolvedOriginalUserId = String(found.id ?? found.Id ?? found.userId ?? found.UserId ?? '');
+              if (resolvedOriginalUserId) {
+                setForm((prev) => ({ ...prev, assignedUserId: resolvedOriginalUserId }));
+              }
             }
           }
         }
-        setOriginalAssignedUserId(resolvedOriginalUserId);        setHistoryLoading(true);
+        setOriginalAssignedUserId(resolvedOriginalUserId);
+        setHistoryLoading(true);
         try {
           const historyRes = await api.get(`/admin/assignment/history/${id}`);
           const history = Array.isArray(historyRes.data) ? historyRes.data : [];
           setAssignmentHistory(history);
 
-          // Fallback: if userEmail match failed, derive from active history entry.
-          // Active = assignedTo is null/undefined/empty/"0001-01-01..." (backend default date)
+          // Fallback: if original ID not resolved yet, derive from active history entry
           if (!resolvedOriginalUserId) {
             const isActiveEntry = (h) => {
               const val = h.assignedTo ?? h.AssignedTo;
@@ -123,13 +158,11 @@ const EditVehicle = () => {
             };
             const activeEntry = history.find(isActiveEntry);
             if (activeEntry) {
-              const driverId = String(activeEntry.driverId ?? activeEntry.DriverId ?? '');
               const entryEmail = (activeEntry.driverEmail || activeEntry.DriverEmail || '').toLowerCase();
-              // Try: driverId == d.id, OR driverId == d.userId (in case backend maps it that way), OR email match
-              const found =
-                (driverId && driversList.find((d) => String(d.id ?? d.Id) === driverId)) ||
-                (driverId && driversList.find((d) => String(d.userId ?? d.UserId ?? '') === driverId)) ||
-                (entryEmail && driversList.find((d) => (d.email || d.Email || '').toLowerCase() === entryEmail));
+              // Try email match with available drivers
+              const found = entryEmail && availableDriversList.find(
+                (d) => (d.email || d.Email || '').toLowerCase() === entryEmail
+              );
               if (found) {
                 const uid = String(found.id ?? found.Id ?? found.userId ?? found.UserId ?? '');
                 if (uid) {

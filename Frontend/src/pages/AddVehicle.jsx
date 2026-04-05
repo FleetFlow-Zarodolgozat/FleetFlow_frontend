@@ -318,9 +318,10 @@ const AddVehicle = () => {
                       {drivers.map((d) => {
                         const uid = String(d.userId ?? d.UserId ?? d.id ?? d.Id);
                         const dName = d.fullName || d.FullName || d.email || d.Email || 'Unknown';
+                        const dEmail = d.email || d.Email || '';
                         return (
                           <option key={uid} value={uid}>
-                            {dName}
+                            {dName}{dEmail && ` (${dEmail})`}
                           </option>
                         );
                       })}
