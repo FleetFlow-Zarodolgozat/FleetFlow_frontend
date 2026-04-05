@@ -3,11 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { Card, Container, Row, Col, Pagination, Badge, Alert, Spinner, Button } from 'react-bootstrap';
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
+import { useLanguage } from '../contexts/LanguageContext';
 import '../styles/Trips.css';
 import Footer from '../components/Footer';
 
 const Trips = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -118,9 +120,9 @@ const Trips = () => {
           {/* Header section */}
           <div className="trips-header mb-4">
             <div>
-              <h1 className="trips-title mb-1">My Trips</h1>
+              <h1 className="trips-title mb-1">{t('trips.title')}</h1>
               <p className="trips-subtitle text-muted mb-0">
-                Track and manage your journey history.
+                {t('trips.subtitle')}
               </p>
             </div>
             <Button className="add-new-trip-btn" onClick={() => navigate('/add-new-trip')}>
@@ -128,15 +130,15 @@ const Trips = () => {
                 <circle cx="12" cy="12" r="10" />
                 <path d="M12 8v8M8 12h8" />
               </svg>
-              <span>Add New Trip</span>
+              <span>{t('trips.btn.addNew')}</span>
             </Button>
           </div>
 
           {/* Main table card */}
           <Card className="trips-table-card mb-4">
             <Card.Header className="trips-table-header">
-              <span className="trips-table-title">My Trips</span>
-              <span className="trips-total-badge">Total: {totalCount}</span>
+              <span className="trips-table-title">{t('trips.card.title')}</span>
+              <span className="trips-total-badge">{t('trips.total')}: {totalCount}</span>
             </Card.Header>
             <Card.Body className="p-0">
               {loading ? (
@@ -151,9 +153,9 @@ const Trips = () => {
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" strokeLinecap="round" strokeLinejoin="round" />
                     <polyline points="14,2 14,8 20,8" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
-                  <p>No trips recorded yet</p>
+                  <p>{t('trips.empty')}</p>
                   <Button variant="outline-primary" onClick={() => navigate('/add-new-trip')}>
-                    Add your first trip
+                    {t('trips.addFirst')}
                   </Button>
                 </div>
               ) : (
@@ -170,11 +172,11 @@ const Trips = () => {
                       </colgroup>
                       <thead>
                         <tr>
-                          <th className="trip-header">DATE</th>
-                          <th className="trip-header" style={{ textAlign: 'center' }}>VEHICLE</th>
-                          <th className="trip-header">ROUTE</th>
-                          <th className="trip-header">DISTANCE</th>
-                          <th className="trip-header">ACTIONS</th>
+                          <th className="trip-header">{t('trips.th.date')}</th>
+                          <th className="trip-header" style={{ textAlign: 'center' }}>{t('trips.th.vehicle')}</th>
+                          <th className="trip-header">{t('trips.th.route')}</th>
+                          <th className="trip-header">{t('trips.th.distance')}</th>
+                          <th className="trip-header">{t('trips.th.actions')}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -256,7 +258,7 @@ const Trips = () => {
                             <div className="mobile-card-body">
                               <div className="mobile-row route-row">
                                 <span className="mobile-label">
-                                  Route
+                                  {t('trips.mobile.route')}
                                 </span>
                                 <div className="mobile-route">
                                   <span className="mobile-from">{trip.StartLocation || trip.startLocation || 'N/A'}</span>
@@ -268,13 +270,13 @@ const Trips = () => {
                               </div>
                               <div className="mobile-row">
                                 <span className="mobile-label">
-                                  Distance
+                                  {t('trips.mobile.distance')}
                                 </span>
                                 <span className="mobile-value distance-value">{formatDistance(trip.DistanceKm || trip.distanceKm)}</span>
                               </div>
                               <div className="mobile-row">
                                 <span className="mobile-label">
-                                  Vehicle
+                                  {t('trips.mobile.vehicle')}
                                 </span>
                                 <span className="mobile-value">{trip.LicensePlate || trip.licensePlate || 'N/A'}</span>
                               </div>
@@ -290,7 +292,7 @@ const Trips = () => {
             {trips.length > 0 && (
               <Card.Footer className="trips-pagination-footer">
                 <span className="trips-page-info">
-                  Showing {displayedCount} of {totalCount} entries
+                  {t('trips.showing', { count: displayedCount, total: totalCount })}
                 </span>
                 <Pagination className="mb-0 trips-pagination">
                   <Pagination.Prev
@@ -312,27 +314,27 @@ const Trips = () => {
             <Col xs={12} sm={6} lg={4}>
               <Card className="stats-card border-0 shadow-sm h-100">
                 <Card.Body className="d-flex flex-column">
-                  <div className="stats-label">Total Trips</div>
+                  <div className="stats-label">{t('trips.stat.totalTrips')}</div>
                   <div className="stats-value">{stats.totalTrips}</div>
-                  <div className="stats-subtext mt-auto">all time journeys</div>
+                  <div className="stats-subtext mt-auto">{t('trips.stat.allTime')}</div>
                 </Card.Body>
               </Card>
             </Col>
             <Col xs={12} sm={6} lg={4}>
               <Card className="stats-card border-0 shadow-sm h-100">
                 <Card.Body className="d-flex flex-column">
-                  <div className="stats-label">Total Distance</div>
+                  <div className="stats-label">{t('trips.stat.totalDistance')}</div>
                   <div className="stats-value distance-value">{stats.totalDistance.toLocaleString('hu-HU', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} km</div>
-                  <div className="stats-subtext mt-auto">cumulative distance</div>
+                  <div className="stats-subtext mt-auto">{t('trips.stat.cumulative')}</div>
                 </Card.Body>
               </Card>
             </Col>
             <Col xs={12} sm={6} lg={4}>
               <Card className="stats-card border-0 shadow-sm h-100">
                 <Card.Body className="d-flex flex-column">
-                  <div className="stats-label">Avg. Distance</div>
+                  <div className="stats-label">{t('trips.stat.avgDistance')}</div>
                   <div className="stats-value">{stats.avgDistance.toLocaleString('hu-HU', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} km</div>
-                  <div className="stats-subtext mt-auto">per trip</div>
+                  <div className="stats-subtext mt-auto">{t('trips.stat.perTrip')}</div>
                 </Card.Body>
               </Card>
             </Col>

@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Button, Card, Container, Row, Col, Alert, Form, Badge } from 'react-bootstrap';
 import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../contexts/LanguageContext';
 import Sidebar from '../components/Sidebar';
 import '../styles/DriverDashboard.css';
 import '../styles/AddFuelLog.css';
 import Footer from '../components/Footer';
 
 const AddFuelLog = () => {
+  const { t, language } = useLanguage();
   const [vehicles, setVehicles] = useState([]);
   const [selectedVehicle, setSelectedVehicle] = useState('');
   const [vehicleCurrentMileageKm, setVehicleCurrentMileageKm] = useState(null);
@@ -194,8 +196,8 @@ const AddFuelLog = () => {
 
           {/* Header */}
           <div className="add-fuel-header mb-4">
-            <h1 className="add-fuel-title">Add New Fuel Log</h1>
-            <p className="add-fuel-subtitle">Fill in the details from your latest refueling to keep your fleet records updated.</p>
+            <h1 className="add-fuel-title">{t('addFuelLog.title')}</h1>
+            <p className="add-fuel-subtitle">{t('addFuelLog.subtitle')}</p>
           </div>
 
           <Row className="g-4">
@@ -204,14 +206,14 @@ const AddFuelLog = () => {
               <Card className="fuel-form-card border-0 shadow-sm">
                 <Card.Body className="p-4 p-md-5">
                   {error && <Alert variant="danger" className="mb-3">{error}</Alert>}
-                  {success && <Alert variant="success" className="mb-3">Saved successfully!</Alert>}
+                  {success && <Alert variant="success" className="mb-3">{t('addFuelLog.savedSuccess')}</Alert>}
 
                   <Form onSubmit={handleSubmit}>
                     <Row className="g-4">
                       {/* Date and Time */}
                       <Col xs={12}>
                         <Form.Group>
-                          <Form.Label className="form-label">Date and Time of Service</Form.Label>
+                          <Form.Label className="form-label">{t('addFuelLog.label.dateTime')}</Form.Label>
                           <div className="date-time-row">
                             <Form.Control
                               type="date"
@@ -234,7 +236,7 @@ const AddFuelLog = () => {
                       {/* Quantity */}
                         <Col xs={12}>
                         <Form.Group>
-                          <Form.Label className="form-label">Quantity (Liters)</Form.Label>
+                          <Form.Label className="form-label">{t('addFuelLog.label.liters')}</Form.Label>
                           <div className="input-with-suffix">
                             <Form.Control
                               type="number"
@@ -254,7 +256,7 @@ const AddFuelLog = () => {
                       {/* Total Cost */}
                         <Col xs={12}>
                         <Form.Group>
-                          <Form.Label className="form-label">Total Cost</Form.Label>
+                          <Form.Label className="form-label">{t('addFuelLog.label.totalCost')}</Form.Label>
                           <div className="input-with-suffix">
                             <Form.Control
                               type="number"
@@ -279,7 +281,7 @@ const AddFuelLog = () => {
                       {/* Odometer */}
                         <Col xs={12}>
                         <Form.Group>
-                          <Form.Label className="form-label">Odometer Reading</Form.Label>
+                          <Form.Label className="form-label">{t('addFuelLog.label.odometer')}</Form.Label>
                           <div className="input-with-suffix">
                             <Form.Control
                               type="number"
@@ -295,7 +297,7 @@ const AddFuelLog = () => {
                           </div>
                           {vehicleCurrentMileageKm !== null && (
                             <div className="previous-odometer">
-                              Previous trip ended at: {vehicleCurrentMileageKm.toLocaleString()} km
+                              {t('addFuelLog.prevTripEnded', { km: vehicleCurrentMileageKm.toLocaleString() })}
                             </div>
                           )}
                         </Form.Group>
@@ -304,7 +306,7 @@ const AddFuelLog = () => {
                       {/* Station Name */}
                         <Col xs={12}>
                         <Form.Group>
-                          <Form.Label className="form-label">Station Name</Form.Label>
+                          <Form.Label className="form-label">{t('addFuelLog.label.station')}</Form.Label>
                           <Form.Control
                             type="text"
                             value={station}
@@ -318,7 +320,7 @@ const AddFuelLog = () => {
                       {/* Notes */}
                         <Col xs={12}>
                         <Form.Group>
-                          <Form.Label className="form-label">Additional Notes (Optional)</Form.Label>
+                          <Form.Label className="form-label">{t('addFuelLog.label.notes')}</Form.Label>
                           <Form.Control
                             as="textarea"
                             rows={3}
@@ -327,6 +329,16 @@ const AddFuelLog = () => {
                             placeholder="Add details like pump number or issues encountered..."
                             className="form-control-lg"
                           />
+                          {language !== 'en' && (
+                            <Form.Text style={{ color: '#b45309', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
+                              <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" strokeLinecap="round" strokeLinejoin="round"/>
+                                <line x1="12" y1="9" x2="12" y2="13" strokeLinecap="round"/>
+                                <line x1="12" y1="17" x2="12.01" y2="17" strokeLinecap="round"/>
+                              </svg>
+                              {t('common.writeInEnglish')}
+                            </Form.Text>
+                          )}
                         </Form.Group>
                       </Col>
                     </Row>
@@ -343,7 +355,7 @@ const AddFuelLog = () => {
                           <path d="M17 13h2a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2" strokeLinecap="round" strokeLinejoin="round"/>
                           <path d="M7 22V12h6v10" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
-                        Submit Fuel Log
+                        {t('addFuelLog.btn.submit')}
                       </Button>
                       <Button
                         variant="light"
@@ -351,7 +363,7 @@ const AddFuelLog = () => {
                         className="btn-cancel"
                         onClick={() => navigate(-1)}
                       >
-                        Cancel
+                        {t('addFuelLog.btn.cancel')}
                       </Button>
                     </div>
                   </Form>
@@ -371,7 +383,7 @@ const AddFuelLog = () => {
                       <line x1="12" y1="18" x2="12" y2="12" />
                       <line x1="9" y1="15" x2="15" y2="15" />
                     </svg>
-                    <span className="receipt-title">Receipt Upload</span>
+                    <span className="receipt-title">{t('addFuelLog.receipt.title')}</span>
                   </div>
 
                   <div
@@ -418,10 +430,10 @@ const AddFuelLog = () => {
                           </svg>
                         </div>
                         <div className="upload-text">
-                          <strong>Click to upload</strong>
-                          <span>or drag and drop receipt</span>
+                          <strong>{t('addFuelLog.receipt.click')}</strong>
+                          <span>{t('addFuelLog.receipt.drag')}</span>
                         </div>
-                        <div className="upload-hint">JPG, PNG, PDF (MAX 20MB)</div>
+                        <div className="upload-hint">{t('addFuelLog.receipt.hint')}</div>
                       </>
                     )}
                   </div>
@@ -436,23 +448,23 @@ const AddFuelLog = () => {
                       <path d="M9 18h6a2 2 0 0 1 2 2v2H7v-2a2 2 0 0 1 2-2z" />
                       <path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2.26C17.81 13.47 19 11.38 19 9a7 7 0 0 0-7-7z" />
                     </svg>
-                    <span className="pro-tip-title">Pro Tip</span>
+                    <span className="pro-tip-title">{t('addFuelLog.proTip.title')}</span>
                   </div>
                   <p className="pro-tip-text">
-                    Uploading a clear photo of your receipt helps automate data verification and ensures your expense claims are approved faster by fleet managers.
+                    {t('addFuelLog.proTip.text')}
                   </p>
                   <ul className="pro-tip-list">
                     <li>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="#0d6efd" className="me-2">
                         <polyline points="20 6 9 17 4 12" />
                       </svg>
-                      Ensure date is visible
+                      {t('addFuelLog.proTip.1')}
                     </li>
                     <li>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="#0d6efd" className="me-2">
                         <polyline points="20 6 9 17 4 12" />
                       </svg>
-                      Liters & price must be sharp
+                      {t('addFuelLog.proTip.2')}
                     </li>
                   </ul>
                 </Card.Body>
@@ -463,7 +475,7 @@ const AddFuelLog = () => {
                 <Card className="recent-logs-card border-0 shadow-sm">
                   <Card.Body className="p-4">
                     <div className="recent-logs-header mb-3">
-                      <span className="recent-logs-title">RECENT LOGS</span>
+                      <span className="recent-logs-title">{t('addFuelLog.recentLogs')}</span>
                     </div>
                     <div className="recent-logs-list">
                       {recentLogs.map(log => (
@@ -476,7 +488,7 @@ const AddFuelLog = () => {
                         </div>
                       ))}
                     </div>
-                    <a href="/fuel-logs" className="view-all-link">View all logs</a>
+                    <a href="/fuel-logs" className="view-all-link">{t('addFuelLog.viewAllLogs')}</a>
                   </Card.Body>
                 </Card>
               )}

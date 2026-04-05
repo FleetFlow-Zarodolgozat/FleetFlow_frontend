@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLanguage } from '../contexts/LanguageContext';
 import { Card } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
@@ -7,6 +8,7 @@ import '../styles/HelpCenter.css';
 import Footer from '../components/Footer';
 
 const HelpCenter = () => {
+  const { t } = useLanguage();
   const [expandedFaq, setExpandedFaq] = useState(null);
   const [copied, setCopied] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -22,53 +24,53 @@ const HelpCenter = () => {
   const faqs = [
     {
       id: 1,
-      question: "How do I log a new trip?",
-      answer: "Go to the 'Log New Trip' page from your dashboard. Fill in the departure and arrival date/time, start and end location, distance (km), and odometer readings. You can click anywhere on the map to automatically fill in the location fields — it will extract the city and street name. Once all fields are filled in, click 'Log Trip' to save."
+      question: t('help.faq.1.q'),
+      answer: t('help.faq.1.a')
     },
     {
       id: 2,
-      question: "How do I use the map to select trip locations?",
-      answer: "On the 'Log New Trip' page, there is an interactive map. First select which field you want to fill (Departure or Arrival) by clicking the corresponding input field — it will be highlighted in blue. Then click on the desired location on the map. The city and street name will be automatically filled into the selected field."
+      question: t('help.faq.2.q'),
+      answer: t('help.faq.2.a')
     },
     {
       id: 3,
-      question: "How do I add a fuel log entry?",
-      answer: "Navigate to 'Fuel Logs' and click 'Add New Fuel Log'. Fill in the date, fuel station name, number of liters refueled, and the total cost. The system will automatically associate the entry with your assigned vehicle. After saving, the entry will appear in your fuel log table and will be included in the consumption statistics."
+      question: t('help.faq.3.q'),
+      answer: t('help.faq.3.a')
     },
     {
       id: 4,
-      question: "How do I submit a service request?",
-      answer: "Go to 'Service Requests' and click 'Add New Request'. Enter a title describing the issue, select a scheduled date, and provide any additional notes or estimated cost. The request will be sent to the administrator for review. You can track the status of your request (Requested → Approved / Rejected → Closed) in the Service Requests list."
+      question: t('help.faq.4.q'),
+      answer: t('help.faq.4.a')
     },
     {
       id: 5,
-      question: "What do the service request statuses mean?",
-      answer: "REQUESTED: the request has been submitted and is awaiting admin review. APPROVED: the admin has approved the request and maintenance is being scheduled. DRIVER_COST: the driver has reported the actual cost. CLOSED: the service has been completed and the case is closed. REJECTED: the admin has rejected the request."
+      question: t('help.faq.5.q'),
+      answer: t('help.faq.5.a')
     },
     {
       id: 6,
-      question: "Where can I see my assigned vehicle?",
-      answer: "Your assigned vehicle information is displayed on the Driver Dashboard — look for the 'My Vehicle' card which shows the license plate, make/model, and current mileage. You can also see your vehicle's license plate when logging trips and fuel entries."
+      question: t('help.faq.6.q'),
+      answer: t('help.faq.6.a')
     },
     {
       id: 7,
-      question: "How is fuel consumption calculated?",
-      answer: "The average consumption (L/100km) on the Fuel Logs page is calculated automatically from your recorded trips and fuel log entries. It divides the total liters refueled by the total kilometers driven across all your trips and fuel logs. The more data you enter, the more accurate this figure becomes."
+      question: t('help.faq.7.q'),
+      answer: t('help.faq.7.a')
     },
     {
       id: 8,
-      question: "How do I update my profile or profile picture?",
-      answer: "Go to 'Profile Settings' from the sidebar. You can update your phone number and driver's license details here. To change your profile picture, click on the avatar image at the top of the settings page and upload a new photo. Changes are saved immediately after clicking 'Save Changes'."
+      question: t('help.faq.8.q'),
+      answer: t('help.faq.8.a')
     },
     {
       id: 9,
-      question: "How do I reset my password?",
-      answer: "On the login page, click 'Forgot password?'. Enter your registered email address and you will receive a password reset link. Click the link in the email and set a new password. If you do not receive the email, check your spam/junk folder or contact support at fleetflow.info@gmail.com."
+      question: t('help.faq.9.q'),
+      answer: t('help.faq.9.a')
     },
     {
       id: 10,
-      question: "How do notifications work?",
-      answer: "The bell icon in the sidebar shows the number of unread notifications. Notifications are sent for events such as an admin approving or rejecting your service request, or other system messages. Click the bell icon to open the Notifications page and view all your messages."
+      question: t('help.faq.10.q'),
+      answer: t('help.faq.10.a')
     }
   ];
 
@@ -94,8 +96,8 @@ const HelpCenter = () => {
                     <h1 className="logo-title">FleetFlow</h1>
                   </div>
                 </Link>
-                <h2 className="h3 fw-bold mb-2 mt-4">Help Center</h2>
-                <p className="text-muted">Find answers to common questions and get support</p>
+                <h2 className="h3 fw-bold mb-2 mt-4">{t('help.title')}</h2>
+                <p className="text-muted">{t('help.subtitle')}</p>
               </div>
 
             {/* Quick Links */}
@@ -114,14 +116,14 @@ const HelpCenter = () => {
                     <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </div>
-                <h4 className="h6 fw-semibold mb-2">Email Support</h4>
-                <p className="small text-muted mb-0">{copied ? 'Email copied to clipboard!' : 'fleetflow.info@gmail.com'}</p>
+                <h4 className="h6 fw-semibold mb-2">{t('help.email.title')}</h4>
+                <p className="small text-muted mb-0">{copied ? t('help.email.copied') : t('help.email.text')}</p>
               </Card>
             </div>
 
             {/* FAQ Section */}
             <div className="mb-5">
-              <h3 className="h5 fw-bold mb-4">Frequently Asked Questions</h3>
+              <h3 className="h5 fw-bold mb-4">{t('help.faq.heading')}</h3>
               <div className="d-flex flex-column gap-3">
                 {faqs.map((faq) => (
                   <Card 
@@ -165,19 +167,19 @@ const HelpCenter = () => {
             {/* Contact Section */}
             <Card className="bg-light border-0 mb-4">
               <Card.Body className="p-4 text-center">
-                <h3 className="h6 fw-bold mb-3">Still need help?</h3>
+                <h3 className="h6 fw-bold mb-3">{t('help.contact.title')}</h3>
                 <p className="text-muted small mb-4">
-                  Our support team is available Monday to Friday, 9:00 AM - 6:00 PM (CET)
+                  {t('help.contact.subtitle')}
                 </p>
                 <div className="d-flex flex-column flex-md-row justify-content-center gap-4">
                   <div className="text-muted small">
-                    <strong className="text-dark">Email:</strong>{' '}
+                    <strong className="text-dark">{t('help.contact.email')}:</strong>{' '}
                     <a href="mailto:fleetflow.info@gmail.com" className="text-primary text-decoration-none">
                       fleetflow.info@gmail.com
                     </a>
                   </div>
                   <div className="text-muted small">
-                    <strong className="text-dark">Phone:</strong>{' '}
+                    <strong className="text-dark">{t('help.contact.phone')}:</strong>{' '}
                     <a href="tel:+3612345678" className="text-primary text-decoration-none">
                       +36 1 234 5678
                     </a>

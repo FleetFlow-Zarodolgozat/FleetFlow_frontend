@@ -509,6 +509,10 @@
   object-fit: cover;
 }
 
+.profile-info {
+  text-align: center;
+}
+
 .profile-info h4 {
   font-size: 18px;
   font-weight: 700;

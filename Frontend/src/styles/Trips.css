@@ -136,8 +136,15 @@
 .trips-table {
   width: 100%;
   border-collapse: collapse;
-  table-layout: fixed;
+  table-layout: auto;
 }
+
+/* Explicit column widths to prevent Actions column from getting too much space */
+.trips-table th.trip-header:nth-child(1) { width: 130px; }  /* DATE */
+.trips-table th.trip-header:nth-child(2) { width: 120px; }  /* VEHICLE */
+.trips-table th.trip-header:nth-child(3) { }                /* ROUTE — fills remaining */
+.trips-table th.trip-header:nth-child(4) { width: 120px; }  /* DISTANCE */
+.trips-table th.trip-header:nth-child(5) { width: 64px; }   /* ACTIONS */
 
 .trips-table thead {
   background: #f8fafc;
@@ -281,7 +288,8 @@
 /* Actions Cell */
 .actions-cell {
   text-align: center;
-  width: 50px;
+  width: 64px;
+  white-space: nowrap;
 }
 
 .delete-btn {

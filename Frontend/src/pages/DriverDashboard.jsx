@@ -4,24 +4,44 @@ import Sidebar from '../components/Sidebar';
 import { Card, Form, Button, Container, Row, Col, Badge } from 'react-bootstrap';
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
-import { hu } from 'date-fns/locale';
+import { hu, de, enUS } from 'date-fns/locale';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { authService } from '../services/authService';
+import { useLanguage } from '../contexts/LanguageContext';
 import api from '../services/api';
 import '../styles/DriverDashboard.css';
 import Footer from '../components/Footer';
 
-const localizer = dateFnsLocalizer({
-  format,
-  parse,
-  startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 1 }),
-  getDay,
-  locales: { hu },
-});
-
 const DriverDashboard = () => {
   const navigate = useNavigate();
   const user = authService.getCurrentUser();
+  const { t, language } = useLanguage();
+  
+  // Create localizer based on current language
+  const localeMap = { hu, de, en: enUS };
+  const currentLocale = localeMap[language] || enUS;
+  const localizer = dateFnsLocalizer({
+    format,
+    parse,
+    startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 1 }),
+    getDay,
+    locales: { hu, de, en: enUS },
+    formats: {
+      dateFormat: 'dd',
+      dayFormat: 'EEE dd',
+      weekdayFormat: 'EEE',
+      monthHeaderFormat: 'MMMM yyyy',
+      dayHeaderFormat: 'EEE MMM dd',
+      dayRangeHeaderFormat: ({ start, end }) => `${format(start, 'MMM dd', { locale: currentLocale })} – ${format(end, 'MMM dd', { locale: currentLocale })}`,
+      agendaHeaderFormat: ({ start, end }) => `${format(start, 'MMM dd', { locale: currentLocale })} – ${format(end, 'MMM dd', { locale: currentLocale })}`,
+      agendaDateFormat: 'ddd MMM dd',
+      agendaTimeFormat: 'p',
+      agendaTimeRangeFormat: ({ start, end }) => `${format(start, 'p', { locale: currentLocale })} – ${format(end, 'p', { locale: currentLocale })}`,
+      eventTimeRangeFormat: ({ start, end }) => `${format(start, 'p', { locale: currentLocale })} – ${format(end, 'p', { locale: currentLocale })}`,
+      eventTimeFormat: 'p',
+    },
+  });
+  
   const [currentDate] = useState(new Date());
   const [calendarDate, setCalendarDate] = useState(new Date());
   const [calendarView, setCalendarView] = useState('month');
@@ -445,8 +465,8 @@ const DriverDashboard = () => {
               <Row className="g-3 align-items-start">
                 <Col lg={12} xl={6} className="mb-3 mb-xl-0">
                   <div className="header-title">
-                    <h1>Driver Dashboard</h1>
-                    <p>Welcome back, {getDisplayName()}. Here is your daily summary.</p>
+                    <h1>{t('dashboard.title')}</h1>
+                    <p>{t('dashboard.welcome', { name: getDisplayName() })}</p>
                   </div>
                 </Col>
                 <Col lg={12} xl={6}>
@@ -458,7 +478,7 @@ const DriverDashboard = () => {
                         <line x1="16" y1="13" x2="8" y2="13" strokeLinecap="round" strokeLinejoin="round"/>
                         <line x1="16" y1="17" x2="8" y2="17" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
-                      New Trip
+                      {t('dashboard.btn.newTrip')}
                     </Button>
                     <Button className="new-fuel-btn" onClick={() => navigate('/add-fuel-log')}>
                       <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -466,7 +486,7 @@ const DriverDashboard = () => {
                         <path d="M17 13h2a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2" strokeLinecap="round" strokeLinejoin="round"/>
                         <path d="M7 22V12h6v10" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
-                      New Fuel Log
+                      {t('dashboard.btn.newFuelLog')}
                     </Button>
                     <div className="date-display">
                       <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -475,7 +495,7 @@ const DriverDashboard = () => {
                         <line x1="8" y1="2" x2="8" y2="6" strokeLinecap="round" strokeLinejoin="round"/>
                         <line x1="3" y1="10" x2="21" y2="10" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
-                      {currentDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                      {currentDate.toLocaleDateString(t('dashboard.locale'), { month: 'long', day: 'numeric', year: 'numeric' })}
                     </div>
                   </div>
                 </Col>
@@ -489,37 +509,37 @@ const DriverDashboard = () => {
           const allCards = [
             {
               icon: 'trips',
-              label: 'Total Trips',
+              label: t('dashboard.stat.totalTrips'),
               value: statistics.totalTrips,
               svg: (<svg width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" strokeLinecap="round" strokeLinejoin="round"/><polygon points="16.24,7.76 14.12,14.12 7.76,16.24 9.88,9.88 16.24,7.76" strokeLinecap="round" strokeLinejoin="round"/></svg>)
             },
             {
               icon: 'distance',
-              label: 'Total Distance',
+              label: t('dashboard.stat.totalDistance'),
               value: `${statistics.totalDistance.toLocaleString()} km`,
               svg: (<svg width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 20L8 4" strokeLinecap="round" strokeLinejoin="round"/><path d="M21 20L16 4" strokeLinecap="round" strokeLinejoin="round"/><line x1="10" y1="16" x2="14" y2="16" strokeLinecap="round" strokeLinejoin="round"/><line x1="10.5" y1="12" x2="13.5" y2="12" strokeLinecap="round" strokeLinejoin="round"/><line x1="11" y1="8" x2="13" y2="8" strokeLinecap="round" strokeLinejoin="round"/></svg>)
             },
             {
               icon: 'fuel',
-              label: 'Total Fuel Logs',
+              label: t('dashboard.stat.totalFuelLogs'),
               value: statistics.totalFuels,
               svg: (<svg width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 22V8l4-4h6l4 4v14H3z" strokeLinecap="round" strokeLinejoin="round"/><path d="M17 13h2a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2" strokeLinecap="round" strokeLinejoin="round"/><path d="M7 22V12h6v10" strokeLinecap="round" strokeLinejoin="round"/></svg>)
             },
             {
               icon: 'fuel-cost',
-              label: 'Total Fuel Cost',
+              label: t('dashboard.stat.totalFuelCost'),
               value: `${statistics.totalFuelCost.toLocaleString()} Ft`,
               svg: (<svg width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23" strokeLinecap="round" strokeLinejoin="round"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" strokeLinecap="round" strokeLinejoin="round"/></svg>)
             },
             {
               icon: 'services',
-              label: 'Service Requests',
+              label: t('dashboard.stat.serviceRequests'),
               value: statistics.totalServices,
               svg: (<svg width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" strokeLinecap="round" strokeLinejoin="round"/></svg>)
             },
             {
               icon: 'service-cost',
-              label: 'Total Service Cost',
+              label: t('dashboard.stat.totalServiceCost'),
               value: `${statistics.totalServicesCost.toLocaleString()} Ft`,
               svg: (<svg width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23" strokeLinecap="round" strokeLinejoin="round"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" strokeLinecap="round" strokeLinejoin="round"/></svg>)
             },
@@ -587,23 +607,23 @@ const DriverDashboard = () => {
             {/* Quick Add Event */}
             <Card className="event-card h-100 d-flex flex-column">
               <Card.Header className="bg-light" style={{ flexShrink: 0 }}>
-                <h3 className="mb-0">Quick Add Event</h3>
+                <h3 className="mb-0">{t('dashboard.event.title')}</h3>
               </Card.Header>
               <Card.Body className="d-flex flex-column" style={{ flex: 1, overflow: 'hidden' }}>
                 <Form onSubmit={handleSaveEvent} className="d-flex flex-column h-100">
                   <Form.Group className="mb-3" style={{ flexShrink: 0 }}>
-                    <Form.Label className="small text-muted fw-semibold">EVENT TITLE</Form.Label>
+                    <Form.Label className="small text-muted fw-semibold">{t('dashboard.event.label.title')}</Form.Label>
                     <Form.Control
                       type="text"
                       name="title"
-                      placeholder="e.g. Service Checkup"
+                      placeholder={t('dashboard.event.placeholder.title')}
                       value={eventForm.title}
                       onChange={handleEventChange}
                       required
                     />
                   </Form.Group>
                   <Form.Group className="mb-3" style={{ flexShrink: 0 }}>
-                    <Form.Label className="small text-muted fw-semibold">DATE</Form.Label>
+                    <Form.Label className="small text-muted fw-semibold">{t('dashboard.event.label.date')}</Form.Label>
                     <Form.Control
                       type="date"
                       name="date"
@@ -615,7 +635,7 @@ const DriverDashboard = () => {
                   <Row className="g-2 mb-3" style={{ flexShrink: 0 }}>
                     <Col xs={6}>
                       <Form.Group>
-                        <Form.Label className="small text-muted fw-semibold">START</Form.Label>
+                        <Form.Label className="small text-muted fw-semibold">{t('dashboard.event.label.start')}</Form.Label>
                         <Form.Control
                           type="time"
                           name="startTime"
@@ -627,7 +647,7 @@ const DriverDashboard = () => {
                     </Col>
                     <Col xs={6}>
                       <Form.Group>
-                        <Form.Label className="small text-muted fw-semibold">END</Form.Label>
+                        <Form.Label className="small text-muted fw-semibold">{t('dashboard.event.label.end')}</Form.Label>
                         <Form.Control
                           type="time"
                           name="endTime"
@@ -638,11 +658,11 @@ const DriverDashboard = () => {
                     </Col>
                   </Row>
                   <Form.Group className="mb-3 d-flex flex-column" style={{ flex: 1, minHeight: 0 }}>
-                    <Form.Label className="small text-muted fw-semibold" style={{ flexShrink: 0 }}>DESCRIPTION</Form.Label>
+                    <Form.Label className="small text-muted fw-semibold" style={{ flexShrink: 0 }}>{t('dashboard.event.label.description')}</Form.Label>
                     <Form.Control
                       as="textarea"
                       name="description"
-                      placeholder="Additional notes..."
+                      placeholder={t('dashboard.event.placeholder.description')}
                       value={eventForm.description}
                       onChange={handleEventChange}
                       style={{ resize: 'none', flex: 1, minHeight: 0 }}
@@ -654,7 +674,7 @@ const DriverDashboard = () => {
                       <polyline points="17,21 17,13 7,13 7,21" strokeLinecap="round" strokeLinejoin="round"/>
                       <polyline points="7,3 7,8 15,8" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
-                    {eventSaving ? 'Saving...' : 'Save Event'}
+                    {eventSaving ? t('dashboard.event.btn.saving') : t('dashboard.event.btn.save')}
                   </Button>
                   {eventFeedback.message && (
                     <div className={`mt-2 alert alert-${eventFeedback.type} py-2 px-3 mb-0`} role="alert">
@@ -670,12 +690,13 @@ const DriverDashboard = () => {
             {/* Schedule Calendar */}
             <Card className="schedule-card h-100">
               <Card.Header className="bg-light">
-                <h3 className="mb-0 text-center">Schedule</h3>
+                <h3 className="mb-0 text-center">{t('dashboard.schedule.title')}</h3>
               </Card.Header>
               <Card.Body className="rbc-wrapper" style={{ minHeight: 460 }}>
                 {!selectedCalendarEvent ? (
                   <Calendar
                     localizer={localizer}
+                    culture={language}
                     events={scheduleEvents}
                     eventPropGetter={calendarEventStyleGetter}
                     onSelectEvent={(event) => {
@@ -689,14 +710,22 @@ const DriverDashboard = () => {
                     views={['month', 'week', 'day']}
                     style={{ height: 440 }}
                     toolbar={true}
+                    messages={{
+                      today: t('adminDash.cal.today'),
+                      previous: t('adminDash.cal.back'),
+                      next: t('adminDash.cal.next'),
+                      month: t('adminDash.cal.month'),
+                      week: t('adminDash.cal.week'),
+                      day: t('adminDash.cal.day'),
+                    }}
                     popup
                   />
                 ) : (
                   <div className="h-100 d-flex flex-column">
                     <div className="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
                       <div>
-                        <h4 className="mb-1 fw-bold">Event Details</h4>
-                        <small className="text-muted">Review, then delete if needed.</small>
+                        <h4 className="mb-1 fw-bold">{t('dashboard.event.detail.title')}</h4>
+                        <small className="text-muted">{t('dashboard.event.detail.subtitle')}</small>
                       </div>
                       <Button
                         type="button"
@@ -718,7 +747,7 @@ const DriverDashboard = () => {
                       <Card.Body className="p-3">
                         <div className="d-flex justify-content-between align-items-start mb-3">
                           <div>
-                            <small className="text-muted d-block">TITLE</small>
+                            <small className="text-muted d-block">{t('dashboard.event.detail.label.title')}</small>
                             <h5 className="mb-0 fw-semibold">{selectedCalendarEvent.title || 'N/A'}</h5>
                           </div>
                           <Badge bg="dark" pill>{selectedCalendarEvent.eventType || 'DEFAULT'}</Badge>
@@ -727,26 +756,26 @@ const DriverDashboard = () => {
                         <Row className="g-2">
                           <Col md={6} xs={12}>
                             <div className="p-2 bg-white rounded border h-100">
-                              <small className="text-muted d-block">START</small>
+                              <small className="text-muted d-block">{t('dashboard.event.detail.label.start')}</small>
                               <span className="fw-medium">{formatEventDateTime(selectedCalendarEvent.start)}</span>
                             </div>
                           </Col>
                           <Col md={6} xs={12}>
                             <div className="p-2 bg-white rounded border h-100">
-                              <small className="text-muted d-block">END</small>
+                              <small className="text-muted d-block">{t('dashboard.event.detail.label.end')}</small>
                               <span className="fw-medium">{formatEventDateTime(selectedCalendarEvent.end)}</span>
                             </div>
                           </Col>
                           <Col xs={12}>
                             <div className="p-2 bg-white rounded border">
-                              <small className="text-muted d-block">DESCRIPTION</small>
-                              <span>{selectedCalendarEvent.description || 'No description'}</span>
+                              <small className="text-muted d-block">{t('dashboard.event.detail.label.description')}</small>
+                              <span>{selectedCalendarEvent.description || t('dashboard.event.detail.noDescription')}</span>
                             </div>
                           </Col>
                           {selectedCalendarEvent.relatedServiceRequestId && (
                             <Col xs={12}>
                               <div className="p-2 bg-white rounded border">
-                                <small className="text-muted d-block">RELATED SERVICE REQUEST</small>
+                                <small className="text-muted d-block">{t('dashboard.event.detail.label.relatedSR')}</small>
                                 <span className="fw-medium">#{selectedCalendarEvent.relatedServiceRequestId}</span>
                               </div>
                             </Col>
@@ -763,7 +792,7 @@ const DriverDashboard = () => {
 
                     {String(selectedCalendarEvent?.eventType || '').toUpperCase() === 'SERVICE_APPOINTMENT' && profile.role !== 'ADMIN' && (
                       <div className="alert alert-warning py-2 px-3" role="alert">
-                        This event type can only be deleted by admin.
+                        {t('dashboard.event.detail.adminOnly')}
                       </div>
                     )}
 
@@ -777,7 +806,7 @@ const DriverDashboard = () => {
                           (String(selectedCalendarEvent?.eventType || '').toUpperCase() === 'SERVICE_APPOINTMENT' && profile.role !== 'ADMIN')
                         }
                       >
-                        {eventDeleting ? 'Deleting...' : 'Delete Event'}
+                        {eventDeleting ? t('dashboard.event.btn.deleting') : t('dashboard.event.btn.delete')}
                       </Button>
                     </div>
                   </div>
@@ -794,13 +823,13 @@ const DriverDashboard = () => {
             <Card className="info-card h-100">
               <Card.Header className="bg-light">
                 <div className="d-flex justify-content-between align-items-center">
-                  <h3 className="mb-0">Personal Information</h3>
+                  <h3 className="mb-0">{t('dashboard.personal.title')}</h3>
                   <Button variant="outline-primary" size="sm" onClick={() => navigate('/profile-settings', { state: { edit: true, scrollToPersonal: true } })}>
                     <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="me-1">
                       <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" strokeLinecap="round" strokeLinejoin="round"/>
                       <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
-                    Edit
+                    {t('dashboard.personal.btn.edit')}
                   </Button>
                 </div>
               </Card.Header>
@@ -830,7 +859,7 @@ const DriverDashboard = () => {
                   </svg>
                 </div>
                 <div className="info-content d-flex flex-column justify-content-center w-100 text-center">
-                  <span className="info-label">EMAIL</span>
+                  <span className="info-label">{t('dashboard.info.email')}</span>
                   <span className="info-value">{profile.email}</span>
                 </div>
               </div>
@@ -841,7 +870,7 @@ const DriverDashboard = () => {
                   </svg>
                 </div>
                 <div className="info-content d-flex flex-column justify-content-center w-100 text-center">
-                  <span className="info-label">PHONE</span>
+                  <span className="info-label">{t('dashboard.info.phone')}</span>
                   <span className="info-value">{profile.phone || 'N/A'}</span>
                 </div>
               </div>
@@ -857,7 +886,7 @@ const DriverDashboard = () => {
                   </svg>
                 </div>
                 <div className="info-content d-flex flex-column justify-content-center w-100 text-center">
-                  <span className="info-label">LICENSE NUMBER</span>
+                  <span className="info-label">{t('dashboard.info.licenseNumber')}</span>
                   <span className="info-value">{profile.licenseNumber || 'N/A'}</span>
                 </div>
               </div>
@@ -871,7 +900,7 @@ const DriverDashboard = () => {
                   </svg>
                 </div>
                 <div className="info-content d-flex flex-column justify-content-center w-100 text-center">
-                  <span className="info-label">LICENSE EXPIRES</span>
+                  <span className="info-label">{t('dashboard.info.licenseExpires')}</span>
                   <span className="info-value">{formatLicenseExpiry()}</span>
                 </div>
               </div>
@@ -884,13 +913,13 @@ const DriverDashboard = () => {
             {/* Assigned Vehicle */}
             <Card className="vehicle-card h-100">
               <Card.Header className="bg-light">
-                <h3 className="mb-0">Assigned Vehicle</h3>
+                <h3 className="mb-0">{t('dashboard.vehicle.title')}</h3>
               </Card.Header>
               <Card.Body>
                 {vehicleLoading ? (
-                  <div className="text-center text-muted py-4">Loading...</div>
+                  <div className="text-center text-muted py-4">{t('dashboard.vehicle.loading')}</div>
                 ) : !vehicle ? (
-                  <div className="text-center text-muted py-4">No vehicle assigned</div>
+                  <div className="text-center text-muted py-4">{t('dashboard.vehicle.none')}</div>
                 ) : (
                   <div className="vehicle-info">
                     <div className="vehicle-header mb-3">
@@ -921,7 +950,7 @@ const DriverDashboard = () => {
                             </svg>
                           </div>
                           <div className="info-content d-flex flex-column justify-content-center w-100 text-center">
-                            <span className="info-label">MILEAGE</span>
+                            <span className="info-label">{t('dashboard.vehicle.mileage')}</span>
                             <span className="info-value">{vehicle.currentMileageKm.toLocaleString()} km</span>
                           </div>
                         </div>
@@ -935,7 +964,7 @@ const DriverDashboard = () => {
                             </svg>
                           </div>
                           <div className="info-content d-flex flex-column justify-content-center w-100 text-center">
-                            <span className="info-label">VIN</span>
+                            <span className="info-label">{t('dashboard.vehicle.vin')}</span>
                             <span className="info-value" style={{ fontSize: '0.75rem', wordBreak: 'break-all' }}>{vehicle.vin || 'N/A'}</span>
                           </div>
                         </div>

@@ -6,6 +6,7 @@ import api from '../services/api';
 import Sidebar from '../components/Sidebar';
 import '../styles/DriverDashboard.css';
 import '../styles/ServiceRequests.css';
+import { useLanguage } from '../contexts/LanguageContext';
 import Footer from '../components/Footer';
 
 const ServiceRequests = () => {
@@ -40,6 +41,7 @@ const ServiceRequests = () => {
     };
 
     const navigate = useNavigate();
+    const { t } = useLanguage();
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [serviceRequests, setServiceRequests] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -120,15 +122,15 @@ const ServiceRequests = () => {
                     <div className="sr-header-section">
                         <div className="sr-header-content">
                             <div>
-                                <h1 className="sr-page-title">Service Requests</h1>
-                                <p className="sr-page-subtitle">Manage and track your vehicle service requests</p>
+                                <h1 className="sr-page-title">{t('sr.title')}</h1>
+                                <p className="sr-page-subtitle">{t('sr.subtitle')}</p>
                             </div>
                             <Button className="new-request-btn d-flex align-items-center gap-2" onClick={() => navigate('/add-service-request')}>
                                 <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                                     <circle cx="12" cy="12" r="10" />
                                     <path d="M12 8v8M8 12h8" />
                                 </svg>
-                                <span>Add New Request</span>
+                                <span>{t('sr.btn.addNew')}</span>
                             </Button>
                         </div>
                     </div>
@@ -146,7 +148,7 @@ const ServiceRequests = () => {
                                 <span className="sr-stat-value">
                                     {serviceRequests.filter(r => getStatusBadgeVariant(r.status) === 'pending').length}
                                 </span>
-                                <span className="sr-stat-label">Pending</span>
+                                <span className="sr-stat-label">{t('sr.stat.pending')}</span>
                             </div>
                         </Card>
                         <Card className="sr-stat-card">
@@ -159,7 +161,7 @@ const ServiceRequests = () => {
                                 <span className="sr-stat-value">
                                     {serviceRequests.filter(r => getStatusBadgeVariant(r.status) === 'in-progress').length}
                                 </span>
-                                <span className="sr-stat-label">In Progress</span>
+                                <span className="sr-stat-label">{t('sr.stat.inProgress')}</span>
                             </div>
                         </Card>
                         <Card className="sr-stat-card">
@@ -173,7 +175,7 @@ const ServiceRequests = () => {
                                 <span className="sr-stat-value">
                                     {serviceRequests.filter(r => getStatusBadgeVariant(r.status) === 'closed').length}
                                 </span>
-                                <span className="sr-stat-label">Closed</span>
+                                <span className="sr-stat-label">{t('sr.stat.closed')}</span>
                             </div>
                         </Card>
                         <Card className="sr-stat-card">
@@ -188,7 +190,7 @@ const ServiceRequests = () => {
                                 <span className="sr-stat-value">
                                     {serviceRequests.filter(r => getStatusBadgeVariant(r.status) === 'rejected').length}
                                 </span>
-                                <span className="sr-stat-label">Rejected</span>
+                                <span className="sr-stat-label">{t('sr.stat.rejected')}</span>
                             </div>
                         </Card>
                     </div>
@@ -196,14 +198,14 @@ const ServiceRequests = () => {
                     {/* Service Requests Table */}
                     <Card className="sr-table-card">
                         <Card.Header className="sr-table-header">
-                            <span className="sr-table-title">My Service Requests</span>
-                            <span className="sr-total-badge">Total: {pagination.totalCount}</span>
+                            <span className="sr-table-title">{t('sr.card.title')}</span>
+                            <span className="sr-total-badge">{t('sr.total')}: {pagination.totalCount}</span>
                         </Card.Header>
                         <Card.Body className="p-0">
                             {loading ? (
                                 <div className="sr-loading">
                                     <Spinner animation="border" role="status" />
-                                    <span>Loading service requests...</span>
+                                    <span>{t('sr.loading')}</span>
                                 </div>
                             ) : error ? (
                                 <Alert variant="danger" className="m-3">{error}</Alert>
@@ -212,9 +214,9 @@ const ServiceRequests = () => {
                                     <svg width="64" height="64" fill="none" stroke="#cbd5e1" strokeWidth="1.5" viewBox="0 0 24 24">
                                         <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" strokeLinecap="round" strokeLinejoin="round" />
                                     </svg>
-                                    <p>No service requests found</p>
+                                    <p>{t('sr.empty')}</p>
                                     <Button variant="outline-primary" onClick={() => navigate('/add-service-request')}>
-                                        Create your first request
+                                        {t('sr.addFirst')}
                                     </Button>
                                 </div>
                             ) : (
@@ -225,12 +227,12 @@ const ServiceRequests = () => {
                                             <table className="sr-table">
                                                 <thead>
                                                     <tr>
-                                                        <th className="sr-table-col-title">Title</th>
-                                                        <th className="sr-table-col-vehicle">Vehicle</th>
-                                                        <th className="sr-table-col-scheduled">Scheduled</th>
-                                                        <th className="sr-table-col-cost">Driver Cost</th>
-                                                        <th className="sr-table-col-status">Status</th>
-                                                        <th className="sr-table-col-actions">Actions</th>
+                                                        <th className="sr-table-col-title">{t('sr.th.title')}</th>
+                                                        <th className="sr-table-col-vehicle">{t('sr.th.vehicle')}</th>
+                                                        <th className="sr-table-col-scheduled">{t('sr.th.scheduled')}</th>
+                                                        <th className="sr-table-col-cost">{t('sr.th.driverCost')}</th>
+                                                        <th className="sr-table-col-status">{t('sr.th.status')}</th>
+                                                        <th className="sr-table-col-actions">{t('sr.th.actions')}</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -309,16 +311,16 @@ const ServiceRequests = () => {
                                                     <div className="sr-mobile-card-body">
                                                         {request.licensePlate && (
                                                             <div className="sr-mobile-row">
-                                                                <span className="sr-mobile-label">Vehicle</span>
+                                                                <span className="sr-mobile-label">{t('sr.mobile.vehicle')}</span>
                                                                 <span className="sr-mobile-value">{request.licensePlate}</span>
                                                             </div>
                                                         )}
                                                         <div className="sr-mobile-row">
-                                                            <span className="sr-mobile-label">Scheduled</span>
+                                                            <span className="sr-mobile-label">{t('sr.mobile.scheduled')}</span>
                                                             <span className="sr-mobile-value">{formatDateTimeFull(request.scheduledStart)}</span>
                                                         </div>
                                                         <div className="sr-mobile-row">
-                                                            <span className="sr-mobile-label">Driver Cost</span>
+                                                            <span className="sr-mobile-label">{t('sr.mobile.driverCost')}</span>
                                                             <span className="sr-mobile-value sr-mobile-cost">{request.driverReportCost || request.driverReportCost === 0 ? request.driverReportCost : '0'} Ft</span>
                                                         </div>
                                                     </div>
@@ -331,7 +333,7 @@ const ServiceRequests = () => {
                                                                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                                                                 <circle cx="12" cy="12" r="3" />
                                                             </svg>
-                                                            View Details
+                                                            {t('sr.mobile.viewDetails')}
                                                         </Button>
                                                         <Button
                                                             className="sr-mobile-delete-btn"
@@ -341,7 +343,7 @@ const ServiceRequests = () => {
                                                                 <polyline points="3,6 5,6 21,6" />
                                                                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                                                             </svg>
-                                                            Cancel
+                                                            {t('sr.mobile.cancel')}
                                                         </Button>
                                                     </div>
                                                 </Card.Body>
@@ -354,7 +356,7 @@ const ServiceRequests = () => {
                         {serviceRequests.length > 0 && (
                             <Card.Footer className="sr-pagination-footer">
                                 <span className="sr-page-info">
-                                    Page {pagination.page} of {totalPages}
+                                    {t('sr.page', { current: pagination.page, total: totalPages })}
                                 </span>
                                 <Pagination className="mb-0">
                                     <Pagination.Prev disabled={pagination.page <= 1 || loading} onClick={() => handlePageChange(pagination.page - 1)} />

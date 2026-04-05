@@ -22,14 +22,20 @@ export const authService = {
         };
         localStorage.setItem('user', JSON.stringify(user));
         
-        // Restore dark mode preference from previous session
-        const darkModePreference = localStorage.getItem('fleetflow_darkModePreference');
-        if (darkModePreference === 'true') {
-          localStorage.setItem('fleetflow_darkMode', 'true');
-          document.body.classList.add('dark-mode');
-        } else {
+        // Admin: always light mode. Driver: restore saved dark mode preference.
+        if (user.role?.toLowerCase() === 'admin') {
+          // Only clear the active state — do NOT touch fleetflow_darkModePreference (belongs to driver)
           localStorage.removeItem('fleetflow_darkMode');
           document.body.classList.remove('dark-mode');
+        } else {
+          const darkModePreference = localStorage.getItem('fleetflow_darkModePreference');
+          if (darkModePreference === 'true') {
+            localStorage.setItem('fleetflow_darkMode', 'true');
+            document.body.classList.add('dark-mode');
+          } else {
+            localStorage.removeItem('fleetflow_darkMode');
+            document.body.classList.remove('dark-mode');
+          }
         }
       }
       return response.data;
@@ -57,18 +63,12 @@ export const authService = {
 
   // Logout
   logout() {
-    // Save dark mode preference before clearing
-    const isDarkMode = localStorage.getItem('fleetflow_darkMode') === 'true';
-    if (isDarkMode) {
-      localStorage.setItem('fleetflow_darkModePreference', 'true');
-    } else {
-      localStorage.removeItem('fleetflow_darkModePreference');
-    }
-    
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('user');
+    // Clear the active dark mode state — preference is saved by Sidebar before calling this
     localStorage.removeItem('fleetflow_darkMode');
     document.body.classList.remove('dark-mode');
+
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
   },
 
   // Get current user

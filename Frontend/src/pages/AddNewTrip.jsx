@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Button, Card, Form, Container, Row, Col, Alert } from 'react-bootstrap';
 import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../contexts/LanguageContext';
 import Sidebar from '../components/Sidebar';
 import RouteMap from '../components/RouteMap';
 import '../styles/DriverDashboard.css';
@@ -10,6 +11,7 @@ import '../styles/AddNewTrip.css';
 import Footer from '../components/Footer';
 
 const AddNewTrip = () => {
+  const { t, language } = useLanguage();
   const [startDateTime, setStartDateTime] = useState('');
   const [endDateTime, setEndDateTime] = useState('');
   const [startLocation, setStartLocation] = useState('');
@@ -141,8 +143,8 @@ const AddNewTrip = () => {
         <div className="add-new-trip-page">
           {/* Breadcrumb + Header */}
           <div className="trip-header-section">
-            <h1 className="trip-page-title">Log New Trip</h1>
-            <p className="trip-page-subtitle">Please record your latest journey details accurately for fleet reporting.</p>
+            <h1 className="trip-page-title">{t('addTrip.title')}</h1>
+            <p className="trip-page-subtitle">{t('addTrip.subtitle')}</p>
           </div>
 
           {/* Main layout */}
@@ -152,20 +154,20 @@ const AddNewTrip = () => {
 
               <div className="trip-details-body">
                 {error && <Alert variant="danger">{error}</Alert>}
-                {success && <Alert variant="success">Saved successfully!</Alert>}
+                {success && <Alert variant="success">{t('addTrip.savedSuccess')}</Alert>}
 
                 <Form onSubmit={handleSubmit}>
                   {/* Locations Row */}
                   <Row className="g-3 mb-4">
                     <Col xs={12} md={12}>
                       <Form.Group>
-                        <Form.Label className="trip-form-label required">Departure Location</Form.Label>
+                        <Form.Label className="trip-form-label required">{t('addTrip.label.departure')}</Form.Label>
                         <Form.Control
                           type="text"
                           value={startLocation}
                           onChange={e => setStartLocation(e.target.value)}
                           onFocus={() => setActiveLocationField('start')}
-                          placeholder="e.g. Central Logistics Hub"
+                          placeholder={t('addTrip.placeholder.departure')}
                           className={`trip-location-input${activeLocationField === 'start' ? ' active-location-field' : ''}`}
                           required
                         />
@@ -173,13 +175,13 @@ const AddNewTrip = () => {
                     </Col>
                     <Col xs={12} md={12}>
                       <Form.Group>
-                        <Form.Label className="trip-form-label required">Arrival Location</Form.Label>
+                        <Form.Label className="trip-form-label required">{t('addTrip.label.arrival')}</Form.Label>
                         <Form.Control
                           type="text"
                           value={endLocation}
                           onChange={e => setEndLocation(e.target.value)}
                           onFocus={() => setActiveLocationField('end')}
-                          placeholder="e.g. North Terminal"
+                          placeholder={t('addTrip.placeholder.arrival')}
                           className={`trip-location-input${activeLocationField === 'end' ? ' active-location-field' : ''}`}
                           required
                         />
@@ -191,7 +193,7 @@ const AddNewTrip = () => {
                   <Row className="g-3 mb-4">
                     <Col xs={12} md={6}>
                       <Form.Group>
-                        <Form.Label className="trip-form-label">START</Form.Label>
+                        <Form.Label className="trip-form-label">{t('addTrip.label.start')}</Form.Label>
                         <Form.Control
                           type="datetime-local"
                           value={startDateTime}
@@ -203,7 +205,7 @@ const AddNewTrip = () => {
                     </Col>
                     <Col xs={12} md={6}>
                       <Form.Group>
-                        <Form.Label className="trip-form-label">END</Form.Label>
+                        <Form.Label className="trip-form-label">{t('addTrip.label.end')}</Form.Label>
                         <Form.Control
                           type="datetime-local"
                           value={endDateTime}
@@ -215,12 +217,12 @@ const AddNewTrip = () => {
                     </Col>
                     <Col xs={12} md={12}>
                       <Form.Group>
-                        <Form.Label className="trip-form-label">Distance (km)</Form.Label>
+                        <Form.Label className="trip-form-label">{t('addTrip.label.distance')}</Form.Label>
                         <Form.Control
                           type="number"
                           value={distanceKm}
                           onChange={e => setDistanceKm(e.target.value)}
-                          placeholder="Total distance"
+                          placeholder={t('addTrip.placeholder.distance')}
                           className="trip-odo-input"
                           min="0"
                           step="0.1"
@@ -230,28 +232,28 @@ const AddNewTrip = () => {
                     </Col>
                     <Col xs={12} md={12}>
                       <Form.Group>
-                        <Form.Label className="trip-form-label">Start Odo.</Form.Label>
+                        <Form.Label className="trip-form-label">{t('addTrip.label.startOdo')}</Form.Label>
                         <Form.Control
                           type="number"
                           value={startOdometerKm}
                           onChange={e => setStartOdometerKm(e.target.value)}
-                          placeholder="Start Odometer"
+                          placeholder={t('addTrip.placeholder.startOdo')}
                           className="trip-odo-input"
                           min="0"
                         />
                         <div className="previous-odometer" style={{fontSize: '0.95em', color: '#6b7280', marginTop: '2px'}}>
-                          Previous trip ended at: {Number(previousOdometer).toLocaleString()} km
+                          {t('addTrip.prevTripEnded', { km: Number(previousOdometer).toLocaleString() })}
                         </div>
                       </Form.Group>
                     </Col>
                     <Col xs={12} md={12}>
                       <Form.Group>
-                        <Form.Label className="trip-form-label">End Odo.</Form.Label>
+                        <Form.Label className="trip-form-label">{t('addTrip.label.endOdo')}</Form.Label>
                         <Form.Control
                           type="number"
                           value={endOdometerKm}
                           onChange={e => setEndOdometerKm(e.target.value)}
-                          placeholder="End Odometer"
+                          placeholder={t('addTrip.placeholder.endOdo')}
                           className="trip-odo-input"
                           min="0"
                         />
@@ -261,15 +263,25 @@ const AddNewTrip = () => {
 
                   {/* Notes */}
                   <Form.Group className="mb-4">
-                    <Form.Label className="trip-form-label">Trip Notes (Optional)</Form.Label>
+                    <Form.Label className="trip-form-label">{t('addTrip.label.notes')}</Form.Label>
                     <Form.Control
                       as="textarea"
                       rows={3}
                       value={notes}
                       onChange={e => setNotes(e.target.value)}
-                      placeholder="Add any incidents or specific details about the route..."
+                      placeholder={t('addTrip.placeholder.notes')}
                       className="trip-notes-textarea"
                     />
+                    {language !== 'en' && (
+                      <Form.Text style={{ color: '#b45309', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
+                        <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+                          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" strokeLinecap="round" strokeLinejoin="round"/>
+                          <line x1="12" y1="9" x2="12" y2="13" strokeLinecap="round"/>
+                          <line x1="12" y1="17" x2="12.01" y2="17" strokeLinecap="round"/>
+                        </svg>
+                        {t('common.writeInEnglish')}
+                      </Form.Text>
+                    )}
                   </Form.Group>
 
                   {/* Hidden fields for odometer - will be implemented later if needed */}
@@ -284,9 +296,9 @@ const AddNewTrip = () => {
                         <polyline points="17,21 17,13 7,13 7,21" strokeLinecap="round" strokeLinejoin="round"/>
                         <polyline points="7,3 7,8 15,8" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
-                      Submit Trip Log
+                      {t('addTrip.btn.submit')}
                     </Button>
-                    <Button className="btn-cancel-trip" type="button" onClick={() => navigate(-1)}>Cancel</Button>
+                    <Button className="btn-cancel-trip" type="button" onClick={() => navigate(-1)}>{t('addTrip.btn.cancel')}</Button>
                   </div>
                 </Form>
               </div>
@@ -303,9 +315,9 @@ const AddNewTrip = () => {
                       <line x1="8" y1="2" x2="8" y2="18" strokeLinecap="round" strokeLinejoin="round"/>
                       <line x1="16" y1="6" x2="16" y2="22" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
-                    <span>Route Preview</span>
+                    <span>{t('addTrip.routePreview')}</span>
                   </div>
-                  <span className="live-sync-badge">LIVE SYNC</span>
+                  <span className="live-sync-badge">{t('addTrip.liveSync')}</span>
                 </Card.Header>
                 <Card.Body className="route-preview-body">
                   <div className="map-placeholder">
@@ -323,7 +335,7 @@ const AddNewTrip = () => {
                       <line x1="12" y1="16" x2="12" y2="12" strokeLinecap="round" strokeLinejoin="round"/>
                       <line x1="12" y1="8" x2="12.01" y2="8" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
-                    <p>Distance calculation is based on the most fuel-efficient route. If you took a detour, please adjust the distance manually.</p>
+                    <p>{t('addTrip.distNote')}</p>
                   </div>
                 </Card.Body>
               </Card>
@@ -331,7 +343,7 @@ const AddNewTrip = () => {
               {/* Weekly Performance */}
               <Card className="weekly-performance-card">
                 <div className="weekly-performance-header">
-                  <span className="weekly-performance-title">Weekly Performance</span>
+                  <span className="weekly-performance-title">{t('addTrip.weeklyPerf')}</span>
                   <svg width="20" height="20" fill="none" stroke="#93c5fd" strokeWidth="2" viewBox="0 0 24 24">
                     <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" strokeLinecap="round" strokeLinejoin="round"/>
                     <polyline points="16 7 20 7 20 11" strokeLinecap="round" strokeLinejoin="round"/>
@@ -339,11 +351,11 @@ const AddNewTrip = () => {
                 </div>
                 <div className="weekly-stats">
                   <div className="stat-item">
-                    <span className="stat-label">TOTAL DISTANCE</span>
+                    <span className="stat-label">{t('addTrip.totalDistance')}</span>
                     <span className="stat-value">{weeklyStats.totalDistance.toLocaleString()} <small>km</small></span>
                   </div>
                   <div className="stat-item">
-                    <span className="stat-label">TRIPS LOGGED</span>
+                    <span className="stat-label">{t('addTrip.tripsLogged')}</span>
                     <span className="stat-value">{weeklyStats.tripsLogged}</span>
                   </div>
                 </div>

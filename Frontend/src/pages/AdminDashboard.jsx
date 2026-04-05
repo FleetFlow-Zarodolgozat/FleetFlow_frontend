@@ -5,23 +5,43 @@ import Sidebar from '../components/Sidebar';
 import { Card, Container, Row, Col, Badge, Button, Form } from 'react-bootstrap';
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
-import { hu } from 'date-fns/locale';
+import { hu, de, enUS } from 'date-fns/locale';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { authService } from '../services/authService';
+import { useLanguage } from '../contexts/LanguageContext';
 import api from '../services/api';
 import '../styles/AdminDashboard.css';
-
-const localizer = dateFnsLocalizer({
-  format,
-  parse,
-  startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 1 }),
-  getDay,
-  locales: { hu },
-});
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const user = authService.getCurrentUser();
+  const { t, language } = useLanguage();
+  
+  // Create localizer based on current language
+  const localeMap = { hu, de, en: enUS };
+  const currentLocale = localeMap[language] || enUS;
+  const localizer = dateFnsLocalizer({
+    format,
+    parse,
+    startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 1 }),
+    getDay,
+    locales: { hu, de, en: enUS },
+    formats: {
+      dateFormat: 'dd',
+      dayFormat: 'EEE dd',
+      weekdayFormat: 'EEE',
+      monthHeaderFormat: 'MMMM yyyy',
+      dayHeaderFormat: 'EEE MMM dd',
+      dayRangeHeaderFormat: ({ start, end }) => `${format(start, 'MMM dd', { locale: currentLocale })} – ${format(end, 'MMM dd', { locale: currentLocale })}`,
+      agendaHeaderFormat: ({ start, end }) => `${format(start, 'MMM dd', { locale: currentLocale })} – ${format(end, 'MMM dd', { locale: currentLocale })}`,
+      agendaDateFormat: 'ddd MMM dd',
+      agendaTimeFormat: 'p',
+      agendaTimeRangeFormat: ({ start, end }) => `${format(start, 'p', { locale: currentLocale })} – ${format(end, 'p', { locale: currentLocale })}`,
+      eventTimeRangeFormat: ({ start, end }) => `${format(start, 'p', { locale: currentLocale })} – ${format(end, 'p', { locale: currentLocale })}`,
+      eventTimeFormat: 'p',
+    },
+  });
+  
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 1200);
   const [selectedCalendarEvent, setSelectedCalendarEvent] = useState(null);
 
@@ -901,21 +921,21 @@ ${srCards}
                     className={`btn ${timeRange === 'today' ? 'active' : ''}`}
                     onClick={() => setTimeRange('today')}
                   >
-                    Today
+                    {t('adminDash.range.today')}
                   </button>
                   <button
                     type="button"
                     className={`btn ${timeRange === 'week' ? 'active' : ''}`}
                     onClick={() => setTimeRange('week')}
                   >
-                    Week
+                    {t('adminDash.range.week')}
                   </button>
                   <button
                     type="button"
                     className={`btn ${timeRange === 'month' ? 'active' : ''}`}
                     onClick={() => setTimeRange('month')}
                   >
-                    Month
+                    {t('adminDash.range.month')}
                   </button>
                 </div>
                 <Button className="export-report-btn" onClick={handleExportReport} disabled={exportLoading}>
@@ -1091,7 +1111,7 @@ ${srCards}
             <Card className="schedule-card h-100">
               <Card.Header className="bg-light">
                 <div className="d-flex justify-content-between align-items-center">
-                  <h3 className="mb-0">Schedule Overview</h3>
+                  <h3 className="mb-0">{t('adminDash.schedule.title')}</h3>
                   <div className="calendar-nav-arrows d-flex align-items-center gap-2">
                     <Button variant="outline-secondary" size="sm" onClick={() => {
                       const newDate = new Date(calendarDate);
@@ -1103,7 +1123,7 @@ ${srCards}
                       </svg>
                     </Button>
                     <span className="current-month">
-                      {calendarDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                      {calendarDate.toLocaleDateString(t('dashboard.locale'), { month: 'long', year: 'numeric' })}
                     </span>
                     <Button variant="outline-secondary" size="sm" onClick={() => {
                       const newDate = new Date(calendarDate);
@@ -1121,6 +1141,7 @@ ${srCards}
                 {!selectedCalendarEvent ? (
                   <Calendar
                     localizer={localizer}
+                    culture={language}
                     events={scheduleEvents}
                     eventPropGetter={calendarEventStyleGetter}
                     onSelectEvent={(event) => {
@@ -1133,6 +1154,14 @@ ${srCards}
                     views={['month', 'week', 'day']}
                     style={{ height: '100%' }}
                     toolbar={true}
+                    messages={{
+                      today: t('adminDash.cal.today'),
+                      previous: t('adminDash.cal.back'),
+                      next: t('adminDash.cal.next'),
+                      month: t('adminDash.cal.month'),
+                      week: t('adminDash.cal.week'),
+                      day: t('adminDash.cal.day'),
+                    }}
                     popup
                   />
                 ) : (

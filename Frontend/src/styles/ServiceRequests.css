@@ -294,12 +294,12 @@
   white-space: nowrap;
 }
 
-.sr-table-col-title { min-width: 200px; }
-.sr-table-col-vehicle { min-width: 120px; }
-.sr-table-col-status { min-width: 100px; }
-.sr-table-col-scheduled { min-width: 120px; }
-.sr-table-col-cost { min-width: 100px; }
-.sr-table-col-actions { min-width: 100px; text-align: center; }
+.sr-table-col-title { min-width: 180px; }
+.sr-table-col-vehicle { min-width: 100px; }
+.sr-table-col-status { min-width: 90px; }
+.sr-table-col-scheduled { min-width: 110px; }
+.sr-table-col-cost { min-width: 90px; }
+.sr-table-col-actions { width: 120px; min-width: 120px; max-width: 120px; text-align: center; }
 
 .sr-table tbody tr {
   border-bottom: 1px solid #f1f5f9;

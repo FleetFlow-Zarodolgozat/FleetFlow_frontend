@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button, Card, Container, Row, Col, Form, Alert, Spinner } from 'react-bootstrap';
 import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../contexts/LanguageContext';
 import Sidebar from '../components/Sidebar';
 import '../styles/DriverDashboard.css';
 import '../styles/AddFuelLog.css';
@@ -9,6 +10,7 @@ import '../styles/AddServiceRequest.css';
 import Footer from '../components/Footer';
 
 const AddServiceRequest = () => {
+  const { t, language } = useLanguage();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   // Removed file upload and other fields
@@ -87,8 +89,8 @@ const AddServiceRequest = () => {
 
           {/* Header */}
           <div className="add-fuel-header mb-4">
-            <h1 className="add-fuel-title">New Service Request</h1>
-            <p className="add-fuel-subtitle">Submit a new service request for your vehicle</p>
+            <h1 className="add-fuel-title">{t('addSR.title')}</h1>
+            <p className="add-fuel-subtitle">{t('addSR.subtitle')}</p>
           </div>
 
           <Row className="g-4 justify-content-center">
@@ -97,7 +99,7 @@ const AddServiceRequest = () => {
               <Card className="fuel-form-card border-0 shadow-sm">
                 <Card.Body className="p-4 p-md-5">
                   {error && <Alert variant="danger" className="mb-3">{error}</Alert>}
-                  {success && <Alert variant="success" className="mb-3">Saved successfully!</Alert>}
+                  {success && <Alert variant="success" className="mb-3">{t('addSR.savedSuccess')}</Alert>}
 
                   <Form onSubmit={handleSubmit}>
                     <Row className="g-4">
@@ -105,31 +107,51 @@ const AddServiceRequest = () => {
                       <Col xs={12}>
                         <Form.Group>
                           <Form.Label className="form-label">
-                            Title <span className="asr-required">*</span>
+                            {t('addSR.label.title')} <span className="asr-required">*</span>
                           </Form.Label>
                           <Form.Control
                             type="text"
                             value={title}
                             onChange={e => setTitle(e.target.value)}
-                            placeholder="e.g. Oil change needed"
+                            placeholder={t('addSR.placeholder.title')}
                             className="form-control-lg"
                             required
                           />
+                          {language !== 'en' && (
+                            <Form.Text style={{ color: '#b45309', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
+                              <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" strokeLinecap="round" strokeLinejoin="round"/>
+                                <line x1="12" y1="9" x2="12" y2="13" strokeLinecap="round"/>
+                                <line x1="12" y1="17" x2="12.01" y2="17" strokeLinecap="round"/>
+                              </svg>
+                              {t('common.writeInEnglish')}
+                            </Form.Text>
+                          )}
                         </Form.Group>
                       </Col>
 
                       {/* Description */}
                       <Col xs={12}>
                         <Form.Group>
-                          <Form.Label className="form-label">Description</Form.Label>
+                          <Form.Label className="form-label">{t('addSR.label.description')}</Form.Label>
                           <Form.Control
                             as="textarea"
                             rows={5}
                             value={description}
                             onChange={e => setDescription(e.target.value)}
-                            placeholder="Describe the service needed..."
+                            placeholder={t('addSR.placeholder.description')}
                             className="form-control-lg"
                           />
+                          {language !== 'en' && (
+                            <Form.Text style={{ color: '#b45309', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
+                              <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" strokeLinecap="round" strokeLinejoin="round"/>
+                                <line x1="12" y1="9" x2="12" y2="13" strokeLinecap="round"/>
+                                <line x1="12" y1="17" x2="12.01" y2="17" strokeLinecap="round"/>
+                              </svg>
+                              {t('common.writeInEnglish')}
+                            </Form.Text>
+                          )}
                         </Form.Group>
                       </Col>
                     </Row>
@@ -144,14 +166,14 @@ const AddServiceRequest = () => {
                         {isSubmitting ? (
                           <>
                             <Spinner animation="border" size="sm" className="me-2" />
-                            Submitting...
+                            {t('addSR.btn.submitting')}
                           </>
                         ) : (
                           <>
                             <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                               <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" strokeLinecap="round" strokeLinejoin="round"/>
                             </svg>
-                            Create Request
+                            {t('addSR.btn.create')}
                           </>
                         )}
                       </Button>
@@ -162,7 +184,7 @@ const AddServiceRequest = () => {
                         onClick={() => navigate('/service-requests')}
                         disabled={isSubmitting}
                       >
-                        Cancel
+                        {t('addSR.btn.cancel')}
                       </Button>
                     </div>
                   </Form>
@@ -180,10 +202,10 @@ const AddServiceRequest = () => {
                       <path d="M9 18h6a2 2 0 0 1 2 2v2H7v-2a2 2 0 0 1 2-2z" />
                       <path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2.26C17.81 13.47 19 11.38 19 9a7 7 0 0 0-7-7z" />
                     </svg>
-                    <span className="pro-tip-title">Pro Tip</span>
+                    <span className="pro-tip-title">{t('addSR.proTip.title')}</span>
                   </div>
                   <p className="pro-tip-text">
-                    Other details may be added after an admin accepted your request.
+                    {t('addSR.proTip.text')}
                   </p>
                 </Card.Body>
               </Card>
@@ -192,10 +214,10 @@ const AddServiceRequest = () => {
               <Card className="recent-logs-card border-0 shadow-sm">
                 <Card.Body className="p-4">
                   <div className="recent-logs-header mb-3">
-                    <span className="recent-logs-title">Pending Requests</span>
+                    <span className="recent-logs-title">{t('addSR.pendingRequests')}</span>
                   </div>
                   {pendingRequests.length === 0 ? (
-                    <p style={{ fontSize: '0.875rem', color: '#94a3b8', margin: 0 }}>No pending requests.</p>
+                    <p style={{ fontSize: '0.875rem', color: '#94a3b8', margin: 0 }}>{t('addSR.noPending')}</p>
                   ) : (
                     <div className="recent-logs-list">
                       {pendingRequests.map(r => (
@@ -210,7 +232,7 @@ const AddServiceRequest = () => {
                       ))}
                     </div>
                   )}
-                  <a href="/service-requests" className="view-all-link">View all requests</a>
+                  <a href="/service-requests" className="view-all-link">{t('addSR.viewAll')}</a>
                 </Card.Body>
               </Card>
             </Col>

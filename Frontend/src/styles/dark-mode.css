@@ -67,16 +67,25 @@ body.dark-mode .user-role {
 body.dark-mode .action-btn {
   color: #8b949e !important;
   background: #21262d !important;
-  border: none !important;
+  border: 1px solid transparent !important;
+  transition: all 0.2s ease !important;
 }
 
 body.dark-mode .action-btn svg {
   color: #8b949e !important;
   stroke: #8b949e !important;
+  transition: all 0.2s ease !important;
 }
 
 body.dark-mode .action-btn:hover {
   background: #21262d !important;
+  border: 1px solid #8b949e !important;
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .action-btn:hover svg {
+  color: #e6edf3 !important;
+  stroke: #e6edf3 !important;
 }
 
 /* ---------- Cards ---------- */
@@ -394,20 +403,66 @@ body.dark-mode .trips-total-badge,
 body.dark-mode .fuel-logs-total-badge,
 body.dark-mode .sr-total-badge {
   background: #21262d !important;
-  color: #8b949e !important;
 }
 
-/* Restore original badge colors in dark mode */
+/* Total badge colors match the New button color on each page */
 body.dark-mode .trips-total-badge {
-  color: #1d4ed8 !important;
+  color: #58a6ff !important;
+  border: 1px solid #1f6feb !important;
 }
 
 body.dark-mode .fuel-logs-total-badge {
-  color: #c2410c !important;
+  color: #fb923c !important;
+  border: 1px solid #ea580c !important;
 }
 
 body.dark-mode .sr-total-badge {
-  color: #7c3aed !important;
+  color: #a78bfa !important;
+  border: 1px solid #7c3aed !important;
+}
+
+/* Desktop action buttons — dark mode redesign */
+/* Delete button (Trips & Fuel Logs) */
+body.dark-mode .delete-btn {
+  background: #1c2230 !important;
+  border-color: #f85149 !important;
+  color: #f85149 !important;
+}
+
+body.dark-mode .delete-btn:hover {
+  background: #3d1f1f !important;
+  border-color: #da3633 !important;
+  color: #ffa198 !important;
+}
+
+/* Service Requests detail button */
+body.dark-mode .sr-details-btn {
+  background: #1c2230 !important;
+  color: #a78bfa !important;
+  border-color: #7c3aed !important;
+}
+
+body.dark-mode .sr-details-btn:hover {
+  background: #2d1f5e !important;
+  color: #c4b5fd !important;
+  border-color: #9d6fff !important;
+}
+
+body.dark-mode .sr-details-btn:hover svg {
+  stroke: #c4b5fd !important;
+}
+
+/* Service Requests delete button */
+body.dark-mode .sr-delete-btn {
+  background: #1c2230 !important;
+  border-color: #f85149 !important;
+  color: #f85149 !important;
+}
+
+body.dark-mode .sr-delete-btn:hover {
+  background: #3d1f1f !important;
+  border-color: #da3633 !important;
+  color: #ffa198 !important;
 }
 
 /* License plate badges */
@@ -558,6 +613,12 @@ body.dark-mode .legal-page {
   background-color: #0f1117 !important;
 }
 
+body.dark-mode .contact-info {
+  background-color: #161b22 !important;
+  border-left-color: #1f6feb !important;
+  color: #8b949e !important;
+}
+
 body.dark-mode .legal-card {
   background: #1c2230 !important;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3), 0 10px 15px rgba(0, 0, 0, 0.2) !important;
@@ -611,7 +672,7 @@ body.dark-mode .help-page .help-card {
 }
 
 body.dark-mode .help-page .help-card.bg-light {
-  background: #1f3d2b !important;
+  background: #161b22 !important;
 }
 
 body.dark-mode .help-page .logo-title {
@@ -642,7 +703,7 @@ body.dark-mode .help-page .faq-item.border-primary {
 
 body.dark-mode .help-page .faq-item .card-header,
 body.dark-mode .help-page .faq-item .bg-white {
-  background: #161b22 !important;
+  background: #1c2230 !important;
   border-color: #30363d !important;
 }
 
@@ -659,7 +720,7 @@ body.dark-mode .help-page .faq-item .card-body p {
 }
 
 body.dark-mode .help-page .bg-light {
-  background: #21262d !important;
+  background: #0f1117 !important;
 }
 
 body.dark-mode .help-page .text-dark,
@@ -1242,6 +1303,20 @@ body.dark-mode .mobile-value {
   color: #e6edf3 !important;
 }
 
+body.dark-mode .mobile-from,
+body.dark-mode .mobile-to {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .mobile-route svg {
+  stroke: #58a6ff !important;
+}
+
+body.dark-mode .mobile-value.distance-value,
+body.dark-mode .trip-mobile-card .distance-value {
+  color: #58a6ff !important;
+}
+
 /* Service Requests mobile view */
 body.dark-mode .sr-mobile-label {
   color: #8b949e !important;
@@ -1251,16 +1326,21 @@ body.dark-mode .sr-mobile-value {
   color: #e6edf3 !important;
 }
 
+body.dark-mode .sr-mobile-value.sr-mobile-cost,
+body.dark-mode .sr-mobile-card .sr-mobile-cost {
+  color: #3fb950 !important;
+}
+
 /* Mobile cards styling in dark mode */
 /* Trips mobile cards */
 body.dark-mode .trip-mobile-card {
-  background: #1c2230 !important;
-  border-color: #30363d !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+  background: #1e2535 !important;
+  border-color: #3d4656 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5) !important;
 }
 
 body.dark-mode .trip-mobile-card .mobile-card-header {
-  border-bottom-color: #30363d !important;
+  border-bottom-color: #3d4656 !important;
 }
 
 body.dark-mode .mobile-date {
