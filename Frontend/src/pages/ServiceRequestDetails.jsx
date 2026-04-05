@@ -260,7 +260,7 @@ const ServiceRequestDetails = () => {
                               onChange={e => setDriverCost(e.target.value)}
                               placeholder="0"
                               min="0"
-                              step="1"
+                              step="100"
                               className="form-control-lg"
                               required
                             />

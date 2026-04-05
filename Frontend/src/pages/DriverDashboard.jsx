@@ -403,7 +403,7 @@ const DriverDashboard = () => {
   const formatLicenseExpiry = () => {
     if (!profile.licenseExpiryDate) return 'N/A';
     const date = new Date(profile.licenseExpiryDate);
-    return date.toLocaleDateString('hu-HU', { year: 'numeric', month: 'short', day: 'numeric' });
+    return date.toLocaleDateString('hu-HU', { year: 'numeric', month: '2-digit', day: '2-digit' });
   };
 
   // Mobile sidebar toggle

@@ -29,9 +29,11 @@ const AddFuelLog = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
-  const navigate = useNavigate();  useEffect(() => {
+  const navigate = useNavigate();
+  useEffect(() => {
     const fetchData = async () => {
-      try {        try {
+      try {
+        try {
           const vehicleResponse = await api.get('/profile/assigned-vehicle');
           const v = vehicleResponse.data;
           setVehicleCurrentMileageKm(v.currentMileageKm || v.CurrentMileageKm || 0);
@@ -50,7 +52,8 @@ const AddFuelLog = () => {
           } catch {
             // no vehicles available
           }
-        }        try {
+        }
+        try {
           const logsResponse = await api.get('/fuellogs/mine', { params: { page: 1, pageSize: 10 } });
           const allLogs = Array.isArray(logsResponse.data?.data) ? logsResponse.data.data : [];
           const cutoff = new Date();
@@ -236,7 +239,7 @@ const AddFuelLog = () => {
                               onChange={e => setLiters(e.target.value)}
                               required
                               min="0"
-                              step="0.01"
+                              step="1"
                               placeholder="0.00"
                               className="form-control-lg"
                             />
@@ -256,7 +259,7 @@ const AddFuelLog = () => {
                               onChange={e => setCost(e.target.value)}
                               required
                               min="0"
-                              step="0.01"
+                              step="100"
                               placeholder="0.00"
                               className="form-control-lg"
                             />
