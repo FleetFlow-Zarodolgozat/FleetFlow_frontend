@@ -57,6 +57,7 @@ jobs:
           envsubst '$IMAGE_TAG' < Frontend/deployment.yaml | kubectl apply -f -
 
       - name: Cleanup old images
+        continue-on-error: true
         uses: actions/delete-package-versions@v5
         with:
           package-name: fleetflow-frontend
