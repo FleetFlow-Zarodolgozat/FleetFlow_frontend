@@ -1,9 +1,13 @@
+<div align="center">
+
 # 🚗 FleetFlow – Frontend
 
 ![Node.js CI](https://github.com/FleetFlow-Zarodolgozat/FleetFlow_frontend/actions/workflows/node.js.yml/badge.svg)
 ![Deploy](https://github.com/FleetFlow-Zarodolgozat/FleetFlow_frontend/actions/workflows/deploy.yml/badge.svg)
 
 A **FleetFlow** egy modern járműflotta-kezelő webalkalmazás frontendja, amely **React** + **Vite** technológiákra épül. Az alkalmazás lehetővé teszi az adminisztrátorok és sofőrök számára a járművek, utak, üzemanyag-naplók és szervizkérelmek kezelését.
+
+</div>
 
 ---
 
@@ -212,3 +216,11 @@ FleetFlow_frontend/
         ├── node.js.yml     # CI workflow
         └── deploy.yml      # Deploy workflow
 ```
+
+---
+
+<div align="center">
+
+*© 2026 FleetFlow. Minden jog fenntartva.*
+
+</div>
