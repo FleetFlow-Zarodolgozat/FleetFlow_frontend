@@ -7,5 +7,12 @@ export default defineConfig({
   server: {
     port: 5174,
     host: true,
+    proxy: {
+      '/api': {
+        target: 'https://fleetflow-zarodolgozat-backend-ressdominik.jcloud.jedlik.cloud',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   }
 })
