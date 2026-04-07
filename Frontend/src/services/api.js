@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // A backend URL-t állítsd be a tényleges backend címére
-const API_BASE_URL = 'https://fleetflow-zarodolgozat-backend-ressdominik.jcloud.jedlik.cloud/api';
+const API_BASE_URL = '/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
