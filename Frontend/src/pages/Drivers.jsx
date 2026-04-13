@@ -47,7 +47,8 @@ const Drivers = () => {
 
       const response = await api.get('/admin/drivers', { params });
       const payload = response.data || {};
-      const rawDrivers = Array.isArray(payload.data) ? payload.data : [];      const enriched = await Promise.all(
+      const rawDrivers = Array.isArray(payload.data) ? payload.data : [];
+      const enriched = await Promise.all(
         rawDrivers.map(async (d) => {
           const driverId = d.id ?? d.Id;
           try {
@@ -279,6 +280,7 @@ const Drivers = () => {
                     <th>EMAIL</th>
                     <th>PHONE</th>
                     <th>LICENSE NUMBER</th>
+                    <th>LICENSE EXPIRY</th>
                     <th>STATUS</th>
                     <th>ACTIONS</th>
                   </tr>
@@ -286,13 +288,13 @@ const Drivers = () => {
                 <tbody>
                   {loading ? (
                     <tr>
-                      <td colSpan={7} className="drivers-loading-cell">
+                      <td colSpan={8} className="drivers-loading-cell">
                         <Spinner animation="border" size="sm" /> Loading...
                       </td>
                     </tr>
                   ) : drivers.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="drivers-empty-cell">
+                      <td colSpan={8} className="drivers-empty-cell">
                         No drivers found matching the given criteria.
                       </td>
                     </tr>
@@ -322,6 +324,11 @@ const Drivers = () => {
                         </td>
                         <td>
                           {driver.licenseNumber || driver.LicenseNumber || '–'}
+                        </td>
+                        <td>
+                          {driver.licenseExpiryDate || driver.LicenseExpiryDate
+                            ? new Date(driver.licenseExpiryDate || driver.LicenseExpiryDate).toLocaleDateString('en-GB')
+                            : '–'}
                         </td>
                         <td>
                           <span className={`status-badge ${(driver.isActive ?? driver.IsActive) ? 'status-active' : 'status-inactive'}`}>

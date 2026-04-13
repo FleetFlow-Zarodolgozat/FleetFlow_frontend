@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Card, Container, Row, Col, Alert, Form, Badge } from 'react-bootstrap';
+import { Button, Card, Container, Row, Col, Alert, Form } from 'react-bootstrap';
 import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -30,10 +30,13 @@ const AddFuelLog = () => {
   const [isDragging, setIsDragging] = useState(false);
 
   const navigate = useNavigate();
+
+  // Adatok betöltése: járműök és legutóbbi üzemanyag-naplók
   useEffect(() => {
     const fetchData = async () => {
       try {
         try {
+          // Hozzárendelt jármű adatainak lekérése
           const vehicleResponse = await api.get('/profile/assigned-vehicle');
           const v = vehicleResponse.data;
           setVehicleCurrentMileageKm(v.currentMileageKm || v.CurrentMileageKm || 0);
@@ -41,7 +44,7 @@ const AddFuelLog = () => {
           setSelectedVehicle(v.id || v.Id);
           setOdometer(v.currentMileageKm || v.CurrentMileageKm || 0);
         } catch {
-          // No assigned vehicle, fetch all vehicles
+          // Nincs hozzárendelt jármű, az összes jármű lekérése
           try {
             const allVehiclesResponse = await api.get('/vehicles');
             const vehicleList = Array.isArray(allVehiclesResponse.data) ? allVehiclesResponse.data : [];
@@ -50,10 +53,11 @@ const AddFuelLog = () => {
               setSelectedVehicle(vehicleList[0].id || vehicleList[0].Id);
             }
           } catch {
-            // no vehicles available
+            // Nincsenek járművek
           }
         }
         try {
+          // Legutóbbi üzemanyag-naplók lekérése
           const logsResponse = await api.get('/fuellogs/mine', { params: { page: 1, pageSize: 10 } });
           const allLogs = Array.isArray(logsResponse.data?.data) ? logsResponse.data.data : [];
           const cutoff = new Date();
@@ -63,17 +67,17 @@ const AddFuelLog = () => {
             .slice(0, 2);
           setRecentLogs(logs);
         } catch {
-          // could not fetch recent logs
+          // Nem sikerült az utolsó naplók lekérése
         }
-      } catch (err) {
-        // error fetching data
+      } catch {
+        // Hiba az adatok lekérésénél
       }
     };
     fetchData();
   }, []);
 
+  // Alapértelmezett dátum és időpont beállítása az aktuális időre
   useEffect(() => {
-    // Set default date and time to now
     const now = new Date();
     const pad = n => n.toString().padStart(2, '0');
     const defaultDate = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
@@ -83,11 +87,12 @@ const AddFuelLog = () => {
   }, []);
 
   const handleSubmit = async (e) => {
+    // Üzemanyag napló elküldése - Frontend validáció és API hívás
     e.preventDefault();
     setError('');
     setSuccess(false);
 
-    // Frontend validation
+    // Frontend validáció
     if (!liters || Number(liters) <= 0) {
       setError('Liters must be greater than 0');
       return;
@@ -97,7 +102,7 @@ const AddFuelLog = () => {
       return;
     }
     const now = new Date();
-    // Combine date and time for validation
+    // Dátum és idő kombinálása validáláshoz
     const logDateTime = new Date(`${date}T${time}`);
     if (logDateTime > now) {
       setError('Date/time cannot be in the future');
@@ -107,7 +112,7 @@ const AddFuelLog = () => {
       setError('Date/time cannot be older than 7 days');
       return;
     }
-    // Odometer check
+    // Kilométeróra ellenőrzés
     if (
       odometer && vehicleCurrentMileageKm !== null &&
       Number(odometer) < Number(vehicleCurrentMileageKm)
@@ -117,15 +122,14 @@ const AddFuelLog = () => {
     }
 
     try {
-      // FuelLog POST
+      // Üzemanyag napló POST
       const formData = new FormData();
       formData.append('Liters', Number(liters));
       formData.append('TotalCost', Number(cost));
       formData.append('StationName', station);
       formData.append('OdometerKm', Number(odometer));
-      // Combine date and time for submission
+      // Dátum és idő kombinálása az elküldéshez
       formData.append('Date', new Date(`${date}T${time}`).toISOString());
-      // formData.append('FuelType', fuelType);
       if (notes) formData.append('Notes', notes);
       if (receiptPhoto) {
         formData.append('File', receiptPhoto);
@@ -154,6 +158,7 @@ const AddFuelLog = () => {
   };
 
   const handleDrop = (e) => {
+    // Fájl húzása és eldobása - biztosítja, hogy csak kép kerülhet be
     e.preventDefault();
     setIsDragging(false);
     const file = e.dataTransfer.files[0];
@@ -164,21 +169,25 @@ const AddFuelLog = () => {
   };
 
   const handleDragOver = (e) => {
+    // Ráhúzott fájl detektálása
     e.preventDefault();
     setIsDragging(true);
   };
 
   const handleDragLeave = () => {
+    // Húzás elhagyása
     setIsDragging(false);
   };
 
   const formatRecentLogDate = (dateStr) => {
+    // Dátum formázása az utolsó naplóhoz
     if (!dateStr) return '';
     const date = new Date(dateStr);
     return date.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
   };
 
   const formatCost = (costStr) => {
+    // Költség formázása az utolsó naplóhoz
     if (!costStr) return '0 Ft';
     return costStr;
   };
@@ -325,8 +334,8 @@ const AddFuelLog = () => {
                             className="form-control-lg"
                           />
                           {language !== 'en' && (
-                            <Form.Text style={{ color: '#b45309', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
-                              <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+                            <Form.Text className="afl-language-warning">
+                              <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                                 <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" strokeLinecap="round" strokeLinejoin="round"/>
                                 <line x1="12" y1="9" x2="12" y2="13" strokeLinecap="round"/>
                                 <line x1="12" y1="17" x2="12.01" y2="17" strokeLinecap="round"/>
@@ -392,7 +401,7 @@ const AddFuelLog = () => {
                       type="file"
                       accept="image/*,.pdf"
                       id="receiptFileInput"
-                      style={{ display: 'none' }}
+                      className="afl-hidden-file-input"
                       onChange={e => {
                         setReceiptPhoto(e.target.files[0]);
                         setReceiptPhotoName(e.target.files[0]?.name || '');

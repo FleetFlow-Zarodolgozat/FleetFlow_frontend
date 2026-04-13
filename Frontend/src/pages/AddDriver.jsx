@@ -23,6 +23,11 @@ const AddDriver = () => {
     notes: '',
   });
 
+  // Holnapi dátum az engedély lejáratának minimális értékeként
+  const minLicenseDate = new Date();
+  minLicenseDate.setDate(minLicenseDate.getDate() + 1);
+  const minLicenseDateString = minLicenseDate.toISOString().split('T')[0];
+
   useEffect(() => {
     const handleResize = () => setSidebarOpen(window.innerWidth > 1024);
     window.addEventListener('resize', handleResize);
@@ -30,11 +35,13 @@ const AddDriver = () => {
   }, []);
 
   const handleChange = (e) => {
+    // Frissíti az adatmezőt az input értékével
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
+    // Űrlap elküldése - új sofőr létrehozása az API-n keresztül
     e.preventDefault();
     setSaving(true);
     setError('');
@@ -173,7 +180,7 @@ const AddDriver = () => {
                       name="licenseExpiryDate"
                       value={form.licenseExpiryDate}
                       onChange={handleChange}
-                      min={new Date(Date.now() + 86400000).toISOString().split('T')[0]}
+                      min={minLicenseDateString}
                       required
                       className="field-input"
                     />

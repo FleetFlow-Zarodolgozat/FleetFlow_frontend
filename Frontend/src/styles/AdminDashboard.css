@@ -2,12 +2,12 @@
 .admin-dashboard {
   display: flex;
   width: 100vw;
-  height: 99vh;
+  height: 100vh;
   position: fixed;
   left: 0;
   top: 0;
   background-color: #f8f9fa;
-  overflow: auto;
+  overflow: hidden;
   z-index: 1;
 }
 
@@ -17,6 +17,9 @@
   margin-left: var(--sidebar-width);
   padding: 24px;
   background-color: #f8f9fa;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* Header */

@@ -536,6 +536,28 @@
 	border: 2px solid #2563eb !important;
 	box-shadow: 0 6px 24px rgba(37,99,235,0.18), 0 1.5px 6px rgba(0,0,0,0.10), 0 0 0 4px #f0f6ff !important;
 }
+
+/* Previous odometer text */
+.ant-previous-odometer {
+	font-size: 0.95em;
+	color: #6b7280;
+	margin-top: 2px;
+}
+
+/* Language warning text */
+.ant-language-warning {
+	color: #b45309;
+	font-weight: 500;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	margin-top: 4px;
+}
+
+.ant-language-warning svg {
+	flex-shrink: 0;
+}
+
 .add-new-trip-title {
 	font-weight: 700;
 	color: #1f2937;

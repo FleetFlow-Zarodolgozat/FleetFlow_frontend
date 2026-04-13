@@ -15,7 +15,8 @@ import '../styles/AdminDashboard.css';
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const user = authService.getCurrentUser();
-  const { t, language } = useLanguage();  const localeMap = { hu, de, en: enUS };
+  const { t, language } = useLanguage();
+  const localeMap = { hu, de, en: enUS };
   const currentLocale = localeMap[language] || enUS;
   const localizer = dateFnsLocalizer({
     format,
@@ -88,7 +89,8 @@ const AdminDashboard = () => {
   const [eventSaving, setEventSaving] = useState(false);
   const [eventFeedback, setEventFeedback] = useState({ type: '', message: '' });
   const [vehicles, setVehicles] = useState([]);
-  const [drivers, setDrivers] = useState([]);  const loadCalendarEvents = async () => {
+  const [drivers, setDrivers] = useState([]);
+  const loadCalendarEvents = async () => {
     try {
       const calendarResponse = await api.get('/calendarevents');
       const calendarData = Array.isArray(calendarResponse.data) ? calendarResponse.data : [];
@@ -116,7 +118,8 @@ const AdminDashboard = () => {
     } catch (error) {
       console.log('Could not fetch calendar events:', error.message);
     }
-  };  const loadStatistics = async () => {
+  };
+  const loadStatistics = async () => {
     try {
       const statsResponse = await api.get('/statistics/admin-dashboard');
       const data = statsResponse.data;
@@ -143,7 +146,8 @@ const AdminDashboard = () => {
         urgentRequests: 2,
       });
     }
-  };  const loadUpcomingEvents = async () => {
+  };
+  const loadUpcomingEvents = async () => {
     try {
       // A scheduleEvents már tartalmazza a calendar eseményeket
       // Ha nincs, akkor API-ból töltjük be
@@ -175,7 +179,8 @@ const AdminDashboard = () => {
     } catch (error) {
       console.log('Could not fetch upcoming events:', error.message);
     }
-  };  const loadVehicles = async () => {
+  };
+  const loadVehicles = async () => {
     try {
       const response = await api.get('/vehicles');
       const vList = Array.isArray(response.data) ? response.data : [];
@@ -187,7 +192,8 @@ const AdminDashboard = () => {
     } catch (error) {
       console.log('Could not fetch vehicles:', error.message);
     }
-  };  const loadDrivers = async () => {
+  };
+  const loadDrivers = async () => {
     try {
       const response = await api.get('/drivers');
       const dList = Array.isArray(response.data) ? response.data : [];
@@ -285,13 +291,15 @@ const AdminDashboard = () => {
         : 0;
 
       // ── Service requests ───────────────────────────────────────────────
-      // Use scheduledStart if available, else closedAt, else treat as "now" (pending/new)
+      // Use createdAt as primary date field for filtering (when the request was submitted).
+      // Fall back to scheduledStart or closedAt if createdAt is not available.
+      // If no date field is present at all, exclude from the period count.
       const curSrs = srs.filter(sr => {
-        const dateField = sr.scheduledStart ?? sr.ScheduledStart ?? sr.closedAt ?? sr.ClosedAt;
-        if (!dateField) {
-          // No date set = newly submitted REQUESTED, count it in current period
-          return true;
-        }
+        const dateField =
+          sr.createdAt ?? sr.CreatedAt ??
+          sr.scheduledStart ?? sr.ScheduledStart ??
+          sr.closedAt ?? sr.ClosedAt;
+        if (!dateField) return false;
         return inRange(dateField, curFrom, curTo);
       });
       const srCount = curSrs.length;
@@ -320,7 +328,7 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     loadTimeRangeStats(timeRange, fleetStats.total);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   }, [timeRange, fleetStats.total]);
 
   // ── Export helpers ────────────────────────────────────────────────────────
@@ -392,8 +400,11 @@ const AdminDashboard = () => {
         .filter(t => inRange(t.startTime ?? t.StartTime, curFrom, curTo));
       const srs = (Array.isArray(srRes.data?.data) ? srRes.data.data : [])
         .filter(sr => {
-          const dateField = sr.scheduledStart ?? sr.ScheduledStart ?? sr.closedAt ?? sr.ClosedAt;
-          if (!dateField) return true;
+          const dateField =
+            sr.createdAt ?? sr.CreatedAt ??
+            sr.scheduledStart ?? sr.ScheduledStart ??
+            sr.closedAt ?? sr.ClosedAt;
+          if (!dateField) return false;
           return inRange(dateField, curFrom, curTo);
         });
 

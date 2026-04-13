@@ -35,6 +35,7 @@ const AddVehicle = () => {
   }, []);
 
   useEffect(() => {
+    // Aktív sofőrök lekérése az API-ból
     const fetchDrivers = async () => {
       setDriversLoading(true);
       try {
@@ -52,11 +53,13 @@ const AddVehicle = () => {
   }, []);
 
   const handleChange = (e) => {
+    // Frissíti az adatmezőt az input értékével
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
+    // Jármű létrehozása és opcionálisan sofőrhöz rendelése
     e.preventDefault();
     setSaving(true);
     setError('');
@@ -71,7 +74,7 @@ const AddVehicle = () => {
         currentMileageKm: form.currentMileageKm ? parseInt(form.currentMileageKm, 10) : 0,
       });
 
-      // If a driver was selected, look up the new vehicle by license plate to get its ID
+      // Ha egy sofőr lett kiválasztva, az új jármű hozzárendelése
       if (form.assignedUserId) {
         try {
           const listRes = await api.get('/admin/vehicles', {

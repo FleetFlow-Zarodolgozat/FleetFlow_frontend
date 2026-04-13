@@ -12,13 +12,16 @@ import Footer from '../components/Footer';
 const AddServiceRequest = () => {
   const { t, language } = useLanguage();
   const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');  const [error, setError] = useState('');
+  const [description, setDescription] = useState('');
+  const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);  const [pendingRequests, setPendingRequests] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [pendingRequests, setPendingRequests] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Függőben lévő szervizigénylések lekérése
     const fetchPending = async () => {
       try {
         const res = await api.get('/service-requests/mine', { params: { page: 1, pageSize: 50 } });
@@ -29,12 +32,14 @@ const AddServiceRequest = () => {
           .slice(0, 2);
         setPendingRequests(nonCompleted);
       } catch {
-        // silently fail
+        // Hiba a lekérésnél
       }
     };
     fetchPending();
-  }, []);
+  }, []);
+
   const handleSubmit = async (e) => {
+    // Szervizigénylés elküldése az API-nak
     e.preventDefault();
     setError('');
     setSuccess(false);
@@ -111,8 +116,8 @@ const AddServiceRequest = () => {
                             required
                           />
                           {language !== 'en' && (
-                            <Form.Text style={{ color: '#b45309', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
-                              <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+                            <Form.Text className="asr-language-warning">
+                              <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                                 <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" strokeLinecap="round" strokeLinejoin="round"/>
                                 <line x1="12" y1="9" x2="12" y2="13" strokeLinecap="round"/>
                                 <line x1="12" y1="17" x2="12.01" y2="17" strokeLinecap="round"/>
@@ -136,8 +141,8 @@ const AddServiceRequest = () => {
                             className="form-control-lg"
                           />
                           {language !== 'en' && (
-                            <Form.Text style={{ color: '#b45309', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
-                              <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+                            <Form.Text className="asr-language-warning">
+                              <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                                 <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" strokeLinecap="round" strokeLinejoin="round"/>
                                 <line x1="12" y1="9" x2="12" y2="13" strokeLinecap="round"/>
                                 <line x1="12" y1="17" x2="12.01" y2="17" strokeLinecap="round"/>
@@ -210,7 +215,7 @@ const AddServiceRequest = () => {
                     <span className="recent-logs-title">{t('addSR.pendingRequests')}</span>
                   </div>
                   {pendingRequests.length === 0 ? (
-                    <p style={{ fontSize: '0.875rem', color: '#94a3b8', margin: 0 }}>{t('addSR.noPending')}</p>
+                    <p className="asr-no-pending">{t('addSR.noPending')}</p>
                   ) : (
                     <div className="recent-logs-list">
                       {pendingRequests.map(r => (

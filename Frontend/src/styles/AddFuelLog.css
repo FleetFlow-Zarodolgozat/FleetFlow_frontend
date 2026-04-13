@@ -439,6 +439,25 @@
   min-width: 0;
 }
 
+/* Language warning text */
+.afl-language-warning {
+  color: #b45309;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.afl-language-warning svg {
+  flex-shrink: 0;
+}
+
+/* Hidden file input */
+.afl-hidden-file-input {
+  display: none;
+}
+
 /* ===========================================
    RESPONSIVE BREAKPOINTS
    =========================================== */

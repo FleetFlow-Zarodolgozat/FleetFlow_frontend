@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Button, Card, Form, Container, Row, Col, Alert } from 'react-bootstrap';
 import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
-import { useLanguage } from '../contexts/LanguageContext';
+import { useLanguage } from '../contexts/LanguageContext';   
 import Sidebar from '../components/Sidebar';
 import RouteMap from '../components/RouteMap';
 import '../styles/DriverDashboard.css';
@@ -29,8 +29,9 @@ const AddNewTrip = () => {
   const navigate = useNavigate();
 
   const smartTruncateAddress = (address) => {
+    // Cím csonkítása az 50 karakteres limit megtartásához
     if (address.length <= 50) return address;
-    // Nominatim returns "Street, District, City, County, Country"
+    // Nominatim formátuma: "Street, District, City, County, Country"
     const parts = address.split(', ');
     for (let i = parts.length - 1; i >= 1; i--) {
       const candidate = parts.slice(0, i).join(', ');
@@ -40,6 +41,7 @@ const AddNewTrip = () => {
   };
 
   const handleMapLocationSelect = (address) => {
+    // Térkép helyet választ - szél ha azt vagy véghelyet
     const smart = smartTruncateAddress(address);
     if (activeLocationField === 'start') {
       setStartLocation(smart);
@@ -48,12 +50,18 @@ const AddNewTrip = () => {
     }
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
+    // Alapértelmezett kezdési és végzési idő beállítása
     const now = new Date();
     const pad = n => n.toString().padStart(2, '0');
     const defaultDateTime = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
     setStartDateTime(defaultDateTime);
     setEndDateTime(defaultDateTime);
+  }, []);
+
+  useEffect(() => {
+    // Út adatok lekérése: heti statisztikák és előző kilométeróra
     const fetchTripData = async () => {
       try {
         try {
@@ -61,16 +69,16 @@ const AddNewTrip = () => {
           const vehicleData = vehicleRes.data || {};
           const currentMileage = vehicleData.currentMileageKm || vehicleData.CurrentMileageKm || 0;
           setPreviousOdometer(Number(currentMileage));
-        } catch (err) {
-          console.log('Could not fetch vehicle data:', err);
+        } catch {
           setPreviousOdometer(0);
         }
         try {
+          // Legutóbbi utak lekérése heti statisztikához
           const tripsRes = await api.get('/trips/mine', { params: { page: 1, pageSize: 100 } });
           const payload = tripsRes.data || {};
           const trips = Array.isArray(payload.data) ? payload.data : [];
 
-          // Weekly stats: filter last 7 days
+          // Heti statisztikák: utolsó 7 nap szűrése
           const now = new Date();
           const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
           const weekTrips = trips.filter(t => {
@@ -79,12 +87,10 @@ const AddNewTrip = () => {
           });
           const totalDist = weekTrips.reduce((sum, t) => sum + (Number(t.DistanceKm) || Number(t.distanceKm) || 0), 0);
           setWeeklyStats({ totalDistance: totalDist, tripsLogged: weekTrips.length });
-        } catch (err) {
-          console.log('Could not fetch trips:', err);
+        } catch {
           setWeeklyStats({ totalDistance: 0, tripsLogged: 0 });
         }
-      } catch (err) {
-        console.error('Error fetching data:', err);
+      } catch {
         setPreviousOdometer(0);
         setWeeklyStats({ totalDistance: 0, tripsLogged: 0 });
       }
@@ -93,6 +99,7 @@ const AddNewTrip = () => {
   }, []);
 
   const handleSubmit = async (e) => {
+    // Új út elküldése - új út létrehozása az API-n keresztül
     e.preventDefault();
     setError('');
     setSuccess(false);
@@ -235,7 +242,7 @@ const AddNewTrip = () => {
                           className="trip-odo-input"
                           min="0"
                         />
-                        <div className="previous-odometer" style={{fontSize: '0.95em', color: '#6b7280', marginTop: '2px'}}>
+                        <div className="ant-previous-odometer">
                           {t('addTrip.prevTripEnded', { km: Number(previousOdometer).toLocaleString() })}
                         </div>
                       </Form.Group>

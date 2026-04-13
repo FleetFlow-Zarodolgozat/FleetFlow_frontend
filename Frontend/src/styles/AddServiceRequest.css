@@ -120,6 +120,27 @@
   box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
 }
 
+/* Inline warning text for language hint */
+.asr-language-warning {
+  color: #b45309;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.asr-language-warning svg {
+  flex-shrink: 0;
+}
+
+/* No pending requests message */
+.asr-no-pending {
+  font-size: 0.875rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
 /* ===========================================
    RESPONSIVE BREAKPOINTS
    =========================================== */
