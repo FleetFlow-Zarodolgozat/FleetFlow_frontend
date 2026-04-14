@@ -21,7 +21,8 @@ const FuelLogs = () => {
 
   // Trips state for consumption calculation
   const [trips, setTrips] = useState([]);
-  const [tripsLoading, setTripsLoading] = useState(true);  useEffect(() => {
+  const [tripsLoading, setTripsLoading] = useState(true);
+  useEffect(() => {
     const fetchTrips = async () => {
       setTripsLoading(true);
       try {
@@ -29,12 +30,14 @@ const FuelLogs = () => {
         const payload = response.data || {};
         setTrips(Array.isArray(payload.data) ? payload.data : []);
       } catch {
+        // Failed to load trips, but we can still show fuel logs and stats without consumption
       } finally {
         setTripsLoading(false);
       }
     };
     fetchTrips();
-  }, []);  const now = new Date();
+  }, []);
+  const now = new Date();
   const thisMonth = now.getMonth();
   const thisYear = now.getFullYear();
   const lastMonth = thisMonth === 0 ? 11 : thisMonth - 1;
@@ -43,7 +46,8 @@ const FuelLogs = () => {
   let totalSpent = 0;
   let lastMonthSpent = 0;
 
-  fuelLogs.forEach(log => {    const dateObj = new Date(log.date || log.Date);
+  fuelLogs.forEach(log => {
+    const dateObj = new Date(log.date || log.Date);
     const costStr = log.totalCostCur || log.TotalCostCur || '0';
     const cost = parseFloat(costStr.replace(/[^0-9.,]/g, '').replace(',', '.')) || 0;
 
@@ -58,8 +62,11 @@ const FuelLogs = () => {
       }
     }
 
-  });  const spentChange = lastMonthSpent === 0 ? 0 : Math.round(((totalSpent - lastMonthSpent) / lastMonthSpent) * 100);  let daysSinceLastRefuel = 'N/A';
-  if (fuelLogs.length > 0) {    const latestLog = fuelLogs.reduce((latest, log) => {
+  });
+  const spentChange = lastMonthSpent === 0 ? 0 : Math.round(((totalSpent - lastMonthSpent) / lastMonthSpent) * 100);
+  let daysSinceLastRefuel = 'N/A';
+  if (fuelLogs.length > 0) {
+    const latestLog = fuelLogs.reduce((latest, log) => {
       const dateObj = new Date(log.date || log.Date);
       return (!latest || dateObj > latest) ? dateObj : latest;
     }, null);
@@ -68,7 +75,8 @@ const FuelLogs = () => {
       const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
       daysSinceLastRefuel = diffDays === 0 ? t('fuelLogs.stat.today') : t(diffDays === 1 ? 'fuelLogs.stat.dayAgo' : 'fuelLogs.stat.daysAgo', { n: diffDays });
     }
-  }  let avgConsumption = 'N/A';
+  }
+  let avgConsumption = 'N/A';
   if (trips.length > 0 && fuelLogs.length > 0) {
     // Sum total distance from trips
     const totalTripDistance = trips.reduce((sum, trip) => {
@@ -108,7 +116,8 @@ const FuelLogs = () => {
         hour12: false,
       }),
     };
-  };  const fetchFuelLogs = async (pageToLoad = 1) => {
+  };
+  const fetchFuelLogs = async (pageToLoad = 1) => {
     setLoading(true);
     setError('');
     try {
@@ -159,7 +168,8 @@ const FuelLogs = () => {
     }
 
     return items;
-  };  const handleDeleteFuelLog = async (id) => {
+  };
+  const handleDeleteFuelLog = async (id) => {
     if (!window.confirm('Are you sure you want to delete this fuel log?')) return;
     try {
       await api.patch(`/fuellogs/delete/${id}`);

@@ -66,7 +66,8 @@ const AdminServiceRequests = () => {
 
         const response = await api.get('/service-requests/admin', { params });
         const payload = response.data || {};
-        let rawItems = Array.isArray(payload.data) ? payload.data : [];        const allItems = Array.isArray(payload.data) ? payload.data : [];
+        let rawItems = Array.isArray(payload.data) ? payload.data : [];
+        const allItems = Array.isArray(payload.data) ? payload.data : [];
         const totalOngoing = allItems.filter(r => {
           const status = r.status ?? r.Status;
           return status !== 'REJECTED' && status !== 'CLOSED';
@@ -122,7 +123,8 @@ const AdminServiceRequests = () => {
     debounceRef.current = setTimeout(() => {
       setSearchQ(val);
     }, 400);
-  };  useEffect(() => {
+  };
+  useEffect(() => {
     if (requests.length === 0) return;
     let cancelled = false;
     const fetchImages = async () => {
@@ -147,15 +149,6 @@ const AdminServiceRequests = () => {
     fetchImages();
     return () => { cancelled = true; };
   }, [requests]);
-
-  // Computed stats from current page
-  const ongoingCount = requests.filter((r) => {
-    const status = r.status ?? r.Status;
-    return status !== 'REJECTED' && status !== 'CLOSED';
-  }).length;
-  const pendingCount = requests.filter((r) => (r.status ?? r.Status) === 'REQUESTED').length;
-  const approvedCount = requests.filter((r) => (r.status ?? r.Status) === 'APPROVED').length;
-  const rejectedCount = requests.filter((r) => (r.status ?? r.Status) === 'REJECTED').length;
 
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 

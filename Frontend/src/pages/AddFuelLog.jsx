@@ -10,8 +10,6 @@ import Footer from '../components/Footer';
 
 const AddFuelLog = () => {
   const { t, language } = useLanguage();
-  const [vehicles, setVehicles] = useState([]);
-  const [selectedVehicle, setSelectedVehicle] = useState('');
   const [vehicleCurrentMileageKm, setVehicleCurrentMileageKm] = useState(null);
   const [recentLogs, setRecentLogs] = useState([]);
 
@@ -40,21 +38,9 @@ const AddFuelLog = () => {
           const vehicleResponse = await api.get('/profile/assigned-vehicle');
           const v = vehicleResponse.data;
           setVehicleCurrentMileageKm(v.currentMileageKm || v.CurrentMileageKm || 0);
-          setVehicles([{ id: v.id || v.Id, name: v.vehicleName || v.VehicleName || 'Vehicle', licensePlate: v.licensePlate || v.LicensePlate || '' }]);
-          setSelectedVehicle(v.id || v.Id);
           setOdometer(v.currentMileageKm || v.CurrentMileageKm || 0);
         } catch {
-          // Nincs hozzárendelt jármű, az összes jármű lekérése
-          try {
-            const allVehiclesResponse = await api.get('/vehicles');
-            const vehicleList = Array.isArray(allVehiclesResponse.data) ? allVehiclesResponse.data : [];
-            setVehicles(vehicleList.map(v => ({ id: v.id || v.Id, name: v.vehicleName || v.VehicleName || 'Vehicle', licensePlate: v.licensePlate || v.LicensePlate || '' })));
-            if (vehicleList.length > 0) {
-              setSelectedVehicle(vehicleList[0].id || vehicleList[0].Id);
-            }
-          } catch {
-            // Nincsenek járművek
-          }
+          // Nem sikerült a járműadatok lekérése
         }
         try {
           // Legutóbbi üzemanyag-naplók lekérése
@@ -91,35 +77,6 @@ const AddFuelLog = () => {
     e.preventDefault();
     setError('');
     setSuccess(false);
-
-    // Frontend validáció
-    if (!liters || Number(liters) <= 0) {
-      setError('Liters must be greater than 0');
-      return;
-    }
-    if (!cost || Number(cost) <= 0) {
-      setError('Total cost must be greater than 0');
-      return;
-    }
-    const now = new Date();
-    // Dátum és idő kombinálása validáláshoz
-    const logDateTime = new Date(`${date}T${time}`);
-    if (logDateTime > now) {
-      setError('Date/time cannot be in the future');
-      return;
-    }
-    if (logDateTime < new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)) {
-      setError('Date/time cannot be older than 7 days');
-      return;
-    }
-    // Kilométeróra ellenőrzés
-    if (
-      odometer && vehicleCurrentMileageKm !== null &&
-      Number(odometer) < Number(vehicleCurrentMileageKm)
-    ) {
-      setError('Odometer must be greater than or equal to the current mileage of the vehicle (' + vehicleCurrentMileageKm + ' km)');
-      return;
-    }
 
     try {
       // Üzemanyag napló POST

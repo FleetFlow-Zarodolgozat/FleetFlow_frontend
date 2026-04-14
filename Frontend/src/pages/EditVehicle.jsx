@@ -107,7 +107,7 @@ const EditVehicle = () => {
             // Vehicle is not assigned, get free drivers
             availableDriversList = Array.isArray(assignData.freeDrivers) ? assignData.freeDrivers : [];
           }
-        } catch (err) {
+        } catch {
           console.log('Could not fetch available drivers from assign endpoint, falling back to all drivers');
           // Fallback: fetch all active drivers
           try {

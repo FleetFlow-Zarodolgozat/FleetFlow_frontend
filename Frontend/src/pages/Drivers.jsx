@@ -135,22 +135,6 @@ const Drivers = () => {
     }
   };
 
-  const handleDeleteDriver = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this driver?')) return;
-    setError('');
-    try {
-      await api.delete(`/admin/drivers/${id}`);
-      await fetchDrivers(page);
-    } catch (err) {
-      const apiMessage = err?.response?.data;
-      const message =
-        typeof apiMessage === 'string'
-          ? apiMessage
-          : apiMessage?.message || apiMessage?.Message || 'An error occurred while deleting the driver.';
-      setError(message);
-    }
-  };
-
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
   const buildPaginationItems = () => {

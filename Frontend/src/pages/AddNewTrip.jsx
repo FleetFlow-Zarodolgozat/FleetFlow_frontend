@@ -31,7 +31,7 @@ const AddNewTrip = () => {
   const smartTruncateAddress = (address) => {
     // Cím csonkítása az 50 karakteres limit megtartásához
     if (address.length <= 50) return address;
-    // Nominatim formátuma: "Street, District, City, County, Country"
+    // Nominatim formátum: "Street, District, City, County, Country"
     const parts = address.split(', ');
     for (let i = parts.length - 1; i >= 1; i--) {
       const candidate = parts.slice(0, i).join(', ');
@@ -41,7 +41,7 @@ const AddNewTrip = () => {
   };
 
   const handleMapLocationSelect = (address) => {
-    // Térkép helyet választ - szél ha azt vagy véghelyet
+    // Térkép helyet választ
     const smart = smartTruncateAddress(address);
     if (activeLocationField === 'start') {
       setStartLocation(smart);
@@ -50,7 +50,6 @@ const AddNewTrip = () => {
     }
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     // Alapértelmezett kezdési és végzési idő beállítása
     const now = new Date();

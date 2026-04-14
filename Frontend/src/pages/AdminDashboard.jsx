@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import JSZip from 'jszip';
 import Sidebar from '../components/Sidebar';
 import { Card, Container, Row, Col, Badge, Button, Form } from 'react-bootstrap';
@@ -7,14 +6,11 @@ import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { hu, de, enUS } from 'date-fns/locale';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import { authService } from '../services/authService';
 import { useLanguage } from '../contexts/LanguageContext';
 import api from '../services/api';
 import '../styles/AdminDashboard.css';
 
 const AdminDashboard = () => {
-  const navigate = useNavigate();
-  const user = authService.getCurrentUser();
   const { t, language } = useLanguage();
   const localeMap = { hu, de, en: enUS };
   const currentLocale = localeMap[language] || enUS;
@@ -59,15 +55,6 @@ const AdminDashboard = () => {
   const [scheduleEvents, setScheduleEvents] = useState([]);
   const [timeRange, setTimeRange] = useState('today');
   const [fleetStats, setFleetStats] = useState({ total: 0, activePercent: 0 });
-  const [stats, setStats] = useState({
-    totalFleet: 0,
-    fuelCosts: 0,
-    fuelCostsChange: 0,
-    activeTrips: 0,
-    utilizationRate: 0,
-    pendingMaintenance: 0,
-    urgentRequests: 0,
-  });
   const [trStats, setTrStats] = useState({
     fuelCost: 0,
     fuelCostChange: null,
@@ -88,8 +75,6 @@ const AdminDashboard = () => {
   });
   const [eventSaving, setEventSaving] = useState(false);
   const [eventFeedback, setEventFeedback] = useState({ type: '', message: '' });
-  const [vehicles, setVehicles] = useState([]);
-  const [drivers, setDrivers] = useState([]);
   const loadCalendarEvents = async () => {
     try {
       const calendarResponse = await api.get('/calendarevents');
@@ -117,34 +102,6 @@ const AdminDashboard = () => {
       setScheduleEvents(mappedEvents);
     } catch (error) {
       console.log('Could not fetch calendar events:', error.message);
-    }
-  };
-  const loadStatistics = async () => {
-    try {
-      const statsResponse = await api.get('/statistics/admin-dashboard');
-      const data = statsResponse.data;
-
-      setStats({
-        totalFleet: data.totalFleet || data.TotalFleet || 0,
-        fuelCosts: data.fuelCosts || data.FuelCosts || 0,
-        fuelCostsChange: data.fuelCostsChange || data.FuelCostsChange || 0,
-        activeTrips: data.activeTrips || data.ActiveTrips || 0,
-        utilizationRate: data.utilizationRate || data.UtilizationRate || 0,
-        pendingMaintenance: data.pendingMaintenance || data.PendingMaintenance || 0,
-        urgentRequests: data.urgentRequests || data.UrgentRequests || 0,
-      });
-    } catch (error) {
-      console.log('Could not fetch admin statistics:', error.message);
-      // Set default values if API fails
-      setStats({
-        totalFleet: 142,
-        fuelCosts: 8450,
-        fuelCostsChange: 4.2,
-        activeTrips: 38,
-        utilizationRate: 92,
-        pendingMaintenance: 5,
-        urgentRequests: 2,
-      });
     }
   };
   const loadUpcomingEvents = async () => {
@@ -178,32 +135,6 @@ const AdminDashboard = () => {
       setUpcomingEvents(upcoming);
     } catch (error) {
       console.log('Could not fetch upcoming events:', error.message);
-    }
-  };
-  const loadVehicles = async () => {
-    try {
-      const response = await api.get('/vehicles');
-      const vList = Array.isArray(response.data) ? response.data : [];
-      setVehicles(vList.map(v => ({
-        id: v.id || v.Id,
-        brandModel: v.brandModel || v.BrandModel || v.LicensePlate,
-        licensePlate: v.licensePlate || v.LicensePlate,
-      })));
-    } catch (error) {
-      console.log('Could not fetch vehicles:', error.message);
-    }
-  };
-  const loadDrivers = async () => {
-    try {
-      const response = await api.get('/drivers');
-      const dList = Array.isArray(response.data) ? response.data : [];
-      setDrivers(dList.map(d => ({
-        id: d.id || d.Id,
-        fullName: d.fullName || d.FullName,
-        email: d.email || d.Email,
-      })));
-    } catch (error) {
-      console.log('Could not fetch drivers:', error.message);
     }
   };
 
@@ -318,10 +249,7 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     loadCalendarEvents();
-    loadStatistics();
     loadUpcomingEvents();
-    loadVehicles();
-    loadDrivers();
     loadFleetStats();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -816,7 +744,7 @@ ${srCards}
       setEventFeedback({ type: 'success', message: 'Event created successfully.' });
       await loadCalendarEvents();
       await loadUpcomingEvents();
-    } catch (error) {
+    } catch {
       setEventFeedback({ type: 'danger', message: 'Failed to create event.' });
     } finally {
       setEventSaving(false);
@@ -838,11 +766,6 @@ ${srCards}
         color: '#ffffff',
       },
     };
-  };
-
-  const getDisplayName = () => {
-    const emailPrefix = user?.email?.split('@')[0] || 'Admin';
-    return emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1);
   };
 
   const formatEventTime = (dateValue) => {

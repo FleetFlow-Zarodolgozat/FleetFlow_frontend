@@ -21,7 +21,8 @@ const ProfileSettings = () => {
   const [profileImageUrl, setProfileImageUrl] = useState(null);
   const [profileImageError, setProfileImageError] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [feedback, setFeedback] = useState({ type: '', message: '' });  useEffect(() => {
+  const [feedback, setFeedback] = useState({ type: '', message: '' });
+  useEffect(() => {
     if (feedback.message) {
       const timer = setTimeout(() => {
         setFeedback({ type: '', message: '' });
@@ -29,7 +30,6 @@ const ProfileSettings = () => {
       return () => clearTimeout(timer);
     }
   }, [feedback]);
-  const [isDirty, setIsDirty] = useState(false);
   const fileInputRef = useRef(null);
 
   // Personal Information form
@@ -90,7 +90,8 @@ const ProfileSettings = () => {
         phone: data.phone || data.Phone || '',
         password: '',
         confirmPassword: '',
-      });      if (data.id || data.Id) {
+      });
+      if (data.id || data.Id) {
         try {
           const imgResponse = await api.get(`/files/thumbnail/${data.id || data.Id}`, { responseType: 'blob' });
           const objectUrl = URL.createObjectURL(imgResponse.data);
@@ -101,7 +102,7 @@ const ProfileSettings = () => {
           setProfileImageError(true);
         }
       }
-    } catch (err) {
+    } catch {
       setFeedback({ type: 'danger', message: 'Failed to load profile data.' });
     } finally {
       setLoading(false);
@@ -115,7 +116,6 @@ const ProfileSettings = () => {
   const handlePersonalInfoChange = (e) => {
     const { name, value } = e.target;
     setPersonalInfo(prev => ({ ...prev, [name]: value }));
-    setIsDirty(true);
   };
 
   const handleSave = async () => {
@@ -128,12 +128,7 @@ const ProfileSettings = () => {
         formData.append('Password', personalInfo.password);
         formData.append('PasswordAgain', personalInfo.confirmPassword);
       }
-      // Optionally: handle file upload here if needed (formData.append('File', ...))
-      const response = await api.patch('/profile/edit', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
       setFeedback({ type: 'success', message: 'Profile updated successfully.' });
-      setIsDirty(false);
       setEditMode(false);
       fetchProfile();
       setNotificationRefresh((prev) => prev + 1);
@@ -165,7 +160,6 @@ const ProfileSettings = () => {
         confirmPassword: '',
       });
     }
-    setIsDirty(false);
     setEditMode(false);
     setFeedback({ type: '', message: '' });
   };
@@ -176,7 +170,8 @@ const ProfileSettings = () => {
 
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
-    if (!file) return;    const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    if (!file) return;
+    const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
     if (!validTypes.includes(file.type)) {
       setFeedback({ type: 'danger', message: 'Only JPEG, PNG or GIF files are allowed.' });
       return;
@@ -202,7 +197,7 @@ const ProfileSettings = () => {
       setProfileImageUrl(objectUrl);
       setProfileImageError(false);
       setNotificationRefresh((prev) => prev + 1);
-    } catch (err) {
+    } catch {
       setFeedback({ type: 'danger', message: 'Failed to upload profile picture.' });
     }
   };
@@ -215,7 +210,7 @@ const ProfileSettings = () => {
       setProfileImageError(true);
       fetchProfile();
       setNotificationRefresh((prev) => prev + 1);
-    } catch (err) {
+    } catch {
       setFeedback({ type: 'danger', message: 'Failed to remove profile picture.' });
     }
   };
