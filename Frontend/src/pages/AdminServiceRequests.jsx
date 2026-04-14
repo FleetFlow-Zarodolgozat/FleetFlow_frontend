@@ -682,6 +682,7 @@ ${serviceCards}
                   <table className="asr-table">
                     <thead>
                       <tr>
+                        <th className="asr-th">CREATED AT</th>
                         <th className="asr-th">SCHEDULED</th>
                         <th className="asr-th">VEHICLE</th>
                         <th className="asr-th">DRIVER</th>
@@ -695,6 +696,7 @@ ${serviceCards}
                     <tbody>
                       {requests.map((req) => {
                         const id = req.id ?? req.Id;
+                        const createdAt = formatDateTime(req.createdAt ?? req.CreatedAt);
                         const scheduledStart = formatDateTime(req.scheduledStart ?? req.ScheduledStart);
                         const closedAt = formatDateTime(req.closedAt ?? req.ClosedAt);
                         const plate = req.licensePlate ?? req.LicensePlate ?? '—';
@@ -707,6 +709,12 @@ ${serviceCards}
 
                         return (
                           <tr key={id} className="asr-tr">
+                            <td className="asr-td">
+                              <div className="asr-date-main">{createdAt.date}</div>
+                              {createdAt.time && (
+                                <div className="asr-date-time">{createdAt.time}</div>
+                              )}
+                            </td>
                             <td className="asr-td">
                               <div className="asr-date-main">{scheduledStart.date}</div>
                               {scheduledStart.time && (
@@ -770,6 +778,7 @@ ${serviceCards}
                 <div className="asr-mobile-cards">
                   {requests.map((req) => {
                     const id = req.id ?? req.Id;
+                    const createdAt = formatDateTime(req.createdAt ?? req.CreatedAt);
                     const scheduledStart = formatDateTime(req.scheduledStart ?? req.ScheduledStart);
                     const closedAt = formatDateTime(req.closedAt ?? req.ClosedAt);
                     const plate = req.licensePlate ?? req.LicensePlate ?? '—';
@@ -789,6 +798,13 @@ ${serviceCards}
                           </span>
                         </div>
                         <div className="asr-mc-title">{title}</div>
+                        <div className="asr-mc-row">
+                          <span className="asr-mc-label">Created At</span>
+                          <span className="asr-date-main">
+                            {createdAt.date}
+                            {createdAt.time && <span className="asr-date-time"> {createdAt.time}</span>}
+                          </span>
+                        </div>
                         <div className="asr-mc-row">
                           <span className="asr-mc-label">Scheduled</span>
                           <span className="asr-date-main">

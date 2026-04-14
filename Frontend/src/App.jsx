@@ -56,9 +56,27 @@ function App() {  useEffect(() => {
     const isDarkMode = localStorage.getItem('fleetflow_darkMode') === 'true';
     if (isDarkMode) {
       document.body.classList.add('dark-mode');
+      document.documentElement.style.colorScheme = 'dark';
     } else {
       document.body.classList.remove('dark-mode');
+      document.documentElement.style.colorScheme = 'light';
     }
+
+    const handleThemeChange = (event) => {
+      const isDark = event.detail?.isDarkMode ?? localStorage.getItem('fleetflow_darkMode') === 'true';
+      if (isDark) {
+        document.body.classList.add('dark-mode');
+        document.documentElement.style.colorScheme = 'dark';
+      } else {
+        document.body.classList.remove('dark-mode');
+        document.documentElement.style.colorScheme = 'light';
+      }
+    };
+    window.addEventListener('theme-change', handleThemeChange);
+
+    return () => {
+      window.removeEventListener('theme-change', handleThemeChange);
+    };
   }, []);
 
   return (

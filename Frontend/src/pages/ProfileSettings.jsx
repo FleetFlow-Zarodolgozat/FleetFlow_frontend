@@ -221,7 +221,16 @@ const ProfileSettings = () => {
       const newVal = !preferences.darkMode;
       setPreferences(prev => ({ ...prev, darkMode: newVal }));
       localStorage.setItem('fleetflow_darkMode', String(newVal));
-      document.body.classList.toggle('dark-mode', newVal);
+
+      // Force theme update on body class
+      if (newVal) {
+        document.body.classList.add('dark-mode');
+      } else {
+        document.body.classList.remove('dark-mode');
+      }
+
+      // Force re-render of all components by triggering a custom event
+      window.dispatchEvent(new CustomEvent('theme-change', { detail: { isDarkMode: newVal } }));
     } else {
       setPreferences(prev => ({ ...prev, [key]: !prev[key] }));
     }

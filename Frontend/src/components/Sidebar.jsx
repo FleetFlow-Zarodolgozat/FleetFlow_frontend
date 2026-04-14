@@ -107,6 +107,26 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, notificationRefresh }) => {
   };
 
   const [hasUnreadNotification, setHasUnreadNotification] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    return localStorage.getItem('fleetflow_darkMode') === 'true';
+  });
+
+  useEffect(() => {
+    const handleThemeChange = (event) => {
+      if (event.type === 'theme-change') {
+        setIsDarkMode(event.detail?.isDarkMode ?? false);
+      } else {
+        const darkMode = localStorage.getItem('fleetflow_darkMode') === 'true';
+        setIsDarkMode(darkMode);
+      }
+    };
+    window.addEventListener('theme-change', handleThemeChange);
+    window.addEventListener('storage', handleThemeChange);
+    return () => {
+      window.removeEventListener('theme-change', handleThemeChange);
+      window.removeEventListener('storage', handleThemeChange);
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
