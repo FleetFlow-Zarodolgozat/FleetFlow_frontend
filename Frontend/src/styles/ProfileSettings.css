@@ -122,9 +122,10 @@
   position: absolute;
   bottom: 4px;
   right: 4px;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  padding: 0;
   background: #0d6efd;
   border: 3px solid #ffffff;
   display: flex;
@@ -142,6 +143,7 @@
 
 .edit-picture-btn svg {
   stroke: #ffffff;
+  fill: none;
 }
 
 .profile-picture-card .btn-outline-primary {

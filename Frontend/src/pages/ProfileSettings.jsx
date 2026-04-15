@@ -298,7 +298,7 @@ const ProfileSettings = () => {
                             </div>
                           )}
                           <button className="edit-picture-btn" onClick={handleImageUploadClick} type="button" aria-label="Upload new profile picture">
-                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
                               <rect x="3" y="7" width="18" height="13" rx="2" fill="none" />
                               <path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" fill="none" />
                               <circle cx="12" cy="14" r="3" fill="none" />
@@ -334,11 +334,9 @@ const ProfileSettings = () => {
                       <div className="d-flex align-items-center gap-3" style={{ padding: '24px' }}>
                         <div className="help-icon-wrapper">
                           <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            {/* Background circle */}
-                            <circle cx="24" cy="24" r="22" fill="currentColor" fillOpacity="0.1" stroke="currentColor" strokeWidth="2"/>
-                            {/* Question mark */}
-                            <path d="M24 14C20.13 14 17 17.13 17 21H20C20 18.79 21.79 17 24 17C26.21 17 28 18.79 28 21C28 23.5 26 25 24 27V29H27V27C29 25 31 23.5 31 21C31 17.13 27.88 14 24 14Z" fill="currentColor"/>
-                            <circle cx="24" cy="33" r="1.5" fill="currentColor"/>
+                            <circle cx="24" cy="24" r="21" fill="currentColor" fillOpacity="0.08" stroke="currentColor" strokeWidth="2" />
+                            <path d="M19.5 18.5C19.5 16.02 21.52 14 24 14C26.48 14 28.5 16.02 28.5 18.5C28.5 20.38 27.36 21.72 25.8 22.56C24.88 23.06 24 23.88 24 25.5V27" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+                            <circle cx="24" cy="33" r="1.8" fill="currentColor" />
                           </svg>
                         </div>
                         <div className="help-content" style={{ flex: 1 }}>

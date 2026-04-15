@@ -712,6 +712,10 @@ body.dark-mode .legal-section a:hover {
   color: #79b8ff !important;
 }
 
+body.dark-mode .legal-page .text-muted {
+  color: #8b949e !important;
+}
+
 /* ---------- Help Center ---------- */
 body.dark-mode .help-page {
   background-color: #0f1117 !important;
@@ -1238,6 +1242,27 @@ body.dark-mode .schedule-card .card-header h3 {
   color: #e6edf3 !important;
 }
 
+body.dark-mode .schedule-card .bg-light-subtle {
+  background: #1c2230 !important;
+  border-color: #30363d !important;
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .schedule-card .bg-white {
+  background: #21262d !important;
+  border-color: #30363d !important;
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .schedule-card .border {
+  border-color: #30363d !important;
+}
+
+body.dark-mode .schedule-card .badge.bg-dark {
+  background: #30363d !important;
+  color: #e6edf3 !important;
+}
+
 body.dark-mode .rbc-wrapper .rbc-toolbar {
   background: transparent !important;
 }
@@ -1274,6 +1299,10 @@ body.dark-mode .rbc-wrapper .rbc-month-view,
 body.dark-mode .rbc-wrapper .rbc-time-view {
   background: #21262d !important;
   border-color: #30363d !important;
+}
+
+body.dark-mode .rbc-wrapper .rbc-today {
+  background: #55585e !important;
 }
 
 body.dark-mode .rbc-wrapper .rbc-off-range {
