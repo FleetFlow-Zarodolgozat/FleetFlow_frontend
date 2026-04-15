@@ -1,11 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
-import { Button, Card, Form, Container, Row, Col, Alert } from 'react-bootstrap';
+import { Button, Card, Form, Container, Row, Col } from 'react-bootstrap';
 import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';   
 import Sidebar from '../components/Sidebar';
 import RouteMap from '../components/RouteMap';
+import CustomModal from '../components/CustomModal';
 import '../styles/DriverDashboard.css';
 import '../styles/AddNewTrip.css';
 import Footer from '../components/Footer';
@@ -26,6 +27,8 @@ const AddNewTrip = () => {
   const [weeklyStats, setWeeklyStats] = useState({ totalDistance: 0, tripsLogged: 0 });
   const [previousOdometer, setPreviousOdometer] = useState(0);
   const [activeLocationField, setActiveLocationField] = useState('start');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalContent, setModalContent] = useState({ title: '', message: '' });
   const navigate = useNavigate();
 
   const smartTruncateAddress = (address) => {
@@ -58,6 +61,20 @@ const AddNewTrip = () => {
     setStartDateTime(defaultDateTime);
     setEndDateTime(defaultDateTime);
   }, []);
+
+  useEffect(() => {
+    if (error) {
+      setModalContent({ title: t('common.errorTitle'), message: error });
+      setModalOpen(true);
+    }
+  }, [error, t]);
+
+  useEffect(() => {
+    if (success) {
+      setModalContent({ title: t('common.successTitle'), message: t('addTrip.savedSuccess') });
+      setModalOpen(true);
+    }
+  }, [success, t]);
 
   useEffect(() => {
     // Út adatok lekérése: heti statisztikák és előző kilométeróra
@@ -153,8 +170,25 @@ const AddNewTrip = () => {
             <div className="trip-details-card">
 
               <div className="trip-details-body">
-                {error && <Alert variant="danger">{error}</Alert>}
-                {success && <Alert variant="success">{t('addTrip.savedSuccess')}</Alert>}
+                <CustomModal
+                  isOpen={modalOpen}
+                  onClose={() => {
+                    setModalOpen(false);
+                    setError('');
+                    setSuccess(false);
+                  }}
+                  title={modalContent.title}
+                  primaryAction={{
+                    label: t('common.ok'),
+                    onClick: () => {
+                      setModalOpen(false);
+                      setError('');
+                      setSuccess(false);
+                    },
+                  }}
+                >
+                  <p className="mb-0">{modalContent.message}</p>
+                </CustomModal>
 
                 <Form onSubmit={handleSubmit}>
                   {/* Locations Row */}

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Card, Container, Row, Col, Form, Alert, Spinner } from 'react-bootstrap';
+import { Button, Card, Container, Row, Col, Form, Spinner } from 'react-bootstrap';
 import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import Sidebar from '../components/Sidebar';
+import CustomModal from '../components/CustomModal';
 import '../styles/DriverDashboard.css';
 import '../styles/AddFuelLog.css';
 import '../styles/AddServiceRequest.css';
@@ -18,6 +19,8 @@ const AddServiceRequest = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [pendingRequests, setPendingRequests] = useState([]);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalContent, setModalContent] = useState({ title: '', message: '' });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -37,6 +40,20 @@ const AddServiceRequest = () => {
     };
     fetchPending();
   }, []);
+
+  useEffect(() => {
+    if (error) {
+      setModalContent({ title: t('common.errorTitle'), message: error });
+      setModalOpen(true);
+    }
+  }, [error, t]);
+
+  useEffect(() => {
+    if (success) {
+      setModalContent({ title: t('common.successTitle'), message: t('addSR.savedSuccess') });
+      setModalOpen(true);
+    }
+  }, [success, t]);
 
   const handleSubmit = async (e) => {
     // Szervizigénylés elküldése az API-nak
@@ -96,8 +113,25 @@ const AddServiceRequest = () => {
             <Col lg={7} xl={6}>
               <Card className="fuel-form-card border-0 shadow-sm">
                 <Card.Body className="p-4 p-md-5">
-                  {error && <Alert variant="danger" className="mb-3">{error}</Alert>}
-                  {success && <Alert variant="success" className="mb-3">{t('addSR.savedSuccess')}</Alert>}
+                  <CustomModal
+                    isOpen={modalOpen}
+                    onClose={() => {
+                      setModalOpen(false);
+                      setError('');
+                      setSuccess(false);
+                    }}
+                    title={modalContent.title}
+                    primaryAction={{
+                      label: t('common.ok'),
+                      onClick: () => {
+                        setModalOpen(false);
+                        setError('');
+                        setSuccess(false);
+                      },
+                    }}
+                  >
+                    <p className="mb-0">{modalContent.message}</p>
+                  </CustomModal>
 
                   <Form onSubmit={handleSubmit}>
                     <Row className="g-4">

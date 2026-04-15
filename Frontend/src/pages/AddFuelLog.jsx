@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Card, Container, Row, Col, Alert, Form } from 'react-bootstrap';
+import { Button, Card, Container, Row, Col, Form } from 'react-bootstrap';
 import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import Sidebar from '../components/Sidebar';
+import CustomModal from '../components/CustomModal';
 import '../styles/DriverDashboard.css';
 import '../styles/AddFuelLog.css';
 import Footer from '../components/Footer';
@@ -26,6 +27,8 @@ const AddFuelLog = () => {
   const [success, setSuccess] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalContent, setModalContent] = useState({ title: '', message: '' });
 
   const navigate = useNavigate();
 
@@ -71,6 +74,20 @@ const AddFuelLog = () => {
     setDate(defaultDate);
     setTime(defaultTime);
   }, []);
+
+  useEffect(() => {
+    if (error) {
+      setModalContent({ title: t('common.errorTitle'), message: error });
+      setModalOpen(true);
+    }
+  }, [error, t]);
+
+  useEffect(() => {
+    if (success) {
+      setModalContent({ title: t('common.successTitle'), message: t('addFuelLog.savedSuccess') });
+      setModalOpen(true);
+    }
+  }, [success, t]);
 
   const handleSubmit = async (e) => {
     // Üzemanyag napló elküldése - Frontend validáció és API hívás
@@ -166,8 +183,25 @@ const AddFuelLog = () => {
             <Col lg={7} xl={8}>
               <Card className="fuel-form-card border-0 shadow-sm">
                 <Card.Body className="p-4 p-md-5">
-                  {error && <Alert variant="danger" className="mb-3">{error}</Alert>}
-                  {success && <Alert variant="success" className="mb-3">{t('addFuelLog.savedSuccess')}</Alert>}
+                  <CustomModal
+                    isOpen={modalOpen}
+                    onClose={() => {
+                      setModalOpen(false);
+                      setError('');
+                      setSuccess(false);
+                    }}
+                    title={modalContent.title}
+                    primaryAction={{
+                      label: t('common.ok'),
+                      onClick: () => {
+                        setModalOpen(false);
+                        setError('');
+                        setSuccess(false);
+                      },
+                    }}
+                  >
+                    <p className="mb-0">{modalContent.message}</p>
+                  </CustomModal>
 
                   <Form onSubmit={handleSubmit}>
                     <Row className="g-4">
@@ -206,7 +240,7 @@ const AddFuelLog = () => {
                               required
                               min="0"
                               step="1"
-                              placeholder="0.00"
+                              placeholder={t('addFuelLog.placeholder.liters')}
                               className="form-control-lg"
                             />
                             <span className="input-suffix">L</span>
@@ -226,7 +260,7 @@ const AddFuelLog = () => {
                               required
                               min="0"
                               step="100"
-                              placeholder="0.00"
+                              placeholder={t('addFuelLog.placeholder.totalCost')}
                               className="form-control-lg"
                             />
                             <span className="input-suffix">Ft</span>
@@ -250,7 +284,7 @@ const AddFuelLog = () => {
                               onChange={e => setOdometer(e.target.value)}
                               min="0"
                               step="1"
-                              placeholder="0"
+                              placeholder={t('addFuelLog.placeholder.odometer')}
                               className="form-control-lg"
                               required
                             />
@@ -272,7 +306,7 @@ const AddFuelLog = () => {
                             type="text"
                             value={station}
                             onChange={e => setStation(e.target.value)}
-                            placeholder="e.g. Shell, OMV, BP..."
+                            placeholder={t('addFuelLog.placeholder.station')}
                             className="form-control-lg"
                           />
                         </Form.Group>
@@ -287,7 +321,7 @@ const AddFuelLog = () => {
                             rows={3}
                             value={notes}
                             onChange={e => setNotes(e.target.value)}
-                            placeholder="Add details like pump number or issues encountered..."
+                            placeholder={t('addFuelLog.placeholder.notes')}
                             className="form-control-lg"
                           />
                           {language !== 'en' && (

@@ -105,7 +105,9 @@
 }
 
 .admin-dashboard .stat-card .card-body > div {
-  align-items: center !important;
+  align-items: flex-start !important;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .admin-dashboard .stat-label {
@@ -114,6 +116,7 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: #6c757d;
+  word-break: break-word;
 }
 
 .admin-dashboard .stat-value {
@@ -121,6 +124,7 @@
   font-weight: 700;
   color: #212529;
   margin: 0;
+  word-break: break-word;
 }
 
 .admin-dashboard .stat-change {
@@ -128,6 +132,9 @@
   font-weight: 600;
   padding: 4px 8px;
   border-radius: 6px;
+  max-width: 100%;
+  white-space: normal;
+  word-break: break-word;
 }
 
 .admin-dashboard .stat-compare {
@@ -140,6 +147,7 @@
   color: #6c757d;
   display: block;
   margin-top: 4px;
+  word-break: break-word;
 }
 
 .admin-dashboard .stat-icon {

@@ -8,6 +8,7 @@ import { hu, de, enUS } from 'date-fns/locale';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { useLanguage } from '../contexts/LanguageContext';
 import api from '../services/api';
+import CustomModal from '../components/CustomModal';
 import '../styles/AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -75,6 +76,7 @@ const AdminDashboard = () => {
   });
   const [eventSaving, setEventSaving] = useState(false);
   const [eventFeedback, setEventFeedback] = useState({ type: '', message: '' });
+  const [exportEmptyModalOpen, setExportEmptyModalOpen] = useState(false);
   const loadCalendarEvents = async () => {
     try {
       const calendarResponse = await api.get('/calendarevents');
@@ -338,6 +340,7 @@ const AdminDashboard = () => {
 
       if (fuelLogs.length === 0 && trips.length === 0 && srs.length === 0) {
         setExportLoading(false);
+        setExportEmptyModalOpen(true);
         return;
       }
 
@@ -472,12 +475,14 @@ const AdminDashboard = () => {
         const dest = t.endLocation ?? t.EndLocation ?? '—';
         const notes = t.notes ?? t.Notes ?? '';
         const id = t.id ?? t.Id;
-        return `<div class="trip-card">
+        return `<table class="card-block"><tr><td>
+      <div class="trip-card">
   <div class="card-header"><div class="card-number">#${id}</div><div class="card-plate">${plate}</div><div class="card-date">${fmt.date} &nbsp; ${fmt.time}</div></div>
   <div class="card-route"><div class="route-point"><span class="route-dot dot-origin"></span><span class="route-label">From</span><span class="route-value">${origin}</span></div><div class="route-arrow">&#8594;</div><div class="route-point"><span class="route-dot dot-dest"></span><span class="route-label">To</span><span class="route-value">${dest}</span></div></div>
   <div class="card-stats"><div class="stat-pill">&#128205; ${dist} km</div><div class="stat-pill">&#128344; ${dur}</div></div>
   <div class="card-footer"><span class="driver-label">Driver:</span> <span class="driver-email">${driver}</span>${notes ? ` &nbsp;|&nbsp; <span class="notes-text">${notes}</span>` : ''}</div>
-</div>`;
+      </div>
+      </td></tr></table>`;
       }).join('\n');
 
       const tripHtml_cards = tripCards; // already built above
@@ -496,12 +501,14 @@ const AdminDashboard = () => {
         const receiptHtml = receiptEntry
           ? `<div class="receipt-section"><div class="receipt-label">Receipt</div><div class="receipt-filename">&#128206; ${receiptEntry.filename}</div></div>`
           : `<div class="receipt-section receipt-missing">No receipt uploaded</div>`;
-        return `<div class="fuel-card">
+        return `<table class="card-block"><tr><td>
+      <div class="fuel-card">
   <div class="card-header"><div class="card-number">#${id}</div><div class="card-plate">${plate}</div><div class="card-date">${fmt.date}&nbsp;&nbsp;${fmt.time}</div></div>
   <div class="card-stats"><div class="stat-pill pill-orange">&#9650; ${liters} L</div><div class="stat-pill pill-green">&#128178; ${cost}</div><div class="stat-pill">&#128205; ${station}</div></div>
   <div class="card-driver"><span class="driver-label">Driver:</span> <span class="driver-email">${driver}</span></div>
   ${receiptHtml}
-</div>`;
+      </div>
+      </td></tr></table>`;
       }).join('\n');
 
       // Service request cards (for combined Word)
@@ -530,12 +537,14 @@ const AdminDashboard = () => {
         const invoiceHtml = invoiceEntry
           ? `<div class="invoice-section"><div class="invoice-label">Invoice</div><div class="invoice-filename">&#128206; ${invoiceEntry.filename}</div></div>`
           : '';
-        return `<div class="sr-card">
+        return `<table class="card-block"><tr><td>
+      <div class="sr-card">
   <div class="card-header"><div class="card-number">#${id}</div><div class="card-title">${title}</div><div class="status-badge" style="background:${sc.bg};color:${sc.text};border:1px solid ${sc.border}">${statusLbl}</div></div>
   <div class="card-row"><div class="stat-pill pill-vehicle">&#128663; ${plate}</div><div class="stat-pill pill-date">&#128197; ${scheduledFmt}</div>${cost != null && cost !== '' ? `<div class="stat-pill pill-cost">&#128178; ${cost} Ft</div>` : ''}${closedFmt ? `<div class="stat-pill pill-closed">&#10003; Closed: ${closedFmt}</div>` : ''}</div>
   <div class="card-driver"><span class="driver-label">Driver:</span> <span class="driver-email">${driver}</span></div>
   ${invoiceHtml}
-</div>`;
+      </div>
+      </td></tr></table>`;
       }).join('\n');
 
       // ── Dashboard KPI sub-labels (for Word summary cards) ──────────────────
@@ -559,7 +568,9 @@ h2.trips-title{color:#1d6ee6;}h2.fuel-title{color:#f97316;}h2.sr-title{color:#7c
 .stat-box .label{font-size:10px;text-transform:uppercase;color:#94a3b8;}
 .stat-box .value{font-size:17px;font-weight:700;color:#0f172a;}
 .stat-box.blue{border-top:3px solid #3b82f6;}.stat-box.green{border-top:3px solid #16a34a;}.stat-box.purple{border-top:3px solid #7c3aed;}.stat-box.orange{border-top:3px solid #f97316;}
-.trip-card,.fuel-card,.sr-card{border:1px solid #e2e8f0;border-radius:10px;padding:14px 18px;margin-bottom:12px;background:#ffffff;page-break-inside:avoid;}
+.card-block{width:100%;border-collapse:collapse;page-break-inside:avoid;break-inside:avoid;}
+.card-block td{padding:0;}
+.trip-card,.fuel-card,.sr-card{border:1px solid #e2e8f0;border-radius:10px;padding:14px 18px;margin-bottom:12px;background:#ffffff;page-break-inside:avoid;break-inside:avoid-page;break-inside:avoid;-webkit-column-break-inside:avoid;-moz-column-break-inside:avoid;display:block;width:100%;}
 .card-header{display:flex;align-items:center;gap:12px;margin-bottom:10px;border-bottom:1px solid #f1f5f9;padding-bottom:8px;}
 .card-number{font-size:11px;font-weight:700;color:#94a3b8;min-width:28px;}
 .card-plate{font-size:14px;font-weight:700;color:#1e293b;background:#f1f5f9;border-radius:5px;padding:2px 10px;letter-spacing:1px;}
@@ -867,10 +878,22 @@ ${srCards}
           </Row>
         </div>
 
+        <CustomModal
+          isOpen={exportEmptyModalOpen}
+          onClose={() => setExportEmptyModalOpen(false)}
+          title={t('adminDash.export.emptyTitle')}
+          primaryAction={{
+            label: t('common.ok'),
+            onClick: () => setExportEmptyModalOpen(false),
+          }}
+        >
+          <p className="mb-0">{t('adminDash.export.emptyMessage')}</p>
+        </CustomModal>
+
         {/* Stats Cards */}
         <Row className="g-3 mb-4">
           {/* Card 1: Total Fleet — always all-time */}
-          <Col xl={3} lg={4} md={6}>
+          <Col xl={3} lg={6} md={6}>
             <Card className="stat-card h-100">
               <Card.Body>
                 <div className="d-flex justify-content-between align-items-start">
@@ -905,7 +928,7 @@ ${srCards}
           </Col>
 
           {/* Card 2: Fuel Costs — filtered by timeRange */}
-          <Col xl={3} lg={4} md={6}>
+          <Col xl={3} lg={6} md={6}>
             <Card className="stat-card h-100">
               <Card.Body>
                 <div className="d-flex justify-content-between align-items-start">
@@ -954,7 +977,7 @@ ${srCards}
           </Col>
 
           {/* Card 3: Trips — filtered by timeRange */}
-          <Col xl={3} lg={4} md={6}>
+          <Col xl={3} lg={6} md={6}>
             <Card className="stat-card h-100">
               <Card.Body>
                 <div className="d-flex justify-content-between align-items-start">
@@ -993,7 +1016,7 @@ ${srCards}
           </Col>
 
           {/* Card 4: Service Requests — filtered by timeRange */}
-          <Col xl={3} lg={4} md={6}>
+          <Col xl={3} lg={6} md={6}>
             <Card className="stat-card h-100">
               <Card.Body>
                 <div className="d-flex justify-content-between align-items-start">

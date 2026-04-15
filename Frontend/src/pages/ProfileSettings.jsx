@@ -6,6 +6,7 @@ import api from '../services/api';
 import Sidebar from '../components/Sidebar';
 import { authService } from '../services/authService';
 import { useLanguage } from '../contexts/LanguageContext';
+import CustomModal from '../components/CustomModal';
 import '../styles/ProfileSettings.css';
 
 import Footer from '../components/Footer';
@@ -22,6 +23,7 @@ const ProfileSettings = () => {
   const [profileImageError, setProfileImageError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [feedback, setFeedback] = useState({ type: '', message: '' });
+  const [confirmModal, setConfirmModal] = useState({ open: false, title: '', message: '', onConfirm: null });
   useEffect(() => {
     if (feedback.message) {
       const timer = setTimeout(() => {
@@ -215,6 +217,22 @@ const ProfileSettings = () => {
     }
   };
 
+  const openConfirmModal = ({ title, message, onConfirm }) => {
+    setConfirmModal({ open: true, title, message, onConfirm });
+  };
+
+  const closeConfirmModal = () => {
+    setConfirmModal((prev) => ({ ...prev, open: false }));
+  };
+
+  const handleConfirmAction = async () => {
+    const action = confirmModal.onConfirm;
+    closeConfirmModal();
+    if (typeof action === 'function') {
+      await action();
+    }
+  };
+
   const handlePreferenceChange = (key) => {
     if (key === 'darkMode') {
       if (user?.role?.toLowerCase() === 'admin') return;
@@ -315,7 +333,17 @@ const ProfileSettings = () => {
                       </div>
                       <h3 className="card-title text-muted mb-4">{profile.fullName}</h3>
                       <div className="remove-picture-bg">
-                        <Button variant="link" className="w-100 text-danger" onClick={handleRemovePicture}>
+                        <Button
+                          variant="link"
+                          className="w-100 text-danger"
+                          onClick={() =>
+                            openConfirmModal({
+                              title: t('profile.confirm.removeTitle'),
+                              message: t('profile.confirm.removeMessage'),
+                              onConfirm: handleRemovePicture,
+                            })
+                          }
+                        >
                           {t('profile.picture.remove')}
                         </Button>
                       </div>
@@ -491,7 +519,16 @@ const ProfileSettings = () => {
                               {t('profile.btn.edit')}
                             </Button>
                           ) : (
-                            <Button variant="primary" onClick={handleSave}>
+                            <Button
+                              variant="primary"
+                              onClick={() =>
+                                openConfirmModal({
+                                  title: t('profile.confirm.saveTitle'),
+                                  message: t('profile.confirm.saveMessage'),
+                                  onConfirm: handleSave,
+                                })
+                              }
+                            >
                               {t('profile.btn.save')}
                             </Button>
                           )}
@@ -500,6 +537,21 @@ const ProfileSettings = () => {
                     </Card.Body>
                   </Card>
                 </Col>
+                <CustomModal
+                  isOpen={confirmModal.open}
+                  onClose={closeConfirmModal}
+                  title={confirmModal.title}
+                  primaryAction={{
+                    label: t('common.confirm'),
+                    onClick: handleConfirmAction,
+                  }}
+                  secondaryAction={{
+                    label: t('common.cancel'),
+                    onClick: closeConfirmModal,
+                  }}
+                >
+                  <p className="mb-0">{confirmModal.message}</p>
+                </CustomModal>
 
                 {/* Preferences Card */}
                 <Col xs={12}>
@@ -594,23 +646,24 @@ const ProfileSettings = () => {
                   </Card>
                 </Col>
 
-                {/* Danger Zone Card */}
+                {/* Mobile App Download Card */}
                 <Col xs={12}>
-                  <Card className="danger-zone-card">
+                  <Card className="app-download-card">
                     <Card.Body className="p-4">
-                      <div className="danger-zone-content">
-                        <div className="danger-zone-text">
-                          <h4 className="danger-zone-title">{t('profile.danger.title')}</h4>
-                          <p className="danger-zone-description">
-                            {t('profile.danger.description')}
+                      <div className="app-download-content">
+                        <div className="app-download-text">
+                          <h4 className="app-download-title">{t('profile.app.title')}</h4>
+                          <p className="app-download-description">
+                            {t('profile.app.description')}
                           </p>
                         </div>
                         <Button
-                          variant="outline-danger"
-                          className="delete-account-btn"
-                          onClick={() => { authService.logout(); navigate('/login'); }}
+                          variant="primary"
+                          className="app-download-btn"
+                          href="https://github.com/FleetFlow-Zarodolgozat/FleetFlow_mobil/releases/download/v1.2/com.fleetflow.mobil-Signed.apk"
+                          download
                         >
-                          {t('profile.danger.btn')}
+                          {t('profile.app.cta')}
                         </Button>
                       </div>
                     </Card.Body>

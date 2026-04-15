@@ -5,6 +5,8 @@ import api from '../services/api';
 import JSZip from 'jszip';
 import Sidebar from '../components/Sidebar';
 import Footer from '../components/Footer';
+import CustomModal from '../components/CustomModal';
+import { useLanguage } from '../contexts/LanguageContext';
 import '../styles/AdminServiceRequests.css';
 
 const PAGE_SIZE = 10;
@@ -19,6 +21,7 @@ const STATUS_LABELS = {
 
 const AdminServiceRequests = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 1024);
 
   const [requests, setRequests] = useState([]);
@@ -36,6 +39,7 @@ const AdminServiceRequests = () => {
   const debounceRef = useRef(null);
 
   const [exporting, setExporting] = useState(false);
+  const [exportEmptyModalOpen, setExportEmptyModalOpen] = useState(false);
 
   const [statusFilter, setStatusFilter] = useState('ongoing');
   const [ordering, setOrdering] = useState('');
@@ -169,6 +173,17 @@ const AdminServiceRequests = () => {
     };
   };
 
+  const getCreatedAtValue = (req) => {
+    return (
+      req.createdAt ?? req.CreatedAt ??
+      req.createdOn ?? req.CreatedOn ??
+      req.submittedAt ?? req.SubmittedAt ??
+      req.date ?? req.Date ??
+      req.scheduledStart ?? req.ScheduledStart ??
+      req.closedAt ?? req.ClosedAt
+    );
+  };
+
   const getInitials = (email) => {
     if (!email) return '?';
     return email.charAt(0).toUpperCase();
@@ -215,8 +230,9 @@ const AdminServiceRequests = () => {
       }
 
       if (items.length === 0) {
-        setError('No data to export for the selected filters.');
+        setError('');
         setExporting(false);
+        setExportEmptyModalOpen(true);
         return;
       }
 
@@ -310,7 +326,8 @@ const AdminServiceRequests = () => {
           : '';
 
         return `
-<div class="sr-card">
+      <table class="card-block"><tr><td>
+      <div class="sr-card">
   <div class="card-header">
     <div class="card-number">#${id}</div>
     <div class="card-title">${title}</div>
@@ -327,7 +344,8 @@ const AdminServiceRequests = () => {
     <span class="driver-email">${driver}</span>
   </div>
   ${invoiceHtml}
-</div>`;
+</div>
+</td></tr></table>`;
       }).join('\n');
 
       const html = `<!DOCTYPE html>
@@ -352,7 +370,9 @@ const AdminServiceRequests = () => {
   .stat-box.blue { border-top: 3px solid #3b82f6; }
   .stat-box.green { border-top: 3px solid #16a34a; }
   .stat-box.orange { border-top: 3px solid #f97316; }
-  .sr-card { border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px 20px; margin-bottom: 16px; background: #ffffff; page-break-inside: avoid; }
+  .card-block { width: 100%; border-collapse: collapse; page-break-inside: avoid; break-inside: avoid; }
+  .card-block td { padding: 0; }
+  .sr-card { border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px 20px; margin-bottom: 16px; background: #ffffff; page-break-inside: avoid; break-inside: avoid-page; break-inside: avoid; -webkit-column-break-inside: avoid; -moz-column-break-inside: avoid; display: block; width: 100%; }
   .card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; }
   .card-number { font-size: 11px; font-weight: 700; color: #94a3b8; min-width: 28px; }
   .card-title { font-size: 14px; font-weight: 700; color: #1e293b; flex: 1; }
@@ -481,6 +501,18 @@ ${serviceCards}
 
       <main className="asr-main">
         <Container fluid className="asr-page">
+
+          <CustomModal
+            isOpen={exportEmptyModalOpen}
+            onClose={() => setExportEmptyModalOpen(false)}
+            title={t('adminDash.export.emptyTitle')}
+            primaryAction={{
+              label: t('common.ok'),
+              onClick: () => setExportEmptyModalOpen(false),
+            }}
+          >
+            <p className="mb-0">{t('adminDash.export.emptyMessage')}</p>
+          </CustomModal>
 
           {/* ── Header ─────────────────────────────────── */}
           <div className="asr-header">
@@ -696,7 +728,7 @@ ${serviceCards}
                     <tbody>
                       {requests.map((req) => {
                         const id = req.id ?? req.Id;
-                        const createdAt = formatDateTime(req.createdAt ?? req.CreatedAt);
+                        const createdAt = formatDateTime(getCreatedAtValue(req));
                         const scheduledStart = formatDateTime(req.scheduledStart ?? req.ScheduledStart);
                         const closedAt = formatDateTime(req.closedAt ?? req.ClosedAt);
                         const plate = req.licensePlate ?? req.LicensePlate ?? '—';
@@ -778,7 +810,7 @@ ${serviceCards}
                 <div className="asr-mobile-cards">
                   {requests.map((req) => {
                     const id = req.id ?? req.Id;
-                    const createdAt = formatDateTime(req.createdAt ?? req.CreatedAt);
+                    const createdAt = formatDateTime(getCreatedAtValue(req));
                     const scheduledStart = formatDateTime(req.scheduledStart ?? req.ScheduledStart);
                     const closedAt = formatDateTime(req.closedAt ?? req.ClosedAt);
                     const plate = req.licensePlate ?? req.LicensePlate ?? '—';

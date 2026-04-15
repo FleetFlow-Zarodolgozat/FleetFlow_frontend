@@ -1,19 +1,24 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Alert, Button, Container, Form, Spinner } from 'react-bootstrap';
+import { Button, Container, Form, Spinner } from 'react-bootstrap';
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
 import Footer from '../components/Footer';
+import CustomModal from '../components/CustomModal';
+import { useLanguage } from '../contexts/LanguageContext';
 import '../styles/EditDriver.css';
 import '../styles/EditVehicle.css';
 
 const AddVehicle = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 1024);
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalContent, setModalContent] = useState({ title: '', message: '' });
 
   const [form, setForm] = useState({
     licensePlate: '',
@@ -33,6 +38,20 @@ const AddVehicle = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  useEffect(() => {
+    if (error) {
+      setModalContent({ title: t('common.errorTitle'), message: error });
+      setModalOpen(true);
+    }
+  }, [error, t]);
+
+  useEffect(() => {
+    if (success) {
+      setModalContent({ title: t('common.successTitle'), message: success });
+      setModalOpen(true);
+    }
+  }, [success, t]);
 
   useEffect(() => {
     // Aktív sofőrök lekérése az API-ból
@@ -129,16 +148,25 @@ const AddVehicle = () => {
             </div>
           </div>
 
-          {error && (
-            <Alert variant="danger" dismissible onClose={() => setError('')} className="mb-4">
-              {error}
-            </Alert>
-          )}
-          {success && (
-            <Alert variant="success" className="mb-4">
-              {success}
-            </Alert>
-          )}
+          <CustomModal
+            isOpen={modalOpen}
+            onClose={() => {
+              setModalOpen(false);
+              setError('');
+              setSuccess('');
+            }}
+            title={modalContent.title}
+            primaryAction={{
+              label: t('common.ok'),
+              onClick: () => {
+                setModalOpen(false);
+                setError('');
+                setSuccess('');
+              },
+            }}
+          >
+            <p className="mb-0">{modalContent.message}</p>
+          </CustomModal>
 
           <div className="ev-layout">
 

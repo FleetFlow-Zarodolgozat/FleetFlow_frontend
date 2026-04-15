@@ -5,12 +5,15 @@ import JSZip from 'jszip';
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
 import Footer from '../components/Footer';
+import CustomModal from '../components/CustomModal';
+import { useLanguage } from '../contexts/LanguageContext';
 import '../styles/AdminFuelLogs.css';
 
 const PAGE_SIZE = 10;
 
 const AdminFuelLogs = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 1024);
 
   const [fuelLogs, setFuelLogs] = useState([]);
@@ -38,6 +41,7 @@ const AdminFuelLogs = () => {
   const [actionLoading, setActionLoading] = useState(null);
   const [actionError, setActionError] = useState('');
   const [exportLoading, setExportLoading] = useState(false);
+  const [exportEmptyModalOpen, setExportEmptyModalOpen] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
@@ -115,7 +119,8 @@ const AdminFuelLogs = () => {
     debounceRef.current = setTimeout(() => {
       setSearchQ(val);
     }, 400);
-  };  useEffect(() => {
+  };
+  useEffect(() => {
     if (fuelLogs.length === 0) return;
     let cancelled = false;
     const fetchImages = async () => {
@@ -221,8 +226,9 @@ const AdminFuelLogs = () => {
       }
 
       if (rows.length === 0) {
-        setError('No data to export for the selected filters.');
+        setError('');
         setExportLoading(false);
+        setExportEmptyModalOpen(true);
         return;
       }
 
@@ -318,7 +324,8 @@ const AdminFuelLogs = () => {
           : `<div class="receipt-section receipt-missing">No receipt uploaded</div>`;
 
         return `
-<div class="fuel-card${isDeleted ? ' deleted' : ''}">
+      <table class="card-block"><tr><td>
+      <div class="fuel-card${isDeleted ? ' deleted' : ''}">
   <div class="card-header">
     <div class="card-number">#${id}</div>
     <div class="card-plate">${plate}</div>
@@ -335,7 +342,8 @@ const AdminFuelLogs = () => {
     <span class="driver-email">${driver}</span>
   </div>
   ${receiptHtml}
-</div>`;
+</div>
+</td></tr></table>`;
       }).join('\n');
 
       const html = `<!DOCTYPE html>
@@ -360,7 +368,9 @@ const AdminFuelLogs = () => {
   .stat-box.orange { border-top: 3px solid #f97316; }
   .stat-box.green { border-top: 3px solid #16a34a; }
   .stat-box.purple { border-top: 3px solid #7c3aed; }
-  .fuel-card { border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px 20px; margin-bottom: 16px; background: #ffffff; page-break-inside: avoid; }
+  .card-block { width: 100%; border-collapse: collapse; page-break-inside: avoid; break-inside: avoid; }
+  .card-block td { padding: 0; }
+  .fuel-card { border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px 20px; margin-bottom: 16px; background: #ffffff; page-break-inside: avoid; break-inside: avoid-page; break-inside: avoid; -webkit-column-break-inside: avoid; -moz-column-break-inside: avoid; display: block; width: 100%; }
   .fuel-card.deleted { border-color: #fca5a5; background: #fff5f5; }
   .card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; }
   .card-number { font-size: 11px; font-weight: 700; color: #94a3b8; min-width: 28px; }
@@ -524,6 +534,18 @@ ${fuelCards}
 
       <main className="afl-main">
         <Container fluid className="afl-page">
+
+          <CustomModal
+            isOpen={exportEmptyModalOpen}
+            onClose={() => setExportEmptyModalOpen(false)}
+            title={t('adminDash.export.emptyTitle')}
+            primaryAction={{
+              label: t('common.ok'),
+              onClick: () => setExportEmptyModalOpen(false),
+            }}
+          >
+            <p className="mb-0">{t('adminDash.export.emptyMessage')}</p>
+          </CustomModal>
 
           {/* ── Header ─────────────────────────────────── */}
           <div className="afl-header">

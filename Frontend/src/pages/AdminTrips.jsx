@@ -5,6 +5,8 @@ import JSZip from 'jszip';
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
 import Footer from '../components/Footer';
+import CustomModal from '../components/CustomModal';
+import { useLanguage } from '../contexts/LanguageContext';
 import '../styles/AdminTrips.css';
 
 const PAGE_SIZE = 10;
@@ -23,6 +25,7 @@ const getColorForEmail = (email) => {
 
 const AdminTrips = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 1024);
 
   const [trips, setTrips] = useState([]);
@@ -50,6 +53,7 @@ const AdminTrips = () => {
   const [csvLoading, setCsvLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(null);
   const [actionError, setActionError] = useState('');
+  const [exportEmptyModalOpen, setExportEmptyModalOpen] = useState(false);
 
   useEffect(() => {
     const handleResize = () => setSidebarOpen(window.innerWidth > 1024);
@@ -115,7 +119,8 @@ const AdminTrips = () => {
   useEffect(() => {
     fetchTrips(1);
     setPage(1);
-  }, [fetchTrips]);  useEffect(() => {
+  }, [fetchTrips]);
+  useEffect(() => {
     if (trips.length === 0) return;
     let cancelled = false;
     const fetchImages = async () => {
@@ -209,8 +214,9 @@ const AdminTrips = () => {
       }
 
       if (rows.length === 0) {
-        setError('No data to export for the selected filters.');
+        setError('');
         setCsvLoading(false);
+        setExportEmptyModalOpen(true);
         return;
       }
 
@@ -276,7 +282,8 @@ const AdminTrips = () => {
         const dest = t.endLocation ?? t.EndLocation ?? '—';
         const id = t.id ?? t.Id;
         return `
-<div class="trip-card${isDeleted ? ' deleted' : ''}">
+      <table class="card-block"><tr><td>
+      <div class="trip-card${isDeleted ? ' deleted' : ''}">
   <div class="card-header">
     <div class="card-number">#${id}</div>
     <div class="card-plate">${plate}</div>
@@ -304,7 +311,8 @@ const AdminTrips = () => {
   <div class="card-footer">
     <span class="driver-label">Driver:</span> <span class="driver-email">${driver}</span>${notes ? ` &nbsp;|&nbsp; <span class="notes-text">${notes}</span>` : ''}
   </div>
-</div>`;
+</div>
+</td></tr></table>`;
       }).join('\n');
 
       const html = `<!DOCTYPE html>
@@ -328,7 +336,9 @@ const AdminTrips = () => {
   .stat-box.blue { border-top: 3px solid #3b82f6; }
   .stat-box.green { border-top: 3px solid #16a34a; }
   .stat-box.purple { border-top: 3px solid #7c3aed; }
-  .trip-card { border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px 20px; margin-bottom: 14px; background: #ffffff; page-break-inside: avoid; }
+  .card-block { width: 100%; border-collapse: collapse; page-break-inside: avoid; break-inside: avoid; }
+  .card-block td { padding: 0; }
+  .trip-card { border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px 20px; margin-bottom: 14px; background: #ffffff; page-break-inside: avoid; break-inside: avoid-page; break-inside: avoid; -webkit-column-break-inside: avoid; -moz-column-break-inside: avoid; display: block; width: 100%; }
   .trip-card.deleted { border-color: #fca5a5; background: #fff5f5; }
   .card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; }
   .card-number { font-size: 11px; font-weight: 700; color: #94a3b8; min-width: 28px; }
@@ -481,6 +491,18 @@ ${tripCards}
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       <main className="at-main">
         <Container fluid className="at-page">
+
+          <CustomModal
+            isOpen={exportEmptyModalOpen}
+            onClose={() => setExportEmptyModalOpen(false)}
+            title={t('adminDash.export.emptyTitle')}
+            primaryAction={{
+              label: t('common.ok'),
+              onClick: () => setExportEmptyModalOpen(false),
+            }}
+          >
+            <p className="mb-0">{t('adminDash.export.emptyMessage')}</p>
+          </CustomModal>
 
           {/* ── Header ─────────────────────────────────── */}
           <div className="at-header">

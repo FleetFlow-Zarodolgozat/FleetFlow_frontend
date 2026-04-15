@@ -4,6 +4,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { Container, Row, Col, Badge, Alert, Spinner, Button, Form } from 'react-bootstrap';
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
+import CustomModal from '../components/CustomModal';
 import '../styles/Notifications.css';
 
 import Footer from '../components/Footer';
@@ -35,6 +36,15 @@ const Notifications = () => {
   const [error, setError] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
   const [notificationRefresh, setNotificationRefresh] = useState(0);
+  const [confirmModal, setConfirmModal] = useState({
+    open: false,
+    title: '',
+    message: '',
+    confirmLabel: '',
+    cancelLabel: '',
+    confirmVariant: '',
+    onConfirm: null,
+  });
 
   // Sötétebb szövegszín a type labelhez
   const getNotificationTypeTextColor = (notification) => {
@@ -92,48 +102,88 @@ const Notifications = () => {
     }
   };
 
-  const handleMarkAllAsRead = async () => {
-    if (!window.confirm('Mark all notifications as read?')) return;
-    setError('');
-    try {
-      await api.patch('/notifications/read');
-      await fetchNotifications();
-      setNotificationRefresh(r => r + 1);
-    } catch (err) {
-      let msg = 'An error occurred. Please try again.';
-      if (err.response && err.response.data) {
-        const data = err.response.data;
-        if (typeof data === 'string') msg = data;
-        else if (data.message) msg = data.message;
-        else if (data.detail) msg = data.detail;
-        else if (data.errors) msg = Array.isArray(data.errors) ? data.errors.join(', ') : JSON.stringify(data.errors);
-        else if (err.response.statusText) msg = err.response.statusText;
-        else msg = JSON.stringify(data);
-      }
-      setError(msg);
+  const openConfirmModal = ({ title, message, confirmLabel, cancelLabel, confirmVariant, onConfirm }) => {
+    setConfirmModal({
+      open: true,
+      title,
+      message,
+      confirmLabel,
+      cancelLabel,
+      confirmVariant,
+      onConfirm,
+    });
+  };
+
+  const closeConfirmModal = () => {
+    setConfirmModal((prev) => ({ ...prev, open: false }));
+  };
+
+  const handleConfirmAction = async () => {
+    const action = confirmModal.onConfirm;
+    closeConfirmModal();
+    if (typeof action === 'function') {
+      await action();
     }
   };
 
+  const handleMarkAllAsRead = async () => {
+    openConfirmModal({
+      title: t('notif.confirm.markAllTitle'),
+      message: t('notif.confirm.markAllMessage'),
+      confirmLabel: t('common.confirm'),
+      cancelLabel: t('common.cancel'),
+      confirmVariant: 'primary',
+      onConfirm: async () => {
+        setError('');
+        try {
+          await api.patch('/notifications/read');
+          await fetchNotifications();
+          setNotificationRefresh(r => r + 1);
+        } catch (err) {
+          let msg = 'An error occurred. Please try again.';
+          if (err.response && err.response.data) {
+            const data = err.response.data;
+            if (typeof data === 'string') msg = data;
+            else if (data.message) msg = data.message;
+            else if (data.detail) msg = data.detail;
+            else if (data.errors) msg = Array.isArray(data.errors) ? data.errors.join(', ') : JSON.stringify(data.errors);
+            else if (err.response.statusText) msg = err.response.statusText;
+            else msg = JSON.stringify(data);
+          }
+          setError(msg);
+        }
+      },
+    });
+  };
+
   const handleDeleteNotification = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this notification?')) return;
-    setError('');
-    try {
-      await api.delete(`/notifications/${id}`);
-      await fetchNotifications();
-      setNotificationRefresh(r => r + 1);
-    } catch (err) {
-      let msg = 'Failed to delete notification.';
-      if (err.response && err.response.data) {
-        const data = err.response.data;
-        if (typeof data === 'string') msg = data;
-        else if (data.message) msg = data.message;
-        else if (data.detail) msg = data.detail;
-        else if (data.errors) msg = Array.isArray(data.errors) ? data.errors.join(', ') : JSON.stringify(data.errors);
-        else if (err.response.statusText) msg = err.response.statusText;
-        else msg = JSON.stringify(data);
-      }
-      setError(msg);
-    }
+    openConfirmModal({
+      title: t('notif.confirm.deleteTitle'),
+      message: t('notif.confirm.deleteMessage'),
+      confirmLabel: t('common.confirm'),
+      cancelLabel: t('common.cancel'),
+      confirmVariant: 'danger',
+      onConfirm: async () => {
+        setError('');
+        try {
+          await api.delete(`/notifications/${id}`);
+          await fetchNotifications();
+          setNotificationRefresh(r => r + 1);
+        } catch (err) {
+          let msg = 'Failed to delete notification.';
+          if (err.response && err.response.data) {
+            const data = err.response.data;
+            if (typeof data === 'string') msg = data;
+            else if (data.message) msg = data.message;
+            else if (data.detail) msg = data.detail;
+            else if (data.errors) msg = Array.isArray(data.errors) ? data.errors.join(', ') : JSON.stringify(data.errors);
+            else if (err.response.statusText) msg = err.response.statusText;
+            else msg = JSON.stringify(data);
+          }
+          setError(msg);
+        }
+      },
+    });
   };
 
   const handleMarkAsRead = async (id) => {
@@ -148,7 +198,8 @@ const Notifications = () => {
 
   useEffect(() => {
     fetchNotifications();
-  }, []);  const getFilteredNotifications = () => {
+  }, []);
+  const getFilteredNotifications = () => {
     if (activeFilter === 'all') return notifications;
     if (activeFilter === 'unread') return notifications.filter(n => !n.isRead && !n.read);
     if (activeFilter === 'fuel_log') return notifications.filter(n => (n.type || '').toUpperCase() === 'FUEL_LOG');
@@ -180,16 +231,20 @@ const Notifications = () => {
       const dateVal = item.DateTime || item.date || item.createdAt || item.timestamp;
       if (!dateVal) return;
 
-      const itemDate = new Date(dateVal);      if (itemDate.toDateString() === today.toDateString()) {
+      const itemDate = new Date(dateVal);
+      if (itemDate.toDateString() === today.toDateString()) {
         groups['today'] = groups['today'] || [];
         groups['today'].push(item);
-      }      else if (itemDate >= startOfWeek) {
+      }
+      else if (itemDate >= startOfWeek) {
         groups['thisWeek'] = groups['thisWeek'] || [];
         groups['thisWeek'].push(item);
-      }      else if (itemDate >= startOfMonth) {
+      }
+      else if (itemDate >= startOfMonth) {
         groups['thisMonth'] = groups['thisMonth'] || [];
         groups['thisMonth'].push(item);
-      }      else if (itemDate >= startOfYear) {
+      }
+      else if (itemDate >= startOfYear) {
         groups['thisYear'] = groups['thisYear'] || [];
         groups['thisYear'].push(item);
       }
@@ -744,6 +799,22 @@ const Notifications = () => {
             </div>
           )}
         </Container>
+        <CustomModal
+          isOpen={confirmModal.open}
+          onClose={closeConfirmModal}
+          title={confirmModal.title}
+          primaryAction={{
+            label: confirmModal.confirmLabel,
+            onClick: handleConfirmAction,
+            variant: confirmModal.confirmVariant,
+          }}
+          secondaryAction={{
+            label: confirmModal.cancelLabel,
+            onClick: closeConfirmModal,
+          }}
+        >
+          <p className="mb-0">{confirmModal.message}</p>
+        </CustomModal>
         {/* Footer csak ha nem ADMIN */}
         {authService.getCurrentUser()?.role !== 'ADMIN' && (
           <Footer userType={authService.getCurrentUser()?.role} />
