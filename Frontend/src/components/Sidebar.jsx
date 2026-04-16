@@ -88,15 +88,12 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, notificationRefresh }) => {
   const handleLogout = () => {
     const currentUser = authService.getCurrentUser();
     const currentLang = localStorage.getItem('fleetflow_language');
+    const isDarkMode = localStorage.getItem('fleetflow_darkMode') === 'true';
+    localStorage.setItem('fleetflow_darkMode', String(isDarkMode));
+
     if (currentUser?.role?.toLowerCase() === 'driver') {
       if (currentLang) {
         localStorage.setItem('fleetflow_language_driver', currentLang);
-      }
-      const isDarkMode = localStorage.getItem('fleetflow_darkMode') === 'true';
-      if (isDarkMode) {
-        localStorage.setItem('fleetflow_darkModePreference', 'true');
-      } else {
-        localStorage.removeItem('fleetflow_darkModePreference');
       }
     }
     authService.logout();

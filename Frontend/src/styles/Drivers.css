@@ -555,3 +555,86 @@
     align-items: flex-start;
   }
 }
+
+/* Dark mode */
+body.dark-mode .drivers-dashboard,
+body.dark-mode .drivers-dashboard .main-content {
+  background: #0f1117 !important;
+}
+
+body.dark-mode .drivers-title,
+body.dark-mode .driver-name,
+body.dark-mode .driver-name-cell,
+body.dark-mode .pagination-info strong {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .drivers-subtitle,
+body.dark-mode .driver-email-cell,
+body.dark-mode .pagination-info,
+body.dark-mode .drivers-loading-cell,
+body.dark-mode .drivers-empty-cell,
+body.dark-mode .page-ellipsis {
+  color: #8b949e !important;
+}
+
+body.dark-mode .drivers-table-card {
+  background: #1c2230 !important;
+  border-color: #30363d !important;
+}
+
+body.dark-mode .drivers-filters,
+body.dark-mode .drivers-pagination {
+  border-color: #30363d !important;
+}
+
+body.dark-mode .drivers-search-input,
+body.dark-mode .status-select,
+body.dark-mode .page-btn,
+body.dark-mode .assigned-vehicle-badge {
+  background: #21262d !important;
+  border-color: #30363d !important;
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .drivers-search-input::placeholder {
+  color: #6e7681 !important;
+}
+
+body.dark-mode .drivers-search-input:focus,
+body.dark-mode .status-select:focus {
+  border-color: #1f6feb !important;
+  box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.2) !important;
+}
+
+body.dark-mode .drivers-table thead {
+  background: #161b22 !important;
+  border-bottom-color: #30363d !important;
+}
+
+body.dark-mode .drivers-table thead th {
+  color: #8b949e !important;
+}
+
+body.dark-mode .drivers-table tbody tr {
+  border-bottom-color: #30363d !important;
+}
+
+body.dark-mode .drivers-table tbody tr:hover {
+  background: #21262d !important;
+}
+
+body.dark-mode .drivers-table tbody td,
+body.dark-mode .driver-avatar {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .page-btn:hover:not(:disabled) {
+  background: #30363d !important;
+  border-color: #484f58 !important;
+}
+
+body.dark-mode .page-num.active {
+  background: #16a34a !important;
+  border-color: #16a34a !important;
+}

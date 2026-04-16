@@ -4,6 +4,7 @@ import { Alert, Button, Container, Spinner } from 'react-bootstrap';
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
 import Footer from '../components/Footer';
+import CustomModal from '../components/CustomModal';
 import '../styles/Vehicles.css';
 
 const PAGE_SIZE = 10;
@@ -38,6 +39,9 @@ const Vehicles = () => {
   const [statusFilter, setStatusFilter] = useState('');
   const [togglingId, setTogglingId] = useState(null);
   const [driverImages, setDriverImages] = useState({});
+  const [deactivateModalOpen, setDeactivateModalOpen] = useState(false);
+  const [activateModalOpen, setActivateModalOpen] = useState(false);
+  const [selectedVehicleAction, setSelectedVehicleAction] = useState({ id: null, userEmail: null });
 
   const getDriverInitials = (email) => {
     if (!email) return '?';
@@ -126,8 +130,15 @@ const Vehicles = () => {
     }, 400);
   };
 
-  const handleDeactivateVehicle = async (id, userEmail) => {
-    if (!window.confirm('Are you sure you want to deactivate this vehicle? Any active driver assignment will be ended.')) return;
+  const handleDeactivateVehicle = (id, userEmail) => {
+    setSelectedVehicleAction({ id, userEmail: userEmail || null });
+    setDeactivateModalOpen(true);
+  };
+
+  const confirmDeactivateVehicle = async () => {
+    const { id, userEmail } = selectedVehicleAction;
+    if (!id) return;
+    setDeactivateModalOpen(false);
     setTogglingId(id);
     setError('');
     try {
@@ -144,8 +155,10 @@ const Vehicles = () => {
         }
       }
       await api.patch(`/admin/vehicles/deactivate/${id}`);
+      setSelectedVehicleAction({ id: null, userEmail: null });
       await fetchVehicles(page);
     } catch (err) {
+      setSelectedVehicleAction({ id: null, userEmail: null });
       const apiMessage = err?.response?.data;
       const message =
         typeof apiMessage === 'string'
@@ -157,14 +170,23 @@ const Vehicles = () => {
     }
   };
 
-  const handleActivateVehicle = async (id) => {
-    if (!window.confirm('Are you sure you want to activate this vehicle?')) return;
+  const handleActivateVehicle = (id) => {
+    setSelectedVehicleAction({ id, userEmail: null });
+    setActivateModalOpen(true);
+  };
+
+  const confirmActivateVehicle = async () => {
+    const { id } = selectedVehicleAction;
+    if (!id) return;
+    setActivateModalOpen(false);
     setTogglingId(id);
     setError('');
     try {
       await api.patch(`/admin/vehicles/activate/${id}`);
+      setSelectedVehicleAction({ id: null, userEmail: null });
       await fetchVehicles(page);
     } catch (err) {
+      setSelectedVehicleAction({ id: null, userEmail: null });
       const apiMessage = err?.response?.data;
       const message =
         typeof apiMessage === 'string'
@@ -223,6 +245,50 @@ const Vehicles = () => {
               {error}
             </Alert>
           )}
+
+          <CustomModal
+            isOpen={deactivateModalOpen}
+            onClose={() => {
+              setDeactivateModalOpen(false);
+              setSelectedVehicleAction({ id: null, userEmail: null });
+            }}
+            title="Confirm Deactivation"
+            secondaryAction={{
+              label: 'Cancel',
+              onClick: () => {
+                setDeactivateModalOpen(false);
+                setSelectedVehicleAction({ id: null, userEmail: null });
+              },
+            }}
+            primaryAction={{
+              label: 'Deactivate',
+              onClick: confirmDeactivateVehicle,
+            }}
+          >
+            <p className="mb-0">Are you sure you want to deactivate this vehicle? Any active driver assignment will be ended.</p>
+          </CustomModal>
+
+          <CustomModal
+            isOpen={activateModalOpen}
+            onClose={() => {
+              setActivateModalOpen(false);
+              setSelectedVehicleAction({ id: null, userEmail: null });
+            }}
+            title="Confirm Activation"
+            secondaryAction={{
+              label: 'Cancel',
+              onClick: () => {
+                setActivateModalOpen(false);
+                setSelectedVehicleAction({ id: null, userEmail: null });
+              },
+            }}
+            primaryAction={{
+              label: 'Activate',
+              onClick: confirmActivateVehicle,
+            }}
+          >
+            <p className="mb-0">Are you sure you want to activate this vehicle?</p>
+          </CustomModal>
 
           {/* Table Card */}
           <div className="vehicles-table-card">
@@ -437,7 +503,6 @@ const Vehicles = () => {
             )}
           </div>
         </Container>
-        <Footer />
       </main>
     </div>
   );

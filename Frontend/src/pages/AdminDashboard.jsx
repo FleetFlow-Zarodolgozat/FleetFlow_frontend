@@ -38,6 +38,7 @@ const AdminDashboard = () => {
   });
   
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 1200);
+  const [isMobileCalendar, setIsMobileCalendar] = useState(window.innerWidth <= 1024);
   const [selectedCalendarEvent, setSelectedCalendarEvent] = useState(null);
 
   useEffect(() => {
@@ -47,6 +48,7 @@ const AdminDashboard = () => {
       } else {
         setSidebarOpen(false);
       }
+      setIsMobileCalendar(window.innerWidth <= 1024);
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -76,7 +78,16 @@ const AdminDashboard = () => {
   });
   const [eventSaving, setEventSaving] = useState(false);
   const [eventFeedback, setEventFeedback] = useState({ type: '', message: '' });
+  const [eventDeleting, setEventDeleting] = useState(false);
+  const [calendarDetailFeedback, setCalendarDetailFeedback] = useState({ type: '', message: '' });
   const [exportEmptyModalOpen, setExportEmptyModalOpen] = useState(false);
+  const [exportSuccessModalOpen, setExportSuccessModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (!exportSuccessModalOpen) return;
+    const timeoutId = setTimeout(() => setExportSuccessModalOpen(false), 2000);
+    return () => clearTimeout(timeoutId);
+  }, [exportSuccessModalOpen]);
   const loadCalendarEvents = async () => {
     try {
       const calendarResponse = await api.get('/calendarevents');
@@ -142,15 +153,13 @@ const AdminDashboard = () => {
 
   const loadFleetStats = async () => {
     try {
-      const [activeRes, maintenanceRes, retiredRes] = await Promise.all([
+      const [activeRes, maintenanceRes] = await Promise.all([
         api.get('/admin/vehicles', { params: { page: 1, pageSize: 1, Status: 'ACTIVE' } }),
         api.get('/admin/vehicles', { params: { page: 1, pageSize: 1, Status: 'MAINTENANCE' } }),
-        api.get('/admin/vehicles', { params: { page: 1, pageSize: 1, Status: 'RETIRED' } }),
       ]);
       const active = activeRes.data?.totalCount || 0;
       const maintenance = maintenanceRes.data?.totalCount || 0;
-      const retired = retiredRes.data?.totalCount || 0;
-      const total = active + maintenance + retired;
+      const total = active + maintenance;
       const activePercent = total > 0 ? Math.round((active / total) * 100) : 0;
       setFleetStats({ total, activePercent });
     } catch (error) {
@@ -700,6 +709,7 @@ ${srCards}
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(zipUrl);
+      setExportSuccessModalOpen(true);
     } catch (err) {
       console.error('Export failed:', err);
     } finally {
@@ -759,6 +769,31 @@ ${srCards}
       setEventFeedback({ type: 'danger', message: 'Failed to create event.' });
     } finally {
       setEventSaving(false);
+    }
+  };
+
+  const handleDeleteSelectedEvent = async () => {
+    if (!selectedCalendarEvent?.id) {
+      setCalendarDetailFeedback({ type: 'danger', message: 'Event id is missing.' });
+      return;
+    }
+
+    setEventDeleting(true);
+    setCalendarDetailFeedback({ type: '', message: '' });
+
+    try {
+      await api.delete(`/calendarevents/${selectedCalendarEvent.id}`);
+      setSelectedCalendarEvent(null);
+      await loadCalendarEvents();
+      await loadUpcomingEvents();
+    } catch (error) {
+      const apiMessage = error?.response?.data;
+      const message = typeof apiMessage === 'string'
+        ? apiMessage
+        : apiMessage?.message || apiMessage?.Message || 'Failed to delete event.';
+      setCalendarDetailFeedback({ type: 'danger', message });
+    } finally {
+      setEventDeleting(false);
     }
   };
 
@@ -890,10 +925,18 @@ ${srCards}
           <p className="mb-0">{t('adminDash.export.emptyMessage')}</p>
         </CustomModal>
 
+        <CustomModal
+          isOpen={exportSuccessModalOpen}
+          onClose={() => setExportSuccessModalOpen(false)}
+          title={t('common.successTitle')}
+        >
+          <p className="mb-0">Successfully exported.</p>
+        </CustomModal>
+
         {/* Stats Cards */}
         <Row className="g-3 mb-4">
           {/* Card 1: Total Fleet — always all-time */}
-          <Col xl={3} lg={6} md={6}>
+          <Col xxl={3} xl={6} lg={6} md={6}>
             <Card className="stat-card h-100">
               <Card.Body>
                 <div className="d-flex justify-content-between align-items-start">
@@ -928,7 +971,7 @@ ${srCards}
           </Col>
 
           {/* Card 2: Fuel Costs — filtered by timeRange */}
-          <Col xl={3} lg={6} md={6}>
+          <Col xxl={3} xl={6} lg={6} md={6}>
             <Card className="stat-card h-100">
               <Card.Body>
                 <div className="d-flex justify-content-between align-items-start">
@@ -977,7 +1020,7 @@ ${srCards}
           </Col>
 
           {/* Card 3: Trips — filtered by timeRange */}
-          <Col xl={3} lg={6} md={6}>
+          <Col xxl={3} xl={6} lg={6} md={6}>
             <Card className="stat-card h-100">
               <Card.Body>
                 <div className="d-flex justify-content-between align-items-start">
@@ -1016,7 +1059,7 @@ ${srCards}
           </Col>
 
           {/* Card 4: Service Requests — filtered by timeRange */}
-          <Col xl={3} lg={6} md={6}>
+          <Col xxl={3} xl={6} lg={6} md={6}>
             <Card className="stat-card h-100">
               <Card.Body>
                 <div className="d-flex justify-content-between align-items-start">
@@ -1049,9 +1092,9 @@ ${srCards}
           <Col lg={8} xl={9}>
             <Card className="schedule-card h-100">
               <Card.Header className="bg-light">
-                <div className="d-flex justify-content-between align-items-center">
-                  <h3 className="mb-0">{t('adminDash.schedule.title')}</h3>
-                  <div className="calendar-nav-arrows d-flex align-items-center gap-2">
+                <div className={`schedule-header-row d-flex align-items-center ${isMobileCalendar ? 'justify-content-center' : 'justify-content-between'}`}>
+                  <h3 className={`mb-0 ${isMobileCalendar ? 'text-center' : ''}`}>{t('adminDash.schedule.title')}</h3>
+                  {!isMobileCalendar && <div className="calendar-nav-arrows d-flex align-items-center gap-2">
                     <Button variant="outline-secondary" size="sm" onClick={() => {
                       const newDate = new Date(calendarDate);
                       newDate.setMonth(newDate.getMonth() - 1);
@@ -1073,10 +1116,10 @@ ${srCards}
                         <polyline points="9,18 15,12 9,6" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     </Button>
-                  </div>
+                  </div>}
                 </div>
               </Card.Header>
-              <Card.Body className="rbc-wrapper h-100" style={{ height: '100%', minHeight: 0 }}>
+              <Card.Body className="rbc-wrapper h-100" style={{ height: '100%', minHeight: isMobileCalendar ? 460 : 0 }}>
                 {!selectedCalendarEvent ? (
                   <Calendar
                     localizer={localizer}
@@ -1084,6 +1127,7 @@ ${srCards}
                     events={scheduleEvents}
                     eventPropGetter={calendarEventStyleGetter}
                     onSelectEvent={(event) => {
+                      setCalendarDetailFeedback({ type: '', message: '' });
                       setSelectedCalendarEvent(event);
                     }}
                     date={calendarDate}
@@ -1091,7 +1135,7 @@ ${srCards}
                     view={calendarView}
                     onView={setCalendarView}
                     views={['month', 'week', 'day']}
-                    style={{ height: '100%' }}
+                    style={{ height: isMobileCalendar ? 440 : '100%' }}
                     toolbar={true}
                     messages={{
                       today: t('adminDash.cal.today'),
@@ -1161,6 +1205,23 @@ ${srCards}
                         </Row>
                       </Card.Body>
                     </Card>
+
+                    {calendarDetailFeedback.message && (
+                      <div className={`alert alert-${calendarDetailFeedback.type} py-2 px-3`} role="alert">
+                        {calendarDetailFeedback.message}
+                      </div>
+                    )}
+
+                    <div className="mt-auto d-flex justify-content-center">
+                      <Button
+                        variant="danger"
+                        className="px-4"
+                        onClick={handleDeleteSelectedEvent}
+                        disabled={eventDeleting}
+                      >
+                        {eventDeleting ? 'Deleting...' : 'Delete Event'}
+                      </Button>
+                    </div>
                   </div>
                 )}
               </Card.Body>

@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Alert, Button, Container, Form, Spinner } from 'react-bootstrap';
+import { Button, Container, Form, Spinner } from 'react-bootstrap';
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
 import Footer from '../components/Footer';
+import CustomModal from '../components/CustomModal';
+import { useLanguage } from '../contexts/LanguageContext';
 import '../styles/EditDriver.css';
 import '../styles/EditVehicle.css';
 
@@ -15,6 +17,7 @@ const STATUS_OPTIONS = [
 const EditVehicle = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 1024);
 
   const [loading, setLoading] = useState(true);
@@ -22,6 +25,9 @@ const EditVehicle = () => {
   const [unassigning, setUnassigning] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalType, setModalType] = useState('');
+  const [modalContent, setModalContent] = useState({ title: '', message: '' });
 
   const [form, setForm] = useState({
     licensePlate: '',
@@ -47,11 +53,30 @@ const EditVehicle = () => {
   }, []);
 
   useEffect(() => {
-    if (success) {
-      const t = setTimeout(() => setSuccess(''), 3000);
-      return () => clearTimeout(t);
+    if (error) {
+      setModalType('error');
+      setModalContent({ title: t('common.errorTitle'), message: error });
+      setModalOpen(true);
     }
-  }, [success]);
+  }, [error, t]);
+
+  useEffect(() => {
+    if (success) {
+      setModalType('success');
+      setModalContent({ title: t('common.successTitle'), message: success });
+      setModalOpen(true);
+    }
+  }, [success, t]);
+
+  useEffect(() => {
+    if (success !== 'Successfully unassigned.' || !modalOpen) return;
+    const timeoutId = setTimeout(() => {
+      setModalOpen(false);
+      setSuccess('');
+      setModalType('');
+    }, 2000);
+    return () => clearTimeout(timeoutId);
+  }, [success, modalOpen]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -197,10 +222,24 @@ const EditVehicle = () => {
     if (!originalAssignedUserId) return;
     setUnassigning(true);
     setError('');
+    setSuccess('');
     try {
       await api.patch(`/admin/unassign/${originalAssignedUserId}`);
       setOriginalAssignedUserId('');
       setForm((prev) => ({ ...prev, assignedUserId: '' }));
+
+      setHistoryLoading(true);
+      try {
+        const historyRes = await api.get(`/admin/assignment/history/${id}`);
+        const history = Array.isArray(historyRes.data) ? historyRes.data : [];
+        setAssignmentHistory(history);
+      } catch {
+        // keep existing history if refresh fails
+      } finally {
+        setHistoryLoading(false);
+      }
+
+      setSuccess('Successfully unassigned.');
     } catch (err) {
       const msg = err?.response?.data;
       setError(typeof msg === 'string' ? msg : msg?.message || msg?.Message || 'Failed to unassign driver.');
@@ -240,7 +279,7 @@ const EditVehicle = () => {
         await api.post(`/admin/assign/${form.assignedUserId}/${id}`);
         setOriginalAssignedUserId(form.assignedUserId);
       }
-      setSuccess('Vehicle updated successfully.');
+      setSuccess('Successfully edited. Redirecting...');
       setTimeout(() => navigate('/vehicles'), 1500);
     } catch (err) {
       const msg = err?.response?.data;
@@ -266,16 +305,27 @@ const EditVehicle = () => {
             </div>
           </div>
 
-          {error && (
-            <Alert variant="danger" dismissible onClose={() => setError('')} className="mb-4">
-              {error}
-            </Alert>
-          )}
-          {success && (
-            <Alert variant="success" className="mb-4">
-              {success}
-            </Alert>
-          )}
+          <CustomModal
+            isOpen={modalOpen}
+            onClose={() => {
+              setModalOpen(false);
+              setError('');
+              setSuccess('');
+              setModalType('');
+            }}
+            title={modalContent.title}
+            primaryAction={modalType === 'error' ? {
+              label: t('common.ok'),
+              onClick: () => {
+                setModalOpen(false);
+                setError('');
+                setSuccess('');
+                setModalType('');
+              },
+            } : undefined}
+          >
+            <p className="mb-0">{modalContent.message}</p>
+          </CustomModal>
 
           {loading ? (
             <div className="edit-driver-loading">
@@ -619,7 +669,6 @@ const EditVehicle = () => {
             </div>
           )}
         </Container>
-        <Footer />
       </main>
     </div>
   );

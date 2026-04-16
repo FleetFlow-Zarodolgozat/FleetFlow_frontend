@@ -4,6 +4,7 @@ import { Alert, Button, Container, Spinner } from 'react-bootstrap';
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
 import Footer from '../components/Footer';
+import CustomModal from '../components/CustomModal';
 import '../styles/Drivers.css';
 
 const PAGE_SIZE = 10;
@@ -24,6 +25,10 @@ const Drivers = () => {
   const debounceRef = useRef(null);
   const [isActiveFilter, setIsActiveFilter] = useState(true); // true = Aktív, false = Inaktív
   const [driverImages, setDriverImages] = useState({});
+  const [deactivateModalOpen, setDeactivateModalOpen] = useState(false);
+  const [selectedDriverId, setSelectedDriverId] = useState(null);
+  const [activateModalOpen, setActivateModalOpen] = useState(false);
+  const [selectedActivateDriverId, setSelectedActivateDriverId] = useState(null);
 
   useEffect(() => {
     const handleResize = () => {
@@ -97,16 +102,24 @@ const Drivers = () => {
     }, 400);
   };
 
-  const handleDeactivateDriver = async (id) => {
-    if (!window.confirm('Are you sure you want to deactivate this driver? They will lose access and any active vehicle assignment will be ended.')) return;
+  const handleDeactivateDriver = (id) => {
+    setSelectedDriverId(id);
+    setDeactivateModalOpen(true);
+  };
+
+  const confirmDeactivateDriver = async () => {
+    if (!selectedDriverId) return;
     setError('');
-    setTogglingId(id);
+    setTogglingId(selectedDriverId);
+    setDeactivateModalOpen(false);
     try {
-      await api.patch(`/admin/drivers/deactivate/${id}`);
+      await api.patch(`/admin/drivers/deactivate/${selectedDriverId}`);
       setTogglingId(null);
+      setSelectedDriverId(null);
       await fetchDrivers(1);
     } catch (err) {
       setTogglingId(null);
+      setSelectedDriverId(null);
       const apiMessage = err?.response?.data;
       const message =
         typeof apiMessage === 'string'
@@ -116,16 +129,24 @@ const Drivers = () => {
     }
   };
 
-  const handleActivateDriver = async (id) => {
-    if (!window.confirm('Are you sure you want to activate this driver? They will regain access to the system.')) return;
+  const handleActivateDriver = (id) => {
+    setSelectedActivateDriverId(id);
+    setActivateModalOpen(true);
+  };
+
+  const confirmActivateDriver = async () => {
+    if (!selectedActivateDriverId) return;
     setError('');
-    setTogglingId(id);
+    setTogglingId(selectedActivateDriverId);
+    setActivateModalOpen(false);
     try {
-      await api.patch(`/admin/drivers/activate/${id}`);
+      await api.patch(`/admin/drivers/activate/${selectedActivateDriverId}`);
       setTogglingId(null);
+      setSelectedActivateDriverId(null);
       await fetchDrivers(1);
     } catch (err) {
       setTogglingId(null);
+      setSelectedActivateDriverId(null);
       const apiMessage = err?.response?.data;
       const message =
         typeof apiMessage === 'string'
@@ -218,6 +239,50 @@ const Drivers = () => {
               {error}
             </Alert>
           )}
+
+          <CustomModal
+            isOpen={deactivateModalOpen}
+            onClose={() => {
+              setDeactivateModalOpen(false);
+              setSelectedDriverId(null);
+            }}
+            title="Confirm Deactivation"
+            secondaryAction={{
+              label: 'Cancel',
+              onClick: () => {
+                setDeactivateModalOpen(false);
+                setSelectedDriverId(null);
+              },
+            }}
+            primaryAction={{
+              label: 'Deactivate',
+              onClick: confirmDeactivateDriver,
+            }}
+          >
+            <p className="mb-0">Are you sure you want to deactivate this driver? They will lose access and any active vehicle assignment will be ended.</p>
+          </CustomModal>
+
+          <CustomModal
+            isOpen={activateModalOpen}
+            onClose={() => {
+              setActivateModalOpen(false);
+              setSelectedActivateDriverId(null);
+            }}
+            title="Confirm Reactivation"
+            secondaryAction={{
+              label: 'Cancel',
+              onClick: () => {
+                setActivateModalOpen(false);
+                setSelectedActivateDriverId(null);
+              },
+            }}
+            primaryAction={{
+              label: 'Reactivate',
+              onClick: confirmActivateDriver,
+            }}
+          >
+            <p className="mb-0">Are you sure you want to reactivate this driver? They will regain access to the system.</p>
+          </CustomModal>
 
           {/* Table Card */}
           <div className="drivers-table-card">
@@ -405,7 +470,6 @@ const Drivers = () => {
             )}
           </div>
         </Container>
-        <Footer />
       </main>
     </div>
   );

@@ -18,6 +18,7 @@ const AddVehicle = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
+  const [modalType, setModalType] = useState('');
   const [modalContent, setModalContent] = useState({ title: '', message: '' });
 
   const [form, setForm] = useState({
@@ -41,6 +42,7 @@ const AddVehicle = () => {
 
   useEffect(() => {
     if (error) {
+      setModalType('error');
       setModalContent({ title: t('common.errorTitle'), message: error });
       setModalOpen(true);
     }
@@ -48,6 +50,7 @@ const AddVehicle = () => {
 
   useEffect(() => {
     if (success) {
+      setModalType('success');
       setModalContent({ title: t('common.successTitle'), message: success });
       setModalOpen(true);
     }
@@ -122,7 +125,7 @@ const AddVehicle = () => {
         }
       }
 
-      setSuccess('Vehicle created successfully.');
+      setSuccess('Successfully created. Redirecting...');
       setTimeout(() => navigate('/vehicles'), 1500);
     } catch (err) {
       const msg = err?.response?.data;
@@ -154,16 +157,18 @@ const AddVehicle = () => {
               setModalOpen(false);
               setError('');
               setSuccess('');
+              setModalType('');
             }}
             title={modalContent.title}
-            primaryAction={{
+            primaryAction={modalType === 'error' ? {
               label: t('common.ok'),
               onClick: () => {
                 setModalOpen(false);
                 setError('');
                 setSuccess('');
+                setModalType('');
               },
-            }}
+            } : undefined}
           >
             <p className="mb-0">{modalContent.message}</p>
           </CustomModal>
@@ -398,7 +403,6 @@ const AddVehicle = () => {
           </div>
 
         </Container>
-        <Footer />
       </main>
     </div>
   );

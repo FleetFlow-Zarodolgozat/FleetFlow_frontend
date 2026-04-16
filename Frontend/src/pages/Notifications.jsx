@@ -438,7 +438,7 @@ const Notifications = () => {
                         style={{ borderLeft: `4px solid ${styleData.border}` }}
                         onClick={() => !isRead && handleMarkAsRead(notification.id)}
                       >
-                        <div className="notification-icon" style={{ backgroundColor: `${getNotificationTypeIconBg(notification)} !important`, color: getNotificationTypeTextColor(notification) }}>
+                        <div className="notification-icon" style={{ backgroundColor: getNotificationTypeIconBg(notification), color: getNotificationTypeTextColor(notification) }}>
                           {iconData.icon}
                         </div>
                         <div className="notification-content">
@@ -447,22 +447,6 @@ const Notifications = () => {
                               {notification.title || 'Notification'}
                               {!isRead && <span className="unread-dot" style={{ backgroundColor: '#dc2626' }} />}
                             </h4>
-                            <button
-                              className="notification-delete-custom"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteNotification(notification.id);
-                              }}
-                              title="Törlés"
-                            >
-                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M3 6h18" />
-                                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
-                                <line x1="10" y1="11" x2="10" y2="17" />
-                                <line x1="14" y1="11" x2="14" y2="17" />
-                              </svg>
-                            </button>
                           </div>
                           <p className="notification-message">
                             {notification.message || notification.content || ''}
@@ -489,8 +473,23 @@ const Notifications = () => {
                               }}>{notification.type}</span>
                             )}
                           </div>
-                        {/* Delete button now in header */}
                         </div>
+                        <button
+                          className="notification-delete-custom"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteNotification(notification.id);
+                          }}
+                          title="Törlés"
+                        >
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M3 6h18" />
+                            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                            <line x1="10" y1="11" x2="10" y2="17" />
+                            <line x1="14" y1="11" x2="14" y2="17" />
+                          </svg>
+                        </button>
                       </div>
                     );
                   })}

@@ -17,6 +17,7 @@ const AddDriver = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
+  const [modalType, setModalType] = useState('');
   const [modalContent, setModalContent] = useState({ title: '', message: '' });
 
   const [form, setForm] = useState({
@@ -41,6 +42,7 @@ const AddDriver = () => {
 
   useEffect(() => {
     if (error) {
+      setModalType('error');
       setModalContent({ title: t('common.errorTitle'), message: error });
       setModalOpen(true);
     }
@@ -48,6 +50,7 @@ const AddDriver = () => {
 
   useEffect(() => {
     if (success) {
+      setModalType('success');
       setModalContent({ title: t('common.successTitle'), message: success });
       setModalOpen(true);
     }
@@ -74,7 +77,7 @@ const AddDriver = () => {
         licenseExpiryDate: form.licenseExpiryDate,
         notes: form.notes || null,
       });
-      setSuccess('Driver created successfully. A set-password email has been sent. Redirecting...');
+      setSuccess('Successfully created. Redirecting...');
       setTimeout(() => navigate('/drivers'), 2000);
     } catch (err) {
       const msg = err?.response?.data;
@@ -103,16 +106,19 @@ const AddDriver = () => {
               setModalOpen(false);
               setError('');
               setSuccess('');
+              setModalType('');
             }}
             title={modalContent.title}
-            primaryAction={{
+            primaryAction={modalType === 'error' ? {
               label: t('common.ok'),
               onClick: () => {
                 setModalOpen(false);
                 setError('');
                 setSuccess('');
+                setModalType('');
               },
-            }}
+            } : undefined}
+            closeOnBackdrop={modalType === 'error'}
           >
             <p className="mb-0">{modalContent.message}</p>
           </CustomModal>
@@ -265,7 +271,6 @@ const AddDriver = () => {
 
           </form>
         </Container>
-        <Footer />
       </main>
     </div>
   );

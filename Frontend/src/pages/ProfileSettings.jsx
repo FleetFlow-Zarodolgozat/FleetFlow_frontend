@@ -24,6 +24,7 @@ const ProfileSettings = () => {
   const [loading, setLoading] = useState(true);
   const [feedback, setFeedback] = useState({ type: '', message: '' });
   const [confirmModal, setConfirmModal] = useState({ open: false, title: '', message: '', onConfirm: null });
+  const [errorModal, setErrorModal] = useState({ open: false, message: '' });
   useEffect(() => {
     if (feedback.message) {
       const timer = setTimeout(() => {
@@ -59,6 +60,34 @@ const ProfileSettings = () => {
   }, [location.state]);
 
   const { t, language, setLanguage } = useLanguage();
+  const roleLower = String(user?.role || '').toLowerCase();
+  const isAdmin = roleLower === 'admin';
+  const isDriver = roleLower === 'driver';
+
+  const showErrorModal = (message) => {
+    setErrorModal({ open: true, message });
+  };
+
+  const getLocalizedBackendError = (err, fallbackKey = 'profile.error.backendGeneric') => {
+    const data = err?.response?.data;
+    const rawMessage =
+      typeof data === 'string'
+        ? data
+        : data?.message || data?.Message || data?.detail || '';
+
+    const normalized = String(rawMessage || '').toLowerCase();
+    if (normalized.includes('password') && (normalized.includes('match') || normalized.includes('again'))) {
+      return t('profile.error.passwordMismatch');
+    }
+    if (normalized.includes('unauthorized') || err?.response?.status === 401) {
+      return t('profile.error.unauthorized');
+    }
+    if (normalized.includes('forbidden') || err?.response?.status === 403) {
+      return t('profile.error.forbidden');
+    }
+
+    return t(fallbackKey);
+  };
 
   // Preferences
   const [preferences, setPreferences] = useState({
@@ -104,8 +133,8 @@ const ProfileSettings = () => {
           setProfileImageError(true);
         }
       }
-    } catch {
-      setFeedback({ type: 'danger', message: 'Failed to load profile data.' });
+    } catch (err) {
+      showErrorModal(getLocalizedBackendError(err, 'profile.error.loadProfile'));
     } finally {
       setLoading(false);
     }
@@ -130,6 +159,9 @@ const ProfileSettings = () => {
         formData.append('Password', personalInfo.password);
         formData.append('PasswordAgain', personalInfo.confirmPassword);
       }
+      await api.patch('/profile/edit', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
       setFeedback({ type: 'success', message: 'Profile updated successfully.' });
       setEditMode(false);
       fetchProfile();
@@ -137,16 +169,7 @@ const ProfileSettings = () => {
       // Trigger Sidebar reload
       setSidebarOpen((prev) => !prev);
     } catch (err) {
-      let msg = 'Failed to save changes.';
-      if (err.response && err.response.data) {
-        const data = err.response.data;
-        if (typeof data === 'string') msg = data;
-        else if (data.message) msg = data.message;
-        else if (data.detail) msg = data.detail;
-        else if (data.errors) msg = Array.isArray(data.errors) ? data.errors.join(', ') : JSON.stringify(data.errors);
-        else msg = JSON.stringify(data);
-      }
-      setFeedback({ type: 'danger', message: msg });
+      showErrorModal(getLocalizedBackendError(err, 'profile.error.saveChanges'));
     }
   };
 
@@ -175,12 +198,12 @@ const ProfileSettings = () => {
     if (!file) return;
     const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
     if (!validTypes.includes(file.type)) {
-      setFeedback({ type: 'danger', message: 'Only JPEG, PNG or GIF files are allowed.' });
+      showErrorModal(t('profile.error.invalidFileType'));
       return;
     }
 
     if (file.size > 10 * 1024 * 1024) {
-      setFeedback({ type: 'danger', message: 'File size must not exceed 10MB.' });
+      showErrorModal(t('profile.error.fileTooLarge'));
       return;
     }
 
@@ -199,8 +222,8 @@ const ProfileSettings = () => {
       setProfileImageUrl(objectUrl);
       setProfileImageError(false);
       setNotificationRefresh((prev) => prev + 1);
-    } catch {
-      setFeedback({ type: 'danger', message: 'Failed to upload profile picture.' });
+    } catch (err) {
+      showErrorModal(getLocalizedBackendError(err, 'profile.error.uploadPicture'));
     }
   };
 
@@ -212,8 +235,8 @@ const ProfileSettings = () => {
       setProfileImageError(true);
       fetchProfile();
       setNotificationRefresh((prev) => prev + 1);
-    } catch {
-      setFeedback({ type: 'danger', message: 'Failed to remove profile picture.' });
+    } catch (err) {
+      showErrorModal(getLocalizedBackendError(err, 'profile.error.removePicture'));
     }
   };
 
@@ -235,7 +258,6 @@ const ProfileSettings = () => {
 
   const handlePreferenceChange = (key) => {
     if (key === 'darkMode') {
-      if (user?.role?.toLowerCase() === 'admin') return;
       const newVal = !preferences.darkMode;
       setPreferences(prev => ({ ...prev, darkMode: newVal }));
       localStorage.setItem('fleetflow_darkMode', String(newVal));
@@ -290,11 +312,23 @@ const ProfileSettings = () => {
             <p className="page-subtitle">{t('profile.subtitle')}</p>
           </div>
 
-          {feedback.message && (
+          {feedback.type === 'success' && feedback.message && (
             <Alert variant={feedback.type} className="mb-4">
               {feedback.message}
             </Alert>
           )}
+
+          <CustomModal
+            isOpen={errorModal.open}
+            onClose={() => setErrorModal({ open: false, message: '' })}
+            title={t('common.errorTitle')}
+            primaryAction={{
+              label: t('common.ok'),
+              onClick: () => setErrorModal({ open: false, message: '' }),
+            }}
+          >
+            <p className="mb-0">{errorModal.message}</p>
+          </CustomModal>
 
           <Row className="g-4 h-100 align-items-stretch">
             {/* Left Column */}
@@ -356,6 +390,7 @@ const ProfileSettings = () => {
                 </Col>
 
                 {/* Help & Support Card */}
+                {!isAdmin && (
                 <Col xs={12}>
                   <Card className="help-support-card">
                     <Card.Body className="p-0">
@@ -380,6 +415,7 @@ const ProfileSettings = () => {
                     </Card.Body>
                   </Card>
                 </Col>
+                )}
               </Row>
             </Col>
 
@@ -576,17 +612,9 @@ const ProfileSettings = () => {
                             </p>
                           </div>
                           <div className="preference-action">
-                            {user?.role?.toLowerCase() === 'admin' ? (
-                              <div title="Not available for admin page" style={{ cursor: 'not-allowed' }}>
-                                <div className="toggle-switch" style={{ opacity: 0.4, pointerEvents: 'none' }}>
-                                  <span className="toggle-slider"></span>
-                                </div>
-                              </div>
-                            ) : (
                               <div className={`toggle-switch ${preferences.darkMode ? 'active' : ''}`} onClick={() => handlePreferenceChange('darkMode')}>
                                 <span className="toggle-slider"></span>
                               </div>
-                            )}
                           </div>
                         </div>
 
@@ -608,7 +636,7 @@ const ProfileSettings = () => {
                             </p>
                           </div>
                           <div className="preference-action">
-                            {user?.role?.toLowerCase() === 'admin' ? (
+                            {isAdmin ? (
                               <div
                                 title={t('profile.pref.languageNotAvailable')}
                                 style={{ cursor: 'not-allowed' }}
@@ -647,10 +675,16 @@ const ProfileSettings = () => {
                 </Col>
 
                 {/* Mobile App Download Card */}
+                {!isAdmin && (
                 <Col xs={12}>
                   <Card className="app-download-card">
                     <Card.Body className="p-4">
                       <div className="app-download-content">
+                        {isDriver && (
+                          <div className="app-download-logo-wrap">
+                            <img src="/fleetflow_logo.png" alt="FleetFlow" className="app-download-logo" />
+                          </div>
+                        )}
                         <div className="app-download-text">
                           <h4 className="app-download-title">{t('profile.app.title')}</h4>
                           <p className="app-download-description">
@@ -669,6 +703,7 @@ const ProfileSettings = () => {
                     </Card.Body>
                   </Card>
                 </Col>
+                )}
               </Row>
             </Col>
           </Row>

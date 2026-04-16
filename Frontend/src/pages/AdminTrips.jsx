@@ -54,6 +54,15 @@ const AdminTrips = () => {
   const [actionLoading, setActionLoading] = useState(null);
   const [actionError, setActionError] = useState('');
   const [exportEmptyModalOpen, setExportEmptyModalOpen] = useState(false);
+  const [exportSuccessModalOpen, setExportSuccessModalOpen] = useState(false);
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState({ type: '', id: null });
+
+  useEffect(() => {
+    if (!exportSuccessModalOpen) return;
+    const timeoutId = setTimeout(() => setExportSuccessModalOpen(false), 2000);
+    return () => clearTimeout(timeoutId);
+  }, [exportSuccessModalOpen]);
 
   useEffect(() => {
     const handleResize = () => setSidebarOpen(window.innerWidth > 1024);
@@ -153,7 +162,7 @@ const AdminTrips = () => {
     debounceRef.current = setTimeout(() => setSearchQ(val), 400);
   };
 
-  const handleDelete = async (id) => {
+  const executeDelete = async (id) => {
     setActionLoading(id);
     setActionError('');
     try {
@@ -167,7 +176,7 @@ const AdminTrips = () => {
     }
   };
 
-  const handleRestore = async (id) => {
+  const executeRestore = async (id) => {
     setActionLoading(id);
     setActionError('');
     try {
@@ -179,6 +188,28 @@ const AdminTrips = () => {
     } finally {
       setActionLoading(null);
     }
+  };
+
+  const handleDelete = (id) => {
+    setPendingAction({ type: 'delete', id });
+    setConfirmModalOpen(true);
+  };
+
+  const handleRestore = (id) => {
+    setPendingAction({ type: 'restore', id });
+    setConfirmModalOpen(true);
+  };
+
+  const handleConfirmAction = async () => {
+    const { type, id } = pendingAction;
+    if (!id || !type) return;
+    setConfirmModalOpen(false);
+    setPendingAction({ type: '', id: null });
+    if (type === 'delete') {
+      await executeDelete(id);
+      return;
+    }
+    await executeRestore(id);
   };
 
   const handleReset = () => {    setSearchInput('');
@@ -401,6 +432,7 @@ ${tripCards}
       zipA.click();
       document.body.removeChild(zipA);
       URL.revokeObjectURL(zipUrl);
+      setExportSuccessModalOpen(true);
     } catch {
       setError('Failed to export.');
     } finally {
@@ -502,6 +534,40 @@ ${tripCards}
             }}
           >
             <p className="mb-0">{t('adminDash.export.emptyMessage')}</p>
+          </CustomModal>
+
+          <CustomModal
+            isOpen={exportSuccessModalOpen}
+            onClose={() => setExportSuccessModalOpen(false)}
+            title={t('common.successTitle')}
+          >
+            <p className="mb-0">Successfully exported.</p>
+          </CustomModal>
+
+          <CustomModal
+            isOpen={confirmModalOpen}
+            onClose={() => {
+              setConfirmModalOpen(false);
+              setPendingAction({ type: '', id: null });
+            }}
+            title={pendingAction.type === 'delete' ? 'Delete trip?' : 'Restore trip?'}
+            secondaryAction={{
+              label: t('common.cancel'),
+              onClick: () => {
+                setConfirmModalOpen(false);
+                setPendingAction({ type: '', id: null });
+              },
+            }}
+            primaryAction={{
+              label: t('common.confirm'),
+              onClick: handleConfirmAction,
+            }}
+          >
+            <p className="mb-0">
+              {pendingAction.type === 'delete'
+                ? 'Are you sure you want to delete this trip?'
+                : 'Are you sure you want to restore this trip?'}
+            </p>
           </CustomModal>
 
           {/* ── Header ─────────────────────────────────── */}
@@ -923,7 +989,6 @@ ${tripCards}
           </div>
 
         </Container>
-        <Footer />
       </main>
     </div>
   );

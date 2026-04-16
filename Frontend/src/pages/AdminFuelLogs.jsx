@@ -42,6 +42,15 @@ const AdminFuelLogs = () => {
   const [actionError, setActionError] = useState('');
   const [exportLoading, setExportLoading] = useState(false);
   const [exportEmptyModalOpen, setExportEmptyModalOpen] = useState(false);
+  const [exportSuccessModalOpen, setExportSuccessModalOpen] = useState(false);
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState({ type: '', id: null });
+
+  useEffect(() => {
+    if (!exportSuccessModalOpen) return;
+    const timeoutId = setTimeout(() => setExportSuccessModalOpen(false), 2000);
+    return () => clearTimeout(timeoutId);
+  }, [exportSuccessModalOpen]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -437,6 +446,7 @@ ${fuelCards}
       zipA.click();
       document.body.removeChild(zipA);
       URL.revokeObjectURL(zipUrl);
+      setExportSuccessModalOpen(true);
     } catch {
       setError('Failed to export.');
     } finally {
@@ -444,7 +454,7 @@ ${fuelCards}
     }
   };
 
-  const handleDelete = async (id) => {
+  const executeDelete = async (id) => {
     setActionLoading(id);
     setActionError('');
     try {
@@ -458,7 +468,7 @@ ${fuelCards}
     }
   };
 
-  const handleRestore = async (id) => {
+  const executeRestore = async (id) => {
     setActionLoading(id);
     setActionError('');
     try {
@@ -470,6 +480,28 @@ ${fuelCards}
     } finally {
       setActionLoading(null);
     }
+  };
+
+  const handleDelete = (id) => {
+    setPendingAction({ type: 'delete', id });
+    setConfirmModalOpen(true);
+  };
+
+  const handleRestore = (id) => {
+    setPendingAction({ type: 'restore', id });
+    setConfirmModalOpen(true);
+  };
+
+  const handleConfirmAction = async () => {
+    const { type, id } = pendingAction;
+    if (!id || !type) return;
+    setConfirmModalOpen(false);
+    setPendingAction({ type: '', id: null });
+    if (type === 'delete') {
+      await executeDelete(id);
+      return;
+    }
+    await executeRestore(id);
   };
 
   const handleSortDate = () => {
@@ -545,6 +577,40 @@ ${fuelCards}
             }}
           >
             <p className="mb-0">{t('adminDash.export.emptyMessage')}</p>
+          </CustomModal>
+
+          <CustomModal
+            isOpen={exportSuccessModalOpen}
+            onClose={() => setExportSuccessModalOpen(false)}
+            title={t('common.successTitle')}
+          >
+            <p className="mb-0">Successfully exported.</p>
+          </CustomModal>
+
+          <CustomModal
+            isOpen={confirmModalOpen}
+            onClose={() => {
+              setConfirmModalOpen(false);
+              setPendingAction({ type: '', id: null });
+            }}
+            title={pendingAction.type === 'delete' ? 'Delete fuel log?' : 'Restore fuel log?'}
+            secondaryAction={{
+              label: t('common.cancel'),
+              onClick: () => {
+                setConfirmModalOpen(false);
+                setPendingAction({ type: '', id: null });
+              },
+            }}
+            primaryAction={{
+              label: t('common.confirm'),
+              onClick: handleConfirmAction,
+            }}
+          >
+            <p className="mb-0">
+              {pendingAction.type === 'delete'
+                ? 'Are you sure you want to delete this fuel log?'
+                : 'Are you sure you want to restore this fuel log?'}
+            </p>
           </CustomModal>
 
           {/* ── Header ─────────────────────────────────── */}
@@ -1020,8 +1086,6 @@ ${fuelCards}
             )}
           </div>
         </Container>
-
-        <Footer />
       </main>
     </div>
   );

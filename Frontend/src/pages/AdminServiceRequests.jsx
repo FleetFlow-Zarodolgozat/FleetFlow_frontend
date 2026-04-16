@@ -893,7 +893,6 @@ ${serviceCards}
           </div>
 
         </Container>
-        <Footer />
       </main>
     </div>
   );

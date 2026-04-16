@@ -423,3 +423,66 @@
   border-color: #0b5ed7 !important;
   box-shadow: 0 6px 18px rgba(13, 110, 253, 0.35) !important;
 }
+
+/* Dark mode */
+body.dark-mode .ev-history-empty,
+body.dark-mode .ev-tips-header,
+body.dark-mode .ev-field-hint,
+body.dark-mode .ev-history-dates,
+body.dark-mode .ev-tips-list li {
+  color: #8b949e !important;
+}
+
+body.dark-mode .ev-history-item,
+body.dark-mode .ev-assigned-driver-row {
+  background: #21262d !important;
+  border-color: #30363d !important;
+}
+
+body.dark-mode .ev-history-driver,
+body.dark-mode .ev-assigned-driver-name {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .ev-section-label {
+  border-bottom-color: #30363d !important;
+  color: #58a6ff !important;
+}
+
+body.dark-mode .ev-status-pill {
+  opacity: 0.75;
+}
+
+body.dark-mode .ev-status-option.selected .ev-status-pill {
+  opacity: 1;
+}
+
+body.dark-mode .ev-plate-input-wrapper,
+body.dark-mode .ev-mileage-wrapper {
+  background: #21262d !important;
+  border-color: #30363d !important;
+}
+
+body.dark-mode .ev-plate-input-wrapper:focus-within,
+body.dark-mode .ev-mileage-wrapper:focus-within {
+  border-color: #1f6feb !important;
+  box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.2) !important;
+}
+
+body.dark-mode .ev-plate-prefix,
+body.dark-mode .ev-mileage-suffix {
+  background: #161b22 !important;
+  border-color: #30363d !important;
+  color: #8b949e !important;
+}
+
+body.dark-mode .ev-unassign-btn {
+  background: #3d1f1f !important;
+  border-color: #da3633 !important;
+  color: #ffa198 !important;
+}
+
+body.dark-mode .ev-unassign-btn:hover:not(:disabled) {
+  background: #5a1c1c !important;
+  border-color: #b91c1c !important;
+}

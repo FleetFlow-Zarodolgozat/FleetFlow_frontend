@@ -1,14 +1,17 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Alert, Button, Container, Form, Spinner } from 'react-bootstrap';
+import { Button, Container, Form, Spinner } from 'react-bootstrap';
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
 import Footer from '../components/Footer';
+import CustomModal from '../components/CustomModal';
+import { useLanguage } from '../contexts/LanguageContext';
 import '../styles/EditDriver.css';
 
 const EditDriver = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 1024);
 
   const [loading, setLoading] = useState(true);
@@ -16,6 +19,9 @@ const EditDriver = () => {
   const [originalIsActive, setOriginalIsActive] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalType, setModalType] = useState('');
+  const [modalContent, setModalContent] = useState({ title: '', message: '' });
 
   const [form, setForm] = useState({
     fullName: '',
@@ -36,12 +42,22 @@ const EditDriver = () => {
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);  useEffect(() => {
-    if (success) {
-      const t = setTimeout(() => setSuccess(''), 3000);
-      return () => clearTimeout(t);
+  }, []);
+  useEffect(() => {
+    if (error) {
+      setModalType('error');
+      setModalContent({ title: t('common.errorTitle'), message: error });
+      setModalOpen(true);
     }
-  }, [success]);
+  }, [error, t]);
+
+  useEffect(() => {
+    if (success) {
+      setModalType('success');
+      setModalContent({ title: t('common.successTitle'), message: success });
+      setModalOpen(true);
+    }
+  }, [success, t]);
 
   useEffect(() => {
     const fetchDriver = async () => {
@@ -59,7 +75,8 @@ const EditDriver = () => {
         if (!driver) {
           setError('Driver not found.');
           return;
-        }        const formatDate = (val) => {
+        }
+        const formatDate = (val) => {
           if (!val) return '';
           const d = new Date(val);
           if (isNaN(d.getTime())) return '';
@@ -74,7 +91,8 @@ const EditDriver = () => {
           notes: driver.notes || driver.Notes || '',
           isActive: driver.isActive ?? driver.IsActive ?? true,
         });
-        setOriginalIsActive(driver.isActive ?? driver.IsActive ?? true);        try {
+        setOriginalIsActive(driver.isActive ?? driver.IsActive ?? true);
+        try {
           const imgRes = await api.get(`/files/thumbnail/${id}`, { responseType: 'blob' });
           setProfileImageUrl(URL.createObjectURL(imgRes.data));
           setProfileImageError(false);
@@ -121,7 +139,7 @@ const EditDriver = () => {
         await api.patch(endpoint);
         setOriginalIsActive(form.isActive);
       }
-      setSuccess('Driver updated successfully.');
+      setSuccess('Successfully edited. Redirecting...');
       setTimeout(() => navigate('/drivers'), 1500);
     } catch (err) {
       const msg = err?.response?.data;
@@ -145,16 +163,28 @@ const EditDriver = () => {
             </div>
           </div>
 
-          {error && (
-            <Alert variant="danger" dismissible onClose={() => setError('')} className="mb-4">
-              {error}
-            </Alert>
-          )}
-          {success && (
-            <Alert variant="success" className="mb-4">
-              {success}
-            </Alert>
-          )}
+          <CustomModal
+            isOpen={modalOpen}
+            onClose={() => {
+              setModalOpen(false);
+              setError('');
+              setSuccess('');
+              setModalType('');
+            }}
+            title={modalContent.title}
+            primaryAction={modalType === 'error' ? {
+              label: t('common.ok'),
+              onClick: () => {
+                setModalOpen(false);
+                setError('');
+                setSuccess('');
+                setModalType('');
+              },
+            } : undefined}
+            closeOnBackdrop={modalType === 'error'}
+          >
+            <p className="mb-0">{modalContent.message}</p>
+          </CustomModal>
 
           {loading ? (
             <div className="edit-driver-loading">
@@ -238,6 +268,8 @@ const EditDriver = () => {
                         onChange={handleChange}
                         placeholder="e.g. john@example.com"
                         required
+                        disabled
+                        readOnly
                         className="field-input"
                       />
                     </Form.Group>
@@ -373,7 +405,6 @@ const EditDriver = () => {
             </form>
           )}
         </Container>
-        <Footer />
       </main>
     </div>
   );

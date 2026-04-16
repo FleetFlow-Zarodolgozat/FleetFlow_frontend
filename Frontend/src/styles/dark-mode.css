@@ -954,6 +954,11 @@ body.dark-mode .notifications-page .mark-all-read-btn:hover {
   color: #79b8ff !important;
 }
 
+body.dark-mode .notifications-page .page-footer {
+  background: #0f1117 !important;
+  border-top-color: #30363d !important;
+}
+
 body.dark-mode .profile-settings-page .danger-zone-title {
   color: #e6edf3 !important;
 }
@@ -1723,4 +1728,457 @@ body.dark-mode .sr-mobile-delete-btn:hover {
   background: #3d1f1f !important;
   border-color: #da3633 !important;
   color: #ffa198 !important;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Admin Fuel Logs / Fuel Log Details / Trips / Trip Details
+   ───────────────────────────────────────────────────────────── */
+body.dark-mode .afl-dashboard,
+body.dark-mode .afl-main,
+body.dark-mode .afl-page,
+body.dark-mode .afld-dashboard,
+body.dark-mode .afld-main,
+body.dark-mode .afld-page,
+body.dark-mode .at-dashboard,
+body.dark-mode .at-main,
+body.dark-mode .at-page,
+body.dark-mode .atd-dashboard,
+body.dark-mode .atd-main,
+body.dark-mode .atd-page {
+  background: #0f1117 !important;
+}
+
+body.dark-mode .afl-filter-card,
+body.dark-mode .afl-stat-card,
+body.dark-mode .afl-table-card,
+body.dark-mode .afld-section-card,
+body.dark-mode .at-filter-card,
+body.dark-mode .at-stat-card,
+body.dark-mode .at-table-card,
+body.dark-mode .atd-route-banner,
+body.dark-mode .atd-section-card {
+  background: #1c2230 !important;
+  border-color: #30363d !important;
+}
+
+body.dark-mode .afl-title,
+body.dark-mode .afl-period-value,
+body.dark-mode .afl-stat-value,
+body.dark-mode .afl-table-title,
+body.dark-mode .afld-title,
+body.dark-mode .afld-driver-email,
+body.dark-mode .afld-highlight,
+body.dark-mode .at-title,
+body.dark-mode .at-stat-value,
+body.dark-mode .atd-title,
+body.dark-mode .atd-driver-email,
+body.dark-mode .atd-route-value,
+body.dark-mode .atd-stat-value {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .afl-subtitle,
+body.dark-mode .afl-filter-label,
+body.dark-mode .afl-stat-label,
+body.dark-mode .afl-pagination-info,
+body.dark-mode .afl-driver-email,
+body.dark-mode .afld-card-header,
+body.dark-mode .afld-detail-row dt,
+body.dark-mode .afld-muted,
+body.dark-mode .at-subtitle,
+body.dark-mode .at-filter-label,
+body.dark-mode .at-stat-label,
+body.dark-mode .at-pagination-info,
+body.dark-mode .at-driver-email,
+body.dark-mode .at-date-time,
+body.dark-mode .atd-card-header,
+body.dark-mode .atd-route-label,
+body.dark-mode .atd-route-distance,
+body.dark-mode .atd-detail-row dt,
+body.dark-mode .atd-stat-label,
+body.dark-mode .atd-muted {
+  color: #8b949e !important;
+}
+
+body.dark-mode .afl-card-header,
+body.dark-mode .afld-card-header,
+body.dark-mode .at-card-header,
+body.dark-mode .atd-card-header,
+body.dark-mode .afl-th,
+body.dark-mode .at-th {
+  background: #161b22 !important;
+  border-color: #30363d !important;
+}
+
+body.dark-mode .afl-search-input,
+body.dark-mode .afl-select,
+body.dark-mode .afl-date-input,
+body.dark-mode .afl-page-btn,
+body.dark-mode .afl-export-btn,
+body.dark-mode .afl-reset-btn,
+body.dark-mode .afl-plate-badge,
+body.dark-mode .afld-back-btn,
+body.dark-mode .afld-plate-badge,
+body.dark-mode .at-search-input,
+body.dark-mode .at-select,
+body.dark-mode .at-date-input,
+body.dark-mode .at-page-btn,
+body.dark-mode .at-export-btn,
+body.dark-mode .at-reset-btn,
+body.dark-mode .at-plate,
+body.dark-mode .atd-back-btn,
+body.dark-mode .atd-plate-badge {
+  background: #21262d !important;
+  border-color: #30363d !important;
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .afl-search-input::placeholder,
+body.dark-mode .at-search-input::placeholder {
+  color: #6e7681 !important;
+}
+
+body.dark-mode .afl-tr,
+body.dark-mode .afl-pagination,
+body.dark-mode .afl-table-header-row,
+body.dark-mode .afld-detail-row,
+body.dark-mode .at-tr,
+body.dark-mode .at-pagination,
+body.dark-mode .at-table-header-row,
+body.dark-mode .atd-detail-row,
+body.dark-mode .atd-stat-item {
+  border-color: #30363d !important;
+}
+
+body.dark-mode .afl-tr:hover,
+body.dark-mode .at-tr:hover {
+  background: #21262d !important;
+}
+
+body.dark-mode .afl-td,
+body.dark-mode .afl-date-main,
+body.dark-mode .afl-td--cost,
+body.dark-mode .afld-detail-row dd,
+body.dark-mode .at-td,
+body.dark-mode .at-date-main,
+body.dark-mode .at-td--distance,
+body.dark-mode .atd-detail-row dd {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .afld-receipt-frame {
+  background: #161b22 !important;
+}
+
+body.dark-mode .afld-receipt-placeholder,
+body.dark-mode .afld-na {
+  color: #8b949e !important;
+}
+
+body.dark-mode .atd-route-line svg line,
+body.dark-mode .atd-route-line svg polyline {
+  stroke: #6e7681 !important;
+}
+
+body.dark-mode .afl-export-btn:hover,
+body.dark-mode .afl-reset-btn:hover,
+body.dark-mode .afl-page-btn:hover:not(:disabled),
+body.dark-mode .afld-back-btn:hover,
+body.dark-mode .at-export-btn:hover,
+body.dark-mode .at-reset-btn:hover,
+body.dark-mode .at-page-btn:hover:not(:disabled),
+body.dark-mode .atd-back-btn:hover {
+  background: #30363d !important;
+  border-color: #484f58 !important;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Service Requests / Service Request Details
+   ───────────────────────────────────────────────────────────── */
+body.dark-mode .service-requests-page,
+body.dark-mode .srd-page {
+  background: #0f1117 !important;
+}
+
+body.dark-mode .service-requests-page .sr-table-card,
+body.dark-mode .service-requests-page .sr-stat-card,
+body.dark-mode .service-requests-page .sr-mobile-card,
+body.dark-mode .srd-page .fuel-form-card,
+body.dark-mode .srd-page .receipt-card,
+body.dark-mode .srd-page .srd-info-card,
+body.dark-mode .srd-page .srd-meta-card {
+  background: #1c2230 !important;
+  border-color: #30363d !important;
+}
+
+body.dark-mode .service-requests-page .sr-table-header,
+body.dark-mode .service-requests-page .sr-table thead,
+body.dark-mode .service-requests-page .sr-pagination-footer,
+body.dark-mode .srd-page .srd-info-row,
+body.dark-mode .srd-page .srd-existing-invoice,
+body.dark-mode .srd-page .sr-mobile-card-body {
+  background: #161b22 !important;
+  border-color: #30363d !important;
+}
+
+body.dark-mode .service-requests-page .sr-table th,
+body.dark-mode .service-requests-page .sr-mobile-label,
+body.dark-mode .service-requests-page .sr-page-info,
+body.dark-mode .srd-page .srd-info-label,
+body.dark-mode .srd-page .srd-meta-label,
+body.dark-mode .srd-page .srd-existing-label,
+body.dark-mode .srd-page .form-label {
+  color: #8b949e !important;
+}
+
+body.dark-mode .service-requests-page .sr-table-cell,
+body.dark-mode .service-requests-page .sr-cell-title,
+body.dark-mode .service-requests-page .sr-cell-date,
+body.dark-mode .service-requests-page .sr-mobile-value,
+body.dark-mode .service-requests-page .sr-mobile-card-title,
+body.dark-mode .srd-page .srd-info-value,
+body.dark-mode .srd-page .srd-meta-value,
+body.dark-mode .srd-page .srd-request-name {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .service-requests-page .sr-table tbody tr,
+body.dark-mode .service-requests-page .sr-mobile-card-header,
+body.dark-mode .service-requests-page .sr-table tbody tr:last-child,
+body.dark-mode .srd-page .srd-invoice-preview {
+  border-color: #30363d !important;
+}
+
+body.dark-mode .service-requests-page .sr-table tbody tr:hover {
+  background: #21262d !important;
+}
+
+body.dark-mode .srd-page .input-with-suffix .form-control,
+body.dark-mode .srd-page .form-control,
+body.dark-mode .srd-page .input-suffix {
+  background: #21262d !important;
+  border-color: #30363d !important;
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .srd-page .form-control::placeholder {
+  color: #6e7681 !important;
+}
+
+body.dark-mode .srd-page .srd-submit-btn {
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35) !important;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Icon action buttons (dark-mode parity with driver pages)
+   ───────────────────────────────────────────────────────────── */
+body.dark-mode .action-btn-icon,
+body.dark-mode .vaction-btn,
+body.dark-mode .asr-icon-btn,
+body.dark-mode .afl-icon-btn,
+body.dark-mode .at-icon-btn {
+  background: transparent !important;
+  border: 1px solid #30363d !important;
+  box-shadow: none !important;
+}
+
+body.dark-mode .action-edit,
+body.dark-mode .vaction-btn.vaction-edit,
+body.dark-mode .asr-icon-btn--view,
+body.dark-mode .afl-icon-btn--view,
+body.dark-mode .at-icon-btn--view {
+  color: #58a6ff !important;
+  border-color: #1f6feb !important;
+}
+
+body.dark-mode .action-edit:hover,
+body.dark-mode .vaction-btn.vaction-edit:hover,
+body.dark-mode .asr-icon-btn--view:hover,
+body.dark-mode .afl-icon-btn--view:hover,
+body.dark-mode .at-icon-btn--view:hover {
+  background: transparent !important;
+}
+
+body.dark-mode .action-activate,
+body.dark-mode .vaction-btn.vaction-activate,
+body.dark-mode .afl-icon-btn--restore,
+body.dark-mode .at-icon-btn--restore {
+  color: #3fb950 !important;
+  border-color: #238636 !important;
+}
+
+body.dark-mode .action-activate:hover,
+body.dark-mode .vaction-btn.vaction-activate:hover,
+body.dark-mode .afl-icon-btn--restore:hover,
+body.dark-mode .at-icon-btn--restore:hover {
+  background: transparent !important;
+}
+
+body.dark-mode .action-deactivate,
+body.dark-mode .vaction-btn.vaction-deactivate {
+  color: #f0883e !important;
+  border-color: #f0883e !important;
+}
+
+body.dark-mode .action-deactivate:hover,
+body.dark-mode .vaction-btn.vaction-deactivate:hover {
+  background: transparent !important;
+}
+
+body.dark-mode .action-delete,
+body.dark-mode .vaction-btn.vaction-delete,
+body.dark-mode .afl-icon-btn--delete,
+body.dark-mode .at-icon-btn--delete {
+  color: #f85149 !important;
+  border-color: #da3633 !important;
+}
+
+body.dark-mode .action-delete:hover,
+body.dark-mode .vaction-btn.vaction-delete:hover,
+body.dark-mode .afl-icon-btn--delete:hover,
+body.dark-mode .at-icon-btn--delete:hover {
+  background: transparent !important;
+}
+
+body.dark-mode .at-date-duration {
+  background: #30363d !important;
+  color: #8b949e !important;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Admin Service Request Details
+   ───────────────────────────────────────────────────────────── */
+body.dark-mode .asrd-dashboard,
+body.dark-mode .asrd-main,
+body.dark-mode .asrd-page {
+  background: #0f1117 !important;
+}
+
+body.dark-mode .asrd-section-card {
+  background: #1c2230 !important;
+  border-color: #30363d !important;
+}
+
+body.dark-mode .asrd-card-header,
+body.dark-mode .asrd-invoice-frame,
+body.dark-mode .asrd-detail-row,
+body.dark-mode .asrd-detail-description {
+  background: #161b22 !important;
+  border-color: #30363d !important;
+}
+
+body.dark-mode .asrd-title,
+body.dark-mode .asrd-driver-email,
+body.dark-mode .asrd-detail-row dd,
+body.dark-mode .asrd-highlight,
+body.dark-mode .asrd-detail-description-text,
+body.dark-mode .asrd-approve-datepicker,
+body.dark-mode .asrd-approve-location {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .asrd-back-btn,
+body.dark-mode .asrd-plate-badge,
+body.dark-mode .asrd-action-btn--cancel-approve,
+body.dark-mode .asrd-approve-datepicker,
+body.dark-mode .asrd-approve-location {
+  background: #21262d !important;
+  border-color: #30363d !important;
+}
+
+body.dark-mode .asrd-back-btn:hover,
+body.dark-mode .asrd-action-btn--cancel-approve:hover:not(:disabled) {
+  background: #30363d !important;
+  border-color: #484f58 !important;
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .asrd-card-header,
+body.dark-mode .asrd-detail-row dt,
+body.dark-mode .asrd-detail-description-label,
+body.dark-mode .asrd-approve-label,
+body.dark-mode .asrd-muted,
+body.dark-mode .asrd-na {
+  color: #8b949e !important;
+}
+
+body.dark-mode .asrd-detail-description-text {
+  background: #1f1930 !important;
+  border-left-color: #7c3aed !important;
+}
+
+body.dark-mode .asrd-invoice-placeholder {
+  color: #8b949e !important;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Auth pages (Login / Forgot / Set Password)
+   ───────────────────────────────────────────────────────────── */
+body.dark-mode .login-page,
+body.dark-mode .forgot-password-page,
+body.dark-mode .set-password-page {
+  background: #0f1117 !important;
+}
+
+body.dark-mode .login-card,
+body.dark-mode .forgot-password-card,
+body.dark-mode .set-password-card {
+  background: #1c2230 !important;
+  border-color: #30363d !important;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35) !important;
+}
+
+body.dark-mode .logo-title,
+body.dark-mode .welcome-title,
+body.dark-mode .page-title,
+body.dark-mode .success-message h3,
+body.dark-mode .card-footer-text,
+body.dark-mode .card-footer-text p {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .welcome-subtitle,
+body.dark-mode .page-subtitle,
+body.dark-mode .resend-text,
+body.dark-mode .back-to-login,
+body.dark-mode .card-footer-text a,
+body.dark-mode .set-password-page .form-text,
+body.dark-mode .page-footer,
+body.dark-mode .page-footer * {
+  color: #8b949e !important;
+}
+
+body.dark-mode .login-page .form-label,
+body.dark-mode .forgot-password-page .form-label,
+body.dark-mode .set-password-page .form-label {
+  color: #8b949e !important;
+}
+
+body.dark-mode .login-page .form-control,
+body.dark-mode .forgot-password-page .form-control,
+body.dark-mode .set-password-page .form-control {
+  background: #21262d !important;
+  border-color: #30363d !important;
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .login-page .form-control::placeholder,
+body.dark-mode .forgot-password-page .form-control::placeholder,
+body.dark-mode .set-password-page .form-control::placeholder {
+  color: #6e7681 !important;
+}
+
+body.dark-mode .forgot-link,
+body.dark-mode .back-link,
+body.dark-mode .resend-link,
+body.dark-mode .page-footer a {
+  color: #58a6ff !important;
+}
+
+body.dark-mode .password-toggle {
+  color: #8b949e !important;
+}
+
+body.dark-mode .password-toggle:hover {
+  color: #e6edf3 !important;
 }

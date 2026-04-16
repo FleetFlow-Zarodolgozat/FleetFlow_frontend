@@ -88,7 +88,8 @@ const AdminTripDetails = () => {
     if (rawEnd) {
       const d = new Date(rawEnd);
       if (!isNaN(d.getTime())) return formatDateTime(rawEnd);
-    }    const rawStart = trip.startTime ?? trip.StartTime;
+    }
+    const rawStart = trip.startTime ?? trip.StartTime;
     const rawDur = trip.long ?? trip.Long;
     if (!rawStart || !rawDur) return 'N/A';
     const start = new Date(rawStart);
@@ -293,8 +294,6 @@ const AdminTripDetails = () => {
             </div>
           </div>
         </div>
-
-        <Footer />
       </main>
     </div>
   );

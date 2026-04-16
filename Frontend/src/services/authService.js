@@ -21,22 +21,6 @@ export const authService = {
           id: payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier']
         };
         localStorage.setItem('user', JSON.stringify(user));
-        
-        // Admin: always light mode. Driver: restore saved dark mode preference.
-        if (user.role?.toLowerCase() === 'admin') {
-          // Only clear the active state — do NOT touch fleetflow_darkModePreference (belongs to driver)
-          localStorage.removeItem('fleetflow_darkMode');
-          document.body.classList.remove('dark-mode');
-        } else {
-          const darkModePreference = localStorage.getItem('fleetflow_darkModePreference');
-          if (darkModePreference === 'true') {
-            localStorage.setItem('fleetflow_darkMode', 'true');
-            document.body.classList.add('dark-mode');
-          } else {
-            localStorage.removeItem('fleetflow_darkMode');
-            document.body.classList.remove('dark-mode');
-          }
-        }
       }
       return response.data;
     } catch (error) {
@@ -63,16 +47,14 @@ export const authService = {
 
   // Logout
   logout() {
-    // Clear the active dark mode state — preference is saved by Sidebar before calling this
-    localStorage.removeItem('fleetflow_darkMode');
-    document.body.classList.remove('dark-mode');
-
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
-  },  getCurrentUser() {
+  },
+  getCurrentUser() {
     const userStr = localStorage.getItem('user');
     return userStr ? JSON.parse(userStr) : null;
-  },  isAuthenticated() {
+  },
+  isAuthenticated() {
     return !!localStorage.getItem('authToken');
   },
 };
