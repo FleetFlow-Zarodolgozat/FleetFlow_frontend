@@ -2,19 +2,19 @@ import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
-import Footer from '../components/Footer';
 import '../styles/AdminTripDetails.css';
 
-const AVATAR_COLORS = [
-  '#7c3aed', '#2563eb', '#059669', '#d97706',
-  '#dc2626', '#0891b2', '#16a34a', '#ea580c', '#8b5cf6',
+const AVATAR_COLOR_CLASSES = [
+  'atd-driver-avatar--c1', 'atd-driver-avatar--c2', 'atd-driver-avatar--c3',
+  'atd-driver-avatar--c4', 'atd-driver-avatar--c5', 'atd-driver-avatar--c6',
+  'atd-driver-avatar--c7', 'atd-driver-avatar--c8', 'atd-driver-avatar--c9',
 ];
 
-const getColorForEmail = (email) => {
-  if (!email) return AVATAR_COLORS[0];
+const getAvatarClassForEmail = (email) => {
+  if (!email) return AVATAR_COLOR_CLASSES[0];
   let hash = 0;
   for (let i = 0; i < email.length; i++) hash = email.charCodeAt(i) + ((hash << 5) - hash);
-  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+  return AVATAR_COLOR_CLASSES[Math.abs(hash) % AVATAR_COLOR_CLASSES.length];
 };
 
 const getDriverInitials = (email) => {
@@ -116,7 +116,7 @@ const AdminTripDetails = () => {
   const distance    = parseFloat(trip.distanceKm ?? trip.DistanceKm) || 0;
   const notes       = trip.notes ?? trip.Notes ?? '';
   const isDeleted   = trip.isDeleted ?? trip.IsDeleted ?? false;
-  const avatarColor = getColorForEmail(email);
+  const avatarClass = getAvatarClassForEmail(email);
 
   return (
     <div className="atd-dashboard">
@@ -180,7 +180,7 @@ const AdminTripDetails = () => {
                   Driver
                 </div>
                 <div className="atd-driver-row">
-                  <div className="atd-driver-avatar" style={{ background: avatarColor }}>
+                  <div className={`atd-driver-avatar ${avatarClass}`}>
                     {driverImgUrl ? (
                       <img src={driverImgUrl} alt={email} />
                     ) : (

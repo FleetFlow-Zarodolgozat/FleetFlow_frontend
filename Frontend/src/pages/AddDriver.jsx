@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { Button, Container, Form, Spinner } from 'react-bootstrap';
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
-import Footer from '../components/Footer';
 import CustomModal from '../components/CustomModal';
 import { useLanguage } from '../contexts/LanguageContext';
 import '../styles/EditDriver.css';
@@ -63,7 +62,8 @@ const AddDriver = () => {
   };
 
   const handleSubmit = async (e) => {
-    // Űrlap elküldése - új sofőr létrehozása az API-n keresztül
+    // Űrlap elküldése: először létrehozzuk a sofőrt, majd siker esetén rövid késleltetéssel visszalépünk a listába.
+    // A késleltetés célja, hogy a felhasználó biztosan lássa a siker modal tartalmát.
     e.preventDefault();
     setSaving(true);
     setError('');

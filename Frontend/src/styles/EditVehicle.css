@@ -1,4 +1,9 @@
 /* ─── Two-column layout ───────────────────────────────────── */
+/*
+  Bal oldali oszlop: segédkártyák (tippek + előzmények)
+  Jobb oldali oszlop: szerkesztő űrlap.
+  Kisebb nézetben egyoszloposra törik, hogy ne szoruljanak össze a mezők.
+*/
 .ev-layout {
   display: grid;
   grid-template-columns: 300px 1fr;
@@ -160,6 +165,10 @@
 }
 
 /* ─── Status option badges (radio group) ─────────────────── */
+/*
+  A rádió inputok vizuálisan el vannak rejtve, a kattintható "pill" elemek
+  kapják a kiválasztott állapotot a .selected osztállyal.
+*/
 .ev-status-options {
   display: flex;
   gap: 10px;

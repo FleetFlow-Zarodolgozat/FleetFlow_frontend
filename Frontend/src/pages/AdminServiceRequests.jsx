@@ -1,10 +1,9 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Alert, Container, Spinner } from 'react-bootstrap';
+import { Container, Spinner } from 'react-bootstrap';
 import api from '../services/api';
 import JSZip from 'jszip';
 import Sidebar from '../components/Sidebar';
-import Footer from '../components/Footer';
 import CustomModal from '../components/CustomModal';
 import { useLanguage } from '../contexts/LanguageContext';
 import '../styles/AdminServiceRequests.css';
@@ -26,7 +25,7 @@ const AdminServiceRequests = () => {
 
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [errorModalMessage, setErrorModalMessage] = useState('');
   const [totalCount, setTotalCount] = useState(0);
   const [totalOngoingCount, setTotalOngoingCount] = useState(0);
   const [totalRequestedCount, setTotalRequestedCount] = useState(0);
@@ -46,6 +45,11 @@ const AdminServiceRequests = () => {
 
   const [driverImages, setDriverImages] = useState({});
 
+  // Egy helyen kezeljuk az osszes hibauzenetet, hogy egységes modal UX legyen.
+  const openErrorModal = (message) => {
+    setErrorModalMessage(message || 'Unexpected error occurred.');
+  };
+
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth > 1024) setSidebarOpen(true);
@@ -58,7 +62,6 @@ const AdminServiceRequests = () => {
   const fetchRequests = useCallback(
     async (pageToLoad = 1) => {
       setLoading(true);
-      setError('');
       try {
         const params = {
           page: pageToLoad,
@@ -107,7 +110,7 @@ const AdminServiceRequests = () => {
           typeof apiMessage === 'string'
             ? apiMessage
             : apiMessage?.message || apiMessage?.Message || 'An error occurred while fetching service requests.';
-        setError(message);
+        openErrorModal(message);
       } finally {
         setLoading(false);
       }
@@ -230,7 +233,6 @@ const AdminServiceRequests = () => {
       }
 
       if (items.length === 0) {
-        setError('');
         setExporting(false);
         setExportEmptyModalOpen(true);
         return;
@@ -441,7 +443,7 @@ ${serviceCards}
       document.body.removeChild(a);
       URL.revokeObjectURL(zipUrl);
     } catch {
-      setError('Export failed.');
+      openErrorModal('Export failed.');
     } finally {
       setExporting(false);
     }
@@ -512,6 +514,18 @@ ${serviceCards}
             }}
           >
             <p className="mb-0">{t('adminDash.export.emptyMessage')}</p>
+          </CustomModal>
+
+          <CustomModal
+            isOpen={Boolean(errorModalMessage)}
+            onClose={() => setErrorModalMessage('')}
+            title={t('common.errorTitle')}
+            primaryAction={{
+              label: t('common.ok'),
+              onClick: () => setErrorModalMessage(''),
+            }}
+          >
+            <p className="mb-0">{errorModalMessage}</p>
           </CustomModal>
 
           {/* ── Header ─────────────────────────────────── */}
@@ -687,12 +701,6 @@ ${serviceCards}
               </div>
             </div>
           </div>
-
-          {error && (
-            <Alert variant="danger" className="mb-3" onClose={() => setError('')} dismissible>
-              {error}
-            </Alert>
-          )}
 
           {/* ── Table Card ─────────────────────────────── */}
           <div className="asr-table-card">

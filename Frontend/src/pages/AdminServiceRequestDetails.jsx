@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Spinner } from 'react-bootstrap';
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
-import Footer from '../components/Footer';
 import CustomModal from '../components/CustomModal';
 import '../styles/AdminServiceRequestDetails.css';
 
@@ -33,8 +32,7 @@ const AdminServiceRequestDetails = () => {
 
   // Action state
   const [actionLoading, setActionLoading] = useState(null);
-  const [actionError, setActionError] = useState(null);
-  const [actionSuccess, setActionSuccess] = useState(null);
+  const [actionFeedback, setActionFeedback] = useState({ message: '', type: 'error' });
   const [currentStatus, setCurrentStatus] = useState(request.status ?? request.Status ?? '—');
   const [approveMode, setApproveMode] = useState(false);
   const [approveDate, setApproveDate] = useState('');
@@ -44,6 +42,11 @@ const AdminServiceRequestDetails = () => {
   const [validationModalOpen, setValidationModalOpen] = useState(false);
   const [validationMessage, setValidationMessage] = useState('');
   const [downloadSuccessModalOpen, setDownloadSuccessModalOpen] = useState(false);
+
+  // Action eredmenyek (siker/hiba) is modalban mennek ki, nem inline alertkent.
+  const openActionFeedback = (message, type = 'error') => {
+    setActionFeedback({ message, type });
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -138,18 +141,16 @@ const AdminServiceRequestDetails = () => {
       return;
     }
     setActionLoading('approve');
-    setActionError(null);
-    setActionSuccess(null);
     try {
       const dto = { ScheduledStart: new Date(approveDate).toISOString(), ServiceLocation: serviceLocation };
       await api.patch(`/service-requests/approve/${request.id ?? request.Id}`, dto);
       setCurrentStatus('APPROVED');
-      setActionSuccess('Request approved successfully.');
+      openActionFeedback('Request approved successfully.', 'success');
       setApproveMode(false);
       setTimeout(() => navigate(-1), 1200);
     } catch (err) {
       const msg = err?.response?.data?.message ?? err?.response?.data?.Message ?? 'Failed to approve the request.';
-      setActionError(msg);
+      openActionFeedback(msg, 'error');
     } finally {
       setActionLoading(null);
     }
@@ -157,18 +158,16 @@ const AdminServiceRequestDetails = () => {
 
   const executeAction = async (action) => {
     setActionLoading(action);
-    setActionError(null);
-    setActionSuccess(null);
     try {
       await api.patch(`/service-requests/${action}/${request.id ?? request.Id}`, null);
       const nextStatus = { reject: 'REJECTED', close: 'CLOSED' }[action];
       if (nextStatus) setCurrentStatus(nextStatus);
       const label = action === 'reject' ? 'rejected' : 'closed';
-      setActionSuccess(`Request ${label} successfully.`);
+      openActionFeedback(`Request ${label} successfully.`, 'success');
       setTimeout(() => navigate(-1), 1200);
     } catch (err) {
       const msg = err?.response?.data?.message ?? err?.response?.data?.Message ?? `Failed to ${action} the request.`;
-      setActionError(msg);
+      openActionFeedback(msg, 'error');
     } finally {
       setActionLoading(null);
     }
@@ -281,6 +280,18 @@ const AdminServiceRequestDetails = () => {
             }}
           >
             <p className="mb-0">{validationMessage}</p>
+          </CustomModal>
+
+          <CustomModal
+            isOpen={Boolean(actionFeedback.message)}
+            onClose={() => setActionFeedback({ message: '', type: 'error' })}
+            title={actionFeedback.type === 'success' ? 'Success' : 'Error'}
+            primaryAction={{
+              label: 'OK',
+              onClick: () => setActionFeedback({ message: '', type: 'error' }),
+            }}
+          >
+            <p className="mb-0">{actionFeedback.message}</p>
           </CustomModal>
 
           {/* ── Top bar ───────────────────────────────── */}
@@ -463,20 +474,13 @@ const AdminServiceRequestDetails = () => {
                   Actions
                 </div>
                 <div className="asrd-actions-body">
-                  {actionError && (
-                    <div className="asrd-action-alert asrd-action-alert--error">{actionError}</div>
-                  )}
-                  {actionSuccess && (
-                    <div className="asrd-action-alert asrd-action-alert--success">{actionSuccess}</div>
-                  )}
-
                   {status === 'REQUESTED' && (
                     <>
                       {!approveMode ? (
                         <>
                           <button
                             className="asrd-action-btn asrd-action-btn--approve"
-                            onClick={() => { setApproveMode(true); setActionError(null); setApproveDate(''); setServiceLocation(''); }}
+                            onClick={() => { setApproveMode(true); setApproveDate(''); setServiceLocation(''); }}
                             disabled={actionLoading !== null}
                           >
                             <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" strokeLinecap="round" strokeLinejoin="round" /></svg>
@@ -515,7 +519,7 @@ const AdminServiceRequestDetails = () => {
                           <div className="asrd-approve-actions">
                             <button
                               className="asrd-action-btn asrd-action-btn--cancel-approve"
-                              onClick={() => { setApproveMode(false); setApproveDate(''); setServiceLocation(''); setActionError(null); }}
+                              onClick={() => { setApproveMode(false); setApproveDate(''); setServiceLocation(''); }}
                               disabled={actionLoading !== null}
                             >
                               Cancel

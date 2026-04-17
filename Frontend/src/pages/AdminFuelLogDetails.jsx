@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Spinner } from 'react-bootstrap';
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
-import Footer from '../components/Footer';
 import CustomModal from '../components/CustomModal';
 import '../styles/AdminFuelLogDetails.css';
 

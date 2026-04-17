@@ -98,7 +98,10 @@
   color: #94a3b8;
 }
 
-/* Input with suffix */
+/*
+  Jobb oldali mértékegység (L/Ft/km) megjelenítése úgy, hogy az input maradjon egyben fókuszolható.
+  Az abszolút pozíciójú suffix miatt a mező jobb oldala extra belső paddinget kap.
+*/
 .input-with-suffix {
   position: relative;
   display: flex;
@@ -222,7 +225,12 @@
   font-weight: 600;
 }
 
-/* Receipt Dropzone */
+/*
+  Fájl feltöltő dropzone állapotgépe:
+  - alap: semleges háttér és keret,
+  - dragging: erősebb kiemelés a húzás vizuális visszajelzésére,
+  - has-file: sikeres kiválasztás után zöld tónus.
+*/
 .receipt-dropzone {
   border: 2px dashed #e2e8f0;
   border-radius: 12px;

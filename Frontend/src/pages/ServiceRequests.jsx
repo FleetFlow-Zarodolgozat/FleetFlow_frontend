@@ -8,6 +8,7 @@ import '../styles/DriverDashboard.css';
 import '../styles/ServiceRequests.css';
 import { useLanguage } from '../contexts/LanguageContext';
 import Footer from '../components/Footer';
+import CustomModal from '../components/CustomModal';
 
 const ServiceRequests = () => {
     const getStatusBadgeVariant = (status) => {
@@ -46,6 +47,20 @@ const ServiceRequests = () => {
     const [serviceRequests, setServiceRequests] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [confirmModal, setConfirmModal] = useState({
+        open: false,
+        title: '',
+        message: '',
+        confirmLabel: '',
+        cancelLabel: '',
+        confirmVariant: '',
+        onConfirm: null,
+    });
+    const [errorModal, setErrorModal] = useState({
+        open: false,
+        title: '',
+        message: '',
+    });
     const [pagination, setPagination] = useState({
         totalCount: 0,
         page: 1,
@@ -55,6 +70,49 @@ const ServiceRequests = () => {
     const totalPages = useMemo(() => {
         return Math.max(1, Math.ceil((pagination.totalCount || 0) / pagination.pageSize));
     }, [pagination.totalCount, pagination.pageSize]);
+
+    const getApiErrorMessage = (err, fallback) => {
+        const data = err?.response?.data;
+        if (typeof data === 'string') return data;
+        if (data?.message) return data.message;
+        if (data?.Message) return data.Message;
+        if (data?.detail) return data.detail;
+        if (data?.errors) return Array.isArray(data.errors) ? data.errors.join(', ') : JSON.stringify(data.errors);
+        if (err?.response?.statusText) return err.response.statusText;
+        return fallback;
+    };
+
+    const openConfirmModal = ({ title, message, confirmLabel, cancelLabel, confirmVariant, onConfirm }) => {
+        setConfirmModal({
+            open: true,
+            title,
+            message,
+            confirmLabel,
+            cancelLabel,
+            confirmVariant,
+            onConfirm,
+        });
+    };
+
+    const closeConfirmModal = () => {
+        setConfirmModal((prev) => ({ ...prev, open: false }));
+    };
+
+    const handleConfirmAction = async () => {
+        const action = confirmModal.onConfirm;
+        closeConfirmModal();
+        if (typeof action === 'function') {
+            await action();
+        }
+    };
+
+    const openErrorModal = (title, message) => {
+        setErrorModal({ open: true, title, message });
+    };
+
+    const closeErrorModal = () => {
+        setErrorModal((prev) => ({ ...prev, open: false }));
+    };
 
     const fetchServiceRequests = async (pageToLoad = 1) => {
         setLoading(true);
@@ -95,22 +153,25 @@ const ServiceRequests = () => {
     };
 
     const handleDeleteServiceRequest = async (id) => {
-        if (!window.confirm('Are you sure you want to cancel this service request?')) return;
-        setLoading(true);
-        setError('');
-        try {
-            await api.delete(`/service-requests/cancel/${id}`);
-            fetchServiceRequests(pagination.page);
-        } catch (err) {
-            const apiMessage = err?.response?.data;
-            const message =
-                typeof apiMessage === 'string'
-                    ? apiMessage
-                    : apiMessage?.message || apiMessage?.Message || 'Could not cancel service request.';
-            setError(message);
-        } finally {
-            setLoading(false);
-        }
+        openConfirmModal({
+            title: t('sr.modal.cancelTitle'),
+            message: t('sr.modal.cancelMessage'),
+            confirmLabel: t('sr.modal.cancelConfirm'),
+            cancelLabel: t('sr.modal.keep'),
+            confirmVariant: 'danger',
+            onConfirm: async () => {
+                setLoading(true);
+                setError('');
+                try {
+                    await api.delete(`/service-requests/cancel/${id}`);
+                    await fetchServiceRequests(pagination.page);
+                } catch (err) {
+                    openErrorModal(t('sr.modal.cancelFailedTitle'), getApiErrorMessage(err, t('sr.modal.cancelFailedMessage')));
+                } finally {
+                    setLoading(false);
+                }
+            },
+        });
     };
 
     return (
@@ -375,6 +436,35 @@ const ServiceRequests = () => {
                         )}
                     </Card>
                     <Footer />
+
+                    <CustomModal
+                        isOpen={confirmModal.open}
+                        onClose={closeConfirmModal}
+                        title={confirmModal.title}
+                        primaryAction={{
+                            label: confirmModal.confirmLabel,
+                            onClick: handleConfirmAction,
+                            variant: confirmModal.confirmVariant,
+                        }}
+                        secondaryAction={{
+                            label: confirmModal.cancelLabel,
+                            onClick: closeConfirmModal,
+                        }}
+                    >
+                        <p className="mb-0">{confirmModal.message}</p>
+                    </CustomModal>
+
+                    <CustomModal
+                        isOpen={errorModal.open}
+                        onClose={closeErrorModal}
+                        title={errorModal.title}
+                        primaryAction={{
+                            label: t('common.ok'),
+                            onClick: closeErrorModal,
+                        }}
+                    >
+                        <p className="mb-0">{errorModal.message}</p>
+                    </CustomModal>
                 </div>
             </main>
         </div>

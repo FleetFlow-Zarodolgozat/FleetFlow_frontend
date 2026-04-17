@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
-import { Button, Card, Form, Container, Row, Col } from 'react-bootstrap';
+import { useState, useEffect } from 'react';
+import { Button, Card, Form, Row, Col } from 'react-bootstrap';
 import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';   
@@ -28,11 +28,14 @@ const AddNewTrip = () => {
   const [previousOdometer, setPreviousOdometer] = useState(0);
   const [activeLocationField, setActiveLocationField] = useState('start');
   const [modalOpen, setModalOpen] = useState(false);
+  const [modalType, setModalType] = useState('error');
   const [modalContent, setModalContent] = useState({ title: '', message: '' });
   const navigate = useNavigate();
 
   const smartTruncateAddress = (address) => {
-    // Cím csonkítása az 50 karakteres limit megtartásához
+    // Cím csonkítása az 50 karakteres limit megtartásához.
+    // A logika jobb eredményt ad egyszerű slice helyett, mert vessző mentén próbál rövidíteni,
+    // így jellemzően olvasható marad (utca + város), nem középen levágott szöveget kapunk.
     if (address.length <= 50) return address;
     // Nominatim formátum: "Street, District, City, County, Country"
     const parts = address.split(', ');
@@ -64,6 +67,7 @@ const AddNewTrip = () => {
 
   useEffect(() => {
     if (error) {
+      setModalType('error');
       setModalContent({ title: t('common.errorTitle'), message: error });
       setModalOpen(true);
     }
@@ -71,10 +75,19 @@ const AddNewTrip = () => {
 
   useEffect(() => {
     if (success) {
+      setModalType('success');
       setModalContent({ title: t('common.successTitle'), message: t('addTrip.savedSuccess') });
       setModalOpen(true);
+
+      const timer = setTimeout(() => {
+        setModalOpen(false);
+        setSuccess(false);
+        navigate(-1);
+      }, 2000);
+
+      return () => clearTimeout(timer);
     }
-  }, [success, t]);
+  }, [success, t, navigate]);
 
   useEffect(() => {
     // Út adatok lekérése: heti statisztikák és előző kilométeróra
@@ -115,10 +128,34 @@ const AddNewTrip = () => {
   }, []);
 
   const handleSubmit = async (e) => {
-    // Új út elküldése - új út létrehozása az API-n keresztül
+    // Új út elküldése előtt több lépcsős ellenőrzés fut:
+    // 1) minden szám mező valóban értelmezhető szám legyen,
+    // 2) a záró óraállás ne legyen kisebb a nyitónál,
+    // 3) az óraállás-különbség és a távolság ne térjen el jelentősen.
+    // Ez megakadályozza, hogy véletlenül ellentmondó adatok kerüljenek a backendbe.
     e.preventDefault();
     setError('');
     setSuccess(false);
+
+    const startOdo = Number(startOdometerKm);
+    const endOdo = Number(endOdometerKm);
+    const distance = Number(distanceKm);
+
+    if (Number.isNaN(startOdo) || Number.isNaN(endOdo) || Number.isNaN(distance)) {
+      setError(t('addTrip.error.invalidNumbers'));
+      return;
+    }
+
+    if (endOdo < startOdo) {
+      setError(t('addTrip.error.endLower'));
+      return;
+    }
+
+    const odometerDelta = endOdo - startOdo;
+    if (Math.abs(odometerDelta - distance) > 10) {
+      setError(t('addTrip.error.distanceMismatch'));
+      return;
+    }
 
     try {
       const payload = {
@@ -133,12 +170,11 @@ const AddNewTrip = () => {
       };
       await api.post('trips', payload);
       setSuccess(true);
-      setTimeout(() => navigate(-1), 1200);
     } catch (err) {
-      let msg = 'An error occurred while saving!';
+      let msg = t('addTrip.error.save');
       if (err.response) {
         if (err.response.status === 403) {
-          msg = 'You are not authorized to perform this action.';
+          msg = t('addTrip.error.unauthorized');
         } else if (err.response.data) {
           const data = err.response.data;
           if (typeof data === 'string') msg = data;
@@ -178,14 +214,18 @@ const AddNewTrip = () => {
                     setSuccess(false);
                   }}
                   title={modalContent.title}
-                  primaryAction={{
-                    label: t('common.ok'),
-                    onClick: () => {
-                      setModalOpen(false);
-                      setError('');
-                      setSuccess(false);
-                    },
-                  }}
+                  primaryAction={
+                    modalType === 'error'
+                      ? {
+                          label: t('common.ok'),
+                          onClick: () => {
+                            setModalOpen(false);
+                            setError('');
+                            setSuccess(false);
+                          },
+                        }
+                      : undefined
+                  }
                 >
                   <p className="mb-0">{modalContent.message}</p>
                 </CustomModal>
@@ -307,8 +347,8 @@ const AddNewTrip = () => {
                       className="trip-notes-textarea"
                     />
                     {language !== 'en' && (
-                      <Form.Text style={{ color: '#b45309', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
-                        <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+                      <Form.Text className="ant-language-warning">
+                        <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                           <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" strokeLinecap="round" strokeLinejoin="round"/>
                           <line x1="12" y1="9" x2="12" y2="13" strokeLinecap="round"/>
                           <line x1="12" y1="17" x2="12.01" y2="17" strokeLinecap="round"/>
@@ -317,10 +357,6 @@ const AddNewTrip = () => {
                       </Form.Text>
                     )}
                   </Form.Group>
-
-                  {/* Hidden fields for odometer - will be implemented later if needed */}
-                  <input type="hidden" name="startOdometerKm" value={startOdometerKm} />
-                  <input type="hidden" name="endOdometerKm" value={endOdometerKm} />
 
                   {/* Submit Buttons */}
                   <div className="trip-actions">
@@ -360,7 +396,12 @@ const AddNewTrip = () => {
                       endLocation={endLocation}
                       activeField={activeLocationField}
                       onLocationSelect={handleMapLocationSelect}
-                      onDistanceCalculated={(km) => setDistanceKm(km)}
+                      onDistanceCalculated={(km) => {
+                        const numericKm = Number(km);
+                        if (!Number.isNaN(numericKm)) {
+                          setDistanceKm(Math.round(numericKm));
+                        }
+                      }}
                     />
                   </div>
                   <div className="route-info">

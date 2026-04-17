@@ -38,7 +38,10 @@
 	margin: 0;
 }
 
-/* Main Layout */
+/*
+  Fő rács: bal oldalt az űrlap, jobb oldalt fix szélességű információs oszlop.
+  A 380px-es sidebar stabilan tartja a térkép/statisztika arányait desktop nézetben.
+*/
 .trip-main-layout {
 	display: grid;
 	grid-template-columns: 1fr 380px;
@@ -271,7 +274,10 @@
 	gap: 16px;
 }
 
-/* Route Preview Card */
+/*
+  Térkép kártya: az overflow: hidden levágja a térkép széleit a lekerekített sarokhoz,
+  a .map-placeholder fix magassága pedig megakadályozza a layout ugrálását töltés közben.
+*/
 .route-preview-card {
 	border: 1px solid #e2e8f0;
 	border-radius: 12px;
@@ -400,7 +406,10 @@
 	line-height: 1.5;
 }
 
-/* Weekly Performance Card */
+/*
+  Heti statisztika blokk: nagy kontrasztú gradient háttérrel külön vizuális fókuszpont,
+  a két stat elem flex-ben fut egymás mellett, ezért rövid címek mellett jól skálázódik.
+*/
 .weekly-performance-card {
 	background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
 	border-radius: 12px;

@@ -1,10 +1,9 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Alert, Container, Spinner } from 'react-bootstrap';
+import { Container, Spinner } from 'react-bootstrap';
 import JSZip from 'jszip';
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
-import Footer from '../components/Footer';
 import CustomModal from '../components/CustomModal';
 import { useLanguage } from '../contexts/LanguageContext';
 import '../styles/AdminFuelLogs.css';
@@ -18,7 +17,7 @@ const AdminFuelLogs = () => {
 
   const [fuelLogs, setFuelLogs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [errorModalMessage, setErrorModalMessage] = useState('');
   const [totalCount, setTotalCount] = useState(0);
   const [page, setPage] = useState(1);
 
@@ -39,12 +38,16 @@ const AdminFuelLogs = () => {
 
   const [driverImages, setDriverImages] = useState({});
   const [actionLoading, setActionLoading] = useState(null);
-  const [actionError, setActionError] = useState('');
   const [exportLoading, setExportLoading] = useState(false);
   const [exportEmptyModalOpen, setExportEmptyModalOpen] = useState(false);
   const [exportSuccessModalOpen, setExportSuccessModalOpen] = useState(false);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState({ type: '', id: null });
+
+  // Minden hiba egysegesen modalban jelenik meg.
+  const openErrorModal = (message) => {
+    setErrorModalMessage(message || 'Unexpected error occurred.');
+  };
 
   useEffect(() => {
     if (!exportSuccessModalOpen) return;
@@ -64,7 +67,6 @@ const AdminFuelLogs = () => {
   const fetchFuelLogs = useCallback(
     async (pageToLoad = 1) => {
       setLoading(true);
-      setError('');
       try {
         const df = debouncedDateFrom;
         const dt = debouncedDateTo;
@@ -108,7 +110,7 @@ const AdminFuelLogs = () => {
           typeof apiMessage === 'string'
             ? apiMessage
             : apiMessage?.message || apiMessage?.Message || 'An error occurred while fetching fuel logs.';
-        setError(message);
+        openErrorModal(message);
       } finally {
         setLoading(false);
       }
@@ -235,7 +237,6 @@ const AdminFuelLogs = () => {
       }
 
       if (rows.length === 0) {
-        setError('');
         setExportLoading(false);
         setExportEmptyModalOpen(true);
         return;
@@ -448,7 +449,7 @@ ${fuelCards}
       URL.revokeObjectURL(zipUrl);
       setExportSuccessModalOpen(true);
     } catch {
-      setError('Failed to export.');
+      openErrorModal('Failed to export.');
     } finally {
       setExportLoading(false);
     }
@@ -456,13 +457,12 @@ ${fuelCards}
 
   const executeDelete = async (id) => {
     setActionLoading(id);
-    setActionError('');
     try {
       await api.patch(`/fuellogs/delete/${id}`);
       fetchFuelLogs(page);
     } catch (err) {
       const msg = err?.response?.data;
-      setActionError(typeof msg === 'string' ? msg : msg?.message || 'Failed to delete fuel log.');
+      openErrorModal(typeof msg === 'string' ? msg : msg?.message || 'Failed to delete fuel log.');
     } finally {
       setActionLoading(null);
     }
@@ -470,13 +470,12 @@ ${fuelCards}
 
   const executeRestore = async (id) => {
     setActionLoading(id);
-    setActionError('');
     try {
       await api.patch(`/fuellogs/restore/${id}`);
       fetchFuelLogs(page);
     } catch (err) {
       const msg = err?.response?.data;
-      setActionError(typeof msg === 'string' ? msg : msg?.message || 'Failed to restore fuel log.');
+      openErrorModal(typeof msg === 'string' ? msg : msg?.message || 'Failed to restore fuel log.');
     } finally {
       setActionLoading(null);
     }
@@ -611,6 +610,18 @@ ${fuelCards}
                 ? 'Are you sure you want to delete this fuel log?'
                 : 'Are you sure you want to restore this fuel log?'}
             </p>
+          </CustomModal>
+
+          <CustomModal
+            isOpen={Boolean(errorModalMessage)}
+            onClose={() => setErrorModalMessage('')}
+            title={t('common.errorTitle')}
+            primaryAction={{
+              label: t('common.ok'),
+              onClick: () => setErrorModalMessage(''),
+            }}
+          >
+            <p className="mb-0">{errorModalMessage}</p>
           </CustomModal>
 
           {/* ── Header ─────────────────────────────────── */}
@@ -826,18 +837,6 @@ ${fuelCards}
               </div>
             </div>
           </div>
-
-          {error && (
-            <Alert variant="danger" className="mb-3" onClose={() => setError('')} dismissible>
-              {error}
-            </Alert>
-          )}
-
-          {actionError && (
-            <Alert variant="danger" className="mb-3" onClose={() => setActionError('')} dismissible>
-              {actionError}
-            </Alert>
-          )}
 
           {/* ── Table Card ─────────────────────────────── */}
           <div className="afl-table-card">

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Button, Card, Container, Row, Col, Form } from 'react-bootstrap';
 import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
@@ -28,6 +28,7 @@ const AddFuelLog = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+  const [modalType, setModalType] = useState('error');
   const [modalContent, setModalContent] = useState({ title: '', message: '' });
 
   const navigate = useNavigate();
@@ -36,6 +37,9 @@ const AddFuelLog = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // A két adatforrás (jármű + naplók) egymástól független: ha az egyik meghiúsul,
+        // a másik még betöltődhet. Ezért belső try/catch blokkokkal külön kezeljük őket,
+        // így a felület nem marad teljesen üres részleges API hiba esetén sem.
         try {
           // Hozzárendelt jármű adatainak lekérése
           const vehicleResponse = await api.get('/profile/assigned-vehicle');
@@ -77,6 +81,7 @@ const AddFuelLog = () => {
 
   useEffect(() => {
     if (error) {
+      setModalType('error');
       setModalContent({ title: t('common.errorTitle'), message: error });
       setModalOpen(true);
     }
@@ -84,10 +89,19 @@ const AddFuelLog = () => {
 
   useEffect(() => {
     if (success) {
+      setModalType('success');
       setModalContent({ title: t('common.successTitle'), message: t('addFuelLog.savedSuccess') });
       setModalOpen(true);
+
+      const timer = setTimeout(() => {
+        setModalOpen(false);
+        setSuccess(false);
+        navigate('/fuel-logs');
+      }, 2000);
+
+      return () => clearTimeout(timer);
     }
-  }, [success, t]);
+  }, [success, t, navigate]);
 
   const handleSubmit = async (e) => {
     // Üzemanyag napló elküldése - Frontend validáció és API hívás
@@ -112,12 +126,11 @@ const AddFuelLog = () => {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       setSuccess(true);
-      setTimeout(() => navigate('/fuel-logs'), 1200);
     } catch (err) {
-      let msg = 'An error occurred while saving!';
+      let msg = t('addFuelLog.error.save');
       if (err.response) {
         if (err.response.status === 403) {
-          msg = 'You are not authorized to perform this action.';
+          msg = t('addFuelLog.error.unauthorized');
         } else if (err.response.data) {
           const data = err.response.data;
           if (typeof data === 'string') msg = data;
@@ -191,14 +204,18 @@ const AddFuelLog = () => {
                       setSuccess(false);
                     }}
                     title={modalContent.title}
-                    primaryAction={{
-                      label: t('common.ok'),
-                      onClick: () => {
-                        setModalOpen(false);
-                        setError('');
-                        setSuccess(false);
-                      },
-                    }}
+                    primaryAction={
+                      modalType === 'error'
+                        ? {
+                            label: t('common.ok'),
+                            onClick: () => {
+                              setModalOpen(false);
+                              setError('');
+                              setSuccess(false);
+                            },
+                          }
+                        : undefined
+                    }
                   >
                     <p className="mb-0">{modalContent.message}</p>
                   </CustomModal>

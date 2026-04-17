@@ -628,6 +628,17 @@
   overflow: hidden;
 }
 
+/* Szin-osztalyok: az email hash-e fix osztalyt ad, igy nincs inline style */
+.at-avatar--c1 { background: #7c3aed; }
+.at-avatar--c2 { background: #2563eb; }
+.at-avatar--c3 { background: #059669; }
+.at-avatar--c4 { background: #d97706; }
+.at-avatar--c5 { background: #dc2626; }
+.at-avatar--c6 { background: #0891b2; }
+.at-avatar--c7 { background: #16a34a; }
+.at-avatar--c8 { background: #ea580c; }
+.at-avatar--c9 { background: #8b5cf6; }
+
 .at-avatar img {
   width: 100%;
   height: 100%;

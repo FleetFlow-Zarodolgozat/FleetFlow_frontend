@@ -83,7 +83,11 @@
   padding: 80px 0;
 }
 
-/* Form Grid: 2 cards side-by-side on desktop, stacked on mobile */
+/*
+  Kétoszlopos űrlaprács:
+  desktopon egymás mellett tartja a kártyákat, mobilon media query-vel egy oszlopra esik.
+  A min-width: 0 azért kell, hogy a hosszú tartalmak ne feszítsék szét a grid cellákat.
+*/
 .edit-driver-form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -329,7 +333,11 @@
   color: #64748b;
 }
 
-/* Toggle switch */
+/*
+  Egyedi kapcsoló megoldás:
+  a natív checkbox vizuálisan rejtve marad, de továbbra is ő kezeli az állapotot,
+  a .toggle-track + .toggle-thumb csak a vizuális réteg, amit :checked állapot animál.
+*/
 .toggle-switch {
   position: relative;
   display: inline-flex;

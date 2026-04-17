@@ -1,26 +1,26 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Alert, Container, Spinner } from 'react-bootstrap';
+import { Container, Spinner } from 'react-bootstrap';
 import JSZip from 'jszip';
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
-import Footer from '../components/Footer';
 import CustomModal from '../components/CustomModal';
 import { useLanguage } from '../contexts/LanguageContext';
 import '../styles/AdminTrips.css';
 
 const PAGE_SIZE = 10;
 
-const AVATAR_COLORS = [
-  '#7c3aed', '#2563eb', '#059669', '#d97706',
-  '#dc2626', '#0891b2', '#16a34a', '#ea580c', '#8b5cf6',
+const AVATAR_COLOR_CLASSES = [
+  'at-avatar--c1', 'at-avatar--c2', 'at-avatar--c3',
+  'at-avatar--c4', 'at-avatar--c5', 'at-avatar--c6',
+  'at-avatar--c7', 'at-avatar--c8', 'at-avatar--c9',
 ];
 
-const getColorForEmail = (email) => {
-  if (!email) return AVATAR_COLORS[0];
+const getAvatarClassForEmail = (email) => {
+  if (!email) return AVATAR_COLOR_CLASSES[0];
   let hash = 0;
   for (let i = 0; i < email.length; i++) hash = email.charCodeAt(i) + ((hash << 5) - hash);
-  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+  return AVATAR_COLOR_CLASSES[Math.abs(hash) % AVATAR_COLOR_CLASSES.length];
 };
 
 const AdminTrips = () => {
@@ -30,7 +30,7 @@ const AdminTrips = () => {
 
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [errorModalMessage, setErrorModalMessage] = useState('');
   const [totalCount, setTotalCount] = useState(0);
   const [page, setPage] = useState(1);
 
@@ -52,11 +52,14 @@ const AdminTrips = () => {
   const [driverImages, setDriverImages] = useState({});
   const [csvLoading, setCsvLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(null);
-  const [actionError, setActionError] = useState('');
   const [exportEmptyModalOpen, setExportEmptyModalOpen] = useState(false);
   const [exportSuccessModalOpen, setExportSuccessModalOpen] = useState(false);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState({ type: '', id: null });
+
+  const openErrorModal = (message) => {
+    setErrorModalMessage(message || 'Unexpected error occurred.');
+  };
 
   useEffect(() => {
     if (!exportSuccessModalOpen) return;
@@ -72,7 +75,6 @@ const AdminTrips = () => {
 
   const fetchTrips = useCallback(async (pageToLoad = 1) => {
     setLoading(true);
-    setError('');
     try {
       const df = debouncedDateFrom;
       const dt = debouncedDateTo;
@@ -119,7 +121,7 @@ const AdminTrips = () => {
         typeof apiMsg === 'string'
           ? apiMsg
           : apiMsg?.message || apiMsg?.Message || 'An error occurred while fetching trips.';
-      setError(message);
+      openErrorModal(message);
     } finally {
       setLoading(false);
     }
@@ -164,13 +166,12 @@ const AdminTrips = () => {
 
   const executeDelete = async (id) => {
     setActionLoading(id);
-    setActionError('');
     try {
       await api.patch(`/trips/delete/${id}`);
       fetchTrips(page);
     } catch (err) {
       const msg = err?.response?.data;
-      setActionError(typeof msg === 'string' ? msg : msg?.message || 'Failed to delete trip.');
+      openErrorModal(typeof msg === 'string' ? msg : msg?.message || 'Failed to delete trip.');
     } finally {
       setActionLoading(null);
     }
@@ -178,13 +179,12 @@ const AdminTrips = () => {
 
   const executeRestore = async (id) => {
     setActionLoading(id);
-    setActionError('');
     try {
       await api.patch(`/trips/restore/${id}`);
       fetchTrips(page);
     } catch (err) {
       const msg = err?.response?.data;
-      setActionError(typeof msg === 'string' ? msg : msg?.message || 'Failed to restore trip.');
+      openErrorModal(typeof msg === 'string' ? msg : msg?.message || 'Failed to restore trip.');
     } finally {
       setActionLoading(null);
     }
@@ -245,7 +245,6 @@ const AdminTrips = () => {
       }
 
       if (rows.length === 0) {
-        setError('');
         setCsvLoading(false);
         setExportEmptyModalOpen(true);
         return;
@@ -434,7 +433,7 @@ ${tripCards}
       URL.revokeObjectURL(zipUrl);
       setExportSuccessModalOpen(true);
     } catch {
-      setError('Failed to export.');
+      openErrorModal('Failed to export.');
     } finally {
       setCsvLoading(false);
     }
@@ -568,6 +567,18 @@ ${tripCards}
                 ? 'Are you sure you want to delete this trip?'
                 : 'Are you sure you want to restore this trip?'}
             </p>
+          </CustomModal>
+
+          <CustomModal
+            isOpen={Boolean(errorModalMessage)}
+            onClose={() => setErrorModalMessage('')}
+            title={t('common.errorTitle')}
+            primaryAction={{
+              label: t('common.ok'),
+              onClick: () => setErrorModalMessage(''),
+            }}
+          >
+            <p className="mb-0">{errorModalMessage}</p>
           </CustomModal>
 
           {/* ── Header ─────────────────────────────────── */}
@@ -756,18 +767,6 @@ ${tripCards}
             </div>
           </div>
 
-          {error && (
-            <Alert variant="danger" className="mb-3" onClose={() => setError('')} dismissible>
-              {error}
-            </Alert>
-          )}
-
-          {actionError && (
-            <Alert variant="danger" className="mb-3" onClose={() => setActionError('')} dismissible>
-              {actionError}
-            </Alert>
-          )}
-
           {/* ── Table Card ─────────────────────────────── */}
           <div className="at-table-card">
             {loading ? (
@@ -811,7 +810,7 @@ ${tripCards}
                         const isDeleted = trip.isDeleted ?? trip.IsDeleted ?? false;
                         const imgId = trip.profileImgFileId ?? trip.ProfileImgFileId;
                         const imgUrl = imgId != null ? driverImages[imgId] : null;
-                        const avatarColor = getColorForEmail(email);
+                        const avatarClass = getAvatarClassForEmail(email);
 
                         return (
                           <tr key={id} className={`at-tr${isDeleted ? ' at-tr--deleted' : ''}`}>
@@ -829,7 +828,7 @@ ${tripCards}
                             </td>
                             <td className="at-td">
                               <div className="at-driver-cell">
-                                <div className="at-avatar" style={{ background: avatarColor }}>
+                                <div className={`at-avatar ${avatarClass}`}>
                                   {imgUrl ? (
                                     <img src={imgUrl} alt={email}/>
                                   ) : (
@@ -904,7 +903,7 @@ ${tripCards}
                     const isDeleted = trip.isDeleted ?? trip.IsDeleted ?? false;
                     const imgId = trip.profileImgFileId ?? trip.ProfileImgFileId;
                     const imgUrl = imgId != null ? driverImages[imgId] : null;
-                    const avatarColor = getColorForEmail(email);
+                    const avatarClass = getAvatarClassForEmail(email);
 
                     return (
                       <div key={id} className={`at-mobile-card${isDeleted ? ' at-mobile-card--deleted' : ''}`}>
@@ -924,7 +923,7 @@ ${tripCards}
                         <div className="at-mc-row">
                           <span className="at-mc-label">Driver</span>
                           <div className="at-driver-cell">
-                            <div className="at-avatar at-avatar--sm" style={{ background: avatarColor }}>
+                            <div className={`at-avatar at-avatar--sm ${avatarClass}`}>
                               {imgUrl ? <img src={imgUrl} alt={email}/> : <span>{getDriverInitials(email)}</span>}
                             </div>
                             <span className="at-driver-email">{email}</span>

@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { Button, Container, Form, Spinner } from 'react-bootstrap';
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
-import Footer from '../components/Footer';
 import CustomModal from '../components/CustomModal';
 import { useLanguage } from '../contexts/LanguageContext';
 import '../styles/EditDriver.css';
@@ -81,7 +80,10 @@ const AddVehicle = () => {
   };
 
   const handleSubmit = async (e) => {
-    // Jármű létrehozása és opcionálisan sofőrhöz rendelése
+    // Jármű létrehozása és opcionálisan sofőrhöz rendelése.
+    // A backend itt két külön lépést vár: előbb létrehozás, majd (ha kell) hozzárendelés.
+    // Emiatt a második rész külön try/catch-ben fut, hogy részleges siker esetén is
+    // korrekt visszajelzést tudjunk adni (jármű létrejött, de az assignment hibás lett).
     e.preventDefault();
     setSaving(true);
     setError('');
@@ -99,6 +101,8 @@ const AddVehicle = () => {
       // Ha egy sofőr lett kiválasztva, az új jármű hozzárendelése
       if (form.assignedUserId) {
         try {
+          // A frissen létrehozott jármű azonosítóját visszakeressük rendszám alapján,
+          // mert a create endpoint nem ad minden környezetben közvetlen ID-t a válaszban.
           const listRes = await api.get('/admin/vehicles', {
             params: { page: 1, pageSize: 5, StringQ: form.licensePlate },
           });

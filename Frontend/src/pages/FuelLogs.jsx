@@ -7,6 +7,7 @@ import Sidebar from '../components/Sidebar';
 import '../styles/DriverDashboard.css';
 import '../styles/FuelLogs.css';
 import Footer from '../components/Footer';
+import CustomModal from '../components/CustomModal';
 
 
 const FuelLogs = () => {
@@ -22,6 +23,64 @@ const FuelLogs = () => {
   // Trips state for consumption calculation
   const [trips, setTrips] = useState([]);
   const [tripsLoading, setTripsLoading] = useState(true);
+  const [confirmModal, setConfirmModal] = useState({
+    open: false,
+    title: '',
+    message: '',
+    confirmLabel: '',
+    cancelLabel: '',
+    confirmVariant: '',
+    onConfirm: null,
+  });
+  const [errorModal, setErrorModal] = useState({
+    open: false,
+    title: '',
+    message: '',
+  });
+
+  const getApiErrorMessage = (err, fallback) => {
+    const data = err?.response?.data;
+    if (typeof data === 'string') return data;
+    if (data?.message) return data.message;
+    if (data?.Message) return data.Message;
+    if (data?.detail) return data.detail;
+    if (data?.errors) return Array.isArray(data.errors) ? data.errors.join(', ') : JSON.stringify(data.errors);
+    if (err?.response?.statusText) return err.response.statusText;
+    return fallback;
+  };
+
+  const openConfirmModal = ({ title, message, confirmLabel, cancelLabel, confirmVariant, onConfirm }) => {
+    setConfirmModal({
+      open: true,
+      title,
+      message,
+      confirmLabel,
+      cancelLabel,
+      confirmVariant,
+      onConfirm,
+    });
+  };
+
+  const closeConfirmModal = () => {
+    setConfirmModal((prev) => ({ ...prev, open: false }));
+  };
+
+  const handleConfirmAction = async () => {
+    const action = confirmModal.onConfirm;
+    closeConfirmModal();
+    if (typeof action === 'function') {
+      await action();
+    }
+  };
+
+  const openErrorModal = (title, message) => {
+    setErrorModal({ open: true, title, message });
+  };
+
+  const closeErrorModal = () => {
+    setErrorModal((prev) => ({ ...prev, open: false }));
+  };
+
   useEffect(() => {
     const fetchTrips = async () => {
       setTripsLoading(true);
@@ -170,14 +229,21 @@ const FuelLogs = () => {
     return items;
   };
   const handleDeleteFuelLog = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this fuel log?')) return;
-    try {
-      await api.patch(`/fuellogs/delete/${id}`);
-      await fetchFuelLogs(pagination.page);
-    } catch (err) {
-      const msg = err?.response?.data;
-      alert(typeof msg === 'string' ? msg : msg?.message || msg?.Message || 'Failed to delete fuel log.');
-    }
+    openConfirmModal({
+      title: t('fuelLogs.modal.deleteTitle'),
+      message: t('fuelLogs.modal.deleteMessage'),
+      confirmLabel: t('common.delete'),
+      cancelLabel: t('common.cancel'),
+      confirmVariant: 'danger',
+      onConfirm: async () => {
+        try {
+          await api.patch(`/fuellogs/delete/${id}`);
+          await fetchFuelLogs(pagination.page);
+        } catch (err) {
+          openErrorModal(t('fuelLogs.modal.deleteFailedTitle'), getApiErrorMessage(err, t('fuelLogs.modal.deleteFailedMessage')));
+        }
+      },
+    });
   };
 
   const displayedCount = fuelLogs.length;
@@ -421,6 +487,35 @@ const FuelLogs = () => {
           </Row>
         </Container>
         <Footer/>
+
+        <CustomModal
+          isOpen={confirmModal.open}
+          onClose={closeConfirmModal}
+          title={confirmModal.title}
+          primaryAction={{
+            label: confirmModal.confirmLabel,
+            onClick: handleConfirmAction,
+            variant: confirmModal.confirmVariant,
+          }}
+          secondaryAction={{
+            label: confirmModal.cancelLabel,
+            onClick: closeConfirmModal,
+          }}
+        >
+          <p className="mb-0">{confirmModal.message}</p>
+        </CustomModal>
+
+        <CustomModal
+          isOpen={errorModal.open}
+          onClose={closeErrorModal}
+          title={errorModal.title}
+          primaryAction={{
+            label: t('common.ok'),
+            onClick: closeErrorModal,
+          }}
+        >
+          <p className="mb-0">{errorModal.message}</p>
+        </CustomModal>
       </main>
     </div>
   );

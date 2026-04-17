@@ -1,0 +1,9 @@
+Menj végig az összes .jsx-en és a hozzá tartozó css-en, töröld a nem használt kódokat, illetve az összes style taget írd át css-be. Írj a kódokhoz kommentetket magyarul a működésükről, a bonyolultabb részekhez hosszabb,pontos leírást írj. A bonyolultabb css-részekhez is írj kommentet hogyan működik. Illetve ellenőrizd hogy a hibaüzenetek és sikeresüzenetek mindig costummodalként jelennek-e meg
+
+location oszlop
+
+mapnál ne legyenek linkek
+
+readme.md
+
+fleetflow.jcloud.jedlik.cloud

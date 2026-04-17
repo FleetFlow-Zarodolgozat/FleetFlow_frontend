@@ -10,13 +10,14 @@ const CustomModal = ({
   primaryAction,
   secondaryAction,
   size = 'md',
-  closeOnBackdrop = true,
+  closeOnBackdrop = false,
+  closeOnEscape = false,
 }) => {
   useEffect(() => {
     if (!isOpen) return undefined;
 
     const handleKeyDown = (event) => {
-      if (event.key === 'Escape') {
+      if (closeOnEscape && event.key === 'Escape') {
         onClose?.();
       }
     };
@@ -29,7 +30,7 @@ const CustomModal = ({
       document.body.style.overflow = previousOverflow;
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, closeOnEscape]);
 
   if (!isOpen) return null;
 

@@ -77,17 +77,27 @@ const AdminDashboard = () => {
     description: ''
   });
   const [eventSaving, setEventSaving] = useState(false);
-  const [eventFeedback, setEventFeedback] = useState({ type: '', message: '' });
+  const [eventSuccessModalMessage, setEventSuccessModalMessage] = useState('');
   const [eventDeleting, setEventDeleting] = useState(false);
-  const [calendarDetailFeedback, setCalendarDetailFeedback] = useState({ type: '', message: '' });
+  const [errorModalMessage, setErrorModalMessage] = useState('');
   const [exportEmptyModalOpen, setExportEmptyModalOpen] = useState(false);
   const [exportSuccessModalOpen, setExportSuccessModalOpen] = useState(false);
+
+  const openErrorModal = (message) => {
+    setErrorModalMessage(message || 'Unexpected error occurred.');
+  };
 
   useEffect(() => {
     if (!exportSuccessModalOpen) return;
     const timeoutId = setTimeout(() => setExportSuccessModalOpen(false), 2000);
     return () => clearTimeout(timeoutId);
   }, [exportSuccessModalOpen]);
+
+  useEffect(() => {
+    if (!eventSuccessModalMessage) return;
+    const timeoutId = setTimeout(() => setEventSuccessModalMessage(''), 2000);
+    return () => clearTimeout(timeoutId);
+  }, [eventSuccessModalMessage]);
   const loadCalendarEvents = async () => {
     try {
       const calendarResponse = await api.get('/calendarevents');
@@ -727,13 +737,13 @@ ${srCards}
 
     const title = eventForm.title.trim();
     if (!title || !eventForm.date || !eventForm.startTime) {
-      setEventFeedback({ type: 'danger', message: 'Title, date and start time are required.' });
+      openErrorModal('Title, date and start time are required.');
       return;
     }
 
     const startDate = new Date(`${eventForm.date}T${eventForm.startTime}:00`);
     if (Number.isNaN(startDate.getTime())) {
-      setEventFeedback({ type: 'danger', message: 'Invalid date format.' });
+      openErrorModal('Invalid date format.');
       return;
     }
 
@@ -741,17 +751,16 @@ ${srCards}
     if (eventForm.endTime) {
       endDate = new Date(`${eventForm.date}T${eventForm.endTime}:00`);
       if (Number.isNaN(endDate.getTime())) {
-        setEventFeedback({ type: 'danger', message: 'Invalid end time format.' });
+        openErrorModal('Invalid end time format.');
         return;
       }
       if (endDate <= startDate) {
-        setEventFeedback({ type: 'danger', message: 'End time must be later than start time.' });
+        openErrorModal('End time must be later than start time.');
         return;
       }
     }
 
     setEventSaving(true);
-    setEventFeedback({ type: '', message: '' });
 
     try {
       await api.post('/calendarevents', {
@@ -762,11 +771,11 @@ ${srCards}
       });
 
       setEventForm({ title: '', date: '', startTime: '09:00', endTime: '', description: '' });
-      setEventFeedback({ type: 'success', message: 'Event created successfully.' });
+      setEventSuccessModalMessage('Event created successfully.');
       await loadCalendarEvents();
       await loadUpcomingEvents();
     } catch {
-      setEventFeedback({ type: 'danger', message: 'Failed to create event.' });
+      openErrorModal('Failed to create event.');
     } finally {
       setEventSaving(false);
     }
@@ -774,16 +783,16 @@ ${srCards}
 
   const handleDeleteSelectedEvent = async () => {
     if (!selectedCalendarEvent?.id) {
-      setCalendarDetailFeedback({ type: 'danger', message: 'Event id is missing.' });
+      openErrorModal('Event id is missing.');
       return;
     }
 
     setEventDeleting(true);
-    setCalendarDetailFeedback({ type: '', message: '' });
 
     try {
       await api.delete(`/calendarevents/${selectedCalendarEvent.id}`);
       setSelectedCalendarEvent(null);
+      setEventSuccessModalMessage('Event deleted successfully.');
       await loadCalendarEvents();
       await loadUpcomingEvents();
     } catch (error) {
@@ -791,7 +800,7 @@ ${srCards}
       const message = typeof apiMessage === 'string'
         ? apiMessage
         : apiMessage?.message || apiMessage?.Message || 'Failed to delete event.';
-      setCalendarDetailFeedback({ type: 'danger', message });
+      openErrorModal(message);
     } finally {
       setEventDeleting(false);
     }
@@ -851,10 +860,10 @@ ${srCards}
     );
   };
 
-  const getEventTypeColor = (eventType) => {
-    if (eventType === 'SERVICE_APPOINTMENT') return '#0d6efd';
-    if (eventType === 'TRIP') return '#fd7e14';
-    return '#198754';
+  const getEventTypeDotClass = (eventType) => {
+    if (eventType === 'SERVICE_APPOINTMENT') return 'upcoming-status-dot--service';
+    if (eventType === 'TRIP') return 'upcoming-status-dot--trip';
+    return 'upcoming-status-dot--default';
   };
 
   return (
@@ -931,6 +940,26 @@ ${srCards}
           title={t('common.successTitle')}
         >
           <p className="mb-0">Successfully exported.</p>
+        </CustomModal>
+
+        <CustomModal
+          isOpen={Boolean(errorModalMessage)}
+          onClose={() => setErrorModalMessage('')}
+          title={t('common.errorTitle')}
+          primaryAction={{
+            label: t('common.ok'),
+            onClick: () => setErrorModalMessage(''),
+          }}
+        >
+          <p className="mb-0">{errorModalMessage}</p>
+        </CustomModal>
+
+        <CustomModal
+          isOpen={Boolean(eventSuccessModalMessage)}
+          onClose={() => setEventSuccessModalMessage('')}
+          title={t('common.successTitle')}
+        >
+          <p className="mb-0">{eventSuccessModalMessage}</p>
         </CustomModal>
 
         {/* Stats Cards */}
@@ -1119,7 +1148,7 @@ ${srCards}
                   </div>}
                 </div>
               </Card.Header>
-              <Card.Body className="rbc-wrapper h-100" style={{ height: '100%', minHeight: isMobileCalendar ? 460 : 0 }}>
+              <Card.Body className={`rbc-wrapper h-100 dashboard-calendar-body ${isMobileCalendar ? 'dashboard-calendar-body--mobile' : ''}`}>
                 {!selectedCalendarEvent ? (
                   <Calendar
                     localizer={localizer}
@@ -1127,7 +1156,6 @@ ${srCards}
                     events={scheduleEvents}
                     eventPropGetter={calendarEventStyleGetter}
                     onSelectEvent={(event) => {
-                      setCalendarDetailFeedback({ type: '', message: '' });
                       setSelectedCalendarEvent(event);
                     }}
                     date={calendarDate}
@@ -1135,7 +1163,7 @@ ${srCards}
                     view={calendarView}
                     onView={setCalendarView}
                     views={['month', 'week', 'day']}
-                    style={{ height: isMobileCalendar ? 440 : '100%' }}
+                    className={`dashboard-calendar ${isMobileCalendar ? 'dashboard-calendar--mobile' : ''}`}
                     toolbar={true}
                     messages={{
                       today: t('adminDash.cal.today'),
@@ -1148,7 +1176,7 @@ ${srCards}
                     popup
                   />
                 ) : (
-                  <div className="h-100 d-flex flex-column flex-grow-1" style={{ minHeight: 0 }}>
+                  <div className="h-100 d-flex flex-column flex-grow-1 dashboard-min-height-0">
                     <div className="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
                       <div>
                         <h4 className="mb-1 fw-bold">Event Details</h4>
@@ -1158,16 +1186,15 @@ ${srCards}
                         type="button"
                         variant="outline-secondary"
                         size="sm"
-                        className="rounded-circle d-flex align-items-center justify-content-center"
-                        style={{ width: 34, height: 34 }}
+                        className="rounded-circle d-flex align-items-center justify-content-center dashboard-close-btn"
                         aria-label="Close"
                         onClick={() => setSelectedCalendarEvent(null)}
                       >
                         ×
                       </Button>
                     </div>
-                    <Card className="border-0 bg-light-subtle mb-3 shadow-sm flex-grow-1" style={{ minHeight: 0 }}>
-                      <Card.Body className="p-3 h-100" style={{ minHeight: 0 }}>
+                    <Card className="border-0 bg-light-subtle mb-3 shadow-sm flex-grow-1 dashboard-min-height-0">
+                      <Card.Body className="p-3 h-100 dashboard-min-height-0">
                         <div className="d-flex justify-content-between align-items-start mb-3">
                           <div>
                             <small className="text-muted d-block">TITLE</small>
@@ -1206,12 +1233,6 @@ ${srCards}
                       </Card.Body>
                     </Card>
 
-                    {calendarDetailFeedback.message && (
-                      <div className={`alert alert-${calendarDetailFeedback.type} py-2 px-3`} role="alert">
-                        {calendarDetailFeedback.message}
-                      </div>
-                    )}
-
                     <div className="mt-auto d-flex justify-content-center">
                       <Button
                         variant="danger"
@@ -1232,12 +1253,12 @@ ${srCards}
             <Row className="g-3">
               <Col xs={12}>
                 <Card className="event-card h-100 d-flex flex-column">
-                  <Card.Header style={{ flexShrink: 0 }}>
+                  <Card.Header className="dashboard-flex-shrink-0">
                     <h3 className="mb-0">Quick Add Event</h3>
                   </Card.Header>
-                  <Card.Body className="d-flex flex-column" style={{ flex: 1, overflow: 'hidden' }}>
+                  <Card.Body className="d-flex flex-column dashboard-flex-fill-scroll-hidden">
                     <Form onSubmit={handleSaveEvent} className="d-flex flex-column h-100">
-                      <Form.Group className="mb-3" style={{ flexShrink: 0 }}>
+                      <Form.Group className="mb-3 dashboard-flex-shrink-0">
                         <Form.Label className="small text-muted fw-semibold">EVENT TITLE</Form.Label>
                         <Form.Control
                           type="text"
@@ -1248,7 +1269,7 @@ ${srCards}
                           required
                         />
                       </Form.Group>
-                      <Form.Group className="mb-3" style={{ flexShrink: 0 }}>
+                      <Form.Group className="mb-3 dashboard-flex-shrink-0">
                         <Form.Label className="small text-muted fw-semibold">DATE</Form.Label>
                         <Form.Control
                           type="date"
@@ -1258,7 +1279,7 @@ ${srCards}
                           required
                         />
                       </Form.Group>
-                      <Row className="g-2 mb-3" style={{ flexShrink: 0 }}>
+                      <Row className="g-2 mb-3 dashboard-flex-shrink-0">
                         <Col xs={6}>
                           <Form.Group>
                             <Form.Label className="small text-muted fw-semibold">START</Form.Label>
@@ -1283,18 +1304,18 @@ ${srCards}
                           </Form.Group>
                         </Col>
                       </Row>
-                      <Form.Group className="mb-3 d-flex flex-column" style={{ flex: 1, minHeight: 0 }}>
-                        <Form.Label className="small text-muted fw-semibold" style={{ flexShrink: 0 }}>DESCRIPTION</Form.Label>
+                      <Form.Group className="mb-3 d-flex flex-column dashboard-flex-1-min-height-0">
+                        <Form.Label className="small text-muted fw-semibold dashboard-flex-shrink-0">DESCRIPTION</Form.Label>
                         <Form.Control
                           as="textarea"
                           name="description"
                           placeholder="Additional notes..."
                           value={eventForm.description}
                           onChange={handleEventChange}
-                          style={{ resize: 'none', flex: 1, minHeight: 0 }}
+                          className="dashboard-event-textarea"
                         />
                       </Form.Group>
-                      <Button type="submit" variant="primary" className="w-100" style={{ flexShrink: 0 }} disabled={eventSaving}>
+                      <Button type="submit" variant="primary" className="w-100 dashboard-flex-shrink-0" disabled={eventSaving}>
                         <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="me-2">
                           <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" strokeLinecap="round" strokeLinejoin="round"/>
                           <polyline points="17,21 17,13 7,13 7,21" strokeLinecap="round" strokeLinejoin="round"/>
@@ -1302,11 +1323,6 @@ ${srCards}
                         </svg>
                         {eventSaving ? 'Saving...' : 'Save Event'}
                       </Button>
-                      {eventFeedback.message && (
-                        <div className={`mt-2 alert alert-${eventFeedback.type} py-2 px-3 mb-0`} role="alert">
-                          {eventFeedback.message}
-                        </div>
-                      )}
                     </Form>
                   </Card.Body>
                 </Card>
@@ -1335,8 +1351,7 @@ ${srCards}
                                 </small>
                               </div>
                               <div
-                                className="upcoming-status-dot"
-                                style={{ backgroundColor: getEventTypeColor(event.eventType) }}
+                                className={`upcoming-status-dot ${getEventTypeDotClass(event.eventType)}`}
                               />
                             </div>
                             <Button size="sm" variant="outline-primary" onClick={() => {

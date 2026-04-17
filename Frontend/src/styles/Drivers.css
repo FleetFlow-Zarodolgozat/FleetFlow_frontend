@@ -178,6 +178,10 @@
 }
 
 /* Table */
+/*
+  A táblázat mobilon vízszintesen görgethető wrapperbe kerül,
+  így a sok oszlop nem töri szét a layoutot kis kijelzőn sem.
+*/
 .drivers-table-wrapper {
   overflow-x: auto;
 }

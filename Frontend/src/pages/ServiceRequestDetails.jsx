@@ -10,6 +10,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import Sidebar from '../components/Sidebar';
 import Footer from '../components/Footer';
 import api from '../services/api';
+import CustomModal from '../components/CustomModal';
 
 const ServiceRequestDetails = () => {
   const { t, language } = useLanguage();
@@ -20,12 +21,69 @@ const ServiceRequestDetails = () => {
   const [closeNote, setCloseNote] = useState(request.driverCloseNote || '');
   const [file, setFile] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [invoiceImgUrl, setInvoiceImgUrl] = useState(null);
+  const [invoicePreviewOpen, setInvoicePreviewOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [cancelling, setCancelling] = useState(false);
+  const [confirmModal, setConfirmModal] = useState({
+    open: false,
+    title: '',
+    message: '',
+    confirmLabel: '',
+    cancelLabel: '',
+    confirmVariant: '',
+    onConfirm: null,
+  });
+  const [feedbackModal, setFeedbackModal] = useState({
+    open: false,
+    type: 'error',
+    title: '',
+    message: '',
+  });
+
+  const getApiErrorMessage = (err, fallback) => {
+    const data = err?.response?.data;
+    if (typeof data === 'string') return data;
+    if (data?.message) return data.message;
+    if (data?.Message) return data.Message;
+    if (data?.detail) return data.detail;
+    if (data?.errors) return Array.isArray(data.errors) ? data.errors.join(', ') : JSON.stringify(data.errors);
+    if (err?.response?.statusText) return err.response.statusText;
+    return fallback;
+  };
+
+  const openConfirmModal = ({ title, message, confirmLabel, cancelLabel, confirmVariant, onConfirm }) => {
+    setConfirmModal({
+      open: true,
+      title,
+      message,
+      confirmLabel,
+      cancelLabel,
+      confirmVariant,
+      onConfirm,
+    });
+  };
+
+  const closeConfirmModal = () => {
+    setConfirmModal((prev) => ({ ...prev, open: false }));
+  };
+
+  const handleConfirmAction = async () => {
+    const action = confirmModal.onConfirm;
+    closeConfirmModal();
+    if (typeof action === 'function') {
+      await action();
+    }
+  };
+
+  const openFeedbackModal = ({ type = 'error', title, message }) => {
+    setFeedbackModal({ open: true, type, title, message });
+  };
+
+  const closeFeedbackModal = () => {
+    setFeedbackModal((prev) => ({ ...prev, open: false }));
+  };
   // Kép letöltése authentikációval, ha van fileId
   useEffect(() => {
     const fileId = request.InvoiceFileId || request.invoiceFileId;
@@ -67,22 +125,28 @@ const ServiceRequestDetails = () => {
   const handleDragLeave = () => setIsDragging(false);
 
   const handleCancel = async () => {
-    if (!window.confirm('Are you sure you want to cancel this service request?')) return;
-    setCancelling(true);
-    setError('');
-    try {
-      await api.delete(`/service-requests/cancel/${request.id || request.Id}`);
-      navigate(-1);
-    } catch (err) {
-      const apiMessage = err?.response?.data;
-      const message =
-        typeof apiMessage === 'string'
-          ? apiMessage
-          : apiMessage?.message || apiMessage?.Message || 'Could not cancel service request.';
-      setError(message);
-    } finally {
-      setCancelling(false);
-    }
+    openConfirmModal({
+      title: t('sr.modal.cancelTitle'),
+      message: t('sr.modal.cancelMessage'),
+      confirmLabel: t('sr.modal.cancelConfirm'),
+      cancelLabel: t('sr.modal.keep'),
+      confirmVariant: 'danger',
+      onConfirm: async () => {
+        setCancelling(true);
+        try {
+          await api.delete(`/service-requests/cancel/${request.id || request.Id}`);
+          navigate(-1);
+        } catch (err) {
+          openFeedbackModal({
+            type: 'error',
+            title: t('sr.modal.cancelFailedTitle'),
+            message: getApiErrorMessage(err, t('sr.modal.cancelFailedMessage')),
+          });
+        } finally {
+          setCancelling(false);
+        }
+      },
+    });
   };
 
   const getStatusClass = (status) => {
@@ -109,11 +173,13 @@ const ServiceRequestDetails = () => {
 
   const handleSave = async () => {
     setSaving(true);
-    setError('');
-    setSuccess('');
     // Custom file required validation for first upload
     if (!request.driverReportCost && !file) {
-      setError('A file is required');
+      openFeedbackModal({
+        type: 'error',
+        title: t('common.errorTitle'),
+        message: t('srDetails.error.fileRequired'),
+      });
       setSaving(false);
       return;
     }
@@ -133,15 +199,21 @@ const ServiceRequestDetails = () => {
           headers: { 'Content-Type': 'multipart/form-data' },
         })
       );
-      setSuccess('Service details saved successfully!');
-      setTimeout(() => navigate(-1), 1200);
+      openFeedbackModal({
+        type: 'success',
+        title: t('common.successTitle'),
+        message: t('srDetails.success.saved'),
+      });
+      setTimeout(() => {
+        closeFeedbackModal();
+        navigate(-1);
+      }, 2000);
     } catch (err) {
-      const apiMessage = err?.response?.data;
-      const message =
-        typeof apiMessage === 'string'
-          ? apiMessage
-          : apiMessage?.message || apiMessage?.Message || 'Failed to save service details.';
-      setError(message);
+      openFeedbackModal({
+        type: 'error',
+        title: t('common.errorTitle'),
+        message: getApiErrorMessage(err, t('srDetails.error.saveFailed')),
+      });
     } finally {
       setSaving(false);
     }
@@ -163,9 +235,6 @@ const ServiceRequestDetails = () => {
             <Col lg={7} xl={8}>
               <Card className="fuel-form-card border-0 shadow-sm">
                 <Card.Body className="p-4 p-md-5">
-                  {error && <Alert variant="danger" className="mb-3">{error}</Alert>}
-                  {success && <Alert variant="success" className="mb-3">{success}</Alert>}
-
                   {request.status === 'REQUESTED' && (
                     <Alert variant="info" className="mb-4">
                       <strong>{t('srDetails.readOnly')}</strong> {t('srDetails.readOnlyMsg')}
@@ -425,7 +494,20 @@ const ServiceRequestDetails = () => {
                         <span className="srd-existing-label">{t('srDetails.invoice.current')}</span>
                       </div>
                       <div className="srd-invoice-preview">
-                        <img src={invoiceImgUrl} alt="Invoice" className="srd-invoice-img" />
+                        <img
+                          src={invoiceImgUrl}
+                          alt="Invoice"
+                          className="srd-invoice-img"
+                          onClick={() => setInvoicePreviewOpen(true)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              setInvoicePreviewOpen(true);
+                            }
+                          }}
+                          role="button"
+                          tabIndex={0}
+                        />
                       </div>
                     </div>
                   )}
@@ -466,6 +548,54 @@ const ServiceRequestDetails = () => {
           </Row>
         </Container>
         <Footer />
+
+        <CustomModal
+          isOpen={confirmModal.open}
+          onClose={closeConfirmModal}
+          title={confirmModal.title}
+          primaryAction={{
+            label: confirmModal.confirmLabel,
+            onClick: handleConfirmAction,
+            variant: confirmModal.confirmVariant,
+            disabled: cancelling,
+          }}
+          secondaryAction={{
+            label: confirmModal.cancelLabel,
+            onClick: closeConfirmModal,
+            disabled: cancelling,
+          }}
+        >
+          <p className="mb-0">{confirmModal.message}</p>
+        </CustomModal>
+
+        <CustomModal
+          isOpen={feedbackModal.open}
+          onClose={closeFeedbackModal}
+          title={feedbackModal.title}
+          primaryAction={feedbackModal.type === 'error' ? {
+            label: t('common.ok'),
+            onClick: closeFeedbackModal,
+          } : undefined}
+        >
+          <p className="mb-0">{feedbackModal.message}</p>
+        </CustomModal>
+
+        <CustomModal
+          isOpen={invoicePreviewOpen}
+          onClose={() => setInvoicePreviewOpen(false)}
+          title={t('srDetails.invoice.current')}
+          closeOnBackdrop
+          closeOnEscape
+          size="lg"
+          primaryAction={{
+            label: t('common.ok'),
+            onClick: () => setInvoicePreviewOpen(false),
+          }}
+        >
+          <div className="srd-zoomed-image-wrap">
+            <img src={invoiceImgUrl} alt="Invoice enlarged" className="srd-zoomed-image" />
+          </div>
+        </CustomModal>
       </div>
     </div>
   );

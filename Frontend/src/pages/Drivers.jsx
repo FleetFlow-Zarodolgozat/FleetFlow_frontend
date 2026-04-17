@@ -1,9 +1,8 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Alert, Button, Container, Spinner } from 'react-bootstrap';
+import { Button, Container, Spinner } from 'react-bootstrap';
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
-import Footer from '../components/Footer';
 import CustomModal from '../components/CustomModal';
 import '../styles/Drivers.css';
 
@@ -15,7 +14,11 @@ const Drivers = () => {
 
   const [drivers, setDrivers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [errorModal, setErrorModal] = useState({
+    open: false,
+    title: 'Error',
+    message: '',
+  });
   const [totalCount, setTotalCount] = useState(0);
   const [page, setPage] = useState(1);
   const [togglingId, setTogglingId] = useState(null);
@@ -30,6 +33,15 @@ const Drivers = () => {
   const [activateModalOpen, setActivateModalOpen] = useState(false);
   const [selectedActivateDriverId, setSelectedActivateDriverId] = useState(null);
 
+  // Központosított hibamegjelenítés, hogy minden backend hiba azonos modalban látszódjon.
+  const openErrorModal = (message) => {
+    setErrorModal({ open: true, title: 'Error', message });
+  };
+
+  const closeErrorModal = () => {
+    setErrorModal((prev) => ({ ...prev, open: false }));
+  };
+
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth > 1024) setSidebarOpen(true);
@@ -41,8 +53,9 @@ const Drivers = () => {
 
   const fetchDrivers = useCallback(async (pageToLoad = 1) => {
     setLoading(true);
-    setError('');
     try {
+      // A lista backend oldalon lapozott és szűrt, ezért minden állapotváltozásnál
+      // új lekérést indítunk az aktuális oldalra/szűrőkre.
       const params = {
         page: pageToLoad,
         pageSize: PAGE_SIZE,
@@ -53,6 +66,8 @@ const Drivers = () => {
       const response = await api.get('/admin/drivers', { params });
       const payload = response.data || {};
       const rawDrivers = Array.isArray(payload.data) ? payload.data : [];
+      // A driver lista endpoint nem ad rendszámot minden sorban, ezért soronként
+      // lekérjük az aktuális hozzárendelt járművet és dúsítjuk vele a táblát.
       const enriched = await Promise.all(
         rawDrivers.map(async (d) => {
           const driverId = d.id ?? d.Id;
@@ -78,7 +93,7 @@ const Drivers = () => {
         typeof apiMessage === 'string'
           ? apiMessage
           : apiMessage?.message || apiMessage?.Message || 'An error occurred while fetching drivers.';
-      setError(message);
+      openErrorModal(message);
     } finally {
       setLoading(false);
     }
@@ -96,6 +111,8 @@ const Drivers = () => {
   const handleSearchInputChange = (e) => {
     const val = e.target.value;
     setSearchInput(val);
+    // Debounce: gépelés közben nem terheljük túl a backend-et,
+    // csak rövid szünet után frissítjük a tényleges kereső queryt.
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       setSearchQ(val);
@@ -109,7 +126,6 @@ const Drivers = () => {
 
   const confirmDeactivateDriver = async () => {
     if (!selectedDriverId) return;
-    setError('');
     setTogglingId(selectedDriverId);
     setDeactivateModalOpen(false);
     try {
@@ -125,7 +141,7 @@ const Drivers = () => {
         typeof apiMessage === 'string'
           ? apiMessage
           : apiMessage?.message || apiMessage?.Message || 'An error occurred while deactivating the driver.';
-      setError(message);
+      openErrorModal(message);
     }
   };
 
@@ -136,7 +152,6 @@ const Drivers = () => {
 
   const confirmActivateDriver = async () => {
     if (!selectedActivateDriverId) return;
-    setError('');
     setTogglingId(selectedActivateDriverId);
     setActivateModalOpen(false);
     try {
@@ -152,7 +167,7 @@ const Drivers = () => {
         typeof apiMessage === 'string'
           ? apiMessage
           : apiMessage?.message || apiMessage?.Message || 'An error occurred while activating the driver.';
-      setError(message);
+      openErrorModal(message);
     }
   };
 
@@ -189,6 +204,8 @@ const Drivers = () => {
     let cancelled = false;
     const fetchImages = async () => {
       const newImages = {};
+      // A képeket blob URL-re alakítjuk, így a táblában gyorsan és cache-elhetően
+      // jelennek meg az avatárok extra render-logika nélkül.
       await Promise.all(
         drivers.map(async (d) => {
           const imgId = d.profileImgFileId ?? d.ProfileImgFileId;
@@ -234,12 +251,6 @@ const Drivers = () => {
             </Button>
           </div>
 
-          {error && (
-            <Alert variant="danger" className="mb-3" onClose={() => setError('')} dismissible>
-              {error}
-            </Alert>
-          )}
-
           <CustomModal
             isOpen={deactivateModalOpen}
             onClose={() => {
@@ -282,6 +293,18 @@ const Drivers = () => {
             }}
           >
             <p className="mb-0">Are you sure you want to reactivate this driver? They will regain access to the system.</p>
+          </CustomModal>
+
+          <CustomModal
+            isOpen={errorModal.open}
+            onClose={closeErrorModal}
+            title={errorModal.title}
+            primaryAction={{
+              label: 'OK',
+              onClick: closeErrorModal,
+            }}
+          >
+            <p className="mb-0">{errorModal.message}</p>
           </CustomModal>
 
           {/* Table Card */}

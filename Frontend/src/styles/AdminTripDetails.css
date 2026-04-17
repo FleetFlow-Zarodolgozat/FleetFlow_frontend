@@ -217,6 +217,17 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
+/* Szin-osztalyok: deterministic szin email hash alapjan inline style helyett */
+.atd-driver-avatar--c1 { background: #7c3aed; }
+.atd-driver-avatar--c2 { background: #2563eb; }
+.atd-driver-avatar--c3 { background: #059669; }
+.atd-driver-avatar--c4 { background: #d97706; }
+.atd-driver-avatar--c5 { background: #dc2626; }
+.atd-driver-avatar--c6 { background: #0891b2; }
+.atd-driver-avatar--c7 { background: #16a34a; }
+.atd-driver-avatar--c8 { background: #ea580c; }
+.atd-driver-avatar--c9 { background: #8b5cf6; }
+
 .atd-driver-avatar img {
   width: 100%;
   height: 100%;

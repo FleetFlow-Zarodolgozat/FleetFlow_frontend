@@ -11,7 +11,7 @@
 
 /* ---- Info rows (Title, Description, Service Date) ---- */
 .srd-info-row {
-  padding: 10px 0;
+  padding: 10px 0 10px 14px;
   border-bottom: 1px solid #f1f5f9;
 }
 
@@ -181,6 +181,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  padding-left: 12px;
   margin-bottom: 12px;
 }
 
@@ -209,6 +210,31 @@
   max-height: 260px;
   border-radius: 8px;
   object-fit: contain;
+  cursor: zoom-in;
+}
+
+.srd-zoomed-image-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-height: 68vh;
+  overflow: auto;
+}
+
+.srd-zoomed-image {
+  width: 100%;
+  max-width: 100%;
+  max-height: 66vh;
+  object-fit: contain;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+body.dark-mode .srd-page .srd-invoice-preview,
+body.dark-mode .srd-page .srd-zoomed-image {
+  background: #0b1220 !important;
+  border-color: #30363d !important;
 }
 
 /* ---- Request Info sidebar card — purple gradient ---- */

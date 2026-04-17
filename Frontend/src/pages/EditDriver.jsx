@@ -3,7 +3,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Button, Container, Form, Spinner } from 'react-bootstrap';
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
-import Footer from '../components/Footer';
 import CustomModal from '../components/CustomModal';
 import { useLanguage } from '../contexts/LanguageContext';
 import '../styles/EditDriver.css';
@@ -64,6 +63,8 @@ const EditDriver = () => {
       setLoading(true);
       setError('');
       try {
+        // Jelenleg nincs dedikált single-driver endpoint, ezért a listából keressük ki
+        // az adott ID-t. Ez biztosítja, hogy ugyanazt a DTO formát használjuk, mint a táblázat.
         const res = await api.get('/admin/drivers', {
           params: { page: 1, pageSize: 200 },
         });
@@ -93,6 +94,7 @@ const EditDriver = () => {
         });
         setOriginalIsActive(driver.isActive ?? driver.IsActive ?? true);
         try {
+          // A profilkép külön endpointon érhető el, ezért a fő adatok után töltjük.
           const imgRes = await api.get(`/files/thumbnail/${id}`, { responseType: 'blob' });
           setProfileImageUrl(URL.createObjectURL(imgRes.data));
           setProfileImageError(false);
@@ -127,6 +129,8 @@ const EditDriver = () => {
     setError('');
     setSuccess('');
     try {
+      // Először a szerkeszthető mezőket mentjük, majd csak ezután kezeljük az aktiválást,
+      // így hiba esetén jól elkülöníthető, melyik API lépés bukott el.
       await api.patch(`/admin/drivers/edit/${id}`, {
         fullName: form.fullName,
         phone: form.phone || null,
