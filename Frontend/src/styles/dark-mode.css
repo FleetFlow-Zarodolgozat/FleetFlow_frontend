@@ -957,6 +957,17 @@ body.dark-mode .notifications-page .mark-all-read-btn:hover {
 body.dark-mode .notifications-page .page-footer {
   background: #0f1117 !important;
   border-top-color: #30363d !important;
+  color: #8b949e !important;
+}
+
+body.dark-mode .notifications-page .page-footer *,
+body.dark-mode .notifications-page .page-footer a {
+  color: #8b949e !important;
+}
+
+body.dark-mode .notifications-page .page-footer a:hover {
+  color: #b1bac4 !important;
+  text-decoration: underline !important;
 }
 
 body.dark-mode .profile-settings-page .danger-zone-title {
@@ -2173,6 +2184,28 @@ body.dark-mode .back-link,
 body.dark-mode .resend-link,
 body.dark-mode .page-footer a {
   color: #58a6ff !important;
+}
+
+body.dark-mode .login-page .page-footer,
+body.dark-mode .forgot-password-page .page-footer,
+body.dark-mode .set-password-page .page-footer {
+  color: #8b949e !important;
+}
+
+body.dark-mode .login-page .page-footer *,
+body.dark-mode .login-page .page-footer a,
+body.dark-mode .forgot-password-page .page-footer *,
+body.dark-mode .forgot-password-page .page-footer a,
+body.dark-mode .set-password-page .page-footer *,
+body.dark-mode .set-password-page .page-footer a {
+  color: #8b949e !important;
+}
+
+body.dark-mode .login-page .page-footer a:hover,
+body.dark-mode .forgot-password-page .page-footer a:hover,
+body.dark-mode .set-password-page .page-footer a:hover {
+  color: #b1bac4 !important;
+  text-decoration: underline !important;
 }
 
 body.dark-mode .password-toggle {
