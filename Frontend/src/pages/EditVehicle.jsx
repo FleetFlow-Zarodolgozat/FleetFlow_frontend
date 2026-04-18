@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Alert, Button, Container, Form, Spinner } from 'react-bootstrap';
+import { Button, Container, Form, Spinner } from 'react-bootstrap';
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
-import Footer from '../components/Footer';
+import CustomModal from '../components/CustomModal';
+import { useLanguage } from '../contexts/LanguageContext';
 import '../styles/EditDriver.css';
 import '../styles/EditVehicle.css';
 
@@ -15,6 +16,7 @@ const STATUS_OPTIONS = [
 const EditVehicle = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 1024);
 
   const [loading, setLoading] = useState(true);
@@ -22,6 +24,9 @@ const EditVehicle = () => {
   const [unassigning, setUnassigning] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalType, setModalType] = useState('');
+  const [modalContent, setModalContent] = useState({ title: '', message: '' });
 
   const [form, setForm] = useState({
     licensePlate: '',
@@ -47,11 +52,30 @@ const EditVehicle = () => {
   }, []);
 
   useEffect(() => {
-    if (success) {
-      const t = setTimeout(() => setSuccess(''), 3000);
-      return () => clearTimeout(t);
+    if (error) {
+      setModalType('error');
+      setModalContent({ title: t('common.errorTitle'), message: error });
+      setModalOpen(true);
     }
-  }, [success]);
+  }, [error, t]);
+
+  useEffect(() => {
+    if (success) {
+      setModalType('success');
+      setModalContent({ title: t('common.successTitle'), message: success });
+      setModalOpen(true);
+    }
+  }, [success, t]);
+
+  useEffect(() => {
+    if (success !== 'Successfully unassigned.' || !modalOpen) return;
+    const timeoutId = setTimeout(() => {
+      setModalOpen(false);
+      setSuccess('');
+      setModalType('');
+    }, 2000);
+    return () => clearTimeout(timeoutId);
+  }, [success, modalOpen]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -70,7 +94,8 @@ const EditVehicle = () => {
           return;
         }
 
-        // Split BrandModel into brand + model
+        // A backend jelenleg egyben adhatja a brand+model mezőt,
+        // ezt bontjuk szét a két külön inputhoz.
         const brandModel = vehicle.brandModel || vehicle.BrandModel || '';
         const parts = brandModel.split(' ');
         const brand = parts[0] || '';
@@ -88,7 +113,8 @@ const EditVehicle = () => {
         });
         setOriginalStatus(vehicle.status || vehicle.Status || 'ACTIVE');
         
-        // Fetch free/assigned drivers for this vehicle using the new endpoint
+        // A hozzárendeléshez elsődlegesen a dedikált assign endpointot használjuk,
+        // mert ez egyszerre tudja adni az aktuális és a szabad sofőröket is.
         let resolvedOriginalUserId = '';
         let availableDriversList = [];
         
@@ -107,9 +133,9 @@ const EditVehicle = () => {
             // Vehicle is not assigned, get free drivers
             availableDriversList = Array.isArray(assignData.freeDrivers) ? assignData.freeDrivers : [];
           }
-        } catch (err) {
+        } catch {
           console.log('Could not fetch available drivers from assign endpoint, falling back to all drivers');
-          // Fallback: fetch all active drivers
+          // Fallback: ha az assign endpoint hibás, legalább az aktív sofőrök listáját betöltjük.
           try {
             const driversRes = await api.get('/admin/drivers', {
               params: { page: 1, pageSize: 200 },
@@ -122,10 +148,11 @@ const EditVehicle = () => {
           }
         }
         
-        // Store drivers for dropdown
+        // A select mezőhöz és a névfeloldáshoz külön is eltároljuk a listát.
         setDrivers({ active: availableDriversList, all: availableDriversList });
         
-        // Try to resolve original assigned user ID from vehicle email if not set
+        // Ha nincs közvetlen userId, e-mail alapján próbáljuk feloldani a sofőrt,
+        // hogy később az unassign/assign műveletek konzisztensen működjenek.
         if (!resolvedOriginalUserId) {
           const userEmail = vehicle.userEmail || vehicle.UserEmail;
           if (userEmail) {
@@ -148,7 +175,7 @@ const EditVehicle = () => {
           const history = Array.isArray(historyRes.data) ? historyRes.data : [];
           setAssignmentHistory(history);
 
-          // Fallback: if original ID not resolved yet, derive from active history entry
+          // Másodlagos fallback: assignment history-ból próbáljuk meghatározni az aktív sofőrt.
           if (!resolvedOriginalUserId) {
             const isActiveEntry = (h) => {
               const val = h.assignedTo ?? h.AssignedTo;
@@ -197,10 +224,24 @@ const EditVehicle = () => {
     if (!originalAssignedUserId) return;
     setUnassigning(true);
     setError('');
+    setSuccess('');
     try {
       await api.patch(`/admin/unassign/${originalAssignedUserId}`);
       setOriginalAssignedUserId('');
       setForm((prev) => ({ ...prev, assignedUserId: '' }));
+
+      setHistoryLoading(true);
+      try {
+        const historyRes = await api.get(`/admin/assignment/history/${id}`);
+        const history = Array.isArray(historyRes.data) ? historyRes.data : [];
+        setAssignmentHistory(history);
+      } catch {
+        // keep existing history if refresh fails
+      } finally {
+        setHistoryLoading(false);
+      }
+
+      setSuccess('Successfully unassigned.');
     } catch (err) {
       const msg = err?.response?.data;
       setError(typeof msg === 'string' ? msg : msg?.message || msg?.Message || 'Failed to unassign driver.');
@@ -223,7 +264,8 @@ const EditVehicle = () => {
         currentMileageKm: form.currentMileageKm ? parseInt(form.currentMileageKm, 10) : 0,
       });
       if (form.status !== originalStatus) {
-        // If changing to RETIRED and there's an assigned driver, unassign first
+        // Fontos sorrend: RETIRED státusz előtt le kell választani a sofőrt,
+        // különben a backend üzleti szabálya hibát dobhat aktív hozzárendelésre.
         if (form.status === 'RETIRED' && originalAssignedUserId) {
           await api.patch(`/admin/unassign/${originalAssignedUserId}`);
           setOriginalAssignedUserId('');
@@ -235,12 +277,12 @@ const EditVehicle = () => {
         await api.patch(endpoint);
         setOriginalStatus(form.status);
       }
-      // Assign new driver if one was selected (unassign already handled by the Unassign button)
+      // Új sofőrt csak akkor rendelünk, ha tényleg változott az érték.
       if (form.assignedUserId && form.assignedUserId !== originalAssignedUserId) {
         await api.post(`/admin/assign/${form.assignedUserId}/${id}`);
         setOriginalAssignedUserId(form.assignedUserId);
       }
-      setSuccess('Vehicle updated successfully.');
+      setSuccess('Successfully edited. Redirecting...');
       setTimeout(() => navigate('/vehicles'), 1500);
     } catch (err) {
       const msg = err?.response?.data;
@@ -266,16 +308,27 @@ const EditVehicle = () => {
             </div>
           </div>
 
-          {error && (
-            <Alert variant="danger" dismissible onClose={() => setError('')} className="mb-4">
-              {error}
-            </Alert>
-          )}
-          {success && (
-            <Alert variant="success" className="mb-4">
-              {success}
-            </Alert>
-          )}
+          <CustomModal
+            isOpen={modalOpen}
+            onClose={() => {
+              setModalOpen(false);
+              setError('');
+              setSuccess('');
+              setModalType('');
+            }}
+            title={modalContent.title}
+            primaryAction={modalType === 'error' ? {
+              label: t('common.ok'),
+              onClick: () => {
+                setModalOpen(false);
+                setError('');
+                setSuccess('');
+                setModalType('');
+              },
+            } : undefined}
+          >
+            <p className="mb-0">{modalContent.message}</p>
+          </CustomModal>
 
           {loading ? (
             <div className="edit-driver-loading">
@@ -619,7 +672,6 @@ const EditVehicle = () => {
             </div>
           )}
         </Container>
-        <Footer />
       </main>
     </div>
   );

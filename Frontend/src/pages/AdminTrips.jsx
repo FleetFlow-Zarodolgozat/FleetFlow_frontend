@@ -1,33 +1,36 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Alert, Container, Spinner } from 'react-bootstrap';
+import { Container, Spinner } from 'react-bootstrap';
 import JSZip from 'jszip';
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
-import Footer from '../components/Footer';
+import CustomModal from '../components/CustomModal';
+import { useLanguage } from '../contexts/LanguageContext';
 import '../styles/AdminTrips.css';
 
 const PAGE_SIZE = 10;
 
-const AVATAR_COLORS = [
-  '#7c3aed', '#2563eb', '#059669', '#d97706',
-  '#dc2626', '#0891b2', '#16a34a', '#ea580c', '#8b5cf6',
+const AVATAR_COLOR_CLASSES = [
+  'at-avatar--c1', 'at-avatar--c2', 'at-avatar--c3',
+  'at-avatar--c4', 'at-avatar--c5', 'at-avatar--c6',
+  'at-avatar--c7', 'at-avatar--c8', 'at-avatar--c9',
 ];
 
-const getColorForEmail = (email) => {
-  if (!email) return AVATAR_COLORS[0];
+const getAvatarClassForEmail = (email) => {
+  if (!email) return AVATAR_COLOR_CLASSES[0];
   let hash = 0;
   for (let i = 0; i < email.length; i++) hash = email.charCodeAt(i) + ((hash << 5) - hash);
-  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+  return AVATAR_COLOR_CLASSES[Math.abs(hash) % AVATAR_COLOR_CLASSES.length];
 };
 
 const AdminTrips = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 1024);
 
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [errorModalMessage, setErrorModalMessage] = useState('');
   const [totalCount, setTotalCount] = useState(0);
   const [page, setPage] = useState(1);
 
@@ -49,7 +52,20 @@ const AdminTrips = () => {
   const [driverImages, setDriverImages] = useState({});
   const [csvLoading, setCsvLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(null);
-  const [actionError, setActionError] = useState('');
+  const [exportEmptyModalOpen, setExportEmptyModalOpen] = useState(false);
+  const [exportSuccessModalOpen, setExportSuccessModalOpen] = useState(false);
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState({ type: '', id: null });
+
+  const openErrorModal = (message) => {
+    setErrorModalMessage(message || 'Unexpected error occurred.');
+  };
+
+  useEffect(() => {
+    if (!exportSuccessModalOpen) return;
+    const timeoutId = setTimeout(() => setExportSuccessModalOpen(false), 2000);
+    return () => clearTimeout(timeoutId);
+  }, [exportSuccessModalOpen]);
 
   useEffect(() => {
     const handleResize = () => setSidebarOpen(window.innerWidth > 1024);
@@ -59,7 +75,6 @@ const AdminTrips = () => {
 
   const fetchTrips = useCallback(async (pageToLoad = 1) => {
     setLoading(true);
-    setError('');
     try {
       const df = debouncedDateFrom;
       const dt = debouncedDateTo;
@@ -106,7 +121,7 @@ const AdminTrips = () => {
         typeof apiMsg === 'string'
           ? apiMsg
           : apiMsg?.message || apiMsg?.Message || 'An error occurred while fetching trips.';
-      setError(message);
+      openErrorModal(message);
     } finally {
       setLoading(false);
     }
@@ -115,7 +130,8 @@ const AdminTrips = () => {
   useEffect(() => {
     fetchTrips(1);
     setPage(1);
-  }, [fetchTrips]);  useEffect(() => {
+  }, [fetchTrips]);
+  useEffect(() => {
     if (trips.length === 0) return;
     let cancelled = false;
     const fetchImages = async () => {
@@ -148,32 +164,52 @@ const AdminTrips = () => {
     debounceRef.current = setTimeout(() => setSearchQ(val), 400);
   };
 
-  const handleDelete = async (id) => {
+  const executeDelete = async (id) => {
     setActionLoading(id);
-    setActionError('');
     try {
       await api.patch(`/trips/delete/${id}`);
       fetchTrips(page);
     } catch (err) {
       const msg = err?.response?.data;
-      setActionError(typeof msg === 'string' ? msg : msg?.message || 'Failed to delete trip.');
+      openErrorModal(typeof msg === 'string' ? msg : msg?.message || 'Failed to delete trip.');
     } finally {
       setActionLoading(null);
     }
   };
 
-  const handleRestore = async (id) => {
+  const executeRestore = async (id) => {
     setActionLoading(id);
-    setActionError('');
     try {
       await api.patch(`/trips/restore/${id}`);
       fetchTrips(page);
     } catch (err) {
       const msg = err?.response?.data;
-      setActionError(typeof msg === 'string' ? msg : msg?.message || 'Failed to restore trip.');
+      openErrorModal(typeof msg === 'string' ? msg : msg?.message || 'Failed to restore trip.');
     } finally {
       setActionLoading(null);
     }
+  };
+
+  const handleDelete = (id) => {
+    setPendingAction({ type: 'delete', id });
+    setConfirmModalOpen(true);
+  };
+
+  const handleRestore = (id) => {
+    setPendingAction({ type: 'restore', id });
+    setConfirmModalOpen(true);
+  };
+
+  const handleConfirmAction = async () => {
+    const { type, id } = pendingAction;
+    if (!id || !type) return;
+    setConfirmModalOpen(false);
+    setPendingAction({ type: '', id: null });
+    if (type === 'delete') {
+      await executeDelete(id);
+      return;
+    }
+    await executeRestore(id);
   };
 
   const handleReset = () => {    setSearchInput('');
@@ -209,8 +245,8 @@ const AdminTrips = () => {
       }
 
       if (rows.length === 0) {
-        setError('No data to export for the selected filters.');
         setCsvLoading(false);
+        setExportEmptyModalOpen(true);
         return;
       }
 
@@ -276,7 +312,8 @@ const AdminTrips = () => {
         const dest = t.endLocation ?? t.EndLocation ?? '—';
         const id = t.id ?? t.Id;
         return `
-<div class="trip-card${isDeleted ? ' deleted' : ''}">
+      <table class="card-block"><tr><td>
+      <div class="trip-card${isDeleted ? ' deleted' : ''}">
   <div class="card-header">
     <div class="card-number">#${id}</div>
     <div class="card-plate">${plate}</div>
@@ -304,7 +341,8 @@ const AdminTrips = () => {
   <div class="card-footer">
     <span class="driver-label">Driver:</span> <span class="driver-email">${driver}</span>${notes ? ` &nbsp;|&nbsp; <span class="notes-text">${notes}</span>` : ''}
   </div>
-</div>`;
+</div>
+</td></tr></table>`;
       }).join('\n');
 
       const html = `<!DOCTYPE html>
@@ -328,7 +366,9 @@ const AdminTrips = () => {
   .stat-box.blue { border-top: 3px solid #3b82f6; }
   .stat-box.green { border-top: 3px solid #16a34a; }
   .stat-box.purple { border-top: 3px solid #7c3aed; }
-  .trip-card { border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px 20px; margin-bottom: 14px; background: #ffffff; page-break-inside: avoid; }
+  .card-block { width: 100%; border-collapse: collapse; page-break-inside: avoid; break-inside: avoid; }
+  .card-block td { padding: 0; }
+  .trip-card { border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px 20px; margin-bottom: 14px; background: #ffffff; page-break-inside: avoid; break-inside: avoid-page; break-inside: avoid; -webkit-column-break-inside: avoid; -moz-column-break-inside: avoid; display: block; width: 100%; }
   .trip-card.deleted { border-color: #fca5a5; background: #fff5f5; }
   .card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; }
   .card-number { font-size: 11px; font-weight: 700; color: #94a3b8; min-width: 28px; }
@@ -391,8 +431,9 @@ ${tripCards}
       zipA.click();
       document.body.removeChild(zipA);
       URL.revokeObjectURL(zipUrl);
+      setExportSuccessModalOpen(true);
     } catch {
-      setError('Failed to export.');
+      openErrorModal('Failed to export.');
     } finally {
       setCsvLoading(false);
     }
@@ -481,6 +522,64 @@ ${tripCards}
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       <main className="at-main">
         <Container fluid className="at-page">
+
+          <CustomModal
+            isOpen={exportEmptyModalOpen}
+            onClose={() => setExportEmptyModalOpen(false)}
+            title={t('adminDash.export.emptyTitle')}
+            primaryAction={{
+              label: t('common.ok'),
+              onClick: () => setExportEmptyModalOpen(false),
+            }}
+          >
+            <p className="mb-0">{t('adminDash.export.emptyMessage')}</p>
+          </CustomModal>
+
+          <CustomModal
+            isOpen={exportSuccessModalOpen}
+            onClose={() => setExportSuccessModalOpen(false)}
+            title={t('common.successTitle')}
+          >
+            <p className="mb-0">Successfully exported.</p>
+          </CustomModal>
+
+          <CustomModal
+            isOpen={confirmModalOpen}
+            onClose={() => {
+              setConfirmModalOpen(false);
+              setPendingAction({ type: '', id: null });
+            }}
+            title={pendingAction.type === 'delete' ? 'Delete trip?' : 'Restore trip?'}
+            secondaryAction={{
+              label: t('common.cancel'),
+              onClick: () => {
+                setConfirmModalOpen(false);
+                setPendingAction({ type: '', id: null });
+              },
+            }}
+            primaryAction={{
+              label: t('common.confirm'),
+              onClick: handleConfirmAction,
+            }}
+          >
+            <p className="mb-0">
+              {pendingAction.type === 'delete'
+                ? 'Are you sure you want to delete this trip?'
+                : 'Are you sure you want to restore this trip?'}
+            </p>
+          </CustomModal>
+
+          <CustomModal
+            isOpen={Boolean(errorModalMessage)}
+            onClose={() => setErrorModalMessage('')}
+            title={t('common.errorTitle')}
+            primaryAction={{
+              label: t('common.ok'),
+              onClick: () => setErrorModalMessage(''),
+            }}
+          >
+            <p className="mb-0">{errorModalMessage}</p>
+          </CustomModal>
 
           {/* ── Header ─────────────────────────────────── */}
           <div className="at-header">
@@ -668,18 +767,6 @@ ${tripCards}
             </div>
           </div>
 
-          {error && (
-            <Alert variant="danger" className="mb-3" onClose={() => setError('')} dismissible>
-              {error}
-            </Alert>
-          )}
-
-          {actionError && (
-            <Alert variant="danger" className="mb-3" onClose={() => setActionError('')} dismissible>
-              {actionError}
-            </Alert>
-          )}
-
           {/* ── Table Card ─────────────────────────────── */}
           <div className="at-table-card">
             {loading ? (
@@ -723,7 +810,7 @@ ${tripCards}
                         const isDeleted = trip.isDeleted ?? trip.IsDeleted ?? false;
                         const imgId = trip.profileImgFileId ?? trip.ProfileImgFileId;
                         const imgUrl = imgId != null ? driverImages[imgId] : null;
-                        const avatarColor = getColorForEmail(email);
+                        const avatarClass = getAvatarClassForEmail(email);
 
                         return (
                           <tr key={id} className={`at-tr${isDeleted ? ' at-tr--deleted' : ''}`}>
@@ -741,7 +828,7 @@ ${tripCards}
                             </td>
                             <td className="at-td">
                               <div className="at-driver-cell">
-                                <div className="at-avatar" style={{ background: avatarColor }}>
+                                <div className={`at-avatar ${avatarClass}`}>
                                   {imgUrl ? (
                                     <img src={imgUrl} alt={email}/>
                                   ) : (
@@ -816,18 +903,12 @@ ${tripCards}
                     const isDeleted = trip.isDeleted ?? trip.IsDeleted ?? false;
                     const imgId = trip.profileImgFileId ?? trip.ProfileImgFileId;
                     const imgUrl = imgId != null ? driverImages[imgId] : null;
-                    const avatarColor = getColorForEmail(email);
+                    const avatarClass = getAvatarClassForEmail(email);
 
                     return (
                       <div key={id} className={`at-mobile-card${isDeleted ? ' at-mobile-card--deleted' : ''}`}>
                         <div className="at-mc-header">
                           <div className="at-vehicle-cell">
-                            <svg className="at-truck-icon" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-                              <rect x="2" y="11" width="14" height="9" rx="1" strokeLinecap="round" strokeLinejoin="round"/>
-                              <path d="M16 11l4 4v5h-4" strokeLinecap="round" strokeLinejoin="round"/>
-                              <circle cx="6.5" cy="20" r="1.5"/>
-                              <circle cx="17.5" cy="20" r="1.5"/>
-                            </svg>
                             <span className="at-plate">{plate}</span>
                           </div>
                           <span className="at-mc-distance">{distance.toFixed(1)} km</span>
@@ -836,7 +917,7 @@ ${tripCards}
                         <div className="at-mc-row">
                           <span className="at-mc-label">Driver</span>
                           <div className="at-driver-cell">
-                            <div className="at-avatar at-avatar--sm" style={{ background: avatarColor }}>
+                            <div className={`at-avatar at-avatar--sm ${avatarClass}`}>
                               {imgUrl ? <img src={imgUrl} alt={email}/> : <span>{getDriverInitials(email)}</span>}
                             </div>
                             <span className="at-driver-email">{email}</span>
@@ -850,45 +931,48 @@ ${tripCards}
                           <span className="at-mc-label">Destination</span>
                           <span>{destination}</span>
                         </div>
-                        <div className="at-mc-actions">
-                          <button
-                            className="at-icon-btn at-icon-btn--view"
-                            title="Details"
-                            onClick={() => navigate('/admin-trip-details', { state: { trip } })}
-                          >
-                            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" strokeLinecap="round" strokeLinejoin="round"/>
-                              <circle cx="12" cy="12" r="3" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                          </button>
-                          {isDeleted ? (
+                        <div className="at-mc-row at-mc-row--actions">
+                          <span className="at-mc-label">Actions</span>
+                          <div className="at-mc-actions">
                             <button
-                              className="at-icon-btn at-icon-btn--restore"
-                              title="Restore"
-                              disabled={actionLoading === id}
-                              onClick={() => handleRestore(id)}
+                              className="at-icon-btn at-icon-btn--view"
+                              title="Details"
+                              onClick={() => navigate('/admin-trip-details', { state: { trip } })}
                             >
                               <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                                <path d="M1 4v6h6" strokeLinecap="round" strokeLinejoin="round"/>
-                                <path d="M3.51 15a9 9 0 1 0 .49-4.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" strokeLinecap="round" strokeLinejoin="round"/>
+                                <circle cx="12" cy="12" r="3" strokeLinecap="round" strokeLinejoin="round"/>
                               </svg>
                             </button>
-                          ) : (
-                            <button
-                              className="at-icon-btn at-icon-btn--delete"
-                              title="Delete"
-                              disabled={actionLoading === id}
-                              onClick={() => handleDelete(id)}
-                            >
-                              <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                                <polyline points="3 6 5 6 21 6" strokeLinecap="round" strokeLinejoin="round"/>
-                                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" strokeLinecap="round" strokeLinejoin="round"/>
-                                <path d="M10 11v6" strokeLinecap="round" strokeLinejoin="round"/>
-                                <path d="M14 11v6" strokeLinecap="round" strokeLinejoin="round"/>
-                                <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                            </button>
-                          )}
+                            {isDeleted ? (
+                              <button
+                                className="at-icon-btn at-icon-btn--restore"
+                                title="Restore"
+                                disabled={actionLoading === id}
+                                onClick={() => handleRestore(id)}
+                              >
+                                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                  <path d="M1 4v6h6" strokeLinecap="round" strokeLinejoin="round"/>
+                                  <path d="M3.51 15a9 9 0 1 0 .49-4.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                              </button>
+                            ) : (
+                              <button
+                                className="at-icon-btn at-icon-btn--delete"
+                                title="Delete"
+                                disabled={actionLoading === id}
+                                onClick={() => handleDelete(id)}
+                              >
+                                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                  <polyline points="3 6 5 6 21 6" strokeLinecap="round" strokeLinejoin="round"/>
+                                  <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" strokeLinecap="round" strokeLinejoin="round"/>
+                                  <path d="M10 11v6" strokeLinecap="round" strokeLinejoin="round"/>
+                                  <path d="M14 11v6" strokeLinecap="round" strokeLinejoin="round"/>
+                                  <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
                     );
@@ -901,7 +985,6 @@ ${tripCards}
           </div>
 
         </Container>
-        <Footer />
       </main>
     </div>
   );

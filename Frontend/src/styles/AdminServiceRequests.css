@@ -478,7 +478,10 @@
 .asr-driver-email {
   font-size: 0.84rem;
   color: #475569;
-  word-break: break-all;
+  max-width: 220px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   min-width: 0;
 }
 
@@ -598,21 +601,30 @@
 }
 
 /* ─── Mobile Cards ───────────────────────────────────────────── */
+.asr-mobile-cards {
+  padding: 12px;
+}
+
 .asr-mobile-card {
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
+  background: #ffffff;
   padding: 16px;
-  border-bottom: 1px solid #f1f5f9;
+  margin-bottom: 12px;
+  width: 100%;
 }
 
 .asr-mobile-card:last-child {
-  border-bottom: none;
+  margin-bottom: 0;
 }
 
 .asr-mc-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: 12px;
+  margin-bottom: 12px;
   flex-wrap: wrap;
 }
 
@@ -620,7 +632,7 @@
   font-size: 0.92rem;
   font-weight: 600;
   color: #1e293b;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -630,19 +642,16 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 12px;
   padding: 6px 0;
-  border-top: 1px solid #f8fafc;
   font-size: 0.87rem;
   color: #334155;
 }
 
 .asr-mc-label {
-  font-size: 0.77rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-  color: #94a3b8;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #64748b;
   white-space: nowrap;
 }
 
@@ -651,12 +660,79 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
+}
+
+.asr-mc-row > span:last-child {
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.asr-mc-row .asr-td--cost {
+  color: #059669;
+  font-weight: 600;
+}
+
+body.dark-mode .asr-mobile-card {
+  background: #1c2230;
+  border-color: #30363d;
+  box-shadow: none;
+}
+
+body.dark-mode .asr-mc-row {
+  color: #e6edf3;
+}
+
+body.dark-mode .asr-mc-label {
+  color: #8b949e;
+}
+
+body.dark-mode .asr-mc-title {
+  color: #e6edf3;
+}
+
+body.dark-mode .asr-mc-row > span:last-child {
+  color: #e6edf3;
+}
+
+body.dark-mode .asr-mc-row .asr-td--cost {
+  color: #3fb950;
+}
+
+body.dark-mode .asr-plate-badge {
+  background: #21262d;
+  border-color: #30363d;
+  color: #e6edf3;
+}
+
+body.dark-mode .asr-date-main {
+  color: #e6edf3;
+}
+
+body.dark-mode .asr-date-time {
+  color: #8b949e;
+}
+
+body.dark-mode .asr-driver-email {
+  color: #e6edf3;
 }
 
 /* ─── Responsive ─────────────────────────────────────────────── */
 @media (max-width: 1024px) {
   .asr-main {
     margin-left: 0;
+  }
+
+  .asr-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .asr-desktop-table {
+    display: none;
+  }
+
+  .asr-mobile-cards {
+    display: block;
   }
 }
 
@@ -683,14 +759,6 @@
   .asr-filter-group {
     min-width: unset;
     flex: 1;
-  }
-
-  .asr-desktop-table {
-    display: none;
-  }
-
-  .asr-mobile-cards {
-    display: block;
   }
 
   .asr-header {
@@ -729,4 +797,60 @@
     height: 30px;
     font-size: 0.82rem;
   }
+}
+
+@media (max-width: 576px) {
+  .asr-stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+body.dark-mode .asr-stat-badge--blue {
+  background: #dbeafe !important;
+  color: #1d4ed8 !important;
+}
+
+body.dark-mode .asr-stat-badge--orange {
+  background: #ffedd5 !important;
+  color: #c2410c !important;
+}
+
+body.dark-mode .asr-stat-badge--green {
+  background: #dcfce7 !important;
+  color: #166534 !important;
+}
+
+body.dark-mode .asr-stat-badge--purple {
+  background: #ede9fe !important;
+  color: #5b21b6 !important;
+}
+
+body.dark-mode .asr-stat-badge--red {
+  background: #fee2e2 !important;
+  color: #991b1b !important;
+}
+
+.dark-mode .asr-stat-badge--blue {
+  background: #dbeafe !important;
+  color: #1d4ed8 !important;
+}
+
+.dark-mode .asr-stat-badge--orange {
+  background: #ffedd5 !important;
+  color: #c2410c !important;
+}
+
+.dark-mode .asr-stat-badge--green {
+  background: #dcfce7 !important;
+  color: #166534 !important;
+}
+
+.dark-mode .asr-stat-badge--purple {
+  background: #ede9fe !important;
+  color: #5b21b6 !important;
+}
+
+.dark-mode .asr-stat-badge--red {
+  background: #fee2e2 !important;
+  color: #991b1b !important;
 }

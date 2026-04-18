@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { authService } from '../services/authService';
 import { useLanguage } from '../contexts/LanguageContext';
-import { Container, Card, Form, Button, Alert } from 'react-bootstrap';
+import { Card, Form, Button } from 'react-bootstrap';
 import Footer from '../components/Footer';
+import CustomModal from '../components/CustomModal';
 import '../styles/SetPassword.css';
 
 const SetPassword = () => {
@@ -13,8 +14,8 @@ const SetPassword = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
+  const [errorModal, setErrorModal] = useState({ open: false, message: '' });
+  const [successModal, setSuccessModal] = useState({ open: false, message: '' });
   const [loading, setLoading] = useState(false);
   const [tokenMissing, setTokenMissing] = useState(false);
   const navigate = useNavigate();
@@ -22,18 +23,20 @@ const SetPassword = () => {
   const token = searchParams.get('token');
 
   useEffect(() => {
+    // Ha hiányzik a token, azonnal jelezzük a felhasználónak.
     if (!token) {
       setTokenMissing(true);
     }
   }, [token]);
 
+  // Alap jelszóvalidáció: hossz és egyezés ellenőrzése.
   const validatePassword = () => {
     if (password.length < 5) {
-      setError('Password must be at least 5 characters long.');
+      setErrorModal({ open: true, message: 'Password must be at least 5 characters long.' });
       return false;
     }
     if (password !== confirmPassword) {
-      setError('Passwords do not match.');
+      setErrorModal({ open: true, message: 'Passwords do not match.' });
       return false;
     }
     return true;
@@ -41,7 +44,12 @@ const SetPassword = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+
+    // Token nélkül nem indítunk mentést, csak figyelmeztetjük a felhasználót.
+    if (!token) {
+      setErrorModal({ open: true, message: t('setpwd.invalidMsg') });
+      return;
+    }
 
     if (!validatePassword()) {
       return;
@@ -51,94 +59,22 @@ const SetPassword = () => {
 
     try {
       await authService.setPassword(token, password, confirmPassword);
-      setSuccess(true);
+      setSuccessModal({ open: true, message: t('setpwd.successMsg') });
     } catch (err) {
-      setError(
-        err.response?.data || 
-        'Failed to set password. The link may have expired.'
-      );
+      setErrorModal({
+        open: true,
+        message: err.response?.data || 'Failed to set password. The link may have expired.',
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  if (tokenMissing) {
-    return (
-      <div className="set-password-page">
-        <div className="set-password-content">
-          <Card className="set-password-card">
-            <Card.Body>
-              <div className="set-password-header">
-                <div className="logo-section">
-                  <img src="/fleetflow_logo.png" alt="FleetFlow Logo" style={{ height: '48px', width: 'auto' }} />
-                  <h1 className="logo-title">FleetFlow</h1>
-                </div>
-                <div className="error-icon">
-                  <svg width="64" height="64" fill="none" viewBox="0 0 24 24" stroke="#dc3545">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                  </svg>
-                </div>
-                <h2 className="page-title">{t('setpwd.invalidLink')}</h2>
-                <p className="page-subtitle">
-                  {t('setpwd.invalidMsg')}
-                </p>
-              </div>
-              <Button
-                variant="primary"
-                className="w-100"
-                onClick={() => navigate('/forgot-password')}
-              >
-                {t('setpwd.requestNewLink')}
-              </Button>
-              <div className="card-footer-text">
-                <p>
-                  {t('setpwd.rememberPassword')}{' '}
-                  <a href="/login">{t('setpwd.backToSignIn')}</a>
-                </p>
-              </div>
-            </Card.Body>
-          </Card>
-          <Footer />
-        </div>
-      </div>
-    );
-  }
-
-  if (success) {
-    return (
-      <div className="set-password-page">
-        <div className="set-password-content">
-          <Card className="set-password-card">
-            <Card.Body>
-              <div className="set-password-header">
-                <div className="logo-section">
-                  <img src="/fleetflow_logo.png" alt="FleetFlow Logo" style={{ height: '48px', width: 'auto' }} />
-                  <h1 className="logo-title">FleetFlow</h1>
-                </div>
-                <div className="success-icon">
-                  <svg width="64" height="64" fill="none" viewBox="0 0 24 24" stroke="#198754">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <h2 className="page-title">{t('setpwd.successTitle')}</h2>
-                <p className="page-subtitle">
-                  {t('setpwd.successMsg')}
-                </p>
-              </div>
-              <Button
-                variant="primary"
-                className="w-100"
-                onClick={() => navigate('/login')}
-              >
-                {t('setpwd.goToSignIn')}
-              </Button>
-            </Card.Body>
-          </Card>
-          <Footer />
-        </div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (tokenMissing) {
+      setErrorModal({ open: true, message: t('setpwd.invalidMsg') });
+    }
+  }, [tokenMissing, t]);
 
   return (
     <div className="set-password-page">
@@ -148,7 +84,7 @@ const SetPassword = () => {
             {/* Logo and Header */}
             <div className="set-password-header">
               <div className="logo-section">
-                <img src="/fleetflow_logo.png" alt="FleetFlow Logo" style={{ height: '48px', width: 'auto' }} />
+                <img src="/fleetflow_logo.png" alt="FleetFlow Logo" className="set-password-logo" />
                 <h1 className="logo-title">FleetFlow</h1>
               </div>
               <div className="password-icon">
@@ -162,11 +98,22 @@ const SetPassword = () => {
               </p>
             </div>
 
-            {/* Error Alert */}
-            {error && (
-              <Alert variant="danger" dismissible onClose={() => setError('')} className="mb-4">
-                {error}
-              </Alert>
+            {tokenMissing && (
+              <div className="set-password-recovery">
+                <Button
+                  variant="primary"
+                  className="w-100"
+                  onClick={() => navigate('/forgot-password')}
+                >
+                  {t('setpwd.requestNewLink')}
+                </Button>
+                <div className="card-footer-text">
+                  <p>
+                    {t('setpwd.rememberPassword')}{' '}
+                    <a href="/login">{t('setpwd.backToSignIn')}</a>
+                  </p>
+                </div>
+              </div>
             )}
 
             {/* Set Password Form */}
@@ -180,7 +127,7 @@ const SetPassword = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    disabled={loading}
+                    disabled={loading || tokenMissing}
                     minLength={5}
                   />
                   <button
@@ -217,7 +164,7 @@ const SetPassword = () => {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
-                    disabled={loading}
+                    disabled={loading || tokenMissing}
                     minLength={5}
                   />
                   <button
@@ -245,7 +192,7 @@ const SetPassword = () => {
               <Button
                 variant="primary"
                 type="submit"
-                disabled={loading}
+                disabled={loading || tokenMissing}
                 className="w-100"
               >
                 {loading ? t('setpwd.setting') : t('setpwd.submit')}
@@ -264,6 +211,28 @@ const SetPassword = () => {
 
         <Footer />
       </div>
+      <CustomModal
+        isOpen={errorModal.open}
+        onClose={() => setErrorModal({ open: false, message: '' })}
+        title={t('common.errorTitle')}
+        primaryAction={{
+          label: t('common.ok'),
+          onClick: () => setErrorModal({ open: false, message: '' }),
+        }}
+      >
+        <p className="mb-0">{errorModal.message}</p>
+      </CustomModal>
+      <CustomModal
+        isOpen={successModal.open}
+        onClose={() => setSuccessModal({ open: false, message: '' })}
+        title={t('setpwd.successTitle')}
+        primaryAction={{
+          label: t('setpwd.goToSignIn'),
+          onClick: () => navigate('/login'),
+        }}
+      >
+        <p className="mb-0">{successModal.message}</p>
+      </CustomModal>
     </div>
   );
 };

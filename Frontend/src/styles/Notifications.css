@@ -54,11 +54,6 @@ body {
   stroke: currentColor;
 }
 
-.filter-menu-btn:hover {
-  color: #495057;
-  background: #f8f9fa;
-  border-radius: 6px;
-}
 
 /* Filter Tabs */
 .filter-tabs {
@@ -145,6 +140,7 @@ body {
   margin-bottom: 0;
 }
 
+/* Kártya elrendezés: ikon + tartalom + akció gomb egy sorban. */
 .notification-card {
   display: flex;
   align-items: center;
@@ -210,7 +206,7 @@ body {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #0d6efd;
+  background: #dc2626;
   flex-shrink: 0;
 }
 

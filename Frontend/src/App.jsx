@@ -52,13 +52,40 @@ const DashboardRouter = () => {
   return isAdmin ? <AdminDashboard /> : <DriverDashboard />;
 };
 
-function App() {  useEffect(() => {
-    const isDarkMode = localStorage.getItem('fleetflow_darkMode') === 'true';
+function App() {
+  useEffect(() => {
+    const savedDarkMode = localStorage.getItem('fleetflow_darkMode');
+    const isDarkMode = savedDarkMode !== null
+      ? savedDarkMode === 'true'
+      : window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    if (savedDarkMode === null) {
+      localStorage.setItem('fleetflow_darkMode', String(isDarkMode));
+    }
+
     if (isDarkMode) {
       document.body.classList.add('dark-mode');
+      document.documentElement.style.colorScheme = 'dark';
     } else {
       document.body.classList.remove('dark-mode');
+      document.documentElement.style.colorScheme = 'light';
     }
+
+    const handleThemeChange = (event) => {
+      const isDark = event.detail?.isDarkMode ?? localStorage.getItem('fleetflow_darkMode') === 'true';
+      if (isDark) {
+        document.body.classList.add('dark-mode');
+        document.documentElement.style.colorScheme = 'dark';
+      } else {
+        document.body.classList.remove('dark-mode');
+        document.documentElement.style.colorScheme = 'light';
+      }
+    };
+    window.addEventListener('theme-change', handleThemeChange);
+
+    return () => {
+      window.removeEventListener('theme-change', handleThemeChange);
+    };
   }, []);
 
   return (

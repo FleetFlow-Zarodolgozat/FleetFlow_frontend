@@ -1,11 +1,11 @@
 import { useEffect, useState, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
-import { Card, Container, Row, Col, Alert, Spinner, Button, Form, Badge } from 'react-bootstrap';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Card, Container, Row, Col, Spinner, Button, Form } from 'react-bootstrap';
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
 import { authService } from '../services/authService';
 import { useLanguage } from '../contexts/LanguageContext';
+import CustomModal from '../components/CustomModal';
 import '../styles/ProfileSettings.css';
 
 import Footer from '../components/Footer';
@@ -21,15 +21,9 @@ const ProfileSettings = () => {
   const [profileImageUrl, setProfileImageUrl] = useState(null);
   const [profileImageError, setProfileImageError] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [feedback, setFeedback] = useState({ type: '', message: '' });  useEffect(() => {
-    if (feedback.message) {
-      const timer = setTimeout(() => {
-        setFeedback({ type: '', message: '' });
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [feedback]);
-  const [isDirty, setIsDirty] = useState(false);
+  const [successModal, setSuccessModal] = useState({ open: false, message: '' });
+  const [confirmModal, setConfirmModal] = useState({ open: false, title: '', message: '', onConfirm: null });
+  const [errorModal, setErrorModal] = useState({ open: false, message: '' });
   const fileInputRef = useRef(null);
 
   // Personal Information form
@@ -57,6 +51,36 @@ const ProfileSettings = () => {
   }, [location.state]);
 
   const { t, language, setLanguage } = useLanguage();
+  const roleLower = String(user?.role || '').toLowerCase();
+  const isAdmin = roleLower === 'admin';
+  const isDriver = roleLower === 'driver';
+
+  const showErrorModal = (message) => {
+    setErrorModal({ open: true, message });
+  };
+
+  // A backend hibák szövegét kulcsszavak alapján lokalizáljuk,
+  // hogy a felhasználó mindig érthető, konzisztens üzenetet kapjon.
+  const getLocalizedBackendError = (err, fallbackKey = 'profile.error.backendGeneric') => {
+    const data = err?.response?.data;
+    const rawMessage =
+      typeof data === 'string'
+        ? data
+        : data?.message || data?.Message || data?.detail || '';
+
+    const normalized = String(rawMessage || '').toLowerCase();
+    if (normalized.includes('password') && (normalized.includes('match') || normalized.includes('again'))) {
+      return t('profile.error.passwordMismatch');
+    }
+    if (normalized.includes('unauthorized') || err?.response?.status === 401) {
+      return t('profile.error.unauthorized');
+    }
+    if (normalized.includes('forbidden') || err?.response?.status === 403) {
+      return t('profile.error.forbidden');
+    }
+
+    return t(fallbackKey);
+  };
 
   // Preferences
   const [preferences, setPreferences] = useState({
@@ -90,7 +114,8 @@ const ProfileSettings = () => {
         phone: data.phone || data.Phone || '',
         password: '',
         confirmPassword: '',
-      });      if (data.id || data.Id) {
+      });
+      if (data.id || data.Id) {
         try {
           const imgResponse = await api.get(`/files/thumbnail/${data.id || data.Id}`, { responseType: 'blob' });
           const objectUrl = URL.createObjectURL(imgResponse.data);
@@ -102,7 +127,7 @@ const ProfileSettings = () => {
         }
       }
     } catch (err) {
-      setFeedback({ type: 'danger', message: 'Failed to load profile data.' });
+      showErrorModal(getLocalizedBackendError(err, 'profile.error.loadProfile'));
     } finally {
       setLoading(false);
     }
@@ -115,11 +140,9 @@ const ProfileSettings = () => {
   const handlePersonalInfoChange = (e) => {
     const { name, value } = e.target;
     setPersonalInfo(prev => ({ ...prev, [name]: value }));
-    setIsDirty(true);
   };
 
   const handleSave = async () => {
-    setFeedback({ type: '', message: '' });
     try {
       const formData = new FormData();
       if (personalInfo.fullName) formData.append('FullName', personalInfo.fullName);
@@ -128,28 +151,17 @@ const ProfileSettings = () => {
         formData.append('Password', personalInfo.password);
         formData.append('PasswordAgain', personalInfo.confirmPassword);
       }
-      // Optionally: handle file upload here if needed (formData.append('File', ...))
-      const response = await api.patch('/profile/edit', formData, {
+      await api.patch('/profile/edit', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      setFeedback({ type: 'success', message: 'Profile updated successfully.' });
-      setIsDirty(false);
+      setSuccessModal({ open: true, message: 'Profile updated successfully.' });
       setEditMode(false);
       fetchProfile();
       setNotificationRefresh((prev) => prev + 1);
       // Trigger Sidebar reload
       setSidebarOpen((prev) => !prev);
     } catch (err) {
-      let msg = 'Failed to save changes.';
-      if (err.response && err.response.data) {
-        const data = err.response.data;
-        if (typeof data === 'string') msg = data;
-        else if (data.message) msg = data.message;
-        else if (data.detail) msg = data.detail;
-        else if (data.errors) msg = Array.isArray(data.errors) ? data.errors.join(', ') : JSON.stringify(data.errors);
-        else msg = JSON.stringify(data);
-      }
-      setFeedback({ type: 'danger', message: msg });
+      showErrorModal(getLocalizedBackendError(err, 'profile.error.saveChanges'));
     }
   };
 
@@ -165,9 +177,7 @@ const ProfileSettings = () => {
         confirmPassword: '',
       });
     }
-    setIsDirty(false);
     setEditMode(false);
-    setFeedback({ type: '', message: '' });
   };
 
   const handleImageUploadClick = () => {
@@ -176,14 +186,15 @@ const ProfileSettings = () => {
 
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
-    if (!file) return;    const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    if (!file) return;
+    const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
     if (!validTypes.includes(file.type)) {
-      setFeedback({ type: 'danger', message: 'Only JPEG, PNG or GIF files are allowed.' });
+      showErrorModal(t('profile.error.invalidFileType'));
       return;
     }
 
     if (file.size > 10 * 1024 * 1024) {
-      setFeedback({ type: 'danger', message: 'File size must not exceed 10MB.' });
+      showErrorModal(t('profile.error.fileTooLarge'));
       return;
     }
 
@@ -194,7 +205,7 @@ const ProfileSettings = () => {
       await api.patch('/profile/edit', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      setFeedback({ type: 'success', message: 'Profile picture updated successfully.' });
+      setSuccessModal({ open: true, message: 'Profile picture updated successfully.' });
 
       // Reload image
       const imgResponse = await api.get(`/files/thumbnail/${profile.id}`, { responseType: 'blob' });
@@ -203,30 +214,54 @@ const ProfileSettings = () => {
       setProfileImageError(false);
       setNotificationRefresh((prev) => prev + 1);
     } catch (err) {
-      setFeedback({ type: 'danger', message: 'Failed to upload profile picture.' });
+      showErrorModal(getLocalizedBackendError(err, 'profile.error.uploadPicture'));
     }
   };
 
   const handleRemovePicture = async () => {
     try {
       await api.patch('/profile/delete-profile-image');
-      setFeedback({ type: 'success', message: 'Profile picture removed successfully.' });
+      setSuccessModal({ open: true, message: 'Profile picture removed successfully.' });
       setProfileImageUrl(null);
       setProfileImageError(true);
       fetchProfile();
       setNotificationRefresh((prev) => prev + 1);
     } catch (err) {
-      setFeedback({ type: 'danger', message: 'Failed to remove profile picture.' });
+      showErrorModal(getLocalizedBackendError(err, 'profile.error.removePicture'));
+    }
+  };
+
+  const openConfirmModal = ({ title, message, onConfirm }) => {
+    setConfirmModal({ open: true, title, message, onConfirm });
+  };
+
+  const closeConfirmModal = () => {
+    setConfirmModal((prev) => ({ ...prev, open: false }));
+  };
+
+  const handleConfirmAction = async () => {
+    const action = confirmModal.onConfirm;
+    closeConfirmModal();
+    if (typeof action === 'function') {
+      await action();
     }
   };
 
   const handlePreferenceChange = (key) => {
     if (key === 'darkMode') {
-      if (user?.role?.toLowerCase() === 'admin') return;
       const newVal = !preferences.darkMode;
       setPreferences(prev => ({ ...prev, darkMode: newVal }));
       localStorage.setItem('fleetflow_darkMode', String(newVal));
-      document.body.classList.toggle('dark-mode', newVal);
+
+      // Force theme update on body class
+      if (newVal) {
+        document.body.classList.add('dark-mode');
+      } else {
+        document.body.classList.remove('dark-mode');
+      }
+
+      // A custom eventet a többi komponens figyeli, így frissül a teljes UI.
+      window.dispatchEvent(new CustomEvent('theme-change', { detail: { isDarkMode: newVal } }));
     } else {
       setPreferences(prev => ({ ...prev, [key]: !prev[key] }));
     }
@@ -261,18 +296,36 @@ const ProfileSettings = () => {
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} notificationRefresh={notificationRefresh} />
 
       <main className="main-content">
-        <Container fluid className="px-4 py-4" style={{ maxWidth: '1400px' }}>
+        <Container fluid className="px-4 py-4 profile-container">
           {/* Page Header */}
           <div className="page-header mb-4">
             <h1 className="page-title">{t('profile.title')}</h1>
             <p className="page-subtitle">{t('profile.subtitle')}</p>
           </div>
 
-          {feedback.message && (
-            <Alert variant={feedback.type} className="mb-4">
-              {feedback.message}
-            </Alert>
-          )}
+          <CustomModal
+            isOpen={errorModal.open}
+            onClose={() => setErrorModal({ open: false, message: '' })}
+            title={t('common.errorTitle')}
+            primaryAction={{
+              label: t('common.ok'),
+              onClick: () => setErrorModal({ open: false, message: '' }),
+            }}
+          >
+            <p className="mb-0">{errorModal.message}</p>
+          </CustomModal>
+
+          <CustomModal
+            isOpen={successModal.open}
+            onClose={() => setSuccessModal({ open: false, message: '' })}
+            title={t('common.successTitle')}
+            primaryAction={{
+              label: t('common.ok'),
+              onClick: () => setSuccessModal({ open: false, message: '' }),
+            }}
+          >
+            <p className="mb-0">{successModal.message}</p>
+          </CustomModal>
 
           <Row className="g-4 h-100 align-items-stretch">
             {/* Left Column */}
@@ -294,7 +347,7 @@ const ProfileSettings = () => {
                             </div>
                           )}
                           <button className="edit-picture-btn" onClick={handleImageUploadClick} type="button" aria-label="Upload new profile picture">
-                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
                               <rect x="3" y="7" width="18" height="13" rx="2" fill="none" />
                               <path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" fill="none" />
                               <circle cx="12" cy="14" r="3" fill="none" />
@@ -305,13 +358,23 @@ const ProfileSettings = () => {
                             ref={fileInputRef}
                             onChange={handleFileChange}
                             accept="image/jpeg,image/png,image/gif"
-                            style={{ display: 'none' }}
+                            className="file-input-hidden"
                           />
                         </div>
                       </div>
                       <h3 className="card-title text-muted mb-4">{profile.fullName}</h3>
                       <div className="remove-picture-bg">
-                        <Button variant="link" className="w-100 text-danger" onClick={handleRemovePicture}>
+                        <Button
+                          variant="link"
+                          className="w-100 text-danger"
+                          onClick={() =>
+                            openConfirmModal({
+                              title: t('profile.confirm.removeTitle'),
+                              message: t('profile.confirm.removeMessage'),
+                              onConfirm: handleRemovePicture,
+                            })
+                          }
+                        >
                           {t('profile.picture.remove')}
                         </Button>
                       </div>
@@ -324,25 +387,24 @@ const ProfileSettings = () => {
                 </Col>
 
                 {/* Help & Support Card */}
+                {!isAdmin && (
                 <Col xs={12}>
                   <Card className="help-support-card">
                     <Card.Body className="p-0">
-                      <div className="d-flex align-items-center gap-3" style={{ padding: '24px' }}>
+                      <div className="d-flex align-items-center gap-3 help-support-row">
                         <div className="help-icon-wrapper">
                           <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            {/* Background circle */}
-                            <circle cx="24" cy="24" r="22" fill="currentColor" fillOpacity="0.1" stroke="currentColor" strokeWidth="2"/>
-                            {/* Question mark */}
-                            <path d="M24 14C20.13 14 17 17.13 17 21H20C20 18.79 21.79 17 24 17C26.21 17 28 18.79 28 21C28 23.5 26 25 24 27V29H27V27C29 25 31 23.5 31 21C31 17.13 27.88 14 24 14Z" fill="currentColor"/>
-                            <circle cx="24" cy="33" r="1.5" fill="currentColor"/>
+                            <circle cx="24" cy="24" r="21" fill="currentColor" fillOpacity="0.08" stroke="currentColor" strokeWidth="2" />
+                            <path d="M19.5 18.5C19.5 16.02 21.52 14 24 14C26.48 14 28.5 16.02 28.5 18.5C28.5 20.38 27.36 21.72 25.8 22.56C24.88 23.06 24 23.88 24 25.5V27" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+                            <circle cx="24" cy="33" r="1.8" fill="currentColor" />
                           </svg>
                         </div>
-                        <div className="help-content" style={{ flex: 1 }}>
+                        <div className="help-content">
                           <h4 className="help-title mb-1">{t('profile.help.title')}</h4>
                           <p className="help-description mb-2">
                             {t('profile.help.description')}
                           </p>
-                          <Button variant="link" className="help-link p-0" onClick={() => navigate('/help')} style={{ textDecoration: 'none' }}>
+                          <Button variant="link" className="help-link p-0" onClick={() => navigate('/help')}>
                             {t('profile.help.link')}
                           </Button>
                         </div>
@@ -350,6 +412,7 @@ const ProfileSettings = () => {
                     </Card.Body>
                   </Card>
                 </Col>
+                )}
               </Row>
             </Col>
 
@@ -489,7 +552,16 @@ const ProfileSettings = () => {
                               {t('profile.btn.edit')}
                             </Button>
                           ) : (
-                            <Button variant="primary" onClick={handleSave}>
+                            <Button
+                              variant="primary"
+                              onClick={() =>
+                                openConfirmModal({
+                                  title: t('profile.confirm.saveTitle'),
+                                  message: t('profile.confirm.saveMessage'),
+                                  onConfirm: handleSave,
+                                })
+                              }
+                            >
                               {t('profile.btn.save')}
                             </Button>
                           )}
@@ -498,6 +570,21 @@ const ProfileSettings = () => {
                     </Card.Body>
                   </Card>
                 </Col>
+                <CustomModal
+                  isOpen={confirmModal.open}
+                  onClose={closeConfirmModal}
+                  title={confirmModal.title}
+                  primaryAction={{
+                    label: t('common.confirm'),
+                    onClick: handleConfirmAction,
+                  }}
+                  secondaryAction={{
+                    label: t('common.cancel'),
+                    onClick: closeConfirmModal,
+                  }}
+                >
+                  <p className="mb-0">{confirmModal.message}</p>
+                </CustomModal>
 
                 {/* Preferences Card */}
                 <Col xs={12}>
@@ -522,17 +609,9 @@ const ProfileSettings = () => {
                             </p>
                           </div>
                           <div className="preference-action">
-                            {user?.role?.toLowerCase() === 'admin' ? (
-                              <div title="Not available for admin page" style={{ cursor: 'not-allowed' }}>
-                                <div className="toggle-switch" style={{ opacity: 0.4, pointerEvents: 'none' }}>
-                                  <span className="toggle-slider"></span>
-                                </div>
-                              </div>
-                            ) : (
                               <div className={`toggle-switch ${preferences.darkMode ? 'active' : ''}`} onClick={() => handlePreferenceChange('darkMode')}>
                                 <span className="toggle-slider"></span>
                               </div>
-                            )}
                           </div>
                         </div>
 
@@ -554,15 +633,15 @@ const ProfileSettings = () => {
                             </p>
                           </div>
                           <div className="preference-action">
-                            {user?.role?.toLowerCase() === 'admin' ? (
+                            {isAdmin ? (
                               <div
                                 title={t('profile.pref.languageNotAvailable')}
-                                style={{ cursor: 'not-allowed' }}
+                                className="language-select-disabled"
                               >
                                 <Form.Select
                                   size="sm"
                                   disabled
-                                  style={{ opacity: 0.4, pointerEvents: 'none', minWidth: 130 }}
+                                  className="profile-language-select profile-language-select--disabled"
                                   value="en"
                                   readOnly
                                 >
@@ -576,7 +655,7 @@ const ProfileSettings = () => {
                                 size="sm"
                                 value={language}
                                 onChange={(e) => setLanguage(e.target.value)}
-                                style={{ minWidth: 130 }}
+                                className="profile-language-select"
                               >
                                 <option value="en">English</option>
                                 <option value="hu">Hungarian</option>
@@ -592,28 +671,36 @@ const ProfileSettings = () => {
                   </Card>
                 </Col>
 
-                {/* Danger Zone Card */}
+                {/* Mobile App Download Card */}
+                {!isAdmin && (
                 <Col xs={12}>
-                  <Card className="danger-zone-card">
+                  <Card className="app-download-card">
                     <Card.Body className="p-4">
-                      <div className="danger-zone-content">
-                        <div className="danger-zone-text">
-                          <h4 className="danger-zone-title">{t('profile.danger.title')}</h4>
-                          <p className="danger-zone-description">
-                            {t('profile.danger.description')}
+                      <div className="app-download-content">
+                        {isDriver && (
+                          <div className="app-download-logo-wrap">
+                            <img src="/fleetflow_logo.png" alt="FleetFlow" className="app-download-logo" />
+                          </div>
+                        )}
+                        <div className="app-download-text">
+                          <h4 className="app-download-title">{t('profile.app.title')}</h4>
+                          <p className="app-download-description">
+                            {t('profile.app.description')}
                           </p>
                         </div>
                         <Button
-                          variant="outline-danger"
-                          className="delete-account-btn"
-                          onClick={() => { authService.logout(); navigate('/login'); }}
+                          variant="primary"
+                          className="app-download-btn"
+                          href="https://github.com/FleetFlow-Zarodolgozat/FleetFlow_mobil/releases/download/v1.2/com.fleetflow.mobil-Signed.apk"
+                          download
                         >
-                          {t('profile.danger.btn')}
+                          {t('profile.app.cta')}
                         </Button>
                       </div>
                     </Card.Body>
                   </Card>
                 </Col>
+                )}
               </Row>
             </Col>
           </Row>

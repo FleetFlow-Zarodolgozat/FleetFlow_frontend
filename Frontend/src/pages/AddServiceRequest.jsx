@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Button, Card, Container, Row, Col, Form, Alert, Spinner } from 'react-bootstrap';
+import { useState, useEffect } from 'react';
+import { Button, Card, Container, Row, Col, Form, Spinner } from 'react-bootstrap';
 import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import Sidebar from '../components/Sidebar';
+import CustomModal from '../components/CustomModal';
 import '../styles/DriverDashboard.css';
 import '../styles/AddFuelLog.css';
 import '../styles/AddServiceRequest.css';
@@ -12,13 +13,19 @@ import Footer from '../components/Footer';
 const AddServiceRequest = () => {
   const { t, language } = useLanguage();
   const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');  const [error, setError] = useState('');
+  const [description, setDescription] = useState('');
+  const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);  const [pendingRequests, setPendingRequests] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [pendingRequests, setPendingRequests] = useState([]);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalType, setModalType] = useState('error');
+  const [modalContent, setModalContent] = useState({ title: '', message: '' });
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Függőben lévő szervizigénylések lekérése
     const fetchPending = async () => {
       try {
         const res = await api.get('/service-requests/mine', { params: { page: 1, pageSize: 50 } });
@@ -29,18 +36,44 @@ const AddServiceRequest = () => {
           .slice(0, 2);
         setPendingRequests(nonCompleted);
       } catch {
-        // silently fail
+        // Hiba a lekérésnél
       }
     };
     fetchPending();
-  }, []);
+  }, []);
+
+  useEffect(() => {
+    if (error) {
+      setModalType('error');
+      setModalContent({ title: t('common.errorTitle'), message: error });
+      setModalOpen(true);
+    }
+  }, [error, t]);
+
+  useEffect(() => {
+    if (success) {
+      setModalType('success');
+      setModalContent({ title: t('common.successTitle'), message: t('addSR.savedSuccess') });
+      setModalOpen(true);
+
+      const timer = setTimeout(() => {
+        setModalOpen(false);
+        setSuccess(false);
+        navigate('/service-requests');
+      }, 2000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [success, t, navigate]);
+
   const handleSubmit = async (e) => {
+    // Szervizigénylés elküldése az API-nak
     e.preventDefault();
     setError('');
     setSuccess(false);
 
     if (!title) {
-      setError('Title is required');
+      setError(t('addSR.error.titleRequired'));
       return;
     }
 
@@ -52,12 +85,11 @@ const AddServiceRequest = () => {
       };
       await api.post('/service-requests', payload);
       setSuccess(true);
-      setTimeout(() => navigate('/service-requests'), 1200);
     } catch (err) {
-      let msg = 'An error occurred while saving!';
+      let msg = t('addSR.error.save');
       if (err.response) {
         if (err.response.status === 403) {
-          msg = 'You are not authorized to perform this action.';
+         msg = t('addSR.error.unauthorized');
         } else if (err.response.data) {
           const data = err.response.data;
           if (typeof data === 'string') msg = data;
@@ -91,8 +123,29 @@ const AddServiceRequest = () => {
             <Col lg={7} xl={6}>
               <Card className="fuel-form-card border-0 shadow-sm">
                 <Card.Body className="p-4 p-md-5">
-                  {error && <Alert variant="danger" className="mb-3">{error}</Alert>}
-                  {success && <Alert variant="success" className="mb-3">{t('addSR.savedSuccess')}</Alert>}
+                  <CustomModal
+                    isOpen={modalOpen}
+                    onClose={() => {
+                      setModalOpen(false);
+                      setError('');
+                      setSuccess(false);
+                    }}
+                    title={modalContent.title}
+                    primaryAction={
+                      modalType === 'error'
+                        ? {
+                            label: t('common.ok'),
+                            onClick: () => {
+                              setModalOpen(false);
+                              setError('');
+                              setSuccess(false);
+                            },
+                          }
+                        : undefined
+                    }
+                  >
+                    <p className="mb-0">{modalContent.message}</p>
+                  </CustomModal>
 
                   <Form onSubmit={handleSubmit}>
                     <Row className="g-4">
@@ -111,8 +164,8 @@ const AddServiceRequest = () => {
                             required
                           />
                           {language !== 'en' && (
-                            <Form.Text style={{ color: '#b45309', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
-                              <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+                            <Form.Text className="asr-language-warning">
+                              <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                                 <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" strokeLinecap="round" strokeLinejoin="round"/>
                                 <line x1="12" y1="9" x2="12" y2="13" strokeLinecap="round"/>
                                 <line x1="12" y1="17" x2="12.01" y2="17" strokeLinecap="round"/>
@@ -136,8 +189,8 @@ const AddServiceRequest = () => {
                             className="form-control-lg"
                           />
                           {language !== 'en' && (
-                            <Form.Text style={{ color: '#b45309', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
-                              <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+                            <Form.Text className="asr-language-warning">
+                              <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                                 <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" strokeLinecap="round" strokeLinejoin="round"/>
                                 <line x1="12" y1="9" x2="12" y2="13" strokeLinecap="round"/>
                                 <line x1="12" y1="17" x2="12.01" y2="17" strokeLinecap="round"/>
@@ -210,12 +263,12 @@ const AddServiceRequest = () => {
                     <span className="recent-logs-title">{t('addSR.pendingRequests')}</span>
                   </div>
                   {pendingRequests.length === 0 ? (
-                    <p style={{ fontSize: '0.875rem', color: '#94a3b8', margin: 0 }}>{t('addSR.noPending')}</p>
+                    <p className="asr-no-pending">{t('addSR.noPending')}</p>
                   ) : (
                     <div className="recent-logs-list">
                       {pendingRequests.map(r => (
                         <div key={r.id || r.Id} className="recent-log-item">
-                          <div style={{ flex: 1 }}>
+                          <div className="asr-pending-item-content">
                             <div className="recent-log-date">{r.title || r.Title}</div>
                           </div>
                           <span className={`asr-status-badge asr-status-${(r.status || r.Status || '').toLowerCase().replace('_', '-')}`}>

@@ -1,17 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { Button, Card, Container, Row, Col, Alert, Form, Badge } from 'react-bootstrap';
+import { useState, useEffect } from 'react';
+import { Button, Card, Container, Row, Col, Form } from 'react-bootstrap';
 import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import Sidebar from '../components/Sidebar';
+import CustomModal from '../components/CustomModal';
 import '../styles/DriverDashboard.css';
 import '../styles/AddFuelLog.css';
 import Footer from '../components/Footer';
 
 const AddFuelLog = () => {
   const { t, language } = useLanguage();
-  const [vehicles, setVehicles] = useState([]);
-  const [selectedVehicle, setSelectedVehicle] = useState('');
   const [vehicleCurrentMileageKm, setVehicleCurrentMileageKm] = useState(null);
   const [recentLogs, setRecentLogs] = useState([]);
 
@@ -28,32 +27,30 @@ const AddFuelLog = () => {
   const [success, setSuccess] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalType, setModalType] = useState('error');
+  const [modalContent, setModalContent] = useState({ title: '', message: '' });
 
   const navigate = useNavigate();
+
+  // Adatok betöltése: járműök és legutóbbi üzemanyag-naplók
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // A két adatforrás (jármű + naplók) egymástól független: ha az egyik meghiúsul,
+        // a másik még betöltődhet. Ezért belső try/catch blokkokkal külön kezeljük őket,
+        // így a felület nem marad teljesen üres részleges API hiba esetén sem.
         try {
+          // Hozzárendelt jármű adatainak lekérése
           const vehicleResponse = await api.get('/profile/assigned-vehicle');
           const v = vehicleResponse.data;
           setVehicleCurrentMileageKm(v.currentMileageKm || v.CurrentMileageKm || 0);
-          setVehicles([{ id: v.id || v.Id, name: v.vehicleName || v.VehicleName || 'Vehicle', licensePlate: v.licensePlate || v.LicensePlate || '' }]);
-          setSelectedVehicle(v.id || v.Id);
           setOdometer(v.currentMileageKm || v.CurrentMileageKm || 0);
         } catch {
-          // No assigned vehicle, fetch all vehicles
-          try {
-            const allVehiclesResponse = await api.get('/vehicles');
-            const vehicleList = Array.isArray(allVehiclesResponse.data) ? allVehiclesResponse.data : [];
-            setVehicles(vehicleList.map(v => ({ id: v.id || v.Id, name: v.vehicleName || v.VehicleName || 'Vehicle', licensePlate: v.licensePlate || v.LicensePlate || '' })));
-            if (vehicleList.length > 0) {
-              setSelectedVehicle(vehicleList[0].id || vehicleList[0].Id);
-            }
-          } catch {
-            // no vehicles available
-          }
+          // Nem sikerült a járműadatok lekérése
         }
         try {
+          // Legutóbbi üzemanyag-naplók lekérése
           const logsResponse = await api.get('/fuellogs/mine', { params: { page: 1, pageSize: 10 } });
           const allLogs = Array.isArray(logsResponse.data?.data) ? logsResponse.data.data : [];
           const cutoff = new Date();
@@ -63,17 +60,17 @@ const AddFuelLog = () => {
             .slice(0, 2);
           setRecentLogs(logs);
         } catch {
-          // could not fetch recent logs
+          // Nem sikerült az utolsó naplók lekérése
         }
-      } catch (err) {
-        // error fetching data
+      } catch {
+        // Hiba az adatok lekérésénél
       }
     };
     fetchData();
   }, []);
 
+  // Alapértelmezett dátum és időpont beállítása az aktuális időre
   useEffect(() => {
-    // Set default date and time to now
     const now = new Date();
     const pad = n => n.toString().padStart(2, '0');
     const defaultDate = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
@@ -82,50 +79,45 @@ const AddFuelLog = () => {
     setTime(defaultTime);
   }, []);
 
+  useEffect(() => {
+    if (error) {
+      setModalType('error');
+      setModalContent({ title: t('common.errorTitle'), message: error });
+      setModalOpen(true);
+    }
+  }, [error, t]);
+
+  useEffect(() => {
+    if (success) {
+      setModalType('success');
+      setModalContent({ title: t('common.successTitle'), message: t('addFuelLog.savedSuccess') });
+      setModalOpen(true);
+
+      const timer = setTimeout(() => {
+        setModalOpen(false);
+        setSuccess(false);
+        navigate('/fuel-logs');
+      }, 2000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [success, t, navigate]);
+
   const handleSubmit = async (e) => {
+    // Üzemanyag napló elküldése - Frontend validáció és API hívás
     e.preventDefault();
     setError('');
     setSuccess(false);
 
-    // Frontend validation
-    if (!liters || Number(liters) <= 0) {
-      setError('Liters must be greater than 0');
-      return;
-    }
-    if (!cost || Number(cost) <= 0) {
-      setError('Total cost must be greater than 0');
-      return;
-    }
-    const now = new Date();
-    // Combine date and time for validation
-    const logDateTime = new Date(`${date}T${time}`);
-    if (logDateTime > now) {
-      setError('Date/time cannot be in the future');
-      return;
-    }
-    if (logDateTime < new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)) {
-      setError('Date/time cannot be older than 7 days');
-      return;
-    }
-    // Odometer check
-    if (
-      odometer && vehicleCurrentMileageKm !== null &&
-      Number(odometer) < Number(vehicleCurrentMileageKm)
-    ) {
-      setError('Odometer must be greater than or equal to the current mileage of the vehicle (' + vehicleCurrentMileageKm + ' km)');
-      return;
-    }
-
     try {
-      // FuelLog POST
+      // Üzemanyag napló POST
       const formData = new FormData();
       formData.append('Liters', Number(liters));
       formData.append('TotalCost', Number(cost));
       formData.append('StationName', station);
       formData.append('OdometerKm', Number(odometer));
-      // Combine date and time for submission
+      // Dátum és idő kombinálása az elküldéshez
       formData.append('Date', new Date(`${date}T${time}`).toISOString());
-      // formData.append('FuelType', fuelType);
       if (notes) formData.append('Notes', notes);
       if (receiptPhoto) {
         formData.append('File', receiptPhoto);
@@ -134,12 +126,11 @@ const AddFuelLog = () => {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       setSuccess(true);
-      setTimeout(() => navigate('/fuel-logs'), 1200);
     } catch (err) {
-      let msg = 'An error occurred while saving!';
+      let msg = t('addFuelLog.error.save');
       if (err.response) {
         if (err.response.status === 403) {
-          msg = 'You are not authorized to perform this action.';
+          msg = t('addFuelLog.error.unauthorized');
         } else if (err.response.data) {
           const data = err.response.data;
           if (typeof data === 'string') msg = data;
@@ -154,6 +145,7 @@ const AddFuelLog = () => {
   };
 
   const handleDrop = (e) => {
+    // Fájl húzása és eldobása - biztosítja, hogy csak kép kerülhet be
     e.preventDefault();
     setIsDragging(false);
     const file = e.dataTransfer.files[0];
@@ -164,21 +156,25 @@ const AddFuelLog = () => {
   };
 
   const handleDragOver = (e) => {
+    // Ráhúzott fájl detektálása
     e.preventDefault();
     setIsDragging(true);
   };
 
   const handleDragLeave = () => {
+    // Húzás elhagyása
     setIsDragging(false);
   };
 
   const formatRecentLogDate = (dateStr) => {
+    // Dátum formázása az utolsó naplóhoz
     if (!dateStr) return '';
     const date = new Date(dateStr);
     return date.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
   };
 
   const formatCost = (costStr) => {
+    // Költség formázása az utolsó naplóhoz
     if (!costStr) return '0 Ft';
     return costStr;
   };
@@ -200,8 +196,29 @@ const AddFuelLog = () => {
             <Col lg={7} xl={8}>
               <Card className="fuel-form-card border-0 shadow-sm">
                 <Card.Body className="p-4 p-md-5">
-                  {error && <Alert variant="danger" className="mb-3">{error}</Alert>}
-                  {success && <Alert variant="success" className="mb-3">{t('addFuelLog.savedSuccess')}</Alert>}
+                  <CustomModal
+                    isOpen={modalOpen}
+                    onClose={() => {
+                      setModalOpen(false);
+                      setError('');
+                      setSuccess(false);
+                    }}
+                    title={modalContent.title}
+                    primaryAction={
+                      modalType === 'error'
+                        ? {
+                            label: t('common.ok'),
+                            onClick: () => {
+                              setModalOpen(false);
+                              setError('');
+                              setSuccess(false);
+                            },
+                          }
+                        : undefined
+                    }
+                  >
+                    <p className="mb-0">{modalContent.message}</p>
+                  </CustomModal>
 
                   <Form onSubmit={handleSubmit}>
                     <Row className="g-4">
@@ -240,7 +257,7 @@ const AddFuelLog = () => {
                               required
                               min="0"
                               step="1"
-                              placeholder="0.00"
+                              placeholder={t('addFuelLog.placeholder.liters')}
                               className="form-control-lg"
                             />
                             <span className="input-suffix">L</span>
@@ -260,7 +277,7 @@ const AddFuelLog = () => {
                               required
                               min="0"
                               step="100"
-                              placeholder="0.00"
+                              placeholder={t('addFuelLog.placeholder.totalCost')}
                               className="form-control-lg"
                             />
                             <span className="input-suffix">Ft</span>
@@ -284,7 +301,7 @@ const AddFuelLog = () => {
                               onChange={e => setOdometer(e.target.value)}
                               min="0"
                               step="1"
-                              placeholder="0"
+                              placeholder={t('addFuelLog.placeholder.odometer')}
                               className="form-control-lg"
                               required
                             />
@@ -306,7 +323,7 @@ const AddFuelLog = () => {
                             type="text"
                             value={station}
                             onChange={e => setStation(e.target.value)}
-                            placeholder="e.g. Shell, OMV, BP..."
+                            placeholder={t('addFuelLog.placeholder.station')}
                             className="form-control-lg"
                           />
                         </Form.Group>
@@ -321,12 +338,12 @@ const AddFuelLog = () => {
                             rows={3}
                             value={notes}
                             onChange={e => setNotes(e.target.value)}
-                            placeholder="Add details like pump number or issues encountered..."
+                            placeholder={t('addFuelLog.placeholder.notes')}
                             className="form-control-lg"
                           />
                           {language !== 'en' && (
-                            <Form.Text style={{ color: '#b45309', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
-                              <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+                            <Form.Text className="afl-language-warning">
+                              <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                                 <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" strokeLinecap="round" strokeLinejoin="round"/>
                                 <line x1="12" y1="9" x2="12" y2="13" strokeLinecap="round"/>
                                 <line x1="12" y1="17" x2="12.01" y2="17" strokeLinecap="round"/>
@@ -392,7 +409,7 @@ const AddFuelLog = () => {
                       type="file"
                       accept="image/*,.pdf"
                       id="receiptFileInput"
-                      style={{ display: 'none' }}
+                      className="afl-hidden-file-input"
                       onChange={e => {
                         setReceiptPhoto(e.target.files[0]);
                         setReceiptPhotoName(e.target.files[0]?.name || '');

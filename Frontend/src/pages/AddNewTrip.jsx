@@ -1,11 +1,12 @@
 
-import React, { useState, useEffect } from 'react';
-import { Button, Card, Form, Container, Row, Col, Alert } from 'react-bootstrap';
+import { useState, useEffect } from 'react';
+import { Button, Card, Form, Row, Col } from 'react-bootstrap';
 import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
-import { useLanguage } from '../contexts/LanguageContext';
+import { useLanguage } from '../contexts/LanguageContext';   
 import Sidebar from '../components/Sidebar';
 import RouteMap from '../components/RouteMap';
+import CustomModal from '../components/CustomModal';
 import '../styles/DriverDashboard.css';
 import '../styles/AddNewTrip.css';
 import Footer from '../components/Footer';
@@ -26,11 +27,17 @@ const AddNewTrip = () => {
   const [weeklyStats, setWeeklyStats] = useState({ totalDistance: 0, tripsLogged: 0 });
   const [previousOdometer, setPreviousOdometer] = useState(0);
   const [activeLocationField, setActiveLocationField] = useState('start');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalType, setModalType] = useState('error');
+  const [modalContent, setModalContent] = useState({ title: '', message: '' });
   const navigate = useNavigate();
 
   const smartTruncateAddress = (address) => {
+    // Cím csonkítása az 50 karakteres limit megtartásához.
+    // A logika jobb eredményt ad egyszerű slice helyett, mert vessző mentén próbál rövidíteni,
+    // így jellemzően olvasható marad (utca + város), nem középen levágott szöveget kapunk.
     if (address.length <= 50) return address;
-    // Nominatim returns "Street, District, City, County, Country"
+    // Nominatim formátum: "Street, District, City, County, Country"
     const parts = address.split(', ');
     for (let i = parts.length - 1; i >= 1; i--) {
       const candidate = parts.slice(0, i).join(', ');
@@ -40,6 +47,7 @@ const AddNewTrip = () => {
   };
 
   const handleMapLocationSelect = (address) => {
+    // Térkép helyet választ
     const smart = smartTruncateAddress(address);
     if (activeLocationField === 'start') {
       setStartLocation(smart);
@@ -49,11 +57,40 @@ const AddNewTrip = () => {
   };
 
   useEffect(() => {
+    // Alapértelmezett kezdési és végzési idő beállítása
     const now = new Date();
     const pad = n => n.toString().padStart(2, '0');
     const defaultDateTime = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
     setStartDateTime(defaultDateTime);
     setEndDateTime(defaultDateTime);
+  }, []);
+
+  useEffect(() => {
+    if (error) {
+      setModalType('error');
+      setModalContent({ title: t('common.errorTitle'), message: error });
+      setModalOpen(true);
+    }
+  }, [error, t]);
+
+  useEffect(() => {
+    if (success) {
+      setModalType('success');
+      setModalContent({ title: t('common.successTitle'), message: t('addTrip.savedSuccess') });
+      setModalOpen(true);
+
+      const timer = setTimeout(() => {
+        setModalOpen(false);
+        setSuccess(false);
+        navigate(-1);
+      }, 2000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [success, t, navigate]);
+
+  useEffect(() => {
+    // Út adatok lekérése: heti statisztikák és előző kilométeróra
     const fetchTripData = async () => {
       try {
         try {
@@ -61,16 +98,16 @@ const AddNewTrip = () => {
           const vehicleData = vehicleRes.data || {};
           const currentMileage = vehicleData.currentMileageKm || vehicleData.CurrentMileageKm || 0;
           setPreviousOdometer(Number(currentMileage));
-        } catch (err) {
-          console.log('Could not fetch vehicle data:', err);
+        } catch {
           setPreviousOdometer(0);
         }
         try {
+          // Legutóbbi utak lekérése heti statisztikához
           const tripsRes = await api.get('/trips/mine', { params: { page: 1, pageSize: 100 } });
           const payload = tripsRes.data || {};
           const trips = Array.isArray(payload.data) ? payload.data : [];
 
-          // Weekly stats: filter last 7 days
+          // Heti statisztikák: utolsó 7 nap szűrése
           const now = new Date();
           const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
           const weekTrips = trips.filter(t => {
@@ -79,12 +116,10 @@ const AddNewTrip = () => {
           });
           const totalDist = weekTrips.reduce((sum, t) => sum + (Number(t.DistanceKm) || Number(t.distanceKm) || 0), 0);
           setWeeklyStats({ totalDistance: totalDist, tripsLogged: weekTrips.length });
-        } catch (err) {
-          console.log('Could not fetch trips:', err);
+        } catch {
           setWeeklyStats({ totalDistance: 0, tripsLogged: 0 });
         }
-      } catch (err) {
-        console.error('Error fetching data:', err);
+      } catch {
         setPreviousOdometer(0);
         setWeeklyStats({ totalDistance: 0, tripsLogged: 0 });
       }
@@ -93,9 +128,34 @@ const AddNewTrip = () => {
   }, []);
 
   const handleSubmit = async (e) => {
+    // Új út elküldése előtt több lépcsős ellenőrzés fut:
+    // 1) minden szám mező valóban értelmezhető szám legyen,
+    // 2) a záró óraállás ne legyen kisebb a nyitónál,
+    // 3) az óraállás-különbség és a távolság ne térjen el jelentősen.
+    // Ez megakadályozza, hogy véletlenül ellentmondó adatok kerüljenek a backendbe.
     e.preventDefault();
     setError('');
     setSuccess(false);
+
+    const startOdo = Number(startOdometerKm);
+    const endOdo = Number(endOdometerKm);
+    const distance = Number(distanceKm);
+
+    if (Number.isNaN(startOdo) || Number.isNaN(endOdo) || Number.isNaN(distance)) {
+      setError(t('addTrip.error.invalidNumbers'));
+      return;
+    }
+
+    if (endOdo < startOdo) {
+      setError(t('addTrip.error.endLower'));
+      return;
+    }
+
+    const odometerDelta = endOdo - startOdo;
+    if (Math.abs(odometerDelta - distance) > 10) {
+      setError(t('addTrip.error.distanceMismatch'));
+      return;
+    }
 
     try {
       const payload = {
@@ -110,12 +170,11 @@ const AddNewTrip = () => {
       };
       await api.post('trips', payload);
       setSuccess(true);
-      setTimeout(() => navigate(-1), 1200);
     } catch (err) {
-      let msg = 'An error occurred while saving!';
+      let msg = t('addTrip.error.save');
       if (err.response) {
         if (err.response.status === 403) {
-          msg = 'You are not authorized to perform this action.';
+          msg = t('addTrip.error.unauthorized');
         } else if (err.response.data) {
           const data = err.response.data;
           if (typeof data === 'string') msg = data;
@@ -147,8 +206,29 @@ const AddNewTrip = () => {
             <div className="trip-details-card">
 
               <div className="trip-details-body">
-                {error && <Alert variant="danger">{error}</Alert>}
-                {success && <Alert variant="success">{t('addTrip.savedSuccess')}</Alert>}
+                <CustomModal
+                  isOpen={modalOpen}
+                  onClose={() => {
+                    setModalOpen(false);
+                    setError('');
+                    setSuccess(false);
+                  }}
+                  title={modalContent.title}
+                  primaryAction={
+                    modalType === 'error'
+                      ? {
+                          label: t('common.ok'),
+                          onClick: () => {
+                            setModalOpen(false);
+                            setError('');
+                            setSuccess(false);
+                          },
+                        }
+                      : undefined
+                  }
+                >
+                  <p className="mb-0">{modalContent.message}</p>
+                </CustomModal>
 
                 <Form onSubmit={handleSubmit}>
                   {/* Locations Row */}
@@ -235,7 +315,7 @@ const AddNewTrip = () => {
                           className="trip-odo-input"
                           min="0"
                         />
-                        <div className="previous-odometer" style={{fontSize: '0.95em', color: '#6b7280', marginTop: '2px'}}>
+                        <div className="ant-previous-odometer">
                           {t('addTrip.prevTripEnded', { km: Number(previousOdometer).toLocaleString() })}
                         </div>
                       </Form.Group>
@@ -267,8 +347,8 @@ const AddNewTrip = () => {
                       className="trip-notes-textarea"
                     />
                     {language !== 'en' && (
-                      <Form.Text style={{ color: '#b45309', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
-                        <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+                      <Form.Text className="ant-language-warning">
+                        <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                           <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" strokeLinecap="round" strokeLinejoin="round"/>
                           <line x1="12" y1="9" x2="12" y2="13" strokeLinecap="round"/>
                           <line x1="12" y1="17" x2="12.01" y2="17" strokeLinecap="round"/>
@@ -277,10 +357,6 @@ const AddNewTrip = () => {
                       </Form.Text>
                     )}
                   </Form.Group>
-
-                  {/* Hidden fields for odometer - will be implemented later if needed */}
-                  <input type="hidden" name="startOdometerKm" value={startOdometerKm} />
-                  <input type="hidden" name="endOdometerKm" value={endOdometerKm} />
 
                   {/* Submit Buttons */}
                   <div className="trip-actions">
@@ -320,7 +396,12 @@ const AddNewTrip = () => {
                       endLocation={endLocation}
                       activeField={activeLocationField}
                       onLocationSelect={handleMapLocationSelect}
-                      onDistanceCalculated={(km) => setDistanceKm(km)}
+                      onDistanceCalculated={(km) => {
+                        const numericKm = Number(km);
+                        if (!Number.isNaN(numericKm)) {
+                          setDistanceKm(Math.round(numericKm));
+                        }
+                      }}
                     />
                   </div>
                   <div className="route-info">

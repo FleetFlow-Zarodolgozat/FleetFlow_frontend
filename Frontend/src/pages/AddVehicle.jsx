@@ -1,19 +1,24 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Alert, Button, Container, Form, Spinner } from 'react-bootstrap';
+import { Button, Container, Form, Spinner } from 'react-bootstrap';
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
-import Footer from '../components/Footer';
+import CustomModal from '../components/CustomModal';
+import { useLanguage } from '../contexts/LanguageContext';
 import '../styles/EditDriver.css';
 import '../styles/EditVehicle.css';
 
 const AddVehicle = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 1024);
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalType, setModalType] = useState('');
+  const [modalContent, setModalContent] = useState({ title: '', message: '' });
 
   const [form, setForm] = useState({
     licensePlate: '',
@@ -35,6 +40,23 @@ const AddVehicle = () => {
   }, []);
 
   useEffect(() => {
+    if (error) {
+      setModalType('error');
+      setModalContent({ title: t('common.errorTitle'), message: error });
+      setModalOpen(true);
+    }
+  }, [error, t]);
+
+  useEffect(() => {
+    if (success) {
+      setModalType('success');
+      setModalContent({ title: t('common.successTitle'), message: success });
+      setModalOpen(true);
+    }
+  }, [success, t]);
+
+  useEffect(() => {
+    // Aktív sofőrök lekérése az API-ból
     const fetchDrivers = async () => {
       setDriversLoading(true);
       try {
@@ -52,11 +74,16 @@ const AddVehicle = () => {
   }, []);
 
   const handleChange = (e) => {
+    // Frissíti az adatmezőt az input értékével
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
+    // Jármű létrehozása és opcionálisan sofőrhöz rendelése.
+    // A backend itt két külön lépést vár: előbb létrehozás, majd (ha kell) hozzárendelés.
+    // Emiatt a második rész külön try/catch-ben fut, hogy részleges siker esetén is
+    // korrekt visszajelzést tudjunk adni (jármű létrejött, de az assignment hibás lett).
     e.preventDefault();
     setSaving(true);
     setError('');
@@ -71,9 +98,11 @@ const AddVehicle = () => {
         currentMileageKm: form.currentMileageKm ? parseInt(form.currentMileageKm, 10) : 0,
       });
 
-      // If a driver was selected, look up the new vehicle by license plate to get its ID
+      // Ha egy sofőr lett kiválasztva, az új jármű hozzárendelése
       if (form.assignedUserId) {
         try {
+          // A frissen létrehozott jármű azonosítóját visszakeressük rendszám alapján,
+          // mert a create endpoint nem ad minden környezetben közvetlen ID-t a válaszban.
           const listRes = await api.get('/admin/vehicles', {
             params: { page: 1, pageSize: 5, StringQ: form.licensePlate },
           });
@@ -100,7 +129,7 @@ const AddVehicle = () => {
         }
       }
 
-      setSuccess('Vehicle created successfully.');
+      setSuccess('Successfully created. Redirecting...');
       setTimeout(() => navigate('/vehicles'), 1500);
     } catch (err) {
       const msg = err?.response?.data;
@@ -126,16 +155,27 @@ const AddVehicle = () => {
             </div>
           </div>
 
-          {error && (
-            <Alert variant="danger" dismissible onClose={() => setError('')} className="mb-4">
-              {error}
-            </Alert>
-          )}
-          {success && (
-            <Alert variant="success" className="mb-4">
-              {success}
-            </Alert>
-          )}
+          <CustomModal
+            isOpen={modalOpen}
+            onClose={() => {
+              setModalOpen(false);
+              setError('');
+              setSuccess('');
+              setModalType('');
+            }}
+            title={modalContent.title}
+            primaryAction={modalType === 'error' ? {
+              label: t('common.ok'),
+              onClick: () => {
+                setModalOpen(false);
+                setError('');
+                setSuccess('');
+                setModalType('');
+              },
+            } : undefined}
+          >
+            <p className="mb-0">{modalContent.message}</p>
+          </CustomModal>
 
           <div className="ev-layout">
 
@@ -367,7 +407,6 @@ const AddVehicle = () => {
           </div>
 
         </Container>
-        <Footer />
       </main>
     </div>
   );

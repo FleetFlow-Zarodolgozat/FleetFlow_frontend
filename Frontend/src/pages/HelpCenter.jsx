@@ -7,13 +7,13 @@ import { authService } from '../services/authService';
 import '../styles/HelpCenter.css';
 import Footer from '../components/Footer';
 
-const HelpCenter = () => {
+export default function HelpCenter() {
   const { t } = useLanguage();
   const [expandedFaq, setExpandedFaq] = useState(null);
   const [copied, setCopied] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [notificationRefresh] = useState(0);
 
+  // E-mail cím vágólapra másolása, majd rövid visszajelzés megjelenítése.
   const handleEmailClick = () => {
     navigator.clipboard.writeText('fleetflow.info@gmail.com').then(() => {
       setCopied(true);
@@ -82,7 +82,7 @@ const HelpCenter = () => {
   return (
     <div className="help-page">
       {isAuthenticated && (
-        <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} notificationRefresh={notificationRefresh} />
+        <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} notificationRefresh={0} />
       )}
       <main className={`help-main${isAuthenticated ? ' help-main--with-sidebar' : ''}`}>
         <div className="help-content">
@@ -92,7 +92,7 @@ const HelpCenter = () => {
               <div className="help-header text-center mb-5">
                 <Link to="/login" className="text-decoration-none">
                   <div className="logo-section">
-                    <img src="/fleetflow_logo.png" alt="FleetFlow Logo" style={{ height: '48px', width: 'auto' }} />
+                    <img src="/fleetflow_logo.png" alt="FleetFlow Logo" className="help-logo-image" />
                     <h1 className="logo-title">FleetFlow</h1>
                   </div>
                 </Link>
@@ -103,15 +103,13 @@ const HelpCenter = () => {
             {/* Quick Links */}
             <div className="d-flex justify-content-center mb-5">
               <Card 
-                className={`help-card text-center p-4 ${copied ? 'border-success bg-light' : 'border'}`}
-                style={{ cursor: 'pointer', maxWidth: '300px', width: '100%' }}
+                className={`help-card help-quick-card text-center p-4 ${copied ? 'border-success bg-light' : 'border'}`}
                 onClick={handleEmailClick}
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => e.key === 'Enter' && handleEmailClick()}
               >
-                <div className={`rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center ${copied ? 'bg-success' : 'bg-primary'}`} 
-                     style={{ width: '56px', height: '56px' }}>
+                <div className={`help-quick-icon rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center ${copied ? 'bg-success' : 'bg-primary'}`}>
                   <svg width="24" height="24" fill="none" stroke="white" strokeWidth="2" viewBox="0 0 24 24">
                     <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
@@ -131,18 +129,13 @@ const HelpCenter = () => {
                     className={`faq-item border ${expandedFaq === faq.id ? 'border-primary' : ''}`}
                   >
                     <Card.Header 
-                      className="bg-white border-0 p-3"
-                      style={{ cursor: 'pointer' }}
+                      className="bg-white border-0 p-3 faq-header"
                       onClick={() => toggleFaq(faq.id)}
                     >
                       <div className="d-flex justify-content-between align-items-center">
                         <span className="fw-semibold">{faq.question}</span>
                         <svg 
-                          className={`text-muted transition ${expandedFaq === faq.id ? 'rotate-180' : ''}`}
-                          style={{ 
-                            transform: expandedFaq === faq.id ? 'rotate(180deg)' : 'rotate(0deg)',
-                            transition: 'transform 0.2s'
-                          }}
+                          className={`faq-chevron ${expandedFaq === faq.id ? 'faq-chevron--open' : ''}`}
                           width="20" 
                           height="20" 
                           fill="none" 
@@ -204,6 +197,4 @@ const HelpCenter = () => {
       </main>
     </div>
   );
-};
-
-export default HelpCenter;
+}

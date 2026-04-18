@@ -20,6 +20,24 @@ body.dark-mode .profile-settings-page .main-content {
   background-color: #0f1117 !important;
 }
 
+/* Profile Settings - user avatar and details in sidebar */
+body.dark-mode .profile-settings-page .user-avatar {
+  background: #21262d !important;
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .profile-settings-page .user-avatar img {
+  border-color: #30363d !important;
+}
+
+body.dark-mode .profile-settings-page .user-details .user-name {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .profile-settings-page .user-details .user-role {
+  color: #8b949e !important;
+}
+
 /* ---------- Sidebar ---------- */
 body.dark-mode .sidebar {
   background: #161b22 !important;
@@ -64,9 +82,27 @@ body.dark-mode .user-role {
   color: #8b949e !important;
 }
 
+body.dark-mode .user-avatar {
+  background: #21262d !important;
+  color: #e6edf3 !important;
+  border-color: #30363d !important;
+}
+
+body.dark-mode .user-avatar img {
+  border-color: #30363d !important;
+}
+
+body.dark-mode .user-details {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .sidebar-footer {
+  background: #161b22 !important;
+}
+
 body.dark-mode .action-btn {
   color: #8b949e !important;
-  background: #21262d !important;
+  background: transparent !important;
   border: 1px solid transparent !important;
   transition: all 0.2s ease !important;
 }
@@ -86,6 +122,17 @@ body.dark-mode .action-btn:hover {
 body.dark-mode .action-btn:hover svg {
   color: #e6edf3 !important;
   stroke: #e6edf3 !important;
+}
+
+body.dark-mode .action-btn-icon.action-edit {
+  background: transparent !important;
+  color: #4ade80 !important;
+  border: 1px solid #22c55e !important;
+}
+
+body.dark-mode .action-btn-icon.action-edit svg {
+  color: #4ade80 !important;
+  stroke: #4ade80 !important;
 }
 
 /* ---------- Cards ---------- */
@@ -676,6 +723,10 @@ body.dark-mode .legal-section a:hover {
   color: #79b8ff !important;
 }
 
+body.dark-mode .legal-page .text-muted {
+  color: #8b949e !important;
+}
+
 /* ---------- Help Center ---------- */
 body.dark-mode .help-page {
   background-color: #0f1117 !important;
@@ -912,6 +963,22 @@ body.dark-mode .notifications-page .mark-all-read-btn {
 body.dark-mode .notifications-page .mark-all-read-btn:hover {
   background: #1c3a5e !important;
   color: #79b8ff !important;
+}
+
+body.dark-mode .notifications-page .page-footer {
+  background: #0f1117 !important;
+  border-top-color: #30363d !important;
+  color: #8b949e !important;
+}
+
+body.dark-mode .notifications-page .page-footer *,
+body.dark-mode .notifications-page .page-footer a {
+  color: #8b949e !important;
+}
+
+body.dark-mode .notifications-page .page-footer a:hover {
+  color: #b1bac4 !important;
+  text-decoration: underline !important;
 }
 
 body.dark-mode .profile-settings-page .danger-zone-title {
@@ -1202,6 +1269,27 @@ body.dark-mode .schedule-card .card-header h3 {
   color: #e6edf3 !important;
 }
 
+body.dark-mode .schedule-card .bg-light-subtle {
+  background: #1c2230 !important;
+  border-color: #30363d !important;
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .schedule-card .bg-white {
+  background: #21262d !important;
+  border-color: #30363d !important;
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .schedule-card .border {
+  border-color: #30363d !important;
+}
+
+body.dark-mode .schedule-card .badge.bg-dark {
+  background: #30363d !important;
+  color: #e6edf3 !important;
+}
+
 body.dark-mode .rbc-wrapper .rbc-toolbar {
   background: transparent !important;
 }
@@ -1238,6 +1326,10 @@ body.dark-mode .rbc-wrapper .rbc-month-view,
 body.dark-mode .rbc-wrapper .rbc-time-view {
   background: #21262d !important;
   border-color: #30363d !important;
+}
+
+body.dark-mode .rbc-wrapper .rbc-today {
+  background: #55585e !important;
 }
 
 body.dark-mode .rbc-wrapper .rbc-off-range {
@@ -1426,6 +1518,245 @@ body.dark-mode .sr-mobile-row {
   color: #8b949e !important;
 }
 
+/* ─── Admin Service Requests ─────────────────────────────────── */
+body.dark-mode .asr-dashboard,
+body.dark-mode .asr-main {
+  background-color: #0f1117 !important;
+}
+
+body.dark-mode .asr-filter-card {
+  background: #1c2230 !important;
+  border-color: #30363d !important;
+}
+
+body.dark-mode .asr-title {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .asr-subtitle {
+  color: #8b949e !important;
+}
+
+body.dark-mode .asr-filter-label {
+  color: #8b949e !important;
+}
+
+body.dark-mode .asr-search-wrapper {
+  background: #21262d !important;
+}
+
+body.dark-mode .asr-search-input {
+  background: #21262d !important;
+  border-color: #30363d !important;
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .asr-search-input::placeholder {
+  color: #6e7681 !important;
+}
+
+body.dark-mode .asr-select {
+  background: #21262d !important;
+  border-color: #30363d !important;
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .asr-reset-btn {
+  background: #21262d !important;
+  border-color: #30363d !important;
+  color: #8b949e !important;
+}
+
+body.dark-mode .asr-reset-btn:hover {
+  background: #30363d !important;
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .asr-stat-card {
+  background: #1c2230 !important;
+  border-color: #30363d !important;
+}
+
+body.dark-mode .asr-stat-label {
+  color: #8b949e !important;
+}
+
+body.dark-mode .asr-stat-value {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .asr-stat-badge,
+body.dark-mode .afl-stat-badge,
+body.dark-mode .at-stat-badge {
+  background: #21262d !important;
+  color: #8b949e !important;
+  border-color: #30363d !important;
+}
+
+body.dark-mode .asr-stat-badge--blue,
+body.dark-mode .afl-stat-badge--blue,
+body.dark-mode .at-stat-badge--blue {
+  background-color: rgba(29, 78, 216, 0.25) !important;
+  color: #60a5fa !important;
+}
+
+body.dark-mode .asr-stat-badge--purple,
+body.dark-mode .afl-stat-badge--purple,
+body.dark-mode .at-stat-badge--purple {
+  background-color: rgba(91, 33, 182, 0.25) !important;
+  color: #a78bfa !important;
+}
+
+body.dark-mode .asr-stat-badge--green,
+body.dark-mode .afl-stat-badge--green,
+body.dark-mode .at-stat-badge--green {
+  background-color: rgba(22, 101, 52, 0.25) !important;
+  color: #4ade80 !important;
+}
+
+body.dark-mode .asr-stat-badge--orange,
+body.dark-mode .afl-stat-badge--orange,
+body.dark-mode .at-stat-badge--orange {
+  background-color: rgba(194, 65, 12, 0.25) !important;
+  color: #fb923c !important;
+}
+
+body.dark-mode .asr-stat-badge--red,
+body.dark-mode .afl-stat-badge--red,
+body.dark-mode .at-stat-badge--red {
+  background-color: rgba(153, 27, 27, 0.25) !important;
+  color: #f87171 !important;
+}
+
+body.dark-mode .asr-table-card {
+  background: #1c2230 !important;
+  border-color: #30363d !important;
+}
+
+body.dark-mode .asr-table {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .asr-th {
+  background: #21262d !important;
+  color: #8b949e !important;
+  border-bottom-color: #30363d !important;
+}
+
+body.dark-mode .asr-tr {
+  border-bottom-color: #21262d !important;
+}
+
+body.dark-mode .asr-tr:hover {
+  background: #21262d !important;
+}
+
+body.dark-mode .asr-td {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .asr-date-main {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .asr-date-time {
+  color: #8b949e !important;
+}
+
+body.dark-mode .asr-plate-badge {
+  background: #21262d !important;
+  color: #8b949e !important;
+  border-color: #30363d !important;
+}
+
+body.dark-mode .asr-td--cost {
+  color: #3fb950 !important;
+}
+
+body.dark-mode .asr-na {
+  color: #6e7681 !important;
+}
+
+body.dark-mode .asr-driver-email {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .asr-avatar {
+  background: #21262d !important;
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .asr-status-badge {
+  opacity: 0.9;
+}
+
+body.dark-mode .asr-icon-btn {
+  background: #21262d !important;
+  border-color: #30363d !important;
+}
+
+body.dark-mode .asr-empty p {
+  color: #8b949e !important;
+}
+
+body.dark-mode .asr-empty svg {
+  stroke: #30363d !important;
+}
+
+body.dark-mode .asr-mobile-card {
+  background: #1c2230 !important;
+  border-color: #30363d !important;
+}
+
+body.dark-mode .asr-mc-label {
+  color: #8b949e !important;
+}
+
+body.dark-mode .asr-mc-title {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .asr-mc-header {
+  border-bottom-color: #30363d !important;
+}
+
+body.dark-mode .asr-pagination-info {
+  color: #8b949e !important;
+}
+
+body.dark-mode .asr-page-btn {
+  background: #21262d !important;
+  border-color: #30363d !important;
+  color: #8b949e !important;
+}
+
+body.dark-mode .asr-page-btn:disabled {
+  background: #161b22 !important;
+  color: #6e7681 !important;
+}
+
+body.dark-mode .asr-page-btn--active {
+  background: #7c3aed !important;
+  border-color: #7c3aed !important;
+  color: #fff !important;
+}
+
+body.dark-mode .asr-ellipsis {
+  color: #8b949e !important;
+}
+
+body.dark-mode .asr-export-btn {
+  background: #21262d !important;
+  border-color: #30363d !important;
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .asr-export-btn:hover:not(:disabled) {
+  background: #1c3a5e !important;
+  border-color: #1f6feb !important;
+  color: #e6edf3 !important;
+}
+
 body.dark-mode .sr-mobile-details-btn {
   background: #7c3aed !important;
   border-color: #7c3aed !important;
@@ -1447,4 +1778,517 @@ body.dark-mode .sr-mobile-delete-btn:hover {
   background: #3d1f1f !important;
   border-color: #da3633 !important;
   color: #ffa198 !important;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Admin Fuel Logs / Fuel Log Details / Trips / Trip Details
+   ───────────────────────────────────────────────────────────── */
+body.dark-mode .afl-dashboard,
+body.dark-mode .afl-main,
+body.dark-mode .afl-page,
+body.dark-mode .afld-dashboard,
+body.dark-mode .afld-main,
+body.dark-mode .afld-page,
+body.dark-mode .at-dashboard,
+body.dark-mode .at-main,
+body.dark-mode .at-page,
+body.dark-mode .atd-dashboard,
+body.dark-mode .atd-main,
+body.dark-mode .atd-page {
+  background: #0f1117 !important;
+}
+
+body.dark-mode .afl-filter-card,
+body.dark-mode .afl-stat-card,
+body.dark-mode .afl-table-card,
+body.dark-mode .afld-section-card,
+body.dark-mode .at-filter-card,
+body.dark-mode .at-stat-card,
+body.dark-mode .at-table-card,
+body.dark-mode .atd-route-banner,
+body.dark-mode .atd-section-card {
+  background: #1c2230 !important;
+  border-color: #30363d !important;
+}
+
+body.dark-mode .afl-title,
+body.dark-mode .afl-period-value,
+body.dark-mode .afl-stat-value,
+body.dark-mode .afl-table-title,
+body.dark-mode .afld-title,
+body.dark-mode .afld-driver-email,
+body.dark-mode .afld-highlight,
+body.dark-mode .at-title,
+body.dark-mode .at-stat-value,
+body.dark-mode .atd-title,
+body.dark-mode .atd-driver-email,
+body.dark-mode .atd-route-value,
+body.dark-mode .atd-stat-value {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .afl-subtitle,
+body.dark-mode .afl-filter-label,
+body.dark-mode .afl-stat-label,
+body.dark-mode .afl-pagination-info,
+body.dark-mode .afl-driver-email,
+body.dark-mode .afld-card-header,
+body.dark-mode .afld-detail-row dt,
+body.dark-mode .afld-muted,
+body.dark-mode .at-subtitle,
+body.dark-mode .at-filter-label,
+body.dark-mode .at-stat-label,
+body.dark-mode .at-pagination-info,
+body.dark-mode .at-driver-email,
+body.dark-mode .at-date-time,
+body.dark-mode .atd-card-header,
+body.dark-mode .atd-route-label,
+body.dark-mode .atd-route-distance,
+body.dark-mode .atd-detail-row dt,
+body.dark-mode .atd-stat-label,
+body.dark-mode .atd-muted {
+  color: #8b949e !important;
+}
+
+body.dark-mode .afl-card-header,
+body.dark-mode .afld-card-header,
+body.dark-mode .at-card-header,
+body.dark-mode .atd-card-header,
+body.dark-mode .afl-th,
+body.dark-mode .at-th {
+  background: #161b22 !important;
+  border-color: #30363d !important;
+}
+
+body.dark-mode .afl-search-input,
+body.dark-mode .afl-select,
+body.dark-mode .afl-date-input,
+body.dark-mode .afl-page-btn,
+body.dark-mode .afl-export-btn,
+body.dark-mode .afl-reset-btn,
+body.dark-mode .afl-plate-badge,
+body.dark-mode .afld-back-btn,
+body.dark-mode .afld-plate-badge,
+body.dark-mode .at-search-input,
+body.dark-mode .at-select,
+body.dark-mode .at-date-input,
+body.dark-mode .at-page-btn,
+body.dark-mode .at-export-btn,
+body.dark-mode .at-reset-btn,
+body.dark-mode .at-plate,
+body.dark-mode .atd-back-btn,
+body.dark-mode .atd-plate-badge {
+  background: #21262d !important;
+  border-color: #30363d !important;
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .afl-page-btn--active {
+  background: #f97316 !important;
+  border-color: #f97316 !important;
+  color: #fff !important;
+}
+
+body.dark-mode .at-page-btn--active {
+  background: #1f6feb !important;
+  border-color: #1f6feb !important;
+  color: #fff !important;
+}
+
+body.dark-mode .afl-search-input::placeholder,
+body.dark-mode .at-search-input::placeholder {
+  color: #6e7681 !important;
+}
+
+body.dark-mode .afl-tr,
+body.dark-mode .afl-pagination,
+body.dark-mode .afl-table-header-row,
+body.dark-mode .afld-detail-row,
+body.dark-mode .at-tr,
+body.dark-mode .at-pagination,
+body.dark-mode .at-table-header-row,
+body.dark-mode .atd-detail-row,
+body.dark-mode .atd-stat-item {
+  border-color: #30363d !important;
+}
+
+body.dark-mode .afl-tr:hover,
+body.dark-mode .at-tr:hover {
+  background: #21262d !important;
+}
+
+body.dark-mode .afl-td,
+body.dark-mode .afl-date-main,
+body.dark-mode .afl-td--cost,
+body.dark-mode .afld-detail-row dd,
+body.dark-mode .at-td,
+body.dark-mode .at-date-main,
+body.dark-mode .at-td--distance,
+body.dark-mode .atd-detail-row dd {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .afld-receipt-frame {
+  background: #161b22 !important;
+}
+
+body.dark-mode .afld-receipt-placeholder,
+body.dark-mode .afld-na {
+  color: #8b949e !important;
+}
+
+body.dark-mode .atd-route-line svg line,
+body.dark-mode .atd-route-line svg polyline {
+  stroke: #6e7681 !important;
+}
+
+body.dark-mode .afl-export-btn:hover,
+body.dark-mode .afl-reset-btn:hover,
+body.dark-mode .afl-page-btn:hover:not(:disabled),
+body.dark-mode .afld-back-btn:hover,
+body.dark-mode .at-export-btn:hover,
+body.dark-mode .at-reset-btn:hover,
+body.dark-mode .at-page-btn:hover:not(:disabled),
+body.dark-mode .atd-back-btn:hover {
+  background: #30363d !important;
+  border-color: #484f58 !important;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Service Requests / Service Request Details
+   ───────────────────────────────────────────────────────────── */
+body.dark-mode .service-requests-page,
+body.dark-mode .srd-page {
+  background: #0f1117 !important;
+}
+
+body.dark-mode .service-requests-page .sr-table-card,
+body.dark-mode .service-requests-page .sr-stat-card,
+body.dark-mode .service-requests-page .sr-mobile-card,
+body.dark-mode .srd-page .fuel-form-card,
+body.dark-mode .srd-page .receipt-card,
+body.dark-mode .srd-page .srd-info-card,
+body.dark-mode .srd-page .srd-meta-card {
+  background: #1c2230 !important;
+  border-color: #30363d !important;
+}
+
+body.dark-mode .service-requests-page .sr-table-header,
+body.dark-mode .service-requests-page .sr-table thead,
+body.dark-mode .service-requests-page .sr-pagination-footer,
+body.dark-mode .srd-page .srd-info-row,
+body.dark-mode .srd-page .srd-existing-invoice,
+body.dark-mode .srd-page .sr-mobile-card-body {
+  background: #161b22 !important;
+  border-color: #30363d !important;
+}
+
+body.dark-mode .service-requests-page .sr-table th,
+body.dark-mode .service-requests-page .sr-mobile-label,
+body.dark-mode .service-requests-page .sr-page-info,
+body.dark-mode .srd-page .srd-info-label,
+body.dark-mode .srd-page .srd-meta-label,
+body.dark-mode .srd-page .srd-existing-label,
+body.dark-mode .srd-page .form-label {
+  color: #8b949e !important;
+}
+
+body.dark-mode .service-requests-page .sr-table-cell,
+body.dark-mode .service-requests-page .sr-cell-title,
+body.dark-mode .service-requests-page .sr-cell-date,
+body.dark-mode .service-requests-page .sr-mobile-value,
+body.dark-mode .service-requests-page .sr-mobile-card-title,
+body.dark-mode .srd-page .srd-info-value,
+body.dark-mode .srd-page .srd-meta-value,
+body.dark-mode .srd-page .srd-request-name {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .service-requests-page .sr-table tbody tr,
+body.dark-mode .service-requests-page .sr-mobile-card-header,
+body.dark-mode .service-requests-page .sr-table tbody tr:last-child,
+body.dark-mode .srd-page .srd-invoice-preview {
+  border-color: #30363d !important;
+}
+
+body.dark-mode .service-requests-page .sr-table tbody tr:hover {
+  background: #21262d !important;
+}
+
+body.dark-mode .srd-page .input-with-suffix .form-control,
+body.dark-mode .srd-page .form-control,
+body.dark-mode .srd-page .input-suffix {
+  background: #21262d !important;
+  border-color: #30363d !important;
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .srd-page .form-control::placeholder {
+  color: #6e7681 !important;
+}
+
+body.dark-mode .srd-page .srd-submit-btn {
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35) !important;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Icon action buttons (dark-mode parity with driver pages)
+   ───────────────────────────────────────────────────────────── */
+body.dark-mode .action-btn-icon,
+body.dark-mode .vaction-btn,
+body.dark-mode .asr-icon-btn,
+body.dark-mode .afl-icon-btn,
+body.dark-mode .at-icon-btn {
+  background: transparent !important;
+  border: 1px solid #30363d !important;
+  box-shadow: none !important;
+}
+
+body.dark-mode .action-edit,
+body.dark-mode .vaction-btn.vaction-edit,
+body.dark-mode .at-icon-btn--view {
+  color: #58a6ff !important;
+  border-color: #1f6feb !important;
+}
+
+body.dark-mode .asr-icon-btn--view {
+  background-color: transparent !important;
+  border: 1px solid #7c3aed !important;
+  color: #7c3aed !important;
+}
+body.dark-mode .asr-icon-btn--view svg {
+  color: #7c3aed !important;
+  stroke: #7c3aed !important;
+}
+
+body.dark-mode .afl-icon-btn--view {
+  background-color: transparent !important;
+  border: 1px solid #f97316 !important;
+  color: #f97316 !important;
+}
+body.dark-mode .afl-icon-btn--view svg {
+  color: #f97316 !important;
+  stroke: #f97316 !important;
+}
+
+body.dark-mode .action-edit:hover,
+body.dark-mode .vaction-btn.vaction-edit:hover,
+body.dark-mode .at-icon-btn--view:hover {
+  background-color: rgba(88, 166, 255, 0.15) !important;
+}
+
+body.dark-mode .asr-icon-btn--view:hover {
+  background-color: rgba(124, 58, 237, 0.15) !important;
+  border-color: #7c3aed !important;
+}
+
+body.dark-mode .afl-icon-btn--view:hover {
+  background-color: rgba(249, 115, 22, 0.15) !important;
+  border-color: #f97316 !important;
+}
+
+body.dark-mode .action-activate,
+body.dark-mode .vaction-btn.vaction-activate,
+body.dark-mode .afl-icon-btn--restore,
+body.dark-mode .at-icon-btn--restore {
+  color: #3fb950 !important;
+  border-color: #238636 !important;
+}
+
+body.dark-mode .action-activate:hover,
+body.dark-mode .vaction-btn.vaction-activate:hover,
+body.dark-mode .afl-icon-btn--restore:hover,
+body.dark-mode .at-icon-btn--restore:hover {
+  background-color: rgba(63, 185, 80, 0.15) !important;
+}
+
+body.dark-mode .action-deactivate,
+body.dark-mode .vaction-btn.vaction-deactivate {
+  color: #f0883e !important;
+  border-color: #f0883e !important;
+}
+
+body.dark-mode .action-deactivate:hover,
+body.dark-mode .vaction-btn.vaction-deactivate:hover {
+  background-color: rgba(240, 136, 62, 0.15) !important;
+}
+
+body.dark-mode .action-delete,
+body.dark-mode .vaction-btn.vaction-delete,
+body.dark-mode .afl-icon-btn--delete,
+body.dark-mode .at-icon-btn--delete {
+  color: #f85149 !important;
+  border-color: #da3633 !important;
+}
+
+body.dark-mode .action-delete:hover,
+body.dark-mode .vaction-btn.vaction-delete:hover,
+body.dark-mode .afl-icon-btn--delete:hover,
+body.dark-mode .at-icon-btn--delete:hover {
+  background-color: rgba(248, 81, 73, 0.15) !important;
+}
+
+body.dark-mode .at-date-duration {
+  background: #30363d !important;
+  color: #8b949e !important;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Admin Service Request Details
+   ───────────────────────────────────────────────────────────── */
+body.dark-mode .asrd-dashboard,
+body.dark-mode .asrd-main,
+body.dark-mode .asrd-page {
+  background: #0f1117 !important;
+}
+
+body.dark-mode .asrd-section-card {
+  background: #1c2230 !important;
+  border-color: #30363d !important;
+}
+
+body.dark-mode .asrd-card-header,
+body.dark-mode .asrd-invoice-frame,
+body.dark-mode .asrd-detail-row,
+body.dark-mode .asrd-detail-description {
+  background: #161b22 !important;
+  border-color: #30363d !important;
+}
+
+body.dark-mode .asrd-title,
+body.dark-mode .asrd-driver-email,
+body.dark-mode .asrd-detail-row dd,
+body.dark-mode .asrd-highlight,
+body.dark-mode .asrd-detail-description-text,
+body.dark-mode .asrd-approve-datepicker,
+body.dark-mode .asrd-approve-location {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .asrd-back-btn,
+body.dark-mode .asrd-plate-badge,
+body.dark-mode .asrd-action-btn--cancel-approve,
+body.dark-mode .asrd-approve-datepicker,
+body.dark-mode .asrd-approve-location {
+  background: #21262d !important;
+  border-color: #30363d !important;
+}
+
+body.dark-mode .asrd-back-btn:hover,
+body.dark-mode .asrd-action-btn--cancel-approve:hover:not(:disabled) {
+  background: #30363d !important;
+  border-color: #484f58 !important;
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .asrd-card-header,
+body.dark-mode .asrd-detail-row dt,
+body.dark-mode .asrd-detail-description-label,
+body.dark-mode .asrd-approve-label,
+body.dark-mode .asrd-muted,
+body.dark-mode .asrd-na {
+  color: #8b949e !important;
+}
+
+body.dark-mode .asrd-detail-description-text {
+  background: #1f1930 !important;
+  border-left-color: #7c3aed !important;
+}
+
+body.dark-mode .asrd-invoice-placeholder {
+  color: #8b949e !important;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Auth pages (Login / Forgot / Set Password)
+   ───────────────────────────────────────────────────────────── */
+body.dark-mode .login-page,
+body.dark-mode .forgot-password-page,
+body.dark-mode .set-password-page {
+  background: #0f1117 !important;
+}
+
+body.dark-mode .login-card,
+body.dark-mode .forgot-password-card,
+body.dark-mode .set-password-card {
+  background: #1c2230 !important;
+  border-color: #30363d !important;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35) !important;
+}
+
+body.dark-mode .logo-title,
+body.dark-mode .welcome-title,
+body.dark-mode .page-title,
+body.dark-mode .success-message h3,
+body.dark-mode .card-footer-text,
+body.dark-mode .card-footer-text p {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .welcome-subtitle,
+body.dark-mode .page-subtitle,
+body.dark-mode .resend-text,
+body.dark-mode .back-to-login,
+body.dark-mode .card-footer-text a,
+body.dark-mode .set-password-page .form-text,
+body.dark-mode .page-footer,
+body.dark-mode .page-footer * {
+  color: #8b949e !important;
+}
+
+body.dark-mode .login-page .form-label,
+body.dark-mode .forgot-password-page .form-label,
+body.dark-mode .set-password-page .form-label {
+  color: #8b949e !important;
+}
+
+body.dark-mode .login-page .form-control,
+body.dark-mode .forgot-password-page .form-control,
+body.dark-mode .set-password-page .form-control {
+  background: #21262d !important;
+  border-color: #30363d !important;
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .login-page .form-control::placeholder,
+body.dark-mode .forgot-password-page .form-control::placeholder,
+body.dark-mode .set-password-page .form-control::placeholder {
+  color: #6e7681 !important;
+}
+
+body.dark-mode .forgot-link,
+body.dark-mode .back-link,
+body.dark-mode .resend-link,
+body.dark-mode .page-footer a {
+  color: #58a6ff !important;
+}
+
+body.dark-mode .login-page .page-footer,
+body.dark-mode .forgot-password-page .page-footer,
+body.dark-mode .set-password-page .page-footer {
+  color: #8b949e !important;
+}
+
+body.dark-mode .login-page .page-footer *,
+body.dark-mode .login-page .page-footer a,
+body.dark-mode .forgot-password-page .page-footer *,
+body.dark-mode .forgot-password-page .page-footer a,
+body.dark-mode .set-password-page .page-footer *,
+body.dark-mode .set-password-page .page-footer a {
+  color: #8b949e !important;
+}
+
+body.dark-mode .login-page .page-footer a:hover,
+body.dark-mode .forgot-password-page .page-footer a:hover,
+body.dark-mode .set-password-page .page-footer a:hover {
+  color: #b1bac4 !important;
+  text-decoration: underline !important;
+}
+
+body.dark-mode .password-toggle {
+  color: #8b949e !important;
+}
+
+body.dark-mode .password-toggle:hover {
+  color: #e6edf3 !important;
 }

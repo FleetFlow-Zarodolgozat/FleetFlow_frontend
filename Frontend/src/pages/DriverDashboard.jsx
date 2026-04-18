@@ -11,6 +11,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import api from '../services/api';
 import '../styles/DriverDashboard.css';
 import Footer from '../components/Footer';
+import CustomModal from '../components/CustomModal';
 
 const DriverDashboard = () => {
   const navigate = useNavigate();
@@ -18,6 +19,8 @@ const DriverDashboard = () => {
   const { t, language } = useLanguage();
   const localeMap = { hu, de, en: enUS };
   const currentLocale = localeMap[language] || enUS;
+  // A naptár lokalizálását kézzel konfiguráljuk, mert a fejléc/időformátum
+  // több ponton eltér nyelvenként, és a default formátumok nem voltak elég pontosak.
   const localizer = dateFnsLocalizer({
     format,
     parse,
@@ -72,15 +75,32 @@ const DriverDashboard = () => {
     description: ''
   });
   const [eventSaving, setEventSaving] = useState(false);
-  const [eventFeedback, setEventFeedback] = useState({ type: '', message: '' });
+  const [eventSuccessModalMessage, setEventSuccessModalMessage] = useState('');
   const [selectedCalendarEvent, setSelectedCalendarEvent] = useState(null);
   const [eventDeleting, setEventDeleting] = useState(false);
-  const [calendarDetailFeedback, setCalendarDetailFeedback] = useState({ type: '', message: '' });
+  const [errorModal, setErrorModal] = useState({
+    open: false,
+    title: '',
+    message: '',
+  });
   const [copiedField, setCopiedField] = useState('');
   const copyFeedbackTimeoutRef = useRef(null);
   const [activeCardIndex, setActiveCardIndex] = useState(0);
   const carouselIntervalRef = useRef(null);
   const CARD_COUNT = 6;
+
+  // A dashboard mobil nézetben is ugyanazt a sidebar komponenst használja,
+  // ezért itt tartjuk az open/close állapotot, amit a Sidebar kívülről vezérel.
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isMobileCalendar, setIsMobileCalendar] = useState(window.innerWidth <= 1024);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobileCalendar(window.innerWidth <= 1024);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const advanceCarousel = () => {
     setActiveCardIndex(prev => (prev + 1) % CARD_COUNT);
@@ -104,6 +124,8 @@ const DriverDashboard = () => {
     carouselIntervalRef.current = setInterval(advanceCarousel, 3000);
   };
 
+  // A backend többféle névkonvencióval adhatja vissza a mezőket (camel/Pascal case).
+  // Itt egységesítjük az eseményeket a naptár számára, és kiszűrjük az invalid dátumokat.
   const loadCalendarEvents = async () => {
     try {
       const calendarResponse = await api.get('/calendarevents');
@@ -193,7 +215,15 @@ const DriverDashboard = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleCopyToClipboard = (text, label, fieldKey) => {
+  const openErrorModal = (message, title = t('common.errorTitle')) => {
+    setErrorModal({ open: true, title, message });
+  };
+
+  const closeErrorModal = () => {
+    setErrorModal((prev) => ({ ...prev, open: false }));
+  };
+
+  const handleCopyToClipboard = (text, fieldKey) => {
     if (text && text !== 'N/A') {
       navigator.clipboard.writeText(text).then(() => {
         setCopiedField(fieldKey);
@@ -218,28 +248,16 @@ const DriverDashboard = () => {
   }, []);
 
   useEffect(() => {
-    if (!eventFeedback.message) {
+    if (!eventSuccessModalMessage) {
       return;
     }
 
     const timeoutId = setTimeout(() => {
-      setEventFeedback({ type: '', message: '' });
+      setEventSuccessModalMessage('');
     }, 2000);
 
     return () => clearTimeout(timeoutId);
-  }, [eventFeedback]);
-
-  useEffect(() => {
-    if (!calendarDetailFeedback.message) {
-      return;
-    }
-
-    const timeoutId = setTimeout(() => {
-      setCalendarDetailFeedback({ type: '', message: '' });
-    }, 2000);
-
-    return () => clearTimeout(timeoutId);
-  }, [calendarDetailFeedback]);
+  }, [eventSuccessModalMessage]);
 
   const handleEventChange = (e) => {
     const { name, value } = e.target;
@@ -286,13 +304,13 @@ const DriverDashboard = () => {
 
     const title = eventForm.title.trim();
     if (!title || !eventForm.date || !eventForm.startTime) {
-      setEventFeedback({ type: 'danger', message: 'Title, date and start time are required.' });
+      openErrorModal('Title, date and start time are required.');
       return;
     }
 
     const startDate = new Date(`${eventForm.date}T${eventForm.startTime}:00`);
     if (Number.isNaN(startDate.getTime())) {
-      setEventFeedback({ type: 'danger', message: 'Invalid date format.' });
+      openErrorModal('Invalid date format.');
       return;
     }
 
@@ -300,17 +318,16 @@ const DriverDashboard = () => {
     if (eventForm.endTime) {
       endDate = new Date(`${eventForm.date}T${eventForm.endTime}:00`);
       if (Number.isNaN(endDate.getTime())) {
-        setEventFeedback({ type: 'danger', message: 'Invalid end time format.' });
+        openErrorModal('Invalid end time format.');
         return;
       }
       if (endDate <= startDate) {
-        setEventFeedback({ type: 'danger', message: 'End time must be later than start time.' });
+        openErrorModal('End time must be later than start time.');
         return;
       }
     }
 
     setEventSaving(true);
-    setEventFeedback({ type: '', message: '' });
 
     try {
       await api.post('/calendarevents', {
@@ -321,11 +338,11 @@ const DriverDashboard = () => {
       });
 
       setEventForm({ title: '', date: '', startTime: '09:00', endTime: '', description: '' });
-      setEventFeedback({ type: 'success', message: 'Event created successfully.' });
+      setEventSuccessModalMessage('Event created successfully.');
       await loadCalendarEvents();
     } catch (error) {
       const message = getApiErrorMessage(error, 'Failed to create event.');
-      setEventFeedback({ type: 'danger', message });
+      openErrorModal(message);
     } finally {
       setEventSaving(false);
     }
@@ -333,26 +350,26 @@ const DriverDashboard = () => {
 
   const handleDeleteSelectedEvent = async () => {
     if (!selectedCalendarEvent?.id) {
-      setCalendarDetailFeedback({ type: 'danger', message: 'Event id is missing.' });
+      openErrorModal('Event id is missing.');
       return;
     }
 
     const selectedType = String(selectedCalendarEvent?.eventType || '').toUpperCase();
     if (selectedType === 'SERVICE_APPOINTMENT' && profile.role !== 'ADMIN') {
-      setCalendarDetailFeedback({ type: 'danger', message: 'Not allowed to delete' });
+      openErrorModal(t('dashboard.event.detail.adminOnly'));
       return;
     }
 
     setEventDeleting(true);
-    setCalendarDetailFeedback({ type: '', message: '' });
 
     try {
       await api.delete(`/calendarevents/${selectedCalendarEvent.id}`);
       setSelectedCalendarEvent(null);
+      setEventSuccessModalMessage('Event deleted successfully.');
       await loadCalendarEvents();
     } catch (error) {
       const message = getApiErrorMessage(error, 'Failed to delete event.');
-      setCalendarDetailFeedback({ type: 'danger', message });
+      openErrorModal(message);
     } finally {
       setEventDeleting(false);
     }
@@ -405,9 +422,6 @@ const DriverDashboard = () => {
     const date = new Date(profile.licenseExpiryDate);
     return date.toLocaleDateString('hu-HU', { year: 'numeric', month: '2-digit', day: '2-digit' });
   };
-
-  // Mobile sidebar toggle
-  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Profile image for the profile card
   const [profileImageError, setProfileImageError] = useState(false);
@@ -596,12 +610,12 @@ const DriverDashboard = () => {
           <Col lg={4} md={12}>
             {/* Quick Add Event */}
             <Card className="event-card h-100 d-flex flex-column">
-              <Card.Header className="bg-light" style={{ flexShrink: 0 }}>
+              <Card.Header className="bg-light dashboard-event-card-header">
                 <h3 className="mb-0">{t('dashboard.event.title')}</h3>
               </Card.Header>
-              <Card.Body className="d-flex flex-column" style={{ flex: 1, overflow: 'hidden' }}>
+              <Card.Body className="d-flex flex-column dashboard-event-card-body">
                 <Form onSubmit={handleSaveEvent} className="d-flex flex-column h-100">
-                  <Form.Group className="mb-3" style={{ flexShrink: 0 }}>
+                  <Form.Group className="mb-3 dashboard-event-group-fixed">
                     <Form.Label className="small text-muted fw-semibold">{t('dashboard.event.label.title')}</Form.Label>
                     <Form.Control
                       type="text"
@@ -612,7 +626,7 @@ const DriverDashboard = () => {
                       required
                     />
                   </Form.Group>
-                  <Form.Group className="mb-3" style={{ flexShrink: 0 }}>
+                  <Form.Group className="mb-3 dashboard-event-group-fixed">
                     <Form.Label className="small text-muted fw-semibold">{t('dashboard.event.label.date')}</Form.Label>
                     <Form.Control
                       type="date"
@@ -622,7 +636,7 @@ const DriverDashboard = () => {
                       required
                     />
                   </Form.Group>
-                  <Row className="g-2 mb-3" style={{ flexShrink: 0 }}>
+                  <Row className="g-2 mb-3 dashboard-event-group-fixed">
                     <Col xs={6}>
                       <Form.Group>
                         <Form.Label className="small text-muted fw-semibold">{t('dashboard.event.label.start')}</Form.Label>
@@ -647,18 +661,18 @@ const DriverDashboard = () => {
                       </Form.Group>
                     </Col>
                   </Row>
-                  <Form.Group className="mb-3 d-flex flex-column" style={{ flex: 1, minHeight: 0 }}>
-                    <Form.Label className="small text-muted fw-semibold" style={{ flexShrink: 0 }}>{t('dashboard.event.label.description')}</Form.Label>
+                  <Form.Group className="mb-3 d-flex flex-column dashboard-event-description-group">
+                    <Form.Label className="small text-muted fw-semibold dashboard-event-description-label">{t('dashboard.event.label.description')}</Form.Label>
                     <Form.Control
                       as="textarea"
                       name="description"
                       placeholder={t('dashboard.event.placeholder.description')}
                       value={eventForm.description}
                       onChange={handleEventChange}
-                      style={{ resize: 'none', flex: 1, minHeight: 0 }}
+                      className="dashboard-event-description-input"
                     />
                   </Form.Group>
-                  <Button type="submit" variant="primary" className="w-100" style={{ flexShrink: 0 }} disabled={eventSaving}>
+                  <Button type="submit" variant="primary" className="w-100 dashboard-event-submit-btn" disabled={eventSaving}>
                     <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="me-2">
                       <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" strokeLinecap="round" strokeLinejoin="round"/>
                       <polyline points="17,21 17,13 7,13 7,21" strokeLinecap="round" strokeLinejoin="round"/>
@@ -666,11 +680,6 @@ const DriverDashboard = () => {
                     </svg>
                     {eventSaving ? t('dashboard.event.btn.saving') : t('dashboard.event.btn.save')}
                   </Button>
-                  {eventFeedback.message && (
-                    <div className={`mt-2 alert alert-${eventFeedback.type} py-2 px-3 mb-0`} role="alert">
-                      {eventFeedback.message}
-                    </div>
-                  )}
                 </Form>
               </Card.Body>
             </Card>
@@ -680,9 +689,34 @@ const DriverDashboard = () => {
             {/* Schedule Calendar */}
             <Card className="schedule-card h-100">
               <Card.Header className="bg-light">
-                <h3 className="mb-0 text-center">{t('dashboard.schedule.title')}</h3>
+                <div className={`schedule-header-row d-flex align-items-center ${isMobileCalendar ? 'justify-content-center' : 'justify-content-between'}`}>
+                  <h3 className={`mb-0 ${isMobileCalendar ? 'text-center' : ''}`}>{t('dashboard.schedule.title')}</h3>
+                  {!isMobileCalendar && <div className="calendar-nav-arrows d-flex align-items-center gap-2">
+                    <Button variant="outline-secondary" size="sm" onClick={() => {
+                      const newDate = new Date(calendarDate);
+                      newDate.setMonth(newDate.getMonth() - 1);
+                      setCalendarDate(newDate);
+                    }}>
+                      <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <polyline points="15,18 9,12 15,6" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </Button>
+                    <span className="current-month">
+                      {calendarDate.toLocaleDateString(t('dashboard.locale'), { month: 'long', year: 'numeric' })}
+                    </span>
+                    <Button variant="outline-secondary" size="sm" onClick={() => {
+                      const newDate = new Date(calendarDate);
+                      newDate.setMonth(newDate.getMonth() + 1);
+                      setCalendarDate(newDate);
+                    }}>
+                      <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <polyline points="9,18 15,12 9,6" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </Button>
+                  </div>}
+                </div>
               </Card.Header>
-              <Card.Body className="rbc-wrapper" style={{ minHeight: 460 }}>
+              <Card.Body className={`rbc-wrapper dashboard-calendar-body ${isMobileCalendar ? 'dashboard-calendar-body--mobile' : ''}`}>
                 {!selectedCalendarEvent ? (
                   <Calendar
                     localizer={localizer}
@@ -690,7 +724,6 @@ const DriverDashboard = () => {
                     events={scheduleEvents}
                     eventPropGetter={calendarEventStyleGetter}
                     onSelectEvent={(event) => {
-                      setCalendarDetailFeedback({ type: '', message: '' });
                       setSelectedCalendarEvent(event);
                     }}
                     date={calendarDate}
@@ -698,7 +731,7 @@ const DriverDashboard = () => {
                     view={calendarView}
                     onView={setCalendarView}
                     views={['month', 'week', 'day']}
-                    style={{ height: 440 }}
+                    className={`dashboard-calendar ${isMobileCalendar ? 'dashboard-calendar--mobile' : ''}`}
                     toolbar={true}
                     messages={{
                       today: t('adminDash.cal.today'),
@@ -711,7 +744,7 @@ const DriverDashboard = () => {
                     popup
                   />
                 ) : (
-                  <div className="h-100 d-flex flex-column">
+                  <div className="h-100 d-flex flex-column flex-grow-1 dashboard-min-height-0">
                     <div className="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
                       <div>
                         <h4 className="mb-1 fw-bold">{t('dashboard.event.detail.title')}</h4>
@@ -721,11 +754,9 @@ const DriverDashboard = () => {
                         type="button"
                         variant="outline-secondary"
                         size="sm"
-                        className="rounded-circle d-flex align-items-center justify-content-center"
-                        style={{ width: 34, height: 34 }}
+                        className="rounded-circle d-flex align-items-center justify-content-center dashboard-calendar-close-btn"
                         aria-label="Close"
                         onClick={() => {
-                          setCalendarDetailFeedback({ type: '', message: '' });
                           setSelectedCalendarEvent(null);
                         }}
                       >
@@ -773,12 +804,6 @@ const DriverDashboard = () => {
                         </Row>
                       </Card.Body>
                     </Card>
-
-                    {calendarDetailFeedback.message && (
-                      <div className={`alert alert-${calendarDetailFeedback.type} py-2 px-3`} role="alert">
-                        {calendarDetailFeedback.message}
-                      </div>
-                    )}
 
                     {String(selectedCalendarEvent?.eventType || '').toUpperCase() === 'SERVICE_APPOINTMENT' && profile.role !== 'ADMIN' && (
                       <div className="alert alert-warning py-2 px-3" role="alert">
@@ -841,7 +866,7 @@ const DriverDashboard = () => {
               </div>
             </div>
             <div className="info-grid">
-              <div className={`info-item ${copiedField === 'email' ? 'bg-success-subtle border-success' : ''}`} onClick={() => handleCopyToClipboard(profile.email, 'Email', 'email')} style={{ cursor: 'pointer' }}>
+              <div className={`info-item ${copiedField === 'email' ? 'bg-success-subtle border-success' : ''}`} onClick={() => handleCopyToClipboard(profile.email, 'email')}>
                 <div className="info-icon">
                   <svg width="20" height="20" fill="none" stroke="#0d6efd" strokeWidth="2" viewBox="0 0 24 24">
                     <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" strokeLinecap="round" strokeLinejoin="round"/>
@@ -853,7 +878,7 @@ const DriverDashboard = () => {
                   <span className="info-value">{profile.email}</span>
                 </div>
               </div>
-              <div className={`info-item ${copiedField === 'phone' ? 'bg-success-subtle border-success' : ''}`} onClick={() => handleCopyToClipboard(profile.phone, 'Phone', 'phone')} style={{ cursor: 'pointer' }}>
+              <div className={`info-item ${copiedField === 'phone' ? 'bg-success-subtle border-success' : ''}`} onClick={() => handleCopyToClipboard(profile.phone, 'phone')}>
                 <div className="info-icon">
                   <svg width="20" height="20" fill="none" stroke="#0d6efd" strokeWidth="2" viewBox="0 0 24 24">
                     <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" strokeLinecap="round" strokeLinejoin="round"/>
@@ -866,7 +891,7 @@ const DriverDashboard = () => {
               </div>
             </div>
             <div className="info-grid">
-              <div className={`info-item ${copiedField === 'licenseNumber' ? 'bg-success-subtle border-success' : ''}`} onClick={() => handleCopyToClipboard(profile.licenseNumber, 'License Number', 'licenseNumber')} style={{ cursor: 'pointer' }}>
+              <div className={`info-item ${copiedField === 'licenseNumber' ? 'bg-success-subtle border-success' : ''}`} onClick={() => handleCopyToClipboard(profile.licenseNumber, 'licenseNumber')}>
                 <div className="info-icon">
                   <svg width="20" height="20" fill="none" stroke="#0d6efd" strokeWidth="2" viewBox="0 0 24 24">
                     <rect x="2" y="7" width="20" height="14" rx="2" ry="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -880,7 +905,7 @@ const DriverDashboard = () => {
                   <span className="info-value">{profile.licenseNumber || 'N/A'}</span>
                 </div>
               </div>
-              <div className={`info-item ${copiedField === 'licenseExpiry' ? 'bg-success-subtle border-success' : ''}`} onClick={() => handleCopyToClipboard(formatLicenseExpiry(), 'License Expiry', 'licenseExpiry')} style={{ cursor: 'pointer' }}>
+              <div className={`info-item ${copiedField === 'licenseExpiry' ? 'bg-success-subtle border-success' : ''}`} onClick={() => handleCopyToClipboard(formatLicenseExpiry(), 'licenseExpiry')}>
                 <div className="info-icon">
                   <svg width="20" height="20" fill="none" stroke="#0d6efd" strokeWidth="2" viewBox="0 0 24 24">
                     <rect x="3" y="4" width="18" height="18" rx="2" ry="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -923,8 +948,7 @@ const DriverDashboard = () => {
                     <div className="d-flex justify-content-center mb-3">
                       <Badge
                         bg={vehicle.status?.toLowerCase() === 'active' ? 'success' : 'secondary'}
-                        className="d-flex align-items-center px-3 py-2"
-                        style={{ fontSize: '0.85rem' }}
+                        className="d-flex align-items-center px-3 py-2 vehicle-status-badge"
                       >
                         <span className="me-1">●</span> {vehicle.status}
                       </Badge>
@@ -932,7 +956,7 @@ const DriverDashboard = () => {
 
                     <Row className="g-2">
                       <Col xs={12}>
-                        <div className={`info-item ${copiedField === 'mileage' ? 'bg-success-subtle border-success' : ''}`} onClick={() => handleCopyToClipboard(vehicle.currentMileageKm.toLocaleString(), 'Mileage', 'mileage')} style={{ cursor: 'pointer' }}>
+                        <div className={`info-item ${copiedField === 'mileage' ? 'bg-success-subtle border-success' : ''}`} onClick={() => handleCopyToClipboard(vehicle.currentMileageKm.toLocaleString(), 'mileage')}>
                           <div className="info-icon">
                             <svg width="20" height="20" fill="none" stroke="#0d6efd" strokeWidth="2" viewBox="0 0 24 24">
                               <circle cx="12" cy="12" r="10" strokeLinecap="round" strokeLinejoin="round"/>
@@ -946,7 +970,7 @@ const DriverDashboard = () => {
                         </div>
                       </Col>
                       <Col xs={12}>
-                        <div className={`info-item ${copiedField === 'vin' ? 'bg-success-subtle border-success' : ''}`} onClick={() => handleCopyToClipboard(vehicle.vin, 'Vin', 'vin')} style={{ cursor: 'pointer' }}>
+                        <div className={`info-item ${copiedField === 'vin' ? 'bg-success-subtle border-success' : ''}`} onClick={() => handleCopyToClipboard(vehicle.vin, 'vin')}>
                           <div className="info-icon">
                             <svg width="20" height="20" fill="none" stroke="#0d6efd" strokeWidth="2" viewBox="0 0 24 24">
                               <rect x="2" y="7" width="20" height="14" rx="2" ry="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -955,7 +979,7 @@ const DriverDashboard = () => {
                           </div>
                           <div className="info-content d-flex flex-column justify-content-center w-100 text-center">
                             <span className="info-label">{t('dashboard.vehicle.vin')}</span>
-                            <span className="info-value" style={{ fontSize: '0.75rem', wordBreak: 'break-all' }}>{vehicle.vin || 'N/A'}</span>
+                            <span className="info-value vehicle-vin-value">{vehicle.vin || 'N/A'}</span>
                           </div>
                         </div>
                       </Col>
@@ -967,6 +991,26 @@ const DriverDashboard = () => {
           </Col>
         </Row>
         <Footer/>
+
+        <CustomModal
+          isOpen={errorModal.open}
+          onClose={closeErrorModal}
+          title={errorModal.title}
+          primaryAction={{
+            label: t('common.ok'),
+            onClick: closeErrorModal,
+          }}
+        >
+          <p className="mb-0">{errorModal.message}</p>
+        </CustomModal>
+
+        <CustomModal
+          isOpen={Boolean(eventSuccessModalMessage)}
+          onClose={() => setEventSuccessModalMessage('')}
+          title={t('common.successTitle')}
+        >
+          <p className="mb-0">{eventSuccessModalMessage}</p>
+        </CustomModal>
       </main>
     </div>
   );

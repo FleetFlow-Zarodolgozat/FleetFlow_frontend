@@ -7,6 +7,7 @@ import Sidebar from '../components/Sidebar';
 import '../styles/DriverDashboard.css';
 import '../styles/FuelLogs.css';
 import Footer from '../components/Footer';
+import CustomModal from '../components/CustomModal';
 
 
 const FuelLogs = () => {
@@ -21,7 +22,66 @@ const FuelLogs = () => {
 
   // Trips state for consumption calculation
   const [trips, setTrips] = useState([]);
-  const [tripsLoading, setTripsLoading] = useState(true);  useEffect(() => {
+  const [tripsLoading, setTripsLoading] = useState(true);
+  const [confirmModal, setConfirmModal] = useState({
+    open: false,
+    title: '',
+    message: '',
+    confirmLabel: '',
+    cancelLabel: '',
+    confirmVariant: '',
+    onConfirm: null,
+  });
+  const [errorModal, setErrorModal] = useState({
+    open: false,
+    title: '',
+    message: '',
+  });
+
+  const getApiErrorMessage = (err, fallback) => {
+    const data = err?.response?.data;
+    if (typeof data === 'string') return data;
+    if (data?.message) return data.message;
+    if (data?.Message) return data.Message;
+    if (data?.detail) return data.detail;
+    if (data?.errors) return Array.isArray(data.errors) ? data.errors.join(', ') : JSON.stringify(data.errors);
+    if (err?.response?.statusText) return err.response.statusText;
+    return fallback;
+  };
+
+  const openConfirmModal = ({ title, message, confirmLabel, cancelLabel, confirmVariant, onConfirm }) => {
+    setConfirmModal({
+      open: true,
+      title,
+      message,
+      confirmLabel,
+      cancelLabel,
+      confirmVariant,
+      onConfirm,
+    });
+  };
+
+  const closeConfirmModal = () => {
+    setConfirmModal((prev) => ({ ...prev, open: false }));
+  };
+
+  const handleConfirmAction = async () => {
+    const action = confirmModal.onConfirm;
+    closeConfirmModal();
+    if (typeof action === 'function') {
+      await action();
+    }
+  };
+
+  const openErrorModal = (title, message) => {
+    setErrorModal({ open: true, title, message });
+  };
+
+  const closeErrorModal = () => {
+    setErrorModal((prev) => ({ ...prev, open: false }));
+  };
+
+  useEffect(() => {
     const fetchTrips = async () => {
       setTripsLoading(true);
       try {
@@ -29,12 +89,14 @@ const FuelLogs = () => {
         const payload = response.data || {};
         setTrips(Array.isArray(payload.data) ? payload.data : []);
       } catch {
+        // Failed to load trips, but we can still show fuel logs and stats without consumption
       } finally {
         setTripsLoading(false);
       }
     };
     fetchTrips();
-  }, []);  const now = new Date();
+  }, []);
+  const now = new Date();
   const thisMonth = now.getMonth();
   const thisYear = now.getFullYear();
   const lastMonth = thisMonth === 0 ? 11 : thisMonth - 1;
@@ -43,7 +105,8 @@ const FuelLogs = () => {
   let totalSpent = 0;
   let lastMonthSpent = 0;
 
-  fuelLogs.forEach(log => {    const dateObj = new Date(log.date || log.Date);
+  fuelLogs.forEach(log => {
+    const dateObj = new Date(log.date || log.Date);
     const costStr = log.totalCostCur || log.TotalCostCur || '0';
     const cost = parseFloat(costStr.replace(/[^0-9.,]/g, '').replace(',', '.')) || 0;
 
@@ -58,8 +121,11 @@ const FuelLogs = () => {
       }
     }
 
-  });  const spentChange = lastMonthSpent === 0 ? 0 : Math.round(((totalSpent - lastMonthSpent) / lastMonthSpent) * 100);  let daysSinceLastRefuel = 'N/A';
-  if (fuelLogs.length > 0) {    const latestLog = fuelLogs.reduce((latest, log) => {
+  });
+  const spentChange = lastMonthSpent === 0 ? 0 : Math.round(((totalSpent - lastMonthSpent) / lastMonthSpent) * 100);
+  let daysSinceLastRefuel = 'N/A';
+  if (fuelLogs.length > 0) {
+    const latestLog = fuelLogs.reduce((latest, log) => {
       const dateObj = new Date(log.date || log.Date);
       return (!latest || dateObj > latest) ? dateObj : latest;
     }, null);
@@ -68,7 +134,8 @@ const FuelLogs = () => {
       const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
       daysSinceLastRefuel = diffDays === 0 ? t('fuelLogs.stat.today') : t(diffDays === 1 ? 'fuelLogs.stat.dayAgo' : 'fuelLogs.stat.daysAgo', { n: diffDays });
     }
-  }  let avgConsumption = 'N/A';
+  }
+  let avgConsumption = 'N/A';
   if (trips.length > 0 && fuelLogs.length > 0) {
     // Sum total distance from trips
     const totalTripDistance = trips.reduce((sum, trip) => {
@@ -108,7 +175,8 @@ const FuelLogs = () => {
         hour12: false,
       }),
     };
-  };  const fetchFuelLogs = async (pageToLoad = 1) => {
+  };
+  const fetchFuelLogs = async (pageToLoad = 1) => {
     setLoading(true);
     setError('');
     try {
@@ -159,15 +227,23 @@ const FuelLogs = () => {
     }
 
     return items;
-  };  const handleDeleteFuelLog = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this fuel log?')) return;
-    try {
-      await api.patch(`/fuellogs/delete/${id}`);
-      await fetchFuelLogs(pagination.page);
-    } catch (err) {
-      const msg = err?.response?.data;
-      alert(typeof msg === 'string' ? msg : msg?.message || msg?.Message || 'Failed to delete fuel log.');
-    }
+  };
+  const handleDeleteFuelLog = async (id) => {
+    openConfirmModal({
+      title: t('fuelLogs.modal.deleteTitle'),
+      message: t('fuelLogs.modal.deleteMessage'),
+      confirmLabel: t('common.delete'),
+      cancelLabel: t('common.cancel'),
+      confirmVariant: 'danger',
+      onConfirm: async () => {
+        try {
+          await api.patch(`/fuellogs/delete/${id}`);
+          await fetchFuelLogs(pagination.page);
+        } catch (err) {
+          openErrorModal(t('fuelLogs.modal.deleteFailedTitle'), getApiErrorMessage(err, t('fuelLogs.modal.deleteFailedMessage')));
+        }
+      },
+    });
   };
 
   const displayedCount = fuelLogs.length;
@@ -411,6 +487,35 @@ const FuelLogs = () => {
           </Row>
         </Container>
         <Footer/>
+
+        <CustomModal
+          isOpen={confirmModal.open}
+          onClose={closeConfirmModal}
+          title={confirmModal.title}
+          primaryAction={{
+            label: confirmModal.confirmLabel,
+            onClick: handleConfirmAction,
+            variant: confirmModal.confirmVariant,
+          }}
+          secondaryAction={{
+            label: confirmModal.cancelLabel,
+            onClick: closeConfirmModal,
+          }}
+        >
+          <p className="mb-0">{confirmModal.message}</p>
+        </CustomModal>
+
+        <CustomModal
+          isOpen={errorModal.open}
+          onClose={closeErrorModal}
+          title={errorModal.title}
+          primaryAction={{
+            label: t('common.ok'),
+            onClick: closeErrorModal,
+          }}
+        >
+          <p className="mb-0">{errorModal.message}</p>
+        </CustomModal>
       </main>
     </div>
   );

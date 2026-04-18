@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Card, Form, Button, Alert } from 'react-bootstrap';
+import { Card, Form, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { authService } from '../services/authService';
 import { useLanguage } from '../contexts/LanguageContext';
 import Footer from '../components/Footer';
+import CustomModal from '../components/CustomModal';
 import '../styles/ForgotPassword.css';
 
 const ForgotPassword = () => {
@@ -19,9 +20,11 @@ const ForgotPassword = () => {
     setLoading(true);
 
     try {
+      // A backend egy reset e-mail küldést indít; siker esetén külön success nézetre váltunk.
       await authService.forgotPassword(email);
       setSuccess(true);
     } catch (err) {
+      // Minden hiba ugyanabba az állapotba kerül, amit később a CustomModal jelenít meg.
       setError(
         err.response?.data?.message || 
         'Failed to send reset email. Please try again.'
@@ -40,7 +43,7 @@ const ForgotPassword = () => {
             <div className="forgot-password-header">
               <Link to="/login" className="logo-link">
                 <div className="logo-section">
-                  <img src="/fleetflow_logo.png" alt="FleetFlow Logo" style={{ height: '48px', width: 'auto' }} />
+                  <img src="/fleetflow_logo.png" alt="FleetFlow Logo" className="forgot-logo-img" />
                   <h1 className="logo-title">FleetFlow</h1>
                 </div>
               </Link>
@@ -87,13 +90,6 @@ const ForgotPassword = () => {
             ) : (
               // Form State
               <>
-                {/* Error Alert */}
-                {error && (
-                  <Alert variant="danger" dismissible onClose={() => setError('')} className="mb-4">
-                    {error}
-                  </Alert>
-                )}
-
                 {/* Forgot Password Form */}
                 <Form onSubmit={handleSubmit}>
                   <Form.Group className="mb-4">
@@ -133,6 +129,18 @@ const ForgotPassword = () => {
         </Card>
 
         <Footer />
+
+        <CustomModal
+          isOpen={Boolean(error)}
+          onClose={() => setError('')}
+          title={t('common.errorTitle')}
+          primaryAction={{
+            label: t('common.ok'),
+            onClick: () => setError(''),
+          }}
+        >
+          <p className="mb-0">{error}</p>
+        </CustomModal>
       </div>
     </div>
   );

@@ -321,12 +321,15 @@
 .mobile-cards {
   display: none;
   padding: 16px;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .fuel-log-mobile-card {
   border-radius: 12px;
   border: 1px solid #e2e8f0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  width: 100%;
 }
 
 .mobile-card-header {

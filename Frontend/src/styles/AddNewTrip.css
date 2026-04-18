@@ -38,7 +38,10 @@
 	margin: 0;
 }
 
-/* Main Layout */
+/*
+  Fő rács: bal oldalt az űrlap, jobb oldalt fix szélességű információs oszlop.
+  A 380px-es sidebar stabilan tartja a térkép/statisztika arányait desktop nézetben.
+*/
 .trip-main-layout {
 	display: grid;
 	grid-template-columns: 1fr 380px;
@@ -271,7 +274,10 @@
 	gap: 16px;
 }
 
-/* Route Preview Card */
+/*
+  Térkép kártya: az overflow: hidden levágja a térkép széleit a lekerekített sarokhoz,
+  a .map-placeholder fix magassága pedig megakadályozza a layout ugrálását töltés közben.
+*/
 .route-preview-card {
 	border: 1px solid #e2e8f0;
 	border-radius: 12px;
@@ -331,7 +337,7 @@
 .route-map__canvas {
 	width: 100%;
 	height: 100%;
-	border-radius: 8px;
+	border-radius: 0;
 }
 
 .map-image {
@@ -400,7 +406,10 @@
 	line-height: 1.5;
 }
 
-/* Weekly Performance Card */
+/*
+  Heti statisztika blokk: nagy kontrasztú gradient háttérrel külön vizuális fókuszpont,
+  a két stat elem flex-ben fut egymás mellett, ezért rövid címek mellett jól skálázódik.
+*/
 .weekly-performance-card {
 	background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
 	border-radius: 12px;
@@ -536,6 +545,28 @@
 	border: 2px solid #2563eb !important;
 	box-shadow: 0 6px 24px rgba(37,99,235,0.18), 0 1.5px 6px rgba(0,0,0,0.10), 0 0 0 4px #f0f6ff !important;
 }
+
+/* Previous odometer text */
+.ant-previous-odometer {
+	font-size: 0.95em;
+	color: #6b7280;
+	margin-top: 2px;
+}
+
+/* Language warning text */
+.ant-language-warning {
+	color: #b45309;
+	font-weight: 500;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	margin-top: 4px;
+}
+
+.ant-language-warning svg {
+	flex-shrink: 0;
+}
+
 .add-new-trip-title {
 	font-weight: 700;
 	color: #1f2937;

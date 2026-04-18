@@ -1,9 +1,10 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Alert, Button, Container, Spinner } from 'react-bootstrap';
+import { Button, Container, Spinner } from 'react-bootstrap';
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
 import Footer from '../components/Footer';
+import CustomModal from '../components/CustomModal';
 import '../styles/Vehicles.css';
 
 const PAGE_SIZE = 10;
@@ -28,7 +29,7 @@ const Vehicles = () => {
 
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [errorModal, setErrorModal] = useState({ open: false, message: '' });
   const [totalCount, setTotalCount] = useState(0);
   const [page, setPage] = useState(1);
 
@@ -38,6 +39,9 @@ const Vehicles = () => {
   const [statusFilter, setStatusFilter] = useState('');
   const [togglingId, setTogglingId] = useState(null);
   const [driverImages, setDriverImages] = useState({});
+  const [deactivateModalOpen, setDeactivateModalOpen] = useState(false);
+  const [activateModalOpen, setActivateModalOpen] = useState(false);
+  const [selectedVehicleAction, setSelectedVehicleAction] = useState({ id: null, userEmail: null });
 
   const getDriverInitials = (email) => {
     if (!email) return '?';
@@ -58,7 +62,6 @@ const Vehicles = () => {
 
   const fetchVehicles = useCallback(async (pageToLoad = 1) => {
     setLoading(true);
-    setError('');
     try {
       const params = {
         page: pageToLoad,
@@ -80,7 +83,7 @@ const Vehicles = () => {
         typeof apiMessage === 'string'
           ? apiMessage
           : apiMessage?.message || apiMessage?.Message || 'An error occurred while fetching vehicles.';
-      setError(message);
+      setErrorModal({ open: true, message });
     } finally {
       setLoading(false);
     }
@@ -94,6 +97,7 @@ const Vehicles = () => {
   useEffect(() => {
     if (vehicles.length === 0) return;
     let cancelled = false;
+    // A listában szereplő sofőrképek előtöltése, hogy a táblázat villanásmentes legyen.
     const fetchImages = async () => {
       const newImages = {};
       await Promise.all(
@@ -117,6 +121,7 @@ const Vehicles = () => {
     return () => { cancelled = true; };
   }, [vehicles]);
 
+  // Keresés késleltetve, hogy ne küldjünk felesleges kéréseket.
   const handleSearchInputChange = (e) => {
     const val = e.target.value;
     setSearchInput(val);
@@ -126,10 +131,16 @@ const Vehicles = () => {
     }, 400);
   };
 
-  const handleDeactivateVehicle = async (id, userEmail) => {
-    if (!window.confirm('Are you sure you want to deactivate this vehicle? Any active driver assignment will be ended.')) return;
+  const handleDeactivateVehicle = (id, userEmail) => {
+    setSelectedVehicleAction({ id, userEmail: userEmail || null });
+    setDeactivateModalOpen(true);
+  };
+
+  const confirmDeactivateVehicle = async () => {
+    const { id, userEmail } = selectedVehicleAction;
+    if (!id) return;
+    setDeactivateModalOpen(false);
     setTogglingId(id);
-    setError('');
     try {
       if (userEmail) {
         const driversRes = await api.get('/admin/drivers', { params: { page: 1, pageSize: 200 } });
@@ -144,33 +155,43 @@ const Vehicles = () => {
         }
       }
       await api.patch(`/admin/vehicles/deactivate/${id}`);
+      setSelectedVehicleAction({ id: null, userEmail: null });
       await fetchVehicles(page);
     } catch (err) {
+      setSelectedVehicleAction({ id: null, userEmail: null });
       const apiMessage = err?.response?.data;
       const message =
         typeof apiMessage === 'string'
           ? apiMessage
           : apiMessage?.message || apiMessage?.Message || 'An error occurred while deactivating the vehicle.';
-      setError(message);
+      setErrorModal({ open: true, message });
     } finally {
       setTogglingId(null);
     }
   };
 
-  const handleActivateVehicle = async (id) => {
-    if (!window.confirm('Are you sure you want to activate this vehicle?')) return;
+  const handleActivateVehicle = (id) => {
+    setSelectedVehicleAction({ id, userEmail: null });
+    setActivateModalOpen(true);
+  };
+
+  const confirmActivateVehicle = async () => {
+    const { id } = selectedVehicleAction;
+    if (!id) return;
+    setActivateModalOpen(false);
     setTogglingId(id);
-    setError('');
     try {
       await api.patch(`/admin/vehicles/activate/${id}`);
+      setSelectedVehicleAction({ id: null, userEmail: null });
       await fetchVehicles(page);
     } catch (err) {
+      setSelectedVehicleAction({ id: null, userEmail: null });
       const apiMessage = err?.response?.data;
       const message =
         typeof apiMessage === 'string'
           ? apiMessage
           : apiMessage?.message || apiMessage?.Message || 'An error occurred while activating the vehicle.';
-      setError(message);
+      setErrorModal({ open: true, message });
     } finally {
       setTogglingId(null);
     }
@@ -218,11 +239,61 @@ const Vehicles = () => {
             </Button>
           </div>
 
-          {error && (
-            <Alert variant="danger" className="mb-3" onClose={() => setError('')} dismissible>
-              {error}
-            </Alert>
-          )}
+          <CustomModal
+            isOpen={errorModal.open}
+            onClose={() => setErrorModal({ open: false, message: '' })}
+            title="Error"
+            primaryAction={{
+              label: 'OK',
+              onClick: () => setErrorModal({ open: false, message: '' }),
+            }}
+          >
+            <p className="mb-0">{errorModal.message}</p>
+          </CustomModal>
+
+          <CustomModal
+            isOpen={deactivateModalOpen}
+            onClose={() => {
+              setDeactivateModalOpen(false);
+              setSelectedVehicleAction({ id: null, userEmail: null });
+            }}
+            title="Confirm Deactivation"
+            secondaryAction={{
+              label: 'Cancel',
+              onClick: () => {
+                setDeactivateModalOpen(false);
+                setSelectedVehicleAction({ id: null, userEmail: null });
+              },
+            }}
+            primaryAction={{
+              label: 'Deactivate',
+              onClick: confirmDeactivateVehicle,
+            }}
+          >
+            <p className="mb-0">Are you sure you want to deactivate this vehicle? Any active driver assignment will be ended.</p>
+          </CustomModal>
+
+          <CustomModal
+            isOpen={activateModalOpen}
+            onClose={() => {
+              setActivateModalOpen(false);
+              setSelectedVehicleAction({ id: null, userEmail: null });
+            }}
+            title="Confirm Activation"
+            secondaryAction={{
+              label: 'Cancel',
+              onClick: () => {
+                setActivateModalOpen(false);
+                setSelectedVehicleAction({ id: null, userEmail: null });
+              },
+            }}
+            primaryAction={{
+              label: 'Activate',
+              onClick: confirmActivateVehicle,
+            }}
+          >
+            <p className="mb-0">Are you sure you want to activate this vehicle?</p>
+          </CustomModal>
 
           {/* Table Card */}
           <div className="vehicles-table-card">
@@ -437,7 +508,6 @@ const Vehicles = () => {
             )}
           </div>
         </Container>
-        <Footer />
       </main>
     </div>
   );

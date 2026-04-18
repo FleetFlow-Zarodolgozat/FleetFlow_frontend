@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Spinner } from 'react-bootstrap';
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
-import Footer from '../components/Footer';
+import CustomModal from '../components/CustomModal';
 import '../styles/AdminServiceRequestDetails.css';
 
 const STATUS_LABELS = {
@@ -32,12 +32,21 @@ const AdminServiceRequestDetails = () => {
 
   // Action state
   const [actionLoading, setActionLoading] = useState(null);
-  const [actionError, setActionError] = useState(null);
-  const [actionSuccess, setActionSuccess] = useState(null);
+  const [actionFeedback, setActionFeedback] = useState({ message: '', type: 'error' });
   const [currentStatus, setCurrentStatus] = useState(request.status ?? request.Status ?? '—');
   const [approveMode, setApproveMode] = useState(false);
   const [approveDate, setApproveDate] = useState('');
   const [serviceLocation, setServiceLocation] = useState('');
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState('');
+  const [validationModalOpen, setValidationModalOpen] = useState(false);
+  const [validationMessage, setValidationMessage] = useState('');
+  const [downloadSuccessModalOpen, setDownloadSuccessModalOpen] = useState(false);
+
+  // Action eredmenyek (siker/hiba) is modalban mennek ki, nem inline alertkent.
+  const openActionFeedback = (message, type = 'error') => {
+    setActionFeedback({ message, type });
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -46,7 +55,14 @@ const AdminServiceRequestDetails = () => {
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);  useEffect(() => {
+  }, []);
+
+  useEffect(() => {
+    if (!downloadSuccessModalOpen) return;
+    const timeoutId = setTimeout(() => setDownloadSuccessModalOpen(false), 2000);
+    return () => clearTimeout(timeoutId);
+  }, [downloadSuccessModalOpen]);
+  useEffect(() => {
     const invoiceId = request.invoiceFileId ?? request.InvoiceFileId;
     if (!invoiceId) return;
     let objectUrl = null;
@@ -65,7 +81,8 @@ const AdminServiceRequestDetails = () => {
     };
     fetchInvoice();
     return () => { if (objectUrl) URL.revokeObjectURL(objectUrl); };
-  }, [request.invoiceFileId, request.InvoiceFileId]);  useEffect(() => {
+  }, [request.invoiceFileId, request.InvoiceFileId]);
+  useEffect(() => {
     const imgId = request.profileImgFileId ?? request.ProfileImgFileId;
     if (!imgId) return;
     let objectUrl = null;
@@ -109,52 +126,87 @@ const AdminServiceRequestDetails = () => {
     a.href = invoiceUrl;
     a.download = `invoice-service-request-${id}.jpg`;
     a.click();
+    setDownloadSuccessModalOpen(true);
   };
 
-  const handleApprove = async () => {
+  const executeApprove = async () => {
     if (!approveDate) {
-      setActionError('Please select a scheduled date.');
+      setValidationMessage('Please select a scheduled date.');
+      setValidationModalOpen(true);
       return;
     }
     if (!serviceLocation.trim()) {
-      setActionError('Please enter a service location.');
+      setValidationMessage('Please enter a service location.');
+      setValidationModalOpen(true);
       return;
     }
     setActionLoading('approve');
-    setActionError(null);
-    setActionSuccess(null);
     try {
       const dto = { ScheduledStart: new Date(approveDate).toISOString(), ServiceLocation: serviceLocation };
       await api.patch(`/service-requests/approve/${request.id ?? request.Id}`, dto);
       setCurrentStatus('APPROVED');
-      setActionSuccess('Request approved successfully.');
+      openActionFeedback('Request approved successfully.', 'success');
       setApproveMode(false);
       setTimeout(() => navigate(-1), 1200);
     } catch (err) {
       const msg = err?.response?.data?.message ?? err?.response?.data?.Message ?? 'Failed to approve the request.';
-      setActionError(msg);
+      openActionFeedback(msg, 'error');
     } finally {
       setActionLoading(null);
     }
   };
 
-  const handleAction = async (action) => {
+  const executeAction = async (action) => {
     setActionLoading(action);
-    setActionError(null);
-    setActionSuccess(null);
     try {
       await api.patch(`/service-requests/${action}/${request.id ?? request.Id}`, null);
       const nextStatus = { reject: 'REJECTED', close: 'CLOSED' }[action];
       if (nextStatus) setCurrentStatus(nextStatus);
       const label = action === 'reject' ? 'rejected' : 'closed';
-      setActionSuccess(`Request ${label} successfully.`);
+      openActionFeedback(`Request ${label} successfully.`, 'success');
       setTimeout(() => navigate(-1), 1200);
     } catch (err) {
       const msg = err?.response?.data?.message ?? err?.response?.data?.Message ?? `Failed to ${action} the request.`;
-      setActionError(msg);
+      openActionFeedback(msg, 'error');
     } finally {
       setActionLoading(null);
     }
+  };
+
+  const openConfirmModal = (action) => {
+    setPendingAction(action);
+    setConfirmModalOpen(true);
+  };
+
+  const handleConfirmAction = async () => {
+    const action = pendingAction;
+    setConfirmModalOpen(false);
+    setPendingAction('');
+    if (action === 'approve') {
+      await executeApprove();
+      return;
+    }
+    if (action === 'reject') {
+      await executeAction('reject');
+      return;
+    }
+    if (action === 'close') {
+      await executeAction('close');
+    }
+  };
+
+  const handleApproveSaveClick = () => {
+    if (!approveDate) {
+      setValidationMessage('Please select a scheduled date.');
+      setValidationModalOpen(true);
+      return;
+    }
+    if (!serviceLocation.trim()) {
+      setValidationMessage('Please enter a service location.');
+      setValidationModalOpen(true);
+      return;
+    }
+    openConfirmModal('approve');
   };
 
   const id             = request.id ?? request.Id ?? '—';
@@ -175,6 +227,72 @@ const AdminServiceRequestDetails = () => {
 
       <main className="asrd-main">
         <div className="asrd-page">
+
+          <CustomModal
+            isOpen={confirmModalOpen}
+            onClose={() => {
+              setConfirmModalOpen(false);
+              setPendingAction('');
+            }}
+            title={pendingAction === 'approve' ? 'Approve request?' : pendingAction === 'reject' ? 'Reject request?' : 'Close request?'}
+            secondaryAction={{
+              label: 'Cancel',
+              onClick: () => {
+                setConfirmModalOpen(false);
+                setPendingAction('');
+              },
+            }}
+            primaryAction={{
+              label: 'Confirm',
+              onClick: handleConfirmAction,
+            }}
+          >
+            <p className="mb-0">
+              {pendingAction === 'approve'
+                ? 'Are you sure you want to approve this service request?'
+                : pendingAction === 'reject'
+                  ? 'Are you sure you want to reject this service request?'
+                  : 'Are you sure you want to close this service request?'}
+            </p>
+          </CustomModal>
+
+          <CustomModal
+            isOpen={downloadSuccessModalOpen}
+            onClose={() => setDownloadSuccessModalOpen(false)}
+            title="Success"
+          >
+            <p className="mb-0">Successfully downloaded.</p>
+          </CustomModal>
+
+          <CustomModal
+            isOpen={validationModalOpen}
+            onClose={() => {
+              setValidationModalOpen(false);
+              setValidationMessage('');
+            }}
+            title="Validation"
+            primaryAction={{
+              label: 'OK',
+              onClick: () => {
+                setValidationModalOpen(false);
+                setValidationMessage('');
+              },
+            }}
+          >
+            <p className="mb-0">{validationMessage}</p>
+          </CustomModal>
+
+          <CustomModal
+            isOpen={Boolean(actionFeedback.message)}
+            onClose={() => setActionFeedback({ message: '', type: 'error' })}
+            title={actionFeedback.type === 'success' ? 'Success' : 'Error'}
+            primaryAction={{
+              label: 'OK',
+              onClick: () => setActionFeedback({ message: '', type: 'error' }),
+            }}
+          >
+            <p className="mb-0">{actionFeedback.message}</p>
+          </CustomModal>
 
           {/* ── Top bar ───────────────────────────────── */}
           <div className="asrd-topbar">
@@ -300,6 +418,10 @@ const AdminServiceRequestDetails = () => {
                 </div>
                 <dl className="asrd-detail-list">
                   <div className="asrd-detail-row">
+                    <dt>Request ID</dt>
+                    <dd className="asrd-muted">#{id}</dd>
+                  </div>
+                  <div className="asrd-detail-row">
                     <dt>Title</dt>
                     <dd>{title}</dd>
                   </div>
@@ -323,10 +445,6 @@ const AdminServiceRequestDetails = () => {
                   <div className="asrd-detail-row">
                     <dt>Vehicle</dt>
                     <dd><span className="asrd-plate-badge">{plate}</span></dd>
-                  </div>
-                  <div className="asrd-detail-row">
-                    <dt>Request ID</dt>
-                    <dd className="asrd-muted">#{id}</dd>
                   </div>
                   <div className="asrd-detail-row">
                     <dt>Status</dt>
@@ -356,20 +474,13 @@ const AdminServiceRequestDetails = () => {
                   Actions
                 </div>
                 <div className="asrd-actions-body">
-                  {actionError && (
-                    <div className="asrd-action-alert asrd-action-alert--error">{actionError}</div>
-                  )}
-                  {actionSuccess && (
-                    <div className="asrd-action-alert asrd-action-alert--success">{actionSuccess}</div>
-                  )}
-
                   {status === 'REQUESTED' && (
                     <>
                       {!approveMode ? (
                         <>
                           <button
                             className="asrd-action-btn asrd-action-btn--approve"
-                            onClick={() => { setApproveMode(true); setActionError(null); setApproveDate(''); setServiceLocation(''); }}
+                            onClick={() => { setApproveMode(true); setApproveDate(''); setServiceLocation(''); }}
                             disabled={actionLoading !== null}
                           >
                             <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" strokeLinecap="round" strokeLinejoin="round" /></svg>
@@ -377,7 +488,7 @@ const AdminServiceRequestDetails = () => {
                           </button>
                           <button
                             className="asrd-action-btn asrd-action-btn--reject"
-                            onClick={() => handleAction('reject')}
+                            onClick={() => openConfirmModal('reject')}
                             disabled={actionLoading !== null}
                           >
                             {actionLoading === 'reject'
@@ -408,14 +519,14 @@ const AdminServiceRequestDetails = () => {
                           <div className="asrd-approve-actions">
                             <button
                               className="asrd-action-btn asrd-action-btn--cancel-approve"
-                              onClick={() => { setApproveMode(false); setApproveDate(''); setServiceLocation(''); setActionError(null); }}
+                              onClick={() => { setApproveMode(false); setApproveDate(''); setServiceLocation(''); }}
                               disabled={actionLoading !== null}
                             >
                               Cancel
                             </button>
                             <button
                               className="asrd-action-btn asrd-action-btn--save"
-                              onClick={handleApprove}
+                              onClick={handleApproveSaveClick}
                               disabled={actionLoading !== null}
                             >
                               {actionLoading === 'approve'
@@ -432,7 +543,7 @@ const AdminServiceRequestDetails = () => {
                   {status === 'APPROVED' && (
                     <button
                       className="asrd-action-btn asrd-action-btn--reject"
-                      onClick={() => handleAction('reject')}
+                      onClick={() => openConfirmModal('reject')}
                       disabled={actionLoading !== null}
                     >
                       {actionLoading === 'reject'
@@ -445,7 +556,7 @@ const AdminServiceRequestDetails = () => {
                   {status === 'DRIVER_COST' && (
                     <button
                       className="asrd-action-btn asrd-action-btn--close"
-                      onClick={() => handleAction('close')}
+                      onClick={() => openConfirmModal('close')}
                       disabled={actionLoading !== null}
                     >
                       {actionLoading === 'close'
@@ -465,8 +576,6 @@ const AdminServiceRequestDetails = () => {
             </div>{/* /details-col */}
           </div>{/* /layout */}
         </div>
-
-        <Footer />
       </main>
 
       {/* ── Lightbox ──────────────────────────────────── */}

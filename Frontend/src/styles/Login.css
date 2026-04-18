@@ -21,6 +21,11 @@
   margin-bottom: 24px;
 }
 
+.login-logo-image {
+  height: 48px;
+  width: auto;
+}
+
 .logo-title {
   font-size: 28px;
   font-weight: 700;
@@ -93,10 +98,6 @@
   color: #212529;
 }
 
-.forgot-password-link {
-  margin-top: 16px;
-  display: block;
-}
 
 .sign-in-btn:hover {
   transform: translateY(-1px);
