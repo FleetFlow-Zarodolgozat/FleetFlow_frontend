@@ -124,6 +124,17 @@ body.dark-mode .action-btn:hover svg {
   stroke: #e6edf3 !important;
 }
 
+body.dark-mode .action-btn-icon.action-edit {
+  background: transparent !important;
+  color: #4ade80 !important;
+  border: 1px solid #22c55e !important;
+}
+
+body.dark-mode .action-btn-icon.action-edit svg {
+  color: #4ade80 !important;
+  stroke: #4ade80 !important;
+}
+
 /* ---------- Cards ---------- */
 body.dark-mode .driver-dashboard .card,
 body.dark-mode .trips-dashboard .card,
@@ -1574,10 +1585,47 @@ body.dark-mode .asr-stat-value {
   color: #e6edf3 !important;
 }
 
-body.dark-mode .asr-stat-badge {
+body.dark-mode .asr-stat-badge,
+body.dark-mode .afl-stat-badge,
+body.dark-mode .at-stat-badge {
   background: #21262d !important;
   color: #8b949e !important;
   border-color: #30363d !important;
+}
+
+body.dark-mode .asr-stat-badge--blue,
+body.dark-mode .afl-stat-badge--blue,
+body.dark-mode .at-stat-badge--blue {
+  background-color: rgba(29, 78, 216, 0.25) !important;
+  color: #60a5fa !important;
+}
+
+body.dark-mode .asr-stat-badge--purple,
+body.dark-mode .afl-stat-badge--purple,
+body.dark-mode .at-stat-badge--purple {
+  background-color: rgba(91, 33, 182, 0.25) !important;
+  color: #a78bfa !important;
+}
+
+body.dark-mode .asr-stat-badge--green,
+body.dark-mode .afl-stat-badge--green,
+body.dark-mode .at-stat-badge--green {
+  background-color: rgba(22, 101, 52, 0.25) !important;
+  color: #4ade80 !important;
+}
+
+body.dark-mode .asr-stat-badge--orange,
+body.dark-mode .afl-stat-badge--orange,
+body.dark-mode .at-stat-badge--orange {
+  background-color: rgba(194, 65, 12, 0.25) !important;
+  color: #fb923c !important;
+}
+
+body.dark-mode .asr-stat-badge--red,
+body.dark-mode .afl-stat-badge--red,
+body.dark-mode .at-stat-badge--red {
+  background-color: rgba(153, 27, 27, 0.25) !important;
+  color: #f87171 !important;
 }
 
 body.dark-mode .asr-table-card {
@@ -1647,15 +1695,6 @@ body.dark-mode .asr-icon-btn {
   border-color: #30363d !important;
 }
 
-body.dark-mode .asr-icon-btn--view {
-  color: #58a6ff !important;
-}
-
-body.dark-mode .asr-icon-btn--view:hover {
-  background: #1c3a5e !important;
-  border-color: #1f6feb !important;
-}
-
 body.dark-mode .asr-empty p {
   color: #8b949e !important;
 }
@@ -1697,8 +1736,8 @@ body.dark-mode .asr-page-btn:disabled {
 }
 
 body.dark-mode .asr-page-btn--active {
-  background: #1f6feb !important;
-  border-color: #1f6feb !important;
+  background: #7c3aed !important;
+  border-color: #7c3aed !important;
   color: #fff !important;
 }
 
@@ -1842,6 +1881,18 @@ body.dark-mode .atd-plate-badge {
   background: #21262d !important;
   border-color: #30363d !important;
   color: #e6edf3 !important;
+}
+
+body.dark-mode .afl-page-btn--active {
+  background: #f97316 !important;
+  border-color: #f97316 !important;
+  color: #fff !important;
+}
+
+body.dark-mode .at-page-btn--active {
+  background: #1f6feb !important;
+  border-color: #1f6feb !important;
+  color: #fff !important;
 }
 
 body.dark-mode .afl-search-input::placeholder,
@@ -1995,19 +2046,45 @@ body.dark-mode .at-icon-btn {
 
 body.dark-mode .action-edit,
 body.dark-mode .vaction-btn.vaction-edit,
-body.dark-mode .asr-icon-btn--view,
-body.dark-mode .afl-icon-btn--view,
 body.dark-mode .at-icon-btn--view {
   color: #58a6ff !important;
   border-color: #1f6feb !important;
 }
 
+body.dark-mode .asr-icon-btn--view {
+  background-color: transparent !important;
+  border: 1px solid #7c3aed !important;
+  color: #7c3aed !important;
+}
+body.dark-mode .asr-icon-btn--view svg {
+  color: #7c3aed !important;
+  stroke: #7c3aed !important;
+}
+
+body.dark-mode .afl-icon-btn--view {
+  background-color: transparent !important;
+  border: 1px solid #f97316 !important;
+  color: #f97316 !important;
+}
+body.dark-mode .afl-icon-btn--view svg {
+  color: #f97316 !important;
+  stroke: #f97316 !important;
+}
+
 body.dark-mode .action-edit:hover,
 body.dark-mode .vaction-btn.vaction-edit:hover,
-body.dark-mode .asr-icon-btn--view:hover,
-body.dark-mode .afl-icon-btn--view:hover,
 body.dark-mode .at-icon-btn--view:hover {
-  background: transparent !important;
+  background-color: rgba(88, 166, 255, 0.15) !important;
+}
+
+body.dark-mode .asr-icon-btn--view:hover {
+  background-color: rgba(124, 58, 237, 0.15) !important;
+  border-color: #7c3aed !important;
+}
+
+body.dark-mode .afl-icon-btn--view:hover {
+  background-color: rgba(249, 115, 22, 0.15) !important;
+  border-color: #f97316 !important;
 }
 
 body.dark-mode .action-activate,
@@ -2022,7 +2099,7 @@ body.dark-mode .action-activate:hover,
 body.dark-mode .vaction-btn.vaction-activate:hover,
 body.dark-mode .afl-icon-btn--restore:hover,
 body.dark-mode .at-icon-btn--restore:hover {
-  background: transparent !important;
+  background-color: rgba(63, 185, 80, 0.15) !important;
 }
 
 body.dark-mode .action-deactivate,
@@ -2033,7 +2110,7 @@ body.dark-mode .vaction-btn.vaction-deactivate {
 
 body.dark-mode .action-deactivate:hover,
 body.dark-mode .vaction-btn.vaction-deactivate:hover {
-  background: transparent !important;
+  background-color: rgba(240, 136, 62, 0.15) !important;
 }
 
 body.dark-mode .action-delete,
@@ -2048,7 +2125,7 @@ body.dark-mode .action-delete:hover,
 body.dark-mode .vaction-btn.vaction-delete:hover,
 body.dark-mode .afl-icon-btn--delete:hover,
 body.dark-mode .at-icon-btn--delete:hover {
-  background: transparent !important;
+  background-color: rgba(248, 81, 73, 0.15) !important;
 }
 
 body.dark-mode .at-date-duration {

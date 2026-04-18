@@ -1,7 +1,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Alert, Badge, Button, Card, Col, Container, Pagination, Row, Spinner } from 'react-bootstrap';
+import { Button, Card, Pagination, Spinner } from 'react-bootstrap';
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
 import '../styles/DriverDashboard.css';
@@ -11,6 +11,7 @@ import Footer from '../components/Footer';
 import CustomModal from '../components/CustomModal';
 
 const ServiceRequests = () => {
+    // Státusz -> stat kártya kategória (összesítéshez).
     const getStatusBadgeVariant = (status) => {
         const s = status?.toUpperCase() || '';
         if (s === 'REQUESTED') return 'pending';
@@ -30,6 +31,7 @@ const ServiceRequests = () => {
         return 'status-default';
     };
 
+    // Dátumformázás egységesen a táblához és mobil kártyákhoz.
     const formatDateTimeFull = (value) => {
         if (!value) return 'N/A';
         const date = new Date(value);
@@ -46,7 +48,6 @@ const ServiceRequests = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [serviceRequests, setServiceRequests] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
     const [confirmModal, setConfirmModal] = useState({
         open: false,
         title: '',
@@ -71,6 +72,7 @@ const ServiceRequests = () => {
         return Math.max(1, Math.ceil((pagination.totalCount || 0) / pagination.pageSize));
     }, [pagination.totalCount, pagination.pageSize]);
 
+    // Különböző backend hibaszerkezetek egységes szöveggé alakítása.
     const getApiErrorMessage = (err, fallback) => {
         const data = err?.response?.data;
         if (typeof data === 'string') return data;
@@ -116,7 +118,6 @@ const ServiceRequests = () => {
 
     const fetchServiceRequests = async (pageToLoad = 1) => {
         setLoading(true);
-        setError('');
         try {
             const response = await api.get('/service-requests/mine', {
                 params: {
@@ -137,7 +138,8 @@ const ServiceRequests = () => {
                 typeof apiMessage === 'string'
                     ? apiMessage
                     : apiMessage?.message || apiMessage?.Message || 'Could not load service requests.';
-            setError(message);
+            openErrorModal(t('common.errorTitle'), message);
+            setServiceRequests([]);
         } finally {
             setLoading(false);
         }
@@ -161,7 +163,6 @@ const ServiceRequests = () => {
             confirmVariant: 'danger',
             onConfirm: async () => {
                 setLoading(true);
-                setError('');
                 try {
                     await api.delete(`/service-requests/cancel/${id}`);
                     await fetchServiceRequests(pagination.page);
@@ -268,8 +269,6 @@ const ServiceRequests = () => {
                                     <Spinner animation="border" role="status" />
                                     <span>{t('sr.loading')}</span>
                                 </div>
-                            ) : error ? (
-                                <Alert variant="danger" className="m-3">{error}</Alert>
                             ) : serviceRequests.length === 0 ? (
                                 <div className="sr-empty">
                                     <svg width="64" height="64" fill="none" stroke="#cbd5e1" strokeWidth="1.5" viewBox="0 0 24 24">

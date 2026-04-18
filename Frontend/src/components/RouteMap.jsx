@@ -32,6 +32,7 @@ const RouteMap = ({ startLocation, endLocation, activeField = 'start', onLocatio
         center: [47.4979, 19.0402], // Budapest default
         zoom: 7,
         zoomControl: true,
+        attributionControl: false,
       });
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {

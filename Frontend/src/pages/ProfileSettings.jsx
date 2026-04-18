@@ -1,7 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
-import { Card, Container, Row, Col, Alert, Spinner, Button, Form, Badge } from 'react-bootstrap';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Card, Container, Row, Col, Spinner, Button, Form } from 'react-bootstrap';
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
 import { authService } from '../services/authService';
@@ -22,17 +21,9 @@ const ProfileSettings = () => {
   const [profileImageUrl, setProfileImageUrl] = useState(null);
   const [profileImageError, setProfileImageError] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [feedback, setFeedback] = useState({ type: '', message: '' });
+  const [successModal, setSuccessModal] = useState({ open: false, message: '' });
   const [confirmModal, setConfirmModal] = useState({ open: false, title: '', message: '', onConfirm: null });
   const [errorModal, setErrorModal] = useState({ open: false, message: '' });
-  useEffect(() => {
-    if (feedback.message) {
-      const timer = setTimeout(() => {
-        setFeedback({ type: '', message: '' });
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [feedback]);
   const fileInputRef = useRef(null);
 
   // Personal Information form
@@ -68,6 +59,8 @@ const ProfileSettings = () => {
     setErrorModal({ open: true, message });
   };
 
+  // A backend hibák szövegét kulcsszavak alapján lokalizáljuk,
+  // hogy a felhasználó mindig érthető, konzisztens üzenetet kapjon.
   const getLocalizedBackendError = (err, fallbackKey = 'profile.error.backendGeneric') => {
     const data = err?.response?.data;
     const rawMessage =
@@ -150,7 +143,6 @@ const ProfileSettings = () => {
   };
 
   const handleSave = async () => {
-    setFeedback({ type: '', message: '' });
     try {
       const formData = new FormData();
       if (personalInfo.fullName) formData.append('FullName', personalInfo.fullName);
@@ -162,7 +154,7 @@ const ProfileSettings = () => {
       await api.patch('/profile/edit', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      setFeedback({ type: 'success', message: 'Profile updated successfully.' });
+      setSuccessModal({ open: true, message: 'Profile updated successfully.' });
       setEditMode(false);
       fetchProfile();
       setNotificationRefresh((prev) => prev + 1);
@@ -186,7 +178,6 @@ const ProfileSettings = () => {
       });
     }
     setEditMode(false);
-    setFeedback({ type: '', message: '' });
   };
 
   const handleImageUploadClick = () => {
@@ -214,7 +205,7 @@ const ProfileSettings = () => {
       await api.patch('/profile/edit', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      setFeedback({ type: 'success', message: 'Profile picture updated successfully.' });
+      setSuccessModal({ open: true, message: 'Profile picture updated successfully.' });
 
       // Reload image
       const imgResponse = await api.get(`/files/thumbnail/${profile.id}`, { responseType: 'blob' });
@@ -230,7 +221,7 @@ const ProfileSettings = () => {
   const handleRemovePicture = async () => {
     try {
       await api.patch('/profile/delete-profile-image');
-      setFeedback({ type: 'success', message: 'Profile picture removed successfully.' });
+      setSuccessModal({ open: true, message: 'Profile picture removed successfully.' });
       setProfileImageUrl(null);
       setProfileImageError(true);
       fetchProfile();
@@ -269,7 +260,7 @@ const ProfileSettings = () => {
         document.body.classList.remove('dark-mode');
       }
 
-      // Force re-render of all components by triggering a custom event
+      // A custom eventet a többi komponens figyeli, így frissül a teljes UI.
       window.dispatchEvent(new CustomEvent('theme-change', { detail: { isDarkMode: newVal } }));
     } else {
       setPreferences(prev => ({ ...prev, [key]: !prev[key] }));
@@ -305,18 +296,12 @@ const ProfileSettings = () => {
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} notificationRefresh={notificationRefresh} />
 
       <main className="main-content">
-        <Container fluid className="px-4 py-4" style={{ maxWidth: '1400px' }}>
+        <Container fluid className="px-4 py-4 profile-container">
           {/* Page Header */}
           <div className="page-header mb-4">
             <h1 className="page-title">{t('profile.title')}</h1>
             <p className="page-subtitle">{t('profile.subtitle')}</p>
           </div>
-
-          {feedback.type === 'success' && feedback.message && (
-            <Alert variant={feedback.type} className="mb-4">
-              {feedback.message}
-            </Alert>
-          )}
 
           <CustomModal
             isOpen={errorModal.open}
@@ -328,6 +313,18 @@ const ProfileSettings = () => {
             }}
           >
             <p className="mb-0">{errorModal.message}</p>
+          </CustomModal>
+
+          <CustomModal
+            isOpen={successModal.open}
+            onClose={() => setSuccessModal({ open: false, message: '' })}
+            title={t('common.successTitle')}
+            primaryAction={{
+              label: t('common.ok'),
+              onClick: () => setSuccessModal({ open: false, message: '' }),
+            }}
+          >
+            <p className="mb-0">{successModal.message}</p>
           </CustomModal>
 
           <Row className="g-4 h-100 align-items-stretch">
@@ -361,7 +358,7 @@ const ProfileSettings = () => {
                             ref={fileInputRef}
                             onChange={handleFileChange}
                             accept="image/jpeg,image/png,image/gif"
-                            style={{ display: 'none' }}
+                            className="file-input-hidden"
                           />
                         </div>
                       </div>
@@ -394,7 +391,7 @@ const ProfileSettings = () => {
                 <Col xs={12}>
                   <Card className="help-support-card">
                     <Card.Body className="p-0">
-                      <div className="d-flex align-items-center gap-3" style={{ padding: '24px' }}>
+                      <div className="d-flex align-items-center gap-3 help-support-row">
                         <div className="help-icon-wrapper">
                           <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <circle cx="24" cy="24" r="21" fill="currentColor" fillOpacity="0.08" stroke="currentColor" strokeWidth="2" />
@@ -402,12 +399,12 @@ const ProfileSettings = () => {
                             <circle cx="24" cy="33" r="1.8" fill="currentColor" />
                           </svg>
                         </div>
-                        <div className="help-content" style={{ flex: 1 }}>
+                        <div className="help-content">
                           <h4 className="help-title mb-1">{t('profile.help.title')}</h4>
                           <p className="help-description mb-2">
                             {t('profile.help.description')}
                           </p>
-                          <Button variant="link" className="help-link p-0" onClick={() => navigate('/help')} style={{ textDecoration: 'none' }}>
+                          <Button variant="link" className="help-link p-0" onClick={() => navigate('/help')}>
                             {t('profile.help.link')}
                           </Button>
                         </div>
@@ -639,12 +636,12 @@ const ProfileSettings = () => {
                             {isAdmin ? (
                               <div
                                 title={t('profile.pref.languageNotAvailable')}
-                                style={{ cursor: 'not-allowed' }}
+                                className="language-select-disabled"
                               >
                                 <Form.Select
                                   size="sm"
                                   disabled
-                                  style={{ opacity: 0.4, pointerEvents: 'none', minWidth: 130 }}
+                                  className="profile-language-select profile-language-select--disabled"
                                   value="en"
                                   readOnly
                                 >
@@ -658,7 +655,7 @@ const ProfileSettings = () => {
                                 size="sm"
                                 value={language}
                                 onChange={(e) => setLanguage(e.target.value)}
-                                style={{ minWidth: 130 }}
+                                className="profile-language-select"
                               >
                                 <option value="en">English</option>
                                 <option value="hu">Hungarian</option>

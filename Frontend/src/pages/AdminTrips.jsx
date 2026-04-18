@@ -909,12 +909,6 @@ ${tripCards}
                       <div key={id} className={`at-mobile-card${isDeleted ? ' at-mobile-card--deleted' : ''}`}>
                         <div className="at-mc-header">
                           <div className="at-vehicle-cell">
-                            <svg className="at-truck-icon" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-                              <rect x="2" y="11" width="14" height="9" rx="1" strokeLinecap="round" strokeLinejoin="round"/>
-                              <path d="M16 11l4 4v5h-4" strokeLinecap="round" strokeLinejoin="round"/>
-                              <circle cx="6.5" cy="20" r="1.5"/>
-                              <circle cx="17.5" cy="20" r="1.5"/>
-                            </svg>
                             <span className="at-plate">{plate}</span>
                           </div>
                           <span className="at-mc-distance">{distance.toFixed(1)} km</span>
@@ -937,45 +931,48 @@ ${tripCards}
                           <span className="at-mc-label">Destination</span>
                           <span>{destination}</span>
                         </div>
-                        <div className="at-mc-actions">
-                          <button
-                            className="at-icon-btn at-icon-btn--view"
-                            title="Details"
-                            onClick={() => navigate('/admin-trip-details', { state: { trip } })}
-                          >
-                            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" strokeLinecap="round" strokeLinejoin="round"/>
-                              <circle cx="12" cy="12" r="3" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                          </button>
-                          {isDeleted ? (
+                        <div className="at-mc-row at-mc-row--actions">
+                          <span className="at-mc-label">Actions</span>
+                          <div className="at-mc-actions">
                             <button
-                              className="at-icon-btn at-icon-btn--restore"
-                              title="Restore"
-                              disabled={actionLoading === id}
-                              onClick={() => handleRestore(id)}
+                              className="at-icon-btn at-icon-btn--view"
+                              title="Details"
+                              onClick={() => navigate('/admin-trip-details', { state: { trip } })}
                             >
                               <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                                <path d="M1 4v6h6" strokeLinecap="round" strokeLinejoin="round"/>
-                                <path d="M3.51 15a9 9 0 1 0 .49-4.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" strokeLinecap="round" strokeLinejoin="round"/>
+                                <circle cx="12" cy="12" r="3" strokeLinecap="round" strokeLinejoin="round"/>
                               </svg>
                             </button>
-                          ) : (
-                            <button
-                              className="at-icon-btn at-icon-btn--delete"
-                              title="Delete"
-                              disabled={actionLoading === id}
-                              onClick={() => handleDelete(id)}
-                            >
-                              <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                                <polyline points="3 6 5 6 21 6" strokeLinecap="round" strokeLinejoin="round"/>
-                                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" strokeLinecap="round" strokeLinejoin="round"/>
-                                <path d="M10 11v6" strokeLinecap="round" strokeLinejoin="round"/>
-                                <path d="M14 11v6" strokeLinecap="round" strokeLinejoin="round"/>
-                                <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                            </button>
-                          )}
+                            {isDeleted ? (
+                              <button
+                                className="at-icon-btn at-icon-btn--restore"
+                                title="Restore"
+                                disabled={actionLoading === id}
+                                onClick={() => handleRestore(id)}
+                              >
+                                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                  <path d="M1 4v6h6" strokeLinecap="round" strokeLinejoin="round"/>
+                                  <path d="M3.51 15a9 9 0 1 0 .49-4.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                              </button>
+                            ) : (
+                              <button
+                                className="at-icon-btn at-icon-btn--delete"
+                                title="Delete"
+                                disabled={actionLoading === id}
+                                onClick={() => handleDelete(id)}
+                              >
+                                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                  <polyline points="3 6 5 6 21 6" strokeLinecap="round" strokeLinejoin="round"/>
+                                  <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" strokeLinecap="round" strokeLinejoin="round"/>
+                                  <path d="M10 11v6" strokeLinecap="round" strokeLinejoin="round"/>
+                                  <path d="M14 11v6" strokeLinecap="round" strokeLinejoin="round"/>
+                                  <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
                     );

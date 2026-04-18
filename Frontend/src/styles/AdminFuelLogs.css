@@ -543,6 +543,7 @@
 
 .afl-mobile-cards {
   display: none;
+  padding: 16px;
 }
 
 .afl-table {
@@ -837,12 +838,17 @@
 
 /* ─── Mobile Cards ───────────────────────────────────────────── */
 .afl-mobile-card {
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background: #ffffff;
   padding: 16px;
-  border-bottom: 1px solid #f1f5f9;
+  margin-bottom: 12px;
+  width: 100%;
 }
 
 .afl-mobile-card:last-child {
-  border-bottom: none;
+  margin-bottom: 0;
 }
 
 .afl-mobile-card--deleted {
@@ -854,8 +860,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 12px;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f1f5f9;
   flex-wrap: wrap;
 }
 
@@ -863,25 +871,88 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 12px;
   padding: 6px 0;
-  border-top: 1px solid #f8fafc;
   font-size: 0.87rem;
   color: #334155;
 }
 
 .afl-mc-label {
-  font-size: 0.77rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.afl-mc-row > span:last-child {
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.afl-mc-row .afl-td--cost {
+  color: #16a34a;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-  color: #94a3b8;
+}
+
+body.dark-mode .afl-mobile-card {
+  background: #1c2230;
+  border-color: #30363d;
+  box-shadow: none;
+}
+
+body.dark-mode .afl-mc-header {
+  border-bottom-color: #30363d;
+}
+
+body.dark-mode .afl-mc-row {
+  color: #e6edf3;
+}
+
+body.dark-mode .afl-mc-label {
+  color: #8b949e;
+}
+
+body.dark-mode .afl-mc-row > span:last-child {
+  color: #e6edf3;
+}
+
+body.dark-mode .afl-mc-row .afl-td--cost {
+  color: #3fb950;
+}
+
+body.dark-mode .afl-plate-badge {
+  background: #21262d;
+  border-color: #30363d;
+  color: #e6edf3;
+}
+
+body.dark-mode .afl-date-main {
+  color: #e6edf3;
+}
+
+body.dark-mode .afl-date-time {
+  color: #8b949e;
+}
+
+body.dark-mode .afl-driver-email {
+  color: #e6edf3;
 }
 
 /* ─── Responsive ─────────────────────────────────────────────── */
 @media (max-width: 1024px) {
   .afl-main {
     margin-left: 0;
+  }
+
+  .afl-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .afl-desktop-table {
+    display: none;
+  }
+
+  .afl-mobile-cards {
+    display: block;
   }
 }
 
@@ -920,14 +991,6 @@
   .afl-clear-date-btn {
     align-self: stretch;
     justify-content: center;
-  }
-
-  .afl-desktop-table {
-    display: none;
-  }
-
-  .afl-mobile-cards {
-    display: block;
   }
 
   .afl-header {
@@ -969,5 +1032,11 @@
     min-width: 30px;
     height: 30px;
     font-size: 0.82rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .afl-stats-grid {
+    grid-template-columns: 1fr;
   }
 }

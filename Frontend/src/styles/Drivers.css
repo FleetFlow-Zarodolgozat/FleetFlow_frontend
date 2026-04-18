@@ -381,6 +381,9 @@
 }
 
 .page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: #fff;
   border: 1px solid #e2e8f0;
   color: #334155;
@@ -391,6 +394,11 @@
   cursor: pointer;
   transition: all 0.15s ease;
   white-space: nowrap;
+}
+
+.page-btn svg {
+  display: block;
+  flex-shrink: 0;
 }
 
 .page-btn:hover:not(:disabled) {

@@ -466,7 +466,9 @@ const Drivers = () => {
                     disabled={page <= 1}
                     onClick={() => fetchDrivers(page - 1)}
                   >
-                    Previous
+                    <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <polyline points="15,18 9,12 15,6" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
                   </button>
                   {buildPaginationItems().map((item, idx) =>
                     item === '...' ? (
@@ -486,7 +488,9 @@ const Drivers = () => {
                     disabled={page >= totalPages}
                     onClick={() => fetchDrivers(page + 1)}
                   >
-                    Next
+                    <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <polyline points="9,6 15,12 9,18" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
                   </button>
                 </div>
               </div>

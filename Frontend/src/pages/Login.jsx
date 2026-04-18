@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
 import { useLanguage } from '../contexts/LanguageContext';
-import { Container, Card, Form, Button, Alert } from 'react-bootstrap';
+import { Card, Form, Button } from 'react-bootstrap';
 import Footer from '../components/Footer';
+import CustomModal from '../components/CustomModal';
 import '../styles/Login.css';
 
 const Login = () => {
@@ -11,13 +12,13 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
+  const [errorModal, setErrorModal] = useState({ open: false, message: '' });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // Bejelentkezés és nyelvi beállítás a szerepkör alapján.
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
     setLoading(true);
 
     try {
@@ -37,10 +38,10 @@ const Login = () => {
         navigate('/dashboard'); // DashboardRouter automatikusan DriverDashboard-ot ad
       }
     } catch (err) {
-      setError(
-        err.response?.data?.message || 
-        'Login failed. Please check your email and password.'
-      );
+      setErrorModal({
+        open: true,
+        message: err.response?.data?.message || 'Login failed. Please check your email and password.',
+      });
     } finally {
       setLoading(false);
     }
@@ -54,19 +55,12 @@ const Login = () => {
             {/* Logo and Header */}
             <div className="login-header">
               <div className="logo-section">
-                <img src="/fleetflow_logo.png" alt="FleetFlow Logo" style={{ height: '48px', width: 'auto' }} />
+                <img src="/fleetflow_logo.png" alt="FleetFlow Logo" className="login-logo-image" />
                 <h1 className="logo-title">FleetFlow</h1>
               </div>
               <h2 className="welcome-title">{t('login.title')}</h2>
               <p className="welcome-subtitle">{t('login.subtitle')}</p>
             </div>
-
-            {/* Error Alert */}
-            {error && (
-              <Alert variant="danger" dismissible onClose={() => setError('')} className="mb-4">
-                {error}
-              </Alert>
-            )}
 
             {/* Login Form */}
             <Form onSubmit={handleSubmit}>
@@ -132,6 +126,17 @@ const Login = () => {
 
         <Footer />
       </div>
+      <CustomModal
+        isOpen={errorModal.open}
+        onClose={() => setErrorModal({ open: false, message: '' })}
+        title={t('common.errorTitle')}
+        primaryAction={{
+          label: t('common.ok'),
+          onClick: () => setErrorModal({ open: false, message: '' }),
+        }}
+      >
+        <p className="mb-0">{errorModal.message}</p>
+      </CustomModal>
     </div>
   );
 };

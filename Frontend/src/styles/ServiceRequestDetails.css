@@ -9,6 +9,13 @@
   margin-left: 2px;
 }
 
+/* Opcionális mező jelzése, kisebb és visszafogottabb tipográfiával. */
+.srd-optional-note {
+  color: #6c757d;
+  font-weight: 400;
+  font-size: 0.85rem;
+}
+
 /* ---- Info rows (Title, Description, Service Date) ---- */
 .srd-info-row {
   padding: 10px 0 10px 14px;
@@ -59,6 +66,41 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+}
+
+/* A státusz ikon színezését a status-* osztályok adják. */
+.srd-meta-icon-status {
+  color: #475569;
+}
+
+.srd-meta-icon-status.status-requested {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.srd-meta-icon-status.status-approved {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.srd-meta-icon-status.status-rejected {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.srd-meta-icon-status.status-closed {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.srd-meta-icon-status.status-driver-cost {
+  background: #f3e8ff;
+  color: #6b21a8;
+}
+
+.srd-meta-icon-status.status-default {
+  background: #f1f5f9;
+  color: #475569;
 }
 
 .srd-meta-icon-status {
@@ -164,11 +206,34 @@
   box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
 }
 
-/* ---- Dropzone purple accent ---- */
+/* ---- Dropzone purple accent ----
+  A hover/drag állapot vizuálisan jelzi, hogy a zóna aktív. */
 .srd-dropzone:hover,
 .srd-dropzone.dragging {
   border-color: #7c3aed !important;
   background: #f5f3ff !important;
+}
+
+.srd-file-input {
+  display: none;
+}
+
+.srd-upload-icon {
+  background: #ede9fe;
+}
+
+/* Nyelvi figyelmeztetés: sárga árnyalat és ikon egy sorban. */
+.srd-language-warning {
+  color: #b45309;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.srd-language-warning-icon {
+  flex-shrink: 0;
 }
 
 /* ---- Current Invoice preview ---- */

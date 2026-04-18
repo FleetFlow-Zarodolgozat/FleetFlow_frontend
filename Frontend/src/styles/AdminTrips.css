@@ -470,6 +470,7 @@
 
 .at-mobile-cards {
   display: none;
+  padding: 16px;
 }
 
 .at-table {
@@ -751,12 +752,17 @@
 
 /* ─── Mobile Cards ─────────────────────────────────────────────── */
 .at-mobile-card {
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background: #ffffff;
   padding: 16px 20px;
-  border-bottom: 1px solid #f1f5f9;
+  margin-bottom: 12px;
+  width: 100%;
 }
 
 .at-mobile-card:last-child {
-  border-bottom: none;
+  margin-bottom: 0;
 }
 
 .at-mobile-card--deleted {
@@ -846,7 +852,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 6px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .at-mc-distance {
@@ -868,17 +876,59 @@
   padding: 6px 0;
   font-size: 0.85rem;
   color: #374151;
-  border-top: 1px solid #f8fafc;
-  gap: 8px;
+  gap: 12px;
 }
 
 .at-mc-label {
-  font-weight: 600;
+  font-weight: 500;
   color: #64748b;
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
+  font-size: 0.85rem;
   flex-shrink: 0;
+}
+
+.at-mc-row > span:last-child {
+  font-weight: 500;
+  color: #1e293b;
+}
+
+body.dark-mode .at-mobile-card {
+  background: #1c2230;
+  border-color: #30363d;
+  box-shadow: none;
+}
+
+body.dark-mode .at-mc-header {
+  border-bottom-color: #30363d;
+}
+
+body.dark-mode .at-mc-distance {
+  color: #e6edf3;
+}
+
+body.dark-mode .at-mc-date {
+  color: #8b949e;
+}
+
+body.dark-mode .at-mc-row {
+  color: #e6edf3;
+}
+
+body.dark-mode .at-mc-label {
+  color: #8b949e;
+}
+
+body.dark-mode .at-mc-row > span:last-child {
+  color: #e6edf3;
+}
+
+body.dark-mode .at-plate {
+  background: #21262d;
+  border-color: #30363d;
+  color: #e6edf3;
+}
+
+body.dark-mode .at-driver-email {
+  color: #e6edf3;
 }
 
 /* ─── Responsive ─────────────────────────────────────────────── */
@@ -896,6 +946,14 @@
   .at-page {
     padding: 20px 16px 16px 16px;
   }
+
+  .at-desktop-table {
+    display: none;
+  }
+
+  .at-mobile-cards {
+    display: block;
+  }
 }
 
 @media (max-width: 900px) {
@@ -911,15 +969,7 @@
 
 @media (max-width: 768px) {
   .at-stats-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .at-desktop-table {
-    display: none;
-  }
-
-  .at-mobile-cards {
-    display: block;
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .at-date-range {
@@ -943,5 +993,17 @@
   .at-reset-btn {
     width: 100%;
     text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .at-stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 576px) {
+  .at-stats-grid {
+    grid-template-columns: 1fr;
   }
 }

@@ -23,6 +23,14 @@
   overflow-y: auto;
 }
 
+.profile-container {
+  max-width: 1400px;
+}
+
+.file-input-hidden {
+  display: none;
+}
+
 /* Page Header */
 .page-header {
   margin-bottom: 32px;
@@ -171,17 +179,6 @@
   line-height: 1.5;
 }
 
-/* Security Card */
-.security-card {
-  background: #ffffff;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: stretch;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-}
-
 .help-support-card {
   background: linear-gradient(135deg, #f0f7ff 0%, #dbeafe 100%);
   border: 1px solid #0d6efd;
@@ -207,6 +204,10 @@
   color: inherit;
 }
 
+.help-support-row {
+  padding: 24px;
+}
+
 .help-content {
   flex: 1;
 }
@@ -230,61 +231,11 @@
   font-size: 14px;
   transition: all 0.2s;
   padding: 0 !important;
+  text-decoration: none;
 }
 
 .help-link:hover {
   color: #0b5ed7 !important;
-}
-
-.security-card .card-body {
-  padding: 20px 24px;
-  /* visszaállítjuk az eredeti blokkot, hogy a belső d-flex működjön */
-}
-
-.security-icon {
-  width: 48px;
-  height: 48px;
-  background: #dbeafe;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  align-self: center;
-}
-
-.security-icon svg {
-  stroke: #0d6efd;
-}
-
-.security-info {
-  flex: 1;
-}
-
-.security-title {
-  font-size: 15px;
-  font-weight: 600;
-  color: #1a1a2e;
-  margin: 0 0 4px 0;
-}
-
-.security-text {
-  font-size: 13px;
-  color: #6c757d;
-  margin: 0 0 8px 0;
-}
-
-.security-card .btn-link {
-  color: #0d6efd;
-  font-weight: 500;
-  padding: 0;
-  text-decoration: none;
-  font-size: 14px;
-}
-
-.security-card .btn-link:hover {
-  color: #0b5ed7;
-  text-decoration: underline;
 }
 
 /* Personal Information Card */
@@ -343,14 +294,6 @@
 
 .input-with-icon .form-control {
   padding-left: 44px;
-}
-
-.role-badge {
-  font-size: 11px;
-  font-weight: 600;
-  padding: 4px 10px;
-  border-radius: 6px;
-  vertical-align: middle;
 }
 
 .form-actions {
@@ -436,7 +379,22 @@
   align-items: center;
 }
 
-/* Toggle Switch */
+.profile-language-select {
+  min-width: 130px;
+}
+
+.profile-language-select--disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.language-select-disabled {
+  cursor: not-allowed;
+}
+
+/* Toggle Switch
+  A háttérszín és a csúszka pozíciója együtt jelzi az állapotot.
+  Az animációt a translateX adja, így nem ugrik, hanem finoman csúszik. */
 .toggle-switch {
   width: 52px;
   height: 28px;
@@ -471,48 +429,6 @@
   height: 1px;
   background: #e5e9f2;
   margin: 8px 0;
-}
-
-/* Danger Zone Card */
-.danger-zone-card {
-  background: #ffffff;
-  border: 1px solid #fecaca;
-}
-
-.danger-zone-card .card-body {
-  padding: 24px;
-}
-
-.danger-zone-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 24px;
-}
-
-.danger-zone-text {
-  flex: 1;
-}
-
-.danger-zone-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #dc2626;
-  margin: 0 0 6px 0;
-}
-
-.danger-zone-description {
-  font-size: 13px;
-  color: #991b1b;
-  margin: 0;
-  line-height: 1.5;
-}
-
-.delete-account-btn {
-  padding: 10px 20px;
-  font-weight: 500;
-  border-radius: 8px;
-  white-space: nowrap;
 }
 
 /* App Download Card */
@@ -566,29 +482,6 @@
   color: #1e3a8a;
   margin: 0 0 10px 0;
   line-height: 1.5;
-}
-
-.app-download-email {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: #475569;
-  flex-wrap: wrap;
-}
-
-.app-download-email-label {
-  font-weight: 600;
-}
-
-.app-download-email-link {
-  color: #1d4ed8;
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.app-download-email-link:hover {
-  text-decoration: underline;
 }
 
 .app-download-btn {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Container, Row, Col, Pagination, Badge, Alert, Spinner, Button } from 'react-bootstrap';
+import { Card, Container, Row, Col, Pagination, Spinner, Button } from 'react-bootstrap';
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -14,7 +14,6 @@ const Trips = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [confirmModal, setConfirmModal] = useState({
     open: false,
     title: '',
@@ -79,7 +78,7 @@ const Trips = () => {
     setErrorModal((prev) => ({ ...prev, open: false }));
   };
 
-  // Stats calculation
+  // Statisztikák számítása az aktuális oldali adatokból.
   const stats = {
     totalTrips: pagination.totalCount,
     totalDistance: trips.reduce((sum, trip) => sum + (trip.DistanceKm || trip.distanceKm || 0), 0),
@@ -88,7 +87,6 @@ const Trips = () => {
 
   const fetchTrips = async (pageToLoad = 1) => {
     setLoading(true);
-    setError('');
     try {
       const response = await api.get('/trips/mine', {
         params: {
@@ -104,7 +102,8 @@ const Trips = () => {
         pageSize: payload.pageSize || pagination.pageSize,
       });
     } catch (err) {
-      setError('An error occurred while fetching trips.');
+      openErrorModal(t('common.errorTitle'), 'An error occurred while fetching trips.');
+      setTrips([]);
     } finally {
       setLoading(false);
     }
@@ -114,6 +113,7 @@ const Trips = () => {
     fetchTrips(1);
   }, []);
 
+  // Lapozó generálása: széleken és az aktuális környezetében mutatjuk az oldalakat.
   const buildPagination = () => {
     const items = [];
     const current = pagination.page;
@@ -139,7 +139,6 @@ const Trips = () => {
       cancelLabel: t('common.cancel'),
       confirmVariant: 'danger',
       onConfirm: async () => {
-        setError('');
         try {
           await api.patch(`/trips/delete/${id}`);
           await fetchTrips(pagination.page);
@@ -215,8 +214,6 @@ const Trips = () => {
                 <div className="py-5 text-center">
                   <Spinner animation="border" role="status" />
                 </div>
-              ) : error ? (
-                <Alert variant="danger" className="m-3 mb-0">{error}</Alert>
               ) : trips.length === 0 ? (
                 <div className="sr-empty">
                   <svg width="64" height="64" fill="none" stroke="#cbd5e1" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -233,13 +230,6 @@ const Trips = () => {
                   {/* Desktop Table View */}
                   <div className="desktop-table">
                     <table className="trips-table">
-                      <colgroup>
-                        <col style={{ width: '12%' }} />
-                        <col style={{ width: '18%' }} />
-                        <col style={{ width: '38%' }} />
-                        <col style={{ width: '14%' }} />
-                        <col style={{ width: '18%' }} />
-                      </colgroup>
                       <thead>
                         <tr>
                           <th className="trip-header">{t('trips.th.date')}</th>

@@ -337,7 +337,8 @@
   background: #ef4444;
 }
 
-/* ─── Action Buttons ─────────────────────────────────── */
+/* ─── Action Buttons ───────────────────────────────────
+  Ikon gombok különböző státuszokhoz (edit/activate/deactivate). */
 .vactions-cell {
   display: flex;
   gap: 0.45rem;

@@ -92,6 +92,15 @@ const DriverDashboard = () => {
   // A dashboard mobil nézetben is ugyanazt a sidebar komponenst használja,
   // ezért itt tartjuk az open/close állapotot, amit a Sidebar kívülről vezérel.
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isMobileCalendar, setIsMobileCalendar] = useState(window.innerWidth <= 1024);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobileCalendar(window.innerWidth <= 1024);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const advanceCarousel = () => {
     setActiveCardIndex(prev => (prev + 1) % CARD_COUNT);
@@ -680,9 +689,34 @@ const DriverDashboard = () => {
             {/* Schedule Calendar */}
             <Card className="schedule-card h-100">
               <Card.Header className="bg-light">
-                <h3 className="mb-0 text-center">{t('dashboard.schedule.title')}</h3>
+                <div className={`schedule-header-row d-flex align-items-center ${isMobileCalendar ? 'justify-content-center' : 'justify-content-between'}`}>
+                  <h3 className={`mb-0 ${isMobileCalendar ? 'text-center' : ''}`}>{t('dashboard.schedule.title')}</h3>
+                  {!isMobileCalendar && <div className="calendar-nav-arrows d-flex align-items-center gap-2">
+                    <Button variant="outline-secondary" size="sm" onClick={() => {
+                      const newDate = new Date(calendarDate);
+                      newDate.setMonth(newDate.getMonth() - 1);
+                      setCalendarDate(newDate);
+                    }}>
+                      <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <polyline points="15,18 9,12 15,6" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </Button>
+                    <span className="current-month">
+                      {calendarDate.toLocaleDateString(t('dashboard.locale'), { month: 'long', year: 'numeric' })}
+                    </span>
+                    <Button variant="outline-secondary" size="sm" onClick={() => {
+                      const newDate = new Date(calendarDate);
+                      newDate.setMonth(newDate.getMonth() + 1);
+                      setCalendarDate(newDate);
+                    }}>
+                      <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <polyline points="9,18 15,12 9,6" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </Button>
+                  </div>}
+                </div>
               </Card.Header>
-              <Card.Body className="rbc-wrapper dashboard-calendar-body">
+              <Card.Body className={`rbc-wrapper dashboard-calendar-body ${isMobileCalendar ? 'dashboard-calendar-body--mobile' : ''}`}>
                 {!selectedCalendarEvent ? (
                   <Calendar
                     localizer={localizer}
@@ -697,7 +731,7 @@ const DriverDashboard = () => {
                     view={calendarView}
                     onView={setCalendarView}
                     views={['month', 'week', 'day']}
-                    className="dashboard-calendar"
+                    className={`dashboard-calendar ${isMobileCalendar ? 'dashboard-calendar--mobile' : ''}`}
                     toolbar={true}
                     messages={{
                       today: t('adminDash.cal.today'),
@@ -710,7 +744,7 @@ const DriverDashboard = () => {
                     popup
                   />
                 ) : (
-                  <div className="h-100 d-flex flex-column">
+                  <div className="h-100 d-flex flex-column flex-grow-1 dashboard-min-height-0">
                     <div className="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
                       <div>
                         <h4 className="mb-1 fw-bold">{t('dashboard.event.detail.title')}</h4>

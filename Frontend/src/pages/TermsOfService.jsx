@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Container, Card } from 'react-bootstrap';
+import { useState } from 'react';
+import { Card } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import Sidebar from '../components/Sidebar';
@@ -25,7 +25,7 @@ const TermsOfService = () => {
               <div className="legal-header">
                 <Link to="/login" className="logo-link">
                   <div className="logo-section">
-                    <img src="/fleetflow_logo.png" alt="FleetFlow Logo" style={{ height: '48px', width: 'auto' }} />
+                    <img src="/fleetflow_logo.png" alt="FleetFlow Logo" className="legal-logo-image" />
                     <h1 className="logo-title">FleetFlow</h1>
                   </div>
                 </Link>

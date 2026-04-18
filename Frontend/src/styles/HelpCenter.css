@@ -26,16 +26,16 @@
   margin-bottom: 24px;
 }
 
+.help-logo-image {
+  height: 48px;
+  width: auto;
+}
+
 .logo-title {
   font-size: 28px;
   font-weight: 700;
   color: #212529;
   margin: 0;
-}
-
-.search-box {
-  max-width: 600px;
-  margin: 0 auto 48px;
 }
 
 .help-card {
@@ -50,6 +50,31 @@
 
 .faq-item {
   border-radius: 8px;
+}
+
+.help-quick-card {
+  cursor: pointer;
+  max-width: 300px;
+  width: 100%;
+}
+
+.help-quick-icon {
+  width: 56px;
+  height: 56px;
+}
+
+.faq-header {
+  cursor: pointer;
+}
+
+/* A FAQ nyíl forgatása a nyitott állapot jelzéséhez. */
+.faq-chevron {
+  color: #6c757d;
+  transition: transform 0.2s;
+}
+
+.faq-chevron--open {
+  transform: rotate(180deg);
 }
 
 .page-footer a:hover {

@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Alert, Button, Container, Spinner } from 'react-bootstrap';
+import { Button, Container, Spinner } from 'react-bootstrap';
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
 import Footer from '../components/Footer';
@@ -29,7 +29,7 @@ const Vehicles = () => {
 
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [errorModal, setErrorModal] = useState({ open: false, message: '' });
   const [totalCount, setTotalCount] = useState(0);
   const [page, setPage] = useState(1);
 
@@ -62,7 +62,6 @@ const Vehicles = () => {
 
   const fetchVehicles = useCallback(async (pageToLoad = 1) => {
     setLoading(true);
-    setError('');
     try {
       const params = {
         page: pageToLoad,
@@ -84,7 +83,7 @@ const Vehicles = () => {
         typeof apiMessage === 'string'
           ? apiMessage
           : apiMessage?.message || apiMessage?.Message || 'An error occurred while fetching vehicles.';
-      setError(message);
+      setErrorModal({ open: true, message });
     } finally {
       setLoading(false);
     }
@@ -98,6 +97,7 @@ const Vehicles = () => {
   useEffect(() => {
     if (vehicles.length === 0) return;
     let cancelled = false;
+    // A listában szereplő sofőrképek előtöltése, hogy a táblázat villanásmentes legyen.
     const fetchImages = async () => {
       const newImages = {};
       await Promise.all(
@@ -121,6 +121,7 @@ const Vehicles = () => {
     return () => { cancelled = true; };
   }, [vehicles]);
 
+  // Keresés késleltetve, hogy ne küldjünk felesleges kéréseket.
   const handleSearchInputChange = (e) => {
     const val = e.target.value;
     setSearchInput(val);
@@ -140,7 +141,6 @@ const Vehicles = () => {
     if (!id) return;
     setDeactivateModalOpen(false);
     setTogglingId(id);
-    setError('');
     try {
       if (userEmail) {
         const driversRes = await api.get('/admin/drivers', { params: { page: 1, pageSize: 200 } });
@@ -164,7 +164,7 @@ const Vehicles = () => {
         typeof apiMessage === 'string'
           ? apiMessage
           : apiMessage?.message || apiMessage?.Message || 'An error occurred while deactivating the vehicle.';
-      setError(message);
+      setErrorModal({ open: true, message });
     } finally {
       setTogglingId(null);
     }
@@ -180,7 +180,6 @@ const Vehicles = () => {
     if (!id) return;
     setActivateModalOpen(false);
     setTogglingId(id);
-    setError('');
     try {
       await api.patch(`/admin/vehicles/activate/${id}`);
       setSelectedVehicleAction({ id: null, userEmail: null });
@@ -192,7 +191,7 @@ const Vehicles = () => {
         typeof apiMessage === 'string'
           ? apiMessage
           : apiMessage?.message || apiMessage?.Message || 'An error occurred while activating the vehicle.';
-      setError(message);
+      setErrorModal({ open: true, message });
     } finally {
       setTogglingId(null);
     }
@@ -240,11 +239,17 @@ const Vehicles = () => {
             </Button>
           </div>
 
-          {error && (
-            <Alert variant="danger" className="mb-3" onClose={() => setError('')} dismissible>
-              {error}
-            </Alert>
-          )}
+          <CustomModal
+            isOpen={errorModal.open}
+            onClose={() => setErrorModal({ open: false, message: '' })}
+            title="Error"
+            primaryAction={{
+              label: 'OK',
+              onClick: () => setErrorModal({ open: false, message: '' }),
+            }}
+          >
+            <p className="mb-0">{errorModal.message}</p>
+          </CustomModal>
 
           <CustomModal
             isOpen={deactivateModalOpen}
