@@ -886,7 +886,7 @@ ${srCards}
             </Col>
             <Col xs={12} lg={6}>
               <div className="header-actions d-flex flex-wrap gap-2 justify-content-center justify-content-xl-end">
-                <div className="time-range-selector btn-group" role="group">
+                <div className="time-range-selector" role="group">
                   <button
                     type="button"
                     className={`btn ${timeRange === 'today' ? 'active' : ''}`}

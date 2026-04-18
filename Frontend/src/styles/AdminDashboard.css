@@ -42,6 +42,9 @@
 
 /* Time Range Selector */
 .time-range-selector {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   background: #ffffff;
   border: 1px solid #dee2e6;
   border-radius: 8px;
@@ -55,6 +58,9 @@
   padding: 6px 16px;
   font-size: 14px;
   font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+  border-radius: 6px;
   transition: all 0.2s ease;
 }
 
@@ -66,7 +72,6 @@
 .time-range-selector .btn.active {
   background: #e7f1ff;
   color: #0d6efd;
-  border-radius: 6px;
 }
 
 /* Export Report Button */

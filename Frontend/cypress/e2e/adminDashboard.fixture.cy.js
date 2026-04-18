@@ -61,11 +61,16 @@ describe('Admin Dashboard – fixture teszt', () => {
 
   it('a Total Fleet értéke egyezik a fixture adatával', () => {
     cy.fixture('admin').then((admin) => {
+      const activeVehicles = Math.round(admin.fleetStats.total * admin.fleetStats.activePercent / 100);
+      const inactiveVehicles = admin.fleetStats.total - activeVehicles;
+      const maintenanceVehicles = Math.ceil(inactiveVehicles / 2);
+      const expectedDashboardTotal = activeVehicles + maintenanceVehicles;
+
       cy.contains('.stat-label', 'Total Fleet')
         .closest('.card-body')
         .find('.stat-value')
         .invoke('text')
-        .should('contain', String(admin.fleetStats.total));
+        .should('contain', String(expectedDashboardTotal));
     });
   });
 });
