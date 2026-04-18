@@ -1,6 +1,6 @@
 
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, Row, Col, Button, Alert, Form, Container, Spinner } from 'react-bootstrap';
 import '../styles/DriverDashboard.css';
 import '../styles/AddFuelLog.css';
@@ -10,6 +10,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import Sidebar from '../components/Sidebar';
 import Footer from '../components/Footer';
 import api from '../services/api';
+import CustomModal from '../components/CustomModal';
 
 const ServiceRequestDetails = () => {
   const { t, language } = useLanguage();
@@ -20,13 +21,72 @@ const ServiceRequestDetails = () => {
   const [closeNote, setCloseNote] = useState(request.driverCloseNote || '');
   const [file, setFile] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [invoiceImgUrl, setInvoiceImgUrl] = useState(null);
+  const [invoicePreviewOpen, setInvoicePreviewOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [cancelling, setCancelling] = useState(false);
-  // Kép letöltése authentikációval, ha van fileId
+  const [confirmModal, setConfirmModal] = useState({
+    open: false,
+    title: '',
+    message: '',
+    confirmLabel: '',
+    cancelLabel: '',
+    confirmVariant: '',
+    onConfirm: null,
+  });
+  const [feedbackModal, setFeedbackModal] = useState({
+    open: false,
+    type: 'error',
+    title: '',
+    message: '',
+  });
+
+  // Backend hibaüzenetek egységesítése többféle válaszformátumra.
+  const getApiErrorMessage = (err, fallback) => {
+    const data = err?.response?.data;
+    if (typeof data === 'string') return data;
+    if (data?.message) return data.message;
+    if (data?.Message) return data.Message;
+    if (data?.detail) return data.detail;
+    if (data?.errors) return Array.isArray(data.errors) ? data.errors.join(', ') : JSON.stringify(data.errors);
+    if (err?.response?.statusText) return err.response.statusText;
+    return fallback;
+  };
+
+  const openConfirmModal = ({ title, message, confirmLabel, cancelLabel, confirmVariant, onConfirm }) => {
+    setConfirmModal({
+      open: true,
+      title,
+      message,
+      confirmLabel,
+      cancelLabel,
+      confirmVariant,
+      onConfirm,
+    });
+  };
+
+  const closeConfirmModal = () => {
+    setConfirmModal((prev) => ({ ...prev, open: false }));
+  };
+
+  const handleConfirmAction = async () => {
+    const action = confirmModal.onConfirm;
+    closeConfirmModal();
+    if (typeof action === 'function') {
+      await action();
+    }
+  };
+
+  const openFeedbackModal = ({ type = 'error', title, message }) => {
+    setFeedbackModal({ open: true, type, title, message });
+  };
+
+  const closeFeedbackModal = () => {
+    setFeedbackModal((prev) => ({ ...prev, open: false }));
+  };
+  // Kép letöltése authentikációval: a blobból objektum URL készül,
+  // amit cleanup során visszavonunk, így nem szivárog a memória.
   useEffect(() => {
     const fileId = request.InvoiceFileId || request.invoiceFileId;
     if (!fileId) {
@@ -67,22 +127,28 @@ const ServiceRequestDetails = () => {
   const handleDragLeave = () => setIsDragging(false);
 
   const handleCancel = async () => {
-    if (!window.confirm('Are you sure you want to cancel this service request?')) return;
-    setCancelling(true);
-    setError('');
-    try {
-      await api.delete(`/service-requests/cancel/${request.id || request.Id}`);
-      navigate(-1);
-    } catch (err) {
-      const apiMessage = err?.response?.data;
-      const message =
-        typeof apiMessage === 'string'
-          ? apiMessage
-          : apiMessage?.message || apiMessage?.Message || 'Could not cancel service request.';
-      setError(message);
-    } finally {
-      setCancelling(false);
-    }
+    openConfirmModal({
+      title: t('sr.modal.cancelTitle'),
+      message: t('sr.modal.cancelMessage'),
+      confirmLabel: t('sr.modal.cancelConfirm'),
+      cancelLabel: t('sr.modal.keep'),
+      confirmVariant: 'danger',
+      onConfirm: async () => {
+        setCancelling(true);
+        try {
+          await api.delete(`/service-requests/cancel/${request.id || request.Id}`);
+          navigate(-1);
+        } catch (err) {
+          openFeedbackModal({
+            type: 'error',
+            title: t('sr.modal.cancelFailedTitle'),
+            message: getApiErrorMessage(err, t('sr.modal.cancelFailedMessage')),
+          });
+        } finally {
+          setCancelling(false);
+        }
+      },
+    });
   };
 
   const getStatusClass = (status) => {
@@ -96,24 +162,15 @@ const ServiceRequestDetails = () => {
     }
   };
 
-  const getStatusIconStyle = (status) => {
-    switch ((status || '').toUpperCase()) {
-      case 'REQUESTED': return { bg: '#dbeafe', stroke: '#1e40af' };
-      case 'APPROVED':  return { bg: '#dcfce7', stroke: '#166534' };
-      case 'REJECTED':  return { bg: '#fee2e2', stroke: '#991b1b' };
-      case 'CLOSED':    return { bg: '#e5e7eb', stroke: '#374151' };
-      case 'DRIVER_COST': return { bg: '#f3e8ff', stroke: '#6b21a8' };
-      default:          return { bg: '#f1f5f9', stroke: '#475569' };
-    }
-  };
-
   const handleSave = async () => {
     setSaving(true);
-    setError('');
-    setSuccess('');
     // Custom file required validation for first upload
     if (!request.driverReportCost && !file) {
-      setError('A file is required');
+      openFeedbackModal({
+        type: 'error',
+        title: t('common.errorTitle'),
+        message: t('srDetails.error.fileRequired'),
+      });
       setSaving(false);
       return;
     }
@@ -128,20 +185,24 @@ const ServiceRequestDetails = () => {
       } else {
         endpoint = `/service-requests/edit-uploaded-data/${request.id || request.Id}`;
       }
-      await import('../services/api').then(({ default: api }) =>
-        api.patch(endpoint, formData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        })
-      );
-      setSuccess('Service details saved successfully!');
-      setTimeout(() => navigate(-1), 1200);
+      await api.patch(endpoint, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      openFeedbackModal({
+        type: 'success',
+        title: t('common.successTitle'),
+        message: t('srDetails.success.saved'),
+      });
+      setTimeout(() => {
+        closeFeedbackModal();
+        navigate(-1);
+      }, 2000);
     } catch (err) {
-      const apiMessage = err?.response?.data;
-      const message =
-        typeof apiMessage === 'string'
-          ? apiMessage
-          : apiMessage?.message || apiMessage?.Message || 'Failed to save service details.';
-      setError(message);
+      openFeedbackModal({
+        type: 'error',
+        title: t('common.errorTitle'),
+        message: getApiErrorMessage(err, t('srDetails.error.saveFailed')),
+      });
     } finally {
       setSaving(false);
     }
@@ -163,9 +224,6 @@ const ServiceRequestDetails = () => {
             <Col lg={7} xl={8}>
               <Card className="fuel-form-card border-0 shadow-sm">
                 <Card.Body className="p-4 p-md-5">
-                  {error && <Alert variant="danger" className="mb-3">{error}</Alert>}
-                  {success && <Alert variant="success" className="mb-3">{success}</Alert>}
-
                   {request.status === 'REQUESTED' && (
                     <Alert variant="info" className="mb-4">
                       <strong>{t('srDetails.readOnly')}</strong> {t('srDetails.readOnlyMsg')}
@@ -206,8 +264,8 @@ const ServiceRequestDetails = () => {
                       <Row className="g-3">
                         <Col xs={6}>
                           <div className="srd-meta-card">
-                            <div className="srd-meta-icon" style={{ background: getStatusIconStyle(request.status).bg }}>
-                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={getStatusIconStyle(request.status).stroke} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <div className={`srd-meta-icon srd-meta-icon-status status-${getStatusClass(request.status)}`}>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <circle cx="12" cy="12" r="10" />
                                 <path d="M9 12l2 2 4-4" />
                               </svg>
@@ -275,7 +333,7 @@ const ServiceRequestDetails = () => {
                       <Col xs={12}>
                         <Form.Group>
                           <Form.Label className="form-label">
-                            {t('srDetails.label.closeNote')} <span className="text-muted" style={{ fontWeight: 400, fontSize: '0.85rem' }}>{t('srDetails.closeNoteOptional')}</span>
+                            {t('srDetails.label.closeNote')} <span className="srd-optional-note">{t('srDetails.closeNoteOptional')}</span>
                           </Form.Label>
                           <Form.Control
                               type="text"
@@ -283,9 +341,11 @@ const ServiceRequestDetails = () => {
                               onChange={e => setCloseNote(e.target.value)}
                               placeholder={t('srDetails.placeholder.closeNote')}
                             className="form-control-lg"
-                          />                            {language !== 'en' && (
-                              <Form.Text style={{ color: '#b45309', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
-                                <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+                          />
+                            {/* Nem angol nyelvnél jelezzük, hogy angolul kérjük a leírást. */}
+                            {language !== 'en' && (
+                              <Form.Text className="srd-language-warning">
+                                <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="srd-language-warning-icon">
                                   <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" strokeLinecap="round" strokeLinejoin="round"/>
                                   <line x1="12" y1="9" x2="12" y2="13" strokeLinecap="round"/>
                                   <line x1="12" y1="17" x2="12.01" y2="17" strokeLinecap="round"/>
@@ -375,12 +435,12 @@ const ServiceRequestDetails = () => {
                       type="file"
                       accept="image/*"
                       id="invoiceFileInput"
-                      style={{ display: 'none' }}
+                      className="srd-file-input"
                       onChange={handleFileChange}
                     />
                     {file ? (
                       <div className="receipt-file-selected">
-                        <div className="upload-icon" style={{ background: '#ede9fe' }}>
+                        <div className="upload-icon srd-upload-icon">
                           <svg width="24" height="24" fill="none" stroke="#7c3aed" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                             <polyline points="14 2 14 8 20 8" />
@@ -397,7 +457,7 @@ const ServiceRequestDetails = () => {
                       </div>
                     ) : (
                       <>
-                        <div className="upload-icon" style={{ background: '#ede9fe' }}>
+                        <div className="upload-icon srd-upload-icon">
                           <svg width="24" height="24" fill="none" stroke="#7c3aed" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
                             <polyline points="16 16 12 12 8 16" />
                             <line x1="12" y1="12" x2="12" y2="21" />
@@ -425,7 +485,20 @@ const ServiceRequestDetails = () => {
                         <span className="srd-existing-label">{t('srDetails.invoice.current')}</span>
                       </div>
                       <div className="srd-invoice-preview">
-                        <img src={invoiceImgUrl} alt="Invoice" className="srd-invoice-img" />
+                        <img
+                          src={invoiceImgUrl}
+                          alt="Invoice"
+                          className="srd-invoice-img"
+                          onClick={() => setInvoicePreviewOpen(true)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              setInvoicePreviewOpen(true);
+                            }
+                          }}
+                          role="button"
+                          tabIndex={0}
+                        />
                       </div>
                     </div>
                   )}
@@ -466,6 +539,54 @@ const ServiceRequestDetails = () => {
           </Row>
         </Container>
         <Footer />
+
+        <CustomModal
+          isOpen={confirmModal.open}
+          onClose={closeConfirmModal}
+          title={confirmModal.title}
+          primaryAction={{
+            label: confirmModal.confirmLabel,
+            onClick: handleConfirmAction,
+            variant: confirmModal.confirmVariant,
+            disabled: cancelling,
+          }}
+          secondaryAction={{
+            label: confirmModal.cancelLabel,
+            onClick: closeConfirmModal,
+            disabled: cancelling,
+          }}
+        >
+          <p className="mb-0">{confirmModal.message}</p>
+        </CustomModal>
+
+        <CustomModal
+          isOpen={feedbackModal.open}
+          onClose={closeFeedbackModal}
+          title={feedbackModal.title}
+          primaryAction={feedbackModal.type === 'error' ? {
+            label: t('common.ok'),
+            onClick: closeFeedbackModal,
+          } : undefined}
+        >
+          <p className="mb-0">{feedbackModal.message}</p>
+        </CustomModal>
+
+        <CustomModal
+          isOpen={invoicePreviewOpen}
+          onClose={() => setInvoicePreviewOpen(false)}
+          title={t('srDetails.invoice.current')}
+          closeOnBackdrop
+          closeOnEscape
+          size="lg"
+          primaryAction={{
+            label: t('common.ok'),
+            onClick: () => setInvoicePreviewOpen(false),
+          }}
+        >
+          <div className="srd-zoomed-image-wrap">
+            <img src={invoiceImgUrl} alt="Invoice enlarged" className="srd-zoomed-image" />
+          </div>
+        </CustomModal>
       </div>
     </div>
   );

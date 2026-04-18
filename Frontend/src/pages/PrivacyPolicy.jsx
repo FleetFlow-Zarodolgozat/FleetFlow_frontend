@@ -1,4 +1,4 @@
-import { Container, Card } from 'react-bootstrap';
+import { Card } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import Sidebar from '../components/Sidebar';
@@ -12,6 +12,16 @@ const PrivacyPolicy = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notificationRefresh] = useState(0);
   const isAuthenticated = authService.isAuthenticated();
+
+  // A fordítási kulcsok "Címke: érték" formátumát egységesen bontjuk szét.
+  const renderKeyValueItem = (key) => {
+    const [label, value] = t(key).split(':');
+    return (
+      <li>
+        <strong>{label}:</strong> {value}
+      </li>
+    );
+  };
   return (
     <div className="legal-page">
       {isAuthenticated && (
@@ -25,7 +35,7 @@ const PrivacyPolicy = () => {
               <div className="legal-header">
                 <Link to="/login" className="logo-link">
                   <div className="logo-section">
-                    <img src="/fleetflow_logo.png" alt="FleetFlow Logo" style={{ height: '48px', width: 'auto' }} />
+                    <img src="/fleetflow_logo.png" alt="FleetFlow Logo" className="legal-logo-image" />
                     <h1 className="logo-title">FleetFlow</h1>
                   </div>
                 </Link>
@@ -46,11 +56,11 @@ const PrivacyPolicy = () => {
                 <h3>{t('privacy.section2.title')}</h3>
                 <p>{t('privacy.section2.intro')}</p>
                 <ul>
-                  <li><strong>{t('privacy.section2.li1').split(':')[0]}:</strong> {t('privacy.section2.li1').split(':')[1]}</li>
-                  <li><strong>{t('privacy.section2.li2').split(':')[0]}:</strong> {t('privacy.section2.li2').split(':')[1]}</li>
-                  <li><strong>{t('privacy.section2.li3').split(':')[0]}:</strong> {t('privacy.section2.li3').split(':')[1]}</li>
-                  <li><strong>{t('privacy.section2.li4').split(':')[0]}:</strong> {t('privacy.section2.li4').split(':')[1]}</li>
-                  <li><strong>{t('privacy.section2.li5').split(':')[0]}:</strong> {t('privacy.section2.li5').split(':')[1]}</li>
+                  {renderKeyValueItem('privacy.section2.li1')}
+                  {renderKeyValueItem('privacy.section2.li2')}
+                  {renderKeyValueItem('privacy.section2.li3')}
+                  {renderKeyValueItem('privacy.section2.li4')}
+                  {renderKeyValueItem('privacy.section2.li5')}
                 </ul>
               </section>
 
@@ -72,10 +82,10 @@ const PrivacyPolicy = () => {
                 <h3>{t('privacy.section4.title')}</h3>
                 <p>{t('privacy.section4.intro')}</p>
                 <ul>
-                  <li><strong>{t('privacy.section4.li1').split(':')[0]}:</strong> {t('privacy.section4.li1').split(':')[1]}</li>
-                  <li><strong>{t('privacy.section4.li2').split(':')[0]}:</strong> {t('privacy.section4.li2').split(':')[1]}</li>
-                  <li><strong>{t('privacy.section4.li3').split(':')[0]}:</strong> {t('privacy.section4.li3').split(':')[1]}</li>
-                  <li><strong>{t('privacy.section4.li4').split(':')[0]}:</strong> {t('privacy.section4.li4').split(':')[1]}</li>
+                  {renderKeyValueItem('privacy.section4.li1')}
+                  {renderKeyValueItem('privacy.section4.li2')}
+                  {renderKeyValueItem('privacy.section4.li3')}
+                  {renderKeyValueItem('privacy.section4.li4')}
                 </ul>
               </section>
 
@@ -101,12 +111,12 @@ const PrivacyPolicy = () => {
                 <h3>{t('privacy.section7.title')}</h3>
                 <p>{t('privacy.section7.intro')}</p>
                 <ul>
-                  <li><strong>{t('privacy.section7.li1').split(':')[0]}:</strong> {t('privacy.section7.li1').split(':')[1]}</li>
-                  <li><strong>{t('privacy.section7.li2').split(':')[0]}:</strong> {t('privacy.section7.li2').split(':')[1]}</li>
-                  <li><strong>{t('privacy.section7.li3').split(':')[0]}:</strong> {t('privacy.section7.li3').split(':')[1]}</li>
-                  <li><strong>{t('privacy.section7.li4').split(':')[0]}:</strong> {t('privacy.section7.li4').split(':')[1]}</li>
-                  <li><strong>{t('privacy.section7.li5').split(':')[0]}:</strong> {t('privacy.section7.li5').split(':')[1]}</li>
-                  <li><strong>{t('privacy.section7.li6').split(':')[0]}:</strong> {t('privacy.section7.li6').split(':')[1]}</li>
+                  {renderKeyValueItem('privacy.section7.li1')}
+                  {renderKeyValueItem('privacy.section7.li2')}
+                  {renderKeyValueItem('privacy.section7.li3')}
+                  {renderKeyValueItem('privacy.section7.li4')}
+                  {renderKeyValueItem('privacy.section7.li5')}
+                  {renderKeyValueItem('privacy.section7.li6')}
                 </ul>
               </section>
 

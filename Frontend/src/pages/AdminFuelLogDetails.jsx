@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Spinner } from 'react-bootstrap';
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
-import Footer from '../components/Footer';
+import CustomModal from '../components/CustomModal';
 import '../styles/AdminFuelLogDetails.css';
 
 const AdminFuelLogDetails = () => {
@@ -18,6 +18,7 @@ const AdminFuelLogDetails = () => {
   const [receiptLoading, setReceiptLoading] = useState(false);
   const [receiptError, setReceiptError] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [downloadSuccessModalOpen, setDownloadSuccessModalOpen] = useState(false);
 
   // Driver profile image
   const [driverImgUrl, setDriverImgUrl] = useState(null);
@@ -29,7 +30,14 @@ const AdminFuelLogDetails = () => {
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);  useEffect(() => {
+  }, []);
+
+  useEffect(() => {
+    if (!downloadSuccessModalOpen) return;
+    const timeoutId = setTimeout(() => setDownloadSuccessModalOpen(false), 2000);
+    return () => clearTimeout(timeoutId);
+  }, [downloadSuccessModalOpen]);
+  useEffect(() => {
     const receiptId = log.receiptFileId ?? log.ReceiptFileId;
     if (!receiptId) return;
     let objectUrl = null;
@@ -48,7 +56,8 @@ const AdminFuelLogDetails = () => {
     };
     fetch();
     return () => { if (objectUrl) URL.revokeObjectURL(objectUrl); };
-  }, [log.receiptFileId, log.ReceiptFileId]);  useEffect(() => {
+  }, [log.receiptFileId, log.ReceiptFileId]);
+  useEffect(() => {
     const imgId = log.profileImgFileId ?? log.ProfileImgFileId;
     if (!imgId) return;
     let objectUrl = null;
@@ -81,6 +90,7 @@ const AdminFuelLogDetails = () => {
     a.href = receiptUrl;
     a.download = `receipt-fuelog-${id}.jpg`;
     a.click();
+    setDownloadSuccessModalOpen(true);
   };
 
   const id          = log.id ?? log.Id ?? '—';
@@ -100,6 +110,14 @@ const AdminFuelLogDetails = () => {
 
       <main className="afld-main">
         <div className="afld-page">
+
+          <CustomModal
+            isOpen={downloadSuccessModalOpen}
+            onClose={() => setDownloadSuccessModalOpen(false)}
+            title="Success"
+          >
+            <p className="mb-0">Successfully downloaded.</p>
+          </CustomModal>
 
           {/* ── Top bar ───────────────────────────────── */}
           <div className="afld-topbar">
@@ -229,6 +247,10 @@ const AdminFuelLogDetails = () => {
                 </div>
                 <dl className="afld-detail-list">
                   <div className="afld-detail-row">
+                    <dt>Log ID</dt>
+                    <dd className="afld-muted">#{id}</dd>
+                  </div>
+                  <div className="afld-detail-row">
                     <dt>Date</dt>
                     <dd>{date}</dd>
                   </div>
@@ -249,10 +271,6 @@ const AdminFuelLogDetails = () => {
                     <dd><span className="afld-plate-badge">{plate}</span></dd>
                   </div>
                   <div className="afld-detail-row">
-                    <dt>Log ID</dt>
-                    <dd className="afld-muted">#{id}</dd>
-                  </div>
-                  <div className="afld-detail-row">
                     <dt>Status</dt>
                     <dd>
                       {isDeleted
@@ -267,8 +285,6 @@ const AdminFuelLogDetails = () => {
             </div>
           </div>
         </div>
-
-        <Footer />
       </main>
 
       {/* ── Lightbox ──────────────────────────────────── */}

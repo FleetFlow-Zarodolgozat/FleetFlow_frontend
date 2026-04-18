@@ -509,23 +509,6 @@
   box-shadow: 0 5px 16px rgba(22, 163, 74, 0.35);
 }
 
-.asrd-action-alert {
-  font-size: 0.85rem;
-  padding: 10px 14px;
-  border-radius: 8px;
-  font-weight: 500;
-}
-
-.asrd-action-alert--error {
-  background: #fee2e2;
-  color: #991b1b;
-}
-
-.asrd-action-alert--success {
-  background: #dcfce7;
-  color: #166534;
-}
-
 .asrd-no-actions {
   padding: 8px 0;
   text-align: center;

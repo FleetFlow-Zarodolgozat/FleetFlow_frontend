@@ -88,15 +88,12 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, notificationRefresh }) => {
   const handleLogout = () => {
     const currentUser = authService.getCurrentUser();
     const currentLang = localStorage.getItem('fleetflow_language');
+    const isDarkMode = localStorage.getItem('fleetflow_darkMode') === 'true';
+    localStorage.setItem('fleetflow_darkMode', String(isDarkMode));
+
     if (currentUser?.role?.toLowerCase() === 'driver') {
       if (currentLang) {
         localStorage.setItem('fleetflow_language_driver', currentLang);
-      }
-      const isDarkMode = localStorage.getItem('fleetflow_darkMode') === 'true';
-      if (isDarkMode) {
-        localStorage.setItem('fleetflow_darkModePreference', 'true');
-      } else {
-        localStorage.removeItem('fleetflow_darkModePreference');
       }
     }
     authService.logout();
@@ -107,6 +104,26 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, notificationRefresh }) => {
   };
 
   const [hasUnreadNotification, setHasUnreadNotification] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    return localStorage.getItem('fleetflow_darkMode') === 'true';
+  });
+
+  useEffect(() => {
+    const handleThemeChange = (event) => {
+      if (event.type === 'theme-change') {
+        setIsDarkMode(event.detail?.isDarkMode ?? false);
+      } else {
+        const darkMode = localStorage.getItem('fleetflow_darkMode') === 'true';
+        setIsDarkMode(darkMode);
+      }
+    };
+    window.addEventListener('theme-change', handleThemeChange);
+    window.addEventListener('storage', handleThemeChange);
+    return () => {
+      window.removeEventListener('theme-change', handleThemeChange);
+      window.removeEventListener('storage', handleThemeChange);
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -178,9 +195,10 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, notificationRefresh }) => {
               </Link>
               <Link to="/vehicles" className={`nav-item${location.pathname === '/vehicles' ? ' active' : ''}`}> 
                 <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <rect x="3" y="11" width="18" height="6" rx="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <circle cx="7.5" cy="17.5" r="1.5"/>
-                  <circle cx="16.5" cy="17.5" r="1.5"/>
+                  <rect x="1" y="3" width="15" height="13" strokeLinecap="round" strokeLinejoin="round"/>
+                  <polygon points="16,8 20,8 23,11 23,16 16,16 16,8" strokeLinecap="round" strokeLinejoin="round"/>
+                  <circle cx="5.5" cy="18.5" r="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <circle cx="18.5" cy="18.5" r="2.5" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
                 {t('sidebar.nav.vehicles')}
               </Link>

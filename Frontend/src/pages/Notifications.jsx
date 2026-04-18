@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
-import { Container, Row, Col, Badge, Alert, Spinner, Button, Form } from 'react-bootstrap';
+import { Container, Row, Col, Spinner, Button } from 'react-bootstrap';
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
+import CustomModal from '../components/CustomModal';
 import '../styles/Notifications.css';
 
 import Footer from '../components/Footer';
@@ -32,9 +32,18 @@ const Notifications = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [errorModal, setErrorModal] = useState({ open: false, message: '' });
   const [activeFilter, setActiveFilter] = useState('all');
   const [notificationRefresh, setNotificationRefresh] = useState(0);
+  const [confirmModal, setConfirmModal] = useState({
+    open: false,
+    title: '',
+    message: '',
+    confirmLabel: '',
+    cancelLabel: '',
+    confirmVariant: '',
+    onConfirm: null,
+  });
 
   // Sötétebb szövegszín a type labelhez
   const getNotificationTypeTextColor = (notification) => {
@@ -75,7 +84,6 @@ const Notifications = () => {
 
   const fetchNotifications = async () => {
     setLoading(true);
-    setError('');
     try {
       const response = await api.get('/notifications', {
         params: {
@@ -86,54 +94,92 @@ const Notifications = () => {
       const payload = response.data || [];
       setNotifications(Array.isArray(payload) ? payload : []);
     } catch {
-      setError('Failed to load notifications.');
+      setErrorModal({ open: true, message: 'Failed to load notifications.' });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleMarkAllAsRead = async () => {
-    if (!window.confirm('Mark all notifications as read?')) return;
-    setError('');
-    try {
-      await api.patch('/notifications/read');
-      await fetchNotifications();
-      setNotificationRefresh(r => r + 1);
-    } catch (err) {
-      let msg = 'An error occurred. Please try again.';
-      if (err.response && err.response.data) {
-        const data = err.response.data;
-        if (typeof data === 'string') msg = data;
-        else if (data.message) msg = data.message;
-        else if (data.detail) msg = data.detail;
-        else if (data.errors) msg = Array.isArray(data.errors) ? data.errors.join(', ') : JSON.stringify(data.errors);
-        else if (err.response.statusText) msg = err.response.statusText;
-        else msg = JSON.stringify(data);
-      }
-      setError(msg);
+  const openConfirmModal = ({ title, message, confirmLabel, cancelLabel, confirmVariant, onConfirm }) => {
+    setConfirmModal({
+      open: true,
+      title,
+      message,
+      confirmLabel,
+      cancelLabel,
+      confirmVariant,
+      onConfirm,
+    });
+  };
+
+  const closeConfirmModal = () => {
+    setConfirmModal((prev) => ({ ...prev, open: false }));
+  };
+
+  const handleConfirmAction = async () => {
+    const action = confirmModal.onConfirm;
+    closeConfirmModal();
+    if (typeof action === 'function') {
+      await action();
     }
   };
 
+  const handleMarkAllAsRead = async () => {
+    openConfirmModal({
+      title: t('notif.confirm.markAllTitle'),
+      message: t('notif.confirm.markAllMessage'),
+      confirmLabel: t('common.confirm'),
+      cancelLabel: t('common.cancel'),
+      confirmVariant: 'primary',
+      onConfirm: async () => {
+        try {
+          await api.patch('/notifications/read');
+          await fetchNotifications();
+          setNotificationRefresh(r => r + 1);
+        } catch (err) {
+          let msg = 'An error occurred. Please try again.';
+          if (err.response && err.response.data) {
+            const data = err.response.data;
+            if (typeof data === 'string') msg = data;
+            else if (data.message) msg = data.message;
+            else if (data.detail) msg = data.detail;
+            else if (data.errors) msg = Array.isArray(data.errors) ? data.errors.join(', ') : JSON.stringify(data.errors);
+            else if (err.response.statusText) msg = err.response.statusText;
+            else msg = JSON.stringify(data);
+          }
+          setErrorModal({ open: true, message: msg });
+        }
+      },
+    });
+  };
+
   const handleDeleteNotification = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this notification?')) return;
-    setError('');
-    try {
-      await api.delete(`/notifications/${id}`);
-      await fetchNotifications();
-      setNotificationRefresh(r => r + 1);
-    } catch (err) {
-      let msg = 'Failed to delete notification.';
-      if (err.response && err.response.data) {
-        const data = err.response.data;
-        if (typeof data === 'string') msg = data;
-        else if (data.message) msg = data.message;
-        else if (data.detail) msg = data.detail;
-        else if (data.errors) msg = Array.isArray(data.errors) ? data.errors.join(', ') : JSON.stringify(data.errors);
-        else if (err.response.statusText) msg = err.response.statusText;
-        else msg = JSON.stringify(data);
-      }
-      setError(msg);
-    }
+    openConfirmModal({
+      title: t('notif.confirm.deleteTitle'),
+      message: t('notif.confirm.deleteMessage'),
+      confirmLabel: t('common.confirm'),
+      cancelLabel: t('common.cancel'),
+      confirmVariant: 'danger',
+      onConfirm: async () => {
+        try {
+          await api.delete(`/notifications/${id}`);
+          await fetchNotifications();
+          setNotificationRefresh(r => r + 1);
+        } catch (err) {
+          let msg = 'Failed to delete notification.';
+          if (err.response && err.response.data) {
+            const data = err.response.data;
+            if (typeof data === 'string') msg = data;
+            else if (data.message) msg = data.message;
+            else if (data.detail) msg = data.detail;
+            else if (data.errors) msg = Array.isArray(data.errors) ? data.errors.join(', ') : JSON.stringify(data.errors);
+            else if (err.response.statusText) msg = err.response.statusText;
+            else msg = JSON.stringify(data);
+          }
+          setErrorModal({ open: true, message: msg });
+        }
+      },
+    });
   };
 
   const handleMarkAsRead = async (id) => {
@@ -148,7 +194,8 @@ const Notifications = () => {
 
   useEffect(() => {
     fetchNotifications();
-  }, []);  const getFilteredNotifications = () => {
+  }, []);
+  const getFilteredNotifications = () => {
     if (activeFilter === 'all') return notifications;
     if (activeFilter === 'unread') return notifications.filter(n => !n.isRead && !n.read);
     if (activeFilter === 'fuel_log') return notifications.filter(n => (n.type || '').toUpperCase() === 'FUEL_LOG');
@@ -165,7 +212,10 @@ const Notifications = () => {
     return notifications.filter(n => !n.isRead && !n.read).length;
   };
 
-  // Group notifications by date
+  // Értesítések csoportosítása időablakok szerint.
+  // A logika sorban halad: először a "mai" elemeket emeli ki,
+  // majd a gördülő 7 napos, havi, éves, végül az 1 évnél régebbi
+  // csoportokba teszi a bejegyzéseket.
   const groupByDate = (items) => {
     const groups = {};
     const today = new Date();
@@ -180,16 +230,20 @@ const Notifications = () => {
       const dateVal = item.DateTime || item.date || item.createdAt || item.timestamp;
       if (!dateVal) return;
 
-      const itemDate = new Date(dateVal);      if (itemDate.toDateString() === today.toDateString()) {
+      const itemDate = new Date(dateVal);
+      if (itemDate.toDateString() === today.toDateString()) {
         groups['today'] = groups['today'] || [];
         groups['today'].push(item);
-      }      else if (itemDate >= startOfWeek) {
+      }
+      else if (itemDate >= startOfWeek) {
         groups['thisWeek'] = groups['thisWeek'] || [];
         groups['thisWeek'].push(item);
-      }      else if (itemDate >= startOfMonth) {
+      }
+      else if (itemDate >= startOfMonth) {
         groups['thisMonth'] = groups['thisMonth'] || [];
         groups['thisMonth'].push(item);
-      }      else if (itemDate >= startOfYear) {
+      }
+      else if (itemDate >= startOfYear) {
         groups['thisYear'] = groups['thisYear'] || [];
         groups['thisYear'].push(item);
       }
@@ -279,6 +333,85 @@ const Notifications = () => {
   const groupedNotifications = groupByDate(filteredNotifications);
   const unreadCount = getUnreadCount();
 
+  // Egységes kártya renderelő, hogy minden szekció azonos kinézetet kapjon.
+  const renderNotificationCard = (notification) => {
+    const iconData = getNotificationIcon(notification);
+    const styleData = getNotificationStyle(notification);
+    const isRead = notification.isRead || notification.read;
+    const dateVal = notification.DateTime || notification.date || notification.createdAt || notification.timestamp;
+
+    return (
+      <div
+        key={notification.id}
+        className={`notification-card ${!isRead ? 'unread' : ''}`}
+        style={{ borderLeft: `4px solid ${styleData.border}` }}
+        onClick={() => !isRead && handleMarkAsRead(notification.id)}
+      >
+        <div
+          className="notification-icon"
+          style={{ backgroundColor: getNotificationTypeIconBg(notification), color: getNotificationTypeTextColor(notification) }}
+        >
+          {iconData.icon}
+        </div>
+        <div className="notification-content">
+          <div className="notification-header">
+            <h4 className="notification-title">
+              {notification.title || 'Notification'}
+              {!isRead && <span className="unread-dot" />}
+            </h4>
+          </div>
+          <p className="notification-message">
+            {notification.message || notification.content || ''}
+          </p>
+          <div className="notification-meta">
+            <span className="notification-time">
+              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12,6 12,12 16,14" />
+              </svg>
+              {formatTimeAgo(dateVal)}
+            </span>
+            {notification.type && (
+              <span
+                className="notification-type-label"
+                style={{
+                  background: getNotificationTypeBgRgbaColor(notification),
+                  color: getNotificationTypeTextColor(notification),
+                }}
+              >
+                {notification.type}
+              </span>
+            )}
+          </div>
+        </div>
+        <button
+          className="notification-delete-custom"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleDeleteNotification(notification.id);
+          }}
+          title="Törlés"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 6h18" />
+            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+            <line x1="10" y1="11" x2="10" y2="17" />
+            <line x1="14" y1="11" x2="14" y2="17" />
+          </svg>
+        </button>
+      </div>
+    );
+  };
+
+  const sectionConfigs = [
+    { key: 'today', title: t('notif.group.today') },
+    { key: 'thisWeek', title: t('notif.group.thisWeek') },
+    { key: 'thisMonth', title: t('notif.group.thisMonth') },
+    { key: 'thisYear', title: t('notif.group.thisYear') },
+    { key: 'overOneYear', title: t('notif.group.over1Year') },
+  ];
+
   return (
     <div className="notifications-page">
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} notificationRefresh={notificationRefresh} />
@@ -344,13 +477,6 @@ const Notifications = () => {
             </button>
           </div>
 
-          {/* Error Alert */}
-          {error && (
-            <Alert variant="danger" className="mb-4">
-              {error}
-            </Alert>
-          )}
-
           {/* Notifications List */}
           {loading ? (
             <div className="text-center py-5">
@@ -366,384 +492,44 @@ const Notifications = () => {
             </div>
           ) : (
             <div className="notifications-list">
-              {/* Today Section */}
-              {groupedNotifications['today'] && groupedNotifications['today'].length > 0 && (
-                <div className="notifications-section mb-4">
-                  <h3 className="section-title">{t('notif.group.today')}</h3>
-                  {groupedNotifications['today'].map(notification => {
-                    const iconData = getNotificationIcon(notification);
-                    const styleData = getNotificationStyle(notification);
-                    const isRead = notification.isRead || notification.read;
-                    const dateVal = notification.DateTime || notification.date || notification.createdAt || notification.timestamp;
-
-                    return (
-                      <div
-                        key={notification.id}
-                        className={`notification-card ${!isRead ? 'unread' : ''}`}
-                        style={{ borderLeft: `4px solid ${styleData.border}` }}
-                        onClick={() => !isRead && handleMarkAsRead(notification.id)}
-                      >
-                        <div className="notification-icon" style={{ backgroundColor: `${getNotificationTypeIconBg(notification)} !important`, color: getNotificationTypeTextColor(notification) }}>
-                          {iconData.icon}
-                        </div>
-                        <div className="notification-content">
-                          <div className="notification-header">
-                            <h4 className="notification-title">
-                              {notification.title || 'Notification'}
-                              {!isRead && <span className="unread-dot" style={{ backgroundColor: '#dc2626' }} />}
-                            </h4>
-                            <button
-                              className="notification-delete-custom"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteNotification(notification.id);
-                              }}
-                              title="Törlés"
-                            >
-                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M3 6h18" />
-                                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
-                                <line x1="10" y1="11" x2="10" y2="17" />
-                                <line x1="14" y1="11" x2="14" y2="17" />
-                              </svg>
-                            </button>
-                          </div>
-                          <p className="notification-message">
-                            {notification.message || notification.content || ''}
-                          </p>
-                          <div className="notification-meta">
-                            <span className="notification-time">
-                              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                                <circle cx="12" cy="12" r="10" />
-                                <polyline points="12,6 12,12 16,14" />
-                              </svg>
-                              {formatTimeAgo(dateVal)}
-                            </span>
-                            {notification.type && (
-                              <span className="notification-type-label" style={{
-                                marginLeft: 10,
-                                background: getNotificationTypeBgRgbaColor(notification),
-                                color: getNotificationTypeTextColor(notification),
-                                borderRadius: 8,
-                                fontSize: 12,
-                                fontWeight: 600,
-                                padding: '2px 8px',
-                                display: 'inline-block',
-                                textTransform: 'capitalize'
-                              }}>{notification.type}</span>
-                            )}
-                          </div>
-                        {/* Delete button now in header */}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* This Week Section */}
-              {groupedNotifications['thisWeek'] && groupedNotifications['thisWeek'].length > 0 && (
-                <div className="notifications-section mb-4">
-                  <h3 className="section-title">{t('notif.group.thisWeek')}</h3>
-                  {groupedNotifications['thisWeek'].map(notification => {
-                    const iconData = getNotificationIcon(notification);
-                    const styleData = getNotificationStyle(notification);
-                    const isRead = notification.isRead || notification.read;
-                    const dateVal = notification.DateTime || notification.date || notification.createdAt || notification.timestamp;
-
-                    return (
-                      <div
-                        key={notification.id}
-                        className={`notification-card ${!isRead ? 'unread' : ''}`}
-                        style={{ borderLeft: `4px solid ${styleData.border}` }}
-                        onClick={() => !isRead && handleMarkAsRead(notification.id)}
-                      >
-                        <div className="notification-icon" style={{ backgroundColor: getNotificationTypeIconBg(notification), color: getNotificationTypeTextColor(notification) }}>
-                          {iconData.icon}
-                        </div>
-                        <div className="notification-content">
-                          <div className="notification-header">
-                            <h4 className="notification-title">
-                              {notification.title || 'Notification'}
-                              {!isRead && <span className="unread-dot" style={{ backgroundColor: '#dc2626' }} />}
-                            </h4>
-                          </div>
-                          <p className="notification-message">
-                            {notification.message || notification.content || ''}
-                          </p>
-                          <div className="notification-meta">
-                            <span className="notification-time">
-                              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                                <circle cx="12" cy="12" r="10" />
-                                <polyline points="12,6 12,12 16,14" />
-                              </svg>
-                              {formatTimeAgo(dateVal)}
-                            </span>
-                            {notification.type && (
-                              <span className="notification-type-label" style={{
-                                marginLeft: 10,
-                                background: getNotificationTypeBgRgbaColor(notification),
-                                color: getNotificationTypeTextColor(notification),
-                                borderRadius: 8,
-                                fontSize: 12,
-                                fontWeight: 600,
-                                padding: '2px 8px',
-                                display: 'inline-block',
-                                textTransform: 'capitalize'
-                              }}>{notification.type}</span>
-                            )}
-                          </div>
-                        </div>
-                        <button
-                          className="notification-delete-custom"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteNotification(notification.id);
-                          }}
-                          title="Törlés"
-                        >
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M3 6h18" />
-                            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
-                            <line x1="10" y1="11" x2="10" y2="17" />
-                            <line x1="14" y1="11" x2="14" y2="17" />
-                          </svg>
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* This Month Section */}
-              {groupedNotifications['thisMonth'] && groupedNotifications['thisMonth'].length > 0 && (
-                <div className="notifications-section mb-4">
-                  <h3 className="section-title">{t('notif.group.thisMonth')}</h3>
-                  {groupedNotifications['thisMonth'].map(notification => {
-                    const iconData = getNotificationIcon(notification);
-                    const styleData = getNotificationStyle(notification);
-                    const isRead = notification.isRead || notification.read;
-                    const dateVal = notification.DateTime || notification.date || notification.createdAt || notification.timestamp;
-
-                    return (
-                      <div
-                        key={notification.id}
-                        className={`notification-card ${!isRead ? 'unread' : ''}`}
-                        style={{ borderLeft: `4px solid ${styleData.border}` }}
-                        onClick={() => !isRead && handleMarkAsRead(notification.id)}
-                      >
-                        <div className="notification-icon" style={{ backgroundColor: getNotificationTypeIconBg(notification), color: getNotificationTypeTextColor(notification) }}>
-                          {iconData.icon}
-                        </div>
-                        <div className="notification-content">
-                          <div className="notification-header">
-                            <h4 className="notification-title">
-                              {notification.title || 'Notification'}
-                              {!isRead && <span className="unread-dot" style={{ backgroundColor: '#dc2626' }} />}
-                            </h4>
-                          </div>
-                          <p className="notification-message">
-                            {notification.message || notification.content || ''}
-                          </p>
-                          <div className="notification-meta">
-                            <span className="notification-time">
-                              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                                <circle cx="12" cy="12" r="10" />
-                                <polyline points="12,6 12,12 16,14" />
-                              </svg>
-                              {formatTimeAgo(dateVal)}
-                            </span>
-                            {notification.type && (
-                              <span className="notification-type-label" style={{
-                                marginLeft: 10,
-                                background: getNotificationTypeBgRgbaColor(notification),
-                                color: getNotificationTypeTextColor(notification),
-                                borderRadius: 8,
-                                fontSize: 12,
-                                fontWeight: 600,
-                                padding: '2px 8px',
-                                display: 'inline-block',
-                                textTransform: 'capitalize'
-                              }}>{notification.type}</span>
-                            )}
-                          </div>
-                        </div>
-                        <button
-                          className="notification-delete-custom"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteNotification(notification.id);
-                          }}
-                          title="Törlés"
-                        >
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M3 6h18" />
-                            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
-                            <line x1="10" y1="11" x2="10" y2="17" />
-                            <line x1="14" y1="11" x2="14" y2="17" />
-                          </svg>
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* This Year Section */}
-              {groupedNotifications['thisYear'] && groupedNotifications['thisYear'].length > 0 && (
-                <div className="notifications-section mb-4">
-                  <h3 className="section-title">{t('notif.group.thisYear')}</h3>
-                  {groupedNotifications['thisYear'].map(notification => {
-                    const iconData = getNotificationIcon(notification);
-                    const styleData = getNotificationStyle(notification);
-                    const isRead = notification.isRead || notification.read;
-                    const dateVal = notification.DateTime || notification.date || notification.createdAt || notification.timestamp;
-
-                    return (
-                      <div
-                        key={notification.id}
-                        className={`notification-card ${!isRead ? 'unread' : ''}`}
-                        style={{ borderLeft: `4px solid ${styleData.border}` }}
-                        onClick={() => !isRead && handleMarkAsRead(notification.id)}
-                      >
-                        <div className="notification-icon" style={{ backgroundColor: getNotificationTypeIconBg(notification), color: getNotificationTypeTextColor(notification) }}>
-                          {iconData.icon}
-                        </div>
-                        <div className="notification-content">
-                          <div className="notification-header">
-                            <h4 className="notification-title">
-                              {notification.title || 'Notification'}
-                              {!isRead && <span className="unread-dot" style={{ backgroundColor: '#dc2626' }} />}
-                            </h4>
-                          </div>
-                          <p className="notification-message">
-                            {notification.message || notification.content || ''}
-                          </p>
-                          <div className="notification-meta">
-                            <span className="notification-time">
-                              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                                <circle cx="12" cy="12" r="10" />
-                                <polyline points="12,6 12,12 16,14" />
-                              </svg>
-                              {formatTimeAgo(dateVal)}
-                            </span>
-                            {notification.type && (
-                              <span className="notification-type-label" style={{
-                                marginLeft: 10,
-                                background: getNotificationTypeBgRgbaColor(notification),
-                                color: getNotificationTypeTextColor(notification),
-                                borderRadius: 8,
-                                fontSize: 12,
-                                fontWeight: 600,
-                                padding: '2px 8px',
-                                display: 'inline-block',
-                                textTransform: 'capitalize'
-                              }}>{notification.type}</span>
-                            )}
-                          </div>
-                        </div>
-                        <button
-                          className="notification-delete-custom"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteNotification(notification.id);
-                          }}
-                          title="Törlés"
-                        >
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M3 6h18" />
-                            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
-                            <line x1="10" y1="11" x2="10" y2="17" />
-                            <line x1="14" y1="11" x2="14" y2="17" />
-                          </svg>
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* Over 1 Year Ago Section */}
-              {groupedNotifications['overOneYear'] && groupedNotifications['overOneYear'].length > 0 && (
-                <div className="notifications-section mb-4">
-                  <h3 className="section-title">{t('notif.group.over1Year')}</h3>
-                  {groupedNotifications['overOneYear'].map(notification => {
-                    const iconData = getNotificationIcon(notification);
-                    const styleData = getNotificationStyle(notification);
-                    const isRead = notification.isRead || notification.read;
-                    const dateVal = notification.DateTime || notification.date || notification.createdAt || notification.timestamp;
-
-                    return (
-                      <div
-                        key={notification.id}
-                        className={`notification-card ${!isRead ? 'unread' : ''}`}
-                        style={{ borderLeft: `4px solid ${styleData.border}` }}
-                        onClick={() => !isRead && handleMarkAsRead(notification.id)}
-                      >
-                        <div className="notification-icon" style={{ backgroundColor: getNotificationTypeIconBg(notification), color: getNotificationTypeTextColor(notification) }}>
-                          {iconData.icon}
-                        </div>
-                        <div className="notification-content">
-                          <div className="notification-header">
-                            <h4 className="notification-title">
-                              {notification.title || 'Notification'}
-                              {!isRead && <span className="unread-dot" style={{ backgroundColor: '#dc2626' }} />}
-                            </h4>
-                          </div>
-                          <p className="notification-message">
-                            {notification.message || notification.content || ''}
-                          </p>
-                          <div className="notification-meta">
-                            <span className="notification-time">
-                              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                                <circle cx="12" cy="12" r="10" />
-                                <polyline points="12,6 12,12 16,14" />
-                              </svg>
-                              {formatTimeAgo(dateVal)}
-                            </span>
-                            {notification.type && (
-                              <span className="notification-type-label" style={{
-                                marginLeft: 10,
-                                background: getNotificationTypeBgRgbaColor(notification),
-                                color: getNotificationTypeTextColor(notification),
-                                borderRadius: 8,
-                                fontSize: 12,
-                                fontWeight: 600,
-                                padding: '2px 8px',
-                                display: 'inline-block',
-                                textTransform: 'capitalize'
-                              }}>{notification.type}</span>
-                            )}
-                          </div>
-                        </div>
-                        <button
-                          className="notification-delete-custom"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteNotification(notification.id);
-                          }}
-                          title="Törlés"
-                        >
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M3 6h18" />
-                            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
-                            <line x1="10" y1="11" x2="10" y2="17" />
-                            <line x1="14" y1="11" x2="14" y2="17" />
-                          </svg>
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
+              {sectionConfigs.map(({ key, title }) => (
+                groupedNotifications[key] && groupedNotifications[key].length > 0 ? (
+                  <div key={key} className="notifications-section mb-4">
+                    <h3 className="section-title">{title}</h3>
+                    {groupedNotifications[key].map(renderNotificationCard)}
+                  </div>
+                ) : null
+              ))}
             </div>
           )}
         </Container>
+        <CustomModal
+          isOpen={errorModal.open}
+          onClose={() => setErrorModal({ open: false, message: '' })}
+          title={t('common.errorTitle')}
+          primaryAction={{
+            label: t('common.ok'),
+            onClick: () => setErrorModal({ open: false, message: '' }),
+          }}
+        >
+          <p className="mb-0">{errorModal.message}</p>
+        </CustomModal>
+        <CustomModal
+          isOpen={confirmModal.open}
+          onClose={closeConfirmModal}
+          title={confirmModal.title}
+          primaryAction={{
+            label: confirmModal.confirmLabel,
+            onClick: handleConfirmAction,
+            variant: confirmModal.confirmVariant,
+          }}
+          secondaryAction={{
+            label: confirmModal.cancelLabel,
+            onClick: closeConfirmModal,
+          }}
+        >
+          <p className="mb-0">{confirmModal.message}</p>
+        </CustomModal>
         {/* Footer csak ha nem ADMIN */}
         {authService.getCurrentUser()?.role !== 'ADMIN' && (
           <Footer userType={authService.getCurrentUser()?.role} />

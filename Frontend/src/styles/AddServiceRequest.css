@@ -6,7 +6,11 @@
   margin: 0 auto;
 }
 
-/* Status badges — same colors as ServiceRequests table */
+/*
+  Állapot badge rendszer:
+  az osztálynév a státuszból épül, így a JSX-ben elég a státuszhoz tartozó suffixet felvenni,
+  a színlogika itt központosan marad karbantartható.
+*/
 .asr-status-badge {
   font-size: 0.75rem;
   font-weight: 700;
@@ -66,6 +70,11 @@
   min-width: 0;
 }
 
+.asr-pending-item-content {
+  flex: 1;
+  min-width: 0;
+}
+
 .add-service-request-page .recent-log-date {
   white-space: normal;
   word-break: break-word;
@@ -120,11 +129,33 @@
   box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
 }
 
+/* Inline warning text for language hint */
+.asr-language-warning {
+  color: #b45309;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.asr-language-warning svg {
+  flex-shrink: 0;
+}
+
+/* No pending requests message */
+.asr-no-pending {
+  font-size: 0.875rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
 /* ===========================================
    RESPONSIVE BREAKPOINTS
    =========================================== */
 
 @media (max-width: 767.98px) {
+  /* Mobilon egymás alá rakjuk az akciógombokat, hogy ne törjenek csúnyán és könnyebben érhetők legyenek. */
   .add-service-request-page .form-actions {
     flex-direction: column;
   }

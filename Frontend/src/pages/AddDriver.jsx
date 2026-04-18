@@ -1,18 +1,23 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Alert, Button, Container, Form, Spinner } from 'react-bootstrap';
+import { Button, Container, Form, Spinner } from 'react-bootstrap';
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
-import Footer from '../components/Footer';
+import CustomModal from '../components/CustomModal';
+import { useLanguage } from '../contexts/LanguageContext';
 import '../styles/EditDriver.css';
 
 const AddDriver = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 1024);
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalType, setModalType] = useState('');
+  const [modalContent, setModalContent] = useState({ title: '', message: '' });
 
   const [form, setForm] = useState({
     fullName: '',
@@ -23,18 +28,42 @@ const AddDriver = () => {
     notes: '',
   });
 
+  // Holnapi dátum az engedély lejáratának minimális értékeként
+  const minLicenseDate = new Date();
+  minLicenseDate.setDate(minLicenseDate.getDate() + 1);
+  const minLicenseDateString = minLicenseDate.toISOString().split('T')[0];
+
   useEffect(() => {
     const handleResize = () => setSidebarOpen(window.innerWidth > 1024);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  useEffect(() => {
+    if (error) {
+      setModalType('error');
+      setModalContent({ title: t('common.errorTitle'), message: error });
+      setModalOpen(true);
+    }
+  }, [error, t]);
+
+  useEffect(() => {
+    if (success) {
+      setModalType('success');
+      setModalContent({ title: t('common.successTitle'), message: success });
+      setModalOpen(true);
+    }
+  }, [success, t]);
+
   const handleChange = (e) => {
+    // Frissíti az adatmezőt az input értékével
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
+    // Űrlap elküldése: először létrehozzuk a sofőrt, majd siker esetén rövid késleltetéssel visszalépünk a listába.
+    // A késleltetés célja, hogy a felhasználó biztosan lássa a siker modal tartalmát.
     e.preventDefault();
     setSaving(true);
     setError('');
@@ -48,7 +77,7 @@ const AddDriver = () => {
         licenseExpiryDate: form.licenseExpiryDate,
         notes: form.notes || null,
       });
-      setSuccess('Driver created successfully. A set-password email has been sent. Redirecting...');
+      setSuccess('Successfully created. Redirecting...');
       setTimeout(() => navigate('/drivers'), 2000);
     } catch (err) {
       const msg = err?.response?.data;
@@ -71,16 +100,28 @@ const AddDriver = () => {
             </div>
           </div>
 
-          {error && (
-            <Alert variant="danger" dismissible onClose={() => setError('')} className="mb-4">
-              {error}
-            </Alert>
-          )}
-          {success && (
-            <Alert variant="success" className="mb-4">
-              {success}
-            </Alert>
-          )}
+          <CustomModal
+            isOpen={modalOpen}
+            onClose={() => {
+              setModalOpen(false);
+              setError('');
+              setSuccess('');
+              setModalType('');
+            }}
+            title={modalContent.title}
+            primaryAction={modalType === 'error' ? {
+              label: t('common.ok'),
+              onClick: () => {
+                setModalOpen(false);
+                setError('');
+                setSuccess('');
+                setModalType('');
+              },
+            } : undefined}
+            closeOnBackdrop={modalType === 'error'}
+          >
+            <p className="mb-0">{modalContent.message}</p>
+          </CustomModal>
 
           <form onSubmit={handleSubmit} className="edit-driver-form-grid">
 
@@ -173,7 +214,7 @@ const AddDriver = () => {
                       name="licenseExpiryDate"
                       value={form.licenseExpiryDate}
                       onChange={handleChange}
-                      min={new Date(Date.now() + 86400000).toISOString().split('T')[0]}
+                      min={minLicenseDateString}
                       required
                       className="field-input"
                     />
@@ -230,7 +271,6 @@ const AddDriver = () => {
 
           </form>
         </Container>
-        <Footer />
       </main>
     </div>
   );

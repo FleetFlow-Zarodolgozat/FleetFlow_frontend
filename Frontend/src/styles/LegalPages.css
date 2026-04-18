@@ -46,6 +46,11 @@
   margin-bottom: 32px;
 }
 
+.legal-logo-image {
+  height: 48px;
+  width: auto;
+}
+
 .legal-page .logo-icon {
   display: flex;
   align-items: center;

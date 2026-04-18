@@ -1,16 +1,107 @@
-# React + Vite
+# FleetFlow Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+FleetFlow egy flottakezelő webalkalmazás frontendje. A felület két fő szerepkörre épül (driver és admin), és a napi üzemeltetéshez szükséges műveleteket támogatja: utak, üzemanyag-naplók, szervizkérések, járművek és sofőrök kezelése, értesítések, profilbeállítások.
 
-Currently, two official plugins are available:
+## Fő funkciók
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Hitelesítés**: bejelentkezés, elfelejtett jelszó, jelszó beállítása (JWT token a localStorage-ben)
+- **Szerepkör-alapú dashboard**: driver és admin külön dashboarddal
+- **Utak**: lista, részletek, új út rögzítése
+- **Üzemanyag-naplók**: lista, részletek, új napló rögzítése
+- **Szervizkérések**: lista, részletek, státuszok kezelése
+- **Admin menedzsment**: sofőrök és járművek kezelése
+- **Naptár**: ütemezés és események
+- **Értesítések**: olvasatlan jelző a menüben
+- **Többnyelvűség**: en, hu, de
+- **Sötét mód**: localStorage-ben mentett állapot
 
-## React Compiler
+## Technológia
 
-The React Compiler is currently not compatible with SWC. See [this issue](https://github.com/vitejs/vite-plugin-react/issues/428) for tracking the progress.
+- React 19 + Vite 7
+- React Router
+- React-Bootstrap + egyedi CSS
+- Axios
+- Leaflet térkép
+- React Big Calendar
+- Cypress e2e tesztek
 
-## Expanding the ESLint configuration
+## Gyors indítás
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+1. Függőségek telepítése
+
+```bash
+npm install
+```
+
+2. Fejlesztői szerver
+
+```bash
+npm run dev
+```
+
+Alapértelmezett port: `5174`.
+
+## Build és preview
+
+```bash
+npm run build
+npm run preview
+```
+
+## Lint
+
+```bash
+npm run lint
+```
+
+## Cypress (e2e)
+
+```bash
+npx cypress open
+# vagy
+npx cypress run
+```
+
+## API és proxy
+
+- Az Axios base URL: `/api`.
+- Vite proxy beállítás a backendhez: lásd [vite.config.js](vite.config.js).
+- A proxy cél URL-je: `https://fleetflow-zarodolgozat-backend-ressdominik.jcloud.jedlik.cloud`.
+
+## Navigáció és szerepkörök
+
+- Bejelentkezés után a rendszer szerepkör alapján irányít:
+	- **Admin** → admin dashboard
+	- **Driver** → driver dashboard
+
+Fontosabb útvonalak (nem teljes lista):
+
+- `/dashboard`
+- `/trips`, `/add-new-trip`
+- `/fuel-logs`, `/add-fuel-log`
+- `/service-requests`, `/service-request-details`, `/add-service-request`
+- `/drivers`, `/add-driver`, `/drivers/:id/edit`
+- `/vehicles`, `/add-vehicle`, `/vehicles/:id/edit`
+- `/admin-*` oldalak az admin listákhoz
+- `/notifications`
+- `/profile-settings`
+- `/terms`, `/privacy`, `/help`
+
+## Lokális beállítások
+
+- Nyelv: `fleetflow_language` (driver esetén mentés `fleetflow_language_driver` kulcsba is)
+- Sötét mód: `fleetflow_darkMode`
+- Hitelesítés: `authToken` és `user`
+
+## Projekt struktúra (röviden)
+
+- [src/pages](src/pages) – oldalak
+- [src/components](src/components) – megosztott komponensek
+- [src/services](src/services) – API és auth szolgáltatások
+- [src/styles](src/styles) – egyedi stílusok
+- [cypress](cypress) – e2e tesztek
+
+## Megjegyzések
+
+- A legtöbb hiba és siker üzenet egyedi `CustomModal` komponensen keresztül jelenik meg.
+- A témaváltás esemény alapú (`theme-change`) és localStorage-ben tárolódik.

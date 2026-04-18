@@ -1,10 +1,11 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Alert, Container, Spinner } from 'react-bootstrap';
+import { Container, Spinner } from 'react-bootstrap';
 import api from '../services/api';
 import JSZip from 'jszip';
 import Sidebar from '../components/Sidebar';
-import Footer from '../components/Footer';
+import CustomModal from '../components/CustomModal';
+import { useLanguage } from '../contexts/LanguageContext';
 import '../styles/AdminServiceRequests.css';
 
 const PAGE_SIZE = 10;
@@ -19,11 +20,12 @@ const STATUS_LABELS = {
 
 const AdminServiceRequests = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 1024);
 
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [errorModalMessage, setErrorModalMessage] = useState('');
   const [totalCount, setTotalCount] = useState(0);
   const [totalOngoingCount, setTotalOngoingCount] = useState(0);
   const [totalRequestedCount, setTotalRequestedCount] = useState(0);
@@ -36,11 +38,17 @@ const AdminServiceRequests = () => {
   const debounceRef = useRef(null);
 
   const [exporting, setExporting] = useState(false);
+  const [exportEmptyModalOpen, setExportEmptyModalOpen] = useState(false);
 
   const [statusFilter, setStatusFilter] = useState('ongoing');
   const [ordering, setOrdering] = useState('');
 
   const [driverImages, setDriverImages] = useState({});
+
+  // Egy helyen kezeljuk az osszes hibauzenetet, hogy egységes modal UX legyen.
+  const openErrorModal = (message) => {
+    setErrorModalMessage(message || 'Unexpected error occurred.');
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -54,7 +62,6 @@ const AdminServiceRequests = () => {
   const fetchRequests = useCallback(
     async (pageToLoad = 1) => {
       setLoading(true);
-      setError('');
       try {
         const params = {
           page: pageToLoad,
@@ -66,7 +73,8 @@ const AdminServiceRequests = () => {
 
         const response = await api.get('/service-requests/admin', { params });
         const payload = response.data || {};
-        let rawItems = Array.isArray(payload.data) ? payload.data : [];        const allItems = Array.isArray(payload.data) ? payload.data : [];
+        let rawItems = Array.isArray(payload.data) ? payload.data : [];
+        const allItems = Array.isArray(payload.data) ? payload.data : [];
         const totalOngoing = allItems.filter(r => {
           const status = r.status ?? r.Status;
           return status !== 'REJECTED' && status !== 'CLOSED';
@@ -102,7 +110,7 @@ const AdminServiceRequests = () => {
           typeof apiMessage === 'string'
             ? apiMessage
             : apiMessage?.message || apiMessage?.Message || 'An error occurred while fetching service requests.';
-        setError(message);
+        openErrorModal(message);
       } finally {
         setLoading(false);
       }
@@ -122,7 +130,8 @@ const AdminServiceRequests = () => {
     debounceRef.current = setTimeout(() => {
       setSearchQ(val);
     }, 400);
-  };  useEffect(() => {
+  };
+  useEffect(() => {
     if (requests.length === 0) return;
     let cancelled = false;
     const fetchImages = async () => {
@@ -148,15 +157,6 @@ const AdminServiceRequests = () => {
     return () => { cancelled = true; };
   }, [requests]);
 
-  // Computed stats from current page
-  const ongoingCount = requests.filter((r) => {
-    const status = r.status ?? r.Status;
-    return status !== 'REJECTED' && status !== 'CLOSED';
-  }).length;
-  const pendingCount = requests.filter((r) => (r.status ?? r.Status) === 'REQUESTED').length;
-  const approvedCount = requests.filter((r) => (r.status ?? r.Status) === 'APPROVED').length;
-  const rejectedCount = requests.filter((r) => (r.status ?? r.Status) === 'REJECTED').length;
-
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
   const formatDateTime = (value) => {
@@ -174,6 +174,17 @@ const AdminServiceRequests = () => {
         minute: '2-digit',
       }),
     };
+  };
+
+  const getCreatedAtValue = (req) => {
+    return (
+      req.createdAt ?? req.CreatedAt ??
+      req.createdOn ?? req.CreatedOn ??
+      req.submittedAt ?? req.SubmittedAt ??
+      req.date ?? req.Date ??
+      req.scheduledStart ?? req.ScheduledStart ??
+      req.closedAt ?? req.ClosedAt
+    );
   };
 
   const getInitials = (email) => {
@@ -222,8 +233,8 @@ const AdminServiceRequests = () => {
       }
 
       if (items.length === 0) {
-        setError('No data to export for the selected filters.');
         setExporting(false);
+        setExportEmptyModalOpen(true);
         return;
       }
 
@@ -317,7 +328,8 @@ const AdminServiceRequests = () => {
           : '';
 
         return `
-<div class="sr-card">
+      <table class="card-block"><tr><td>
+      <div class="sr-card">
   <div class="card-header">
     <div class="card-number">#${id}</div>
     <div class="card-title">${title}</div>
@@ -334,7 +346,8 @@ const AdminServiceRequests = () => {
     <span class="driver-email">${driver}</span>
   </div>
   ${invoiceHtml}
-</div>`;
+</div>
+</td></tr></table>`;
       }).join('\n');
 
       const html = `<!DOCTYPE html>
@@ -359,7 +372,9 @@ const AdminServiceRequests = () => {
   .stat-box.blue { border-top: 3px solid #3b82f6; }
   .stat-box.green { border-top: 3px solid #16a34a; }
   .stat-box.orange { border-top: 3px solid #f97316; }
-  .sr-card { border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px 20px; margin-bottom: 16px; background: #ffffff; page-break-inside: avoid; }
+  .card-block { width: 100%; border-collapse: collapse; page-break-inside: avoid; break-inside: avoid; }
+  .card-block td { padding: 0; }
+  .sr-card { border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px 20px; margin-bottom: 16px; background: #ffffff; page-break-inside: avoid; break-inside: avoid-page; break-inside: avoid; -webkit-column-break-inside: avoid; -moz-column-break-inside: avoid; display: block; width: 100%; }
   .card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; }
   .card-number { font-size: 11px; font-weight: 700; color: #94a3b8; min-width: 28px; }
   .card-title { font-size: 14px; font-weight: 700; color: #1e293b; flex: 1; }
@@ -428,7 +443,7 @@ ${serviceCards}
       document.body.removeChild(a);
       URL.revokeObjectURL(zipUrl);
     } catch {
-      setError('Export failed.');
+      openErrorModal('Export failed.');
     } finally {
       setExporting(false);
     }
@@ -488,6 +503,30 @@ ${serviceCards}
 
       <main className="asr-main">
         <Container fluid className="asr-page">
+
+          <CustomModal
+            isOpen={exportEmptyModalOpen}
+            onClose={() => setExportEmptyModalOpen(false)}
+            title={t('adminDash.export.emptyTitle')}
+            primaryAction={{
+              label: t('common.ok'),
+              onClick: () => setExportEmptyModalOpen(false),
+            }}
+          >
+            <p className="mb-0">{t('adminDash.export.emptyMessage')}</p>
+          </CustomModal>
+
+          <CustomModal
+            isOpen={Boolean(errorModalMessage)}
+            onClose={() => setErrorModalMessage('')}
+            title={t('common.errorTitle')}
+            primaryAction={{
+              label: t('common.ok'),
+              onClick: () => setErrorModalMessage(''),
+            }}
+          >
+            <p className="mb-0">{errorModalMessage}</p>
+          </CustomModal>
 
           {/* ── Header ─────────────────────────────────── */}
           <div className="asr-header">
@@ -663,12 +702,6 @@ ${serviceCards}
             </div>
           </div>
 
-          {error && (
-            <Alert variant="danger" className="mb-3" onClose={() => setError('')} dismissible>
-              {error}
-            </Alert>
-          )}
-
           {/* ── Table Card ─────────────────────────────── */}
           <div className="asr-table-card">
             {loading ? (
@@ -692,6 +725,7 @@ ${serviceCards}
                         <th className="asr-th">SCHEDULED</th>
                         <th className="asr-th">VEHICLE</th>
                         <th className="asr-th">DRIVER</th>
+                        <th className="asr-th">SERVICE LOCATION</th>
                         <th className="asr-th">TITLE</th>
                         <th className="asr-th">REPORTED COST</th>
                         <th className="asr-th">CLOSED AT</th>
@@ -706,6 +740,14 @@ ${serviceCards}
                         const closedAt = formatDateTime(req.closedAt ?? req.ClosedAt);
                         const plate = req.licensePlate ?? req.LicensePlate ?? '—';
                         const email = req.userEmail ?? req.UserEmail ?? '—';
+                        const serviceLocation =
+                          req.serviceLocation ??
+                          req.ServiceLocation ??
+                          req.location ??
+                          req.Location ??
+                          req.serviceAddress ??
+                          req.ServiceAddress ??
+                          '—';
                         const title = req.title ?? req.Title ?? '—';
                         const status = req.status ?? req.Status ?? '—';
                         const cost = req.driverReportCost ?? req.DriverReportCost;
@@ -735,6 +777,7 @@ ${serviceCards}
                                 <span className="asr-driver-email">{email}</span>
                               </div>
                             </td>
+                            <td className="asr-td">{serviceLocation}</td>
                             <td className="asr-td asr-td--title">{title}</td>
                             <td className="asr-td asr-td--cost">
                               {cost != null ? `${Number(cost).toLocaleString('hu-HU')} Ft` : '—'}
@@ -781,6 +824,14 @@ ${serviceCards}
                     const closedAt = formatDateTime(req.closedAt ?? req.ClosedAt);
                     const plate = req.licensePlate ?? req.LicensePlate ?? '—';
                     const email = req.userEmail ?? req.UserEmail ?? '—';
+                    const serviceLocation =
+                      req.serviceLocation ??
+                      req.ServiceLocation ??
+                      req.location ??
+                      req.Location ??
+                      req.serviceAddress ??
+                      req.ServiceAddress ??
+                      '—';
                     const title = req.title ?? req.Title ?? '—';
                     const status = req.status ?? req.Status ?? '—';
                     const cost = req.driverReportCost ?? req.DriverReportCost;
@@ -815,6 +866,10 @@ ${serviceCards}
                             </div>
                             <span className="asr-driver-email">{email}</span>
                           </div>
+                        </div>
+                        <div className="asr-mc-row">
+                          <span className="asr-mc-label">Service Location</span>
+                          <span>{serviceLocation}</span>
                         </div>
                         <div className="asr-mc-row">
                           <span className="asr-mc-label">Reported Cost</span>
@@ -852,7 +907,6 @@ ${serviceCards}
           </div>
 
         </Container>
-        <Footer />
       </main>
     </div>
   );

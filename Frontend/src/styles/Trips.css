@@ -139,6 +139,8 @@
   table-layout: auto;
 }
 
+/* Oszlopszélességek: a dátum és jármű oszlopok keskenyebbek,
+   az útvonal oszlop kapja a legtöbb helyet. */
 .trips-table th.trip-header:nth-child(1) { width: 12%; text-align: center; }
 .trips-table th.trip-header:nth-child(2) { width: 18%; text-align: center; } 
 .trips-table th.trip-header:nth-child(3) { width: 38%; text-align: left;} 
@@ -354,12 +356,15 @@
 .mobile-cards {
   display: none;
   padding: 16px;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .trip-mobile-card {
   border-radius: 12px;
   border: 1px solid #e2e8f0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  width: 100%;
 }
 
 .mobile-card-header {

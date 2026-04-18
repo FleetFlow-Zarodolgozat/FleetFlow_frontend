@@ -2,12 +2,12 @@
 .admin-dashboard {
   display: flex;
   width: 100vw;
-  height: 99vh;
+  height: 100vh;
   position: fixed;
   left: 0;
   top: 0;
   background-color: #f8f9fa;
-  overflow: auto;
+  overflow: hidden;
   z-index: 1;
 }
 
@@ -17,6 +17,9 @@
   margin-left: var(--sidebar-width);
   padding: 24px;
   background-color: #f8f9fa;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* Header */
@@ -90,6 +93,7 @@
   border: 1px solid #dee2e6;
   border-radius: 12px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  min-width: 0;
 }
 
 .admin-dashboard .stat-card:hover {
@@ -102,7 +106,31 @@
 }
 
 .admin-dashboard .stat-card .card-body > div {
-  align-items: center !important;
+  align-items: flex-start !important;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  gap: 16px;
+}
+
+.admin-dashboard .stat-card .card-body > div > div:first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+
+.admin-dashboard .stat-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-left: auto;
+  align-self: center;
 }
 
 .admin-dashboard .stat-label {
@@ -111,6 +139,8 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: #6c757d;
+  word-break: normal;
+  overflow-wrap: break-word;
 }
 
 .admin-dashboard .stat-value {
@@ -118,6 +148,9 @@
   font-weight: 700;
   color: #212529;
   margin: 0;
+  word-break: normal;
+  overflow-wrap: break-word;
+  line-height: 1.15;
 }
 
 .admin-dashboard .stat-change {
@@ -125,6 +158,13 @@
   font-weight: 600;
   padding: 4px 8px;
   border-radius: 6px;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .admin-dashboard .stat-compare {
@@ -137,16 +177,9 @@
   color: #6c757d;
   display: block;
   margin-top: 4px;
-}
-
-.admin-dashboard .stat-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+  word-break: normal;
+  overflow-wrap: break-word;
+  line-height: 1.4;
 }
 
 .admin-dashboard .stat-icon.fleet {
@@ -212,7 +245,18 @@
   border-radius: 12px;
 }
 
+.admin-dashboard .event-card {
+  background: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 12px;
+}
+
 .admin-dashboard .quick-add-card .card-header {
+  border-bottom: 1px solid #dee2e6;
+  padding: 14px 16px;
+}
+
+.admin-dashboard .event-card .card-header {
   border-bottom: 1px solid #dee2e6;
   padding: 14px 16px;
 }
@@ -221,9 +265,21 @@
   font-size: 16px;
   font-weight: 600;
   color: #212529;
+  background: transparent;
+}
+
+.admin-dashboard .event-card .card-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #212529;
+  background: transparent;
 }
 
 .admin-dashboard .quick-add-card .card-body {
+  padding: 16px;
+}
+
+.admin-dashboard .event-card .card-body {
   padding: 16px;
 }
 
@@ -313,6 +369,65 @@
   margin-top: 4px;
 }
 
+.admin-dashboard .upcoming-status-dot--service {
+  background-color: #0d6efd;
+}
+
+.admin-dashboard .upcoming-status-dot--trip {
+  background-color: #fd7e14;
+}
+
+.admin-dashboard .upcoming-status-dot--default {
+  background-color: #198754;
+}
+
+/* Layout util osztalyok: inline style helyett ujrahasznalhato blokkok */
+.dashboard-calendar-body {
+  height: 100%;
+  min-height: 0;
+}
+
+.dashboard-calendar-body--mobile {
+  min-height: 460px;
+}
+
+.dashboard-calendar {
+  height: 100%;
+}
+
+.dashboard-calendar--mobile {
+  height: 440px;
+}
+
+.dashboard-min-height-0 {
+  min-height: 0;
+}
+
+.dashboard-close-btn {
+  width: 34px;
+  height: 34px;
+}
+
+.dashboard-flex-shrink-0 {
+  flex-shrink: 0;
+}
+
+.dashboard-flex-fill-scroll-hidden {
+  flex: 1;
+  overflow: hidden;
+}
+
+.dashboard-flex-1-min-height-0 {
+  flex: 1;
+  min-height: 0;
+}
+
+.dashboard-event-textarea {
+  resize: none;
+  flex: 1;
+  min-height: 0;
+}
+
 /* Calendar Event Styles */
 .admin-dashboard .rbc-event {
   padding: 4px 8px;
@@ -321,12 +436,17 @@
   border-radius: 6px;
 }
 
-.admin-dashboard .rbc-toolbar {
+.admin-dashboard .rbc-wrapper .rbc-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
   padding: 0;
   margin-bottom: 12px;
 }
 
-.admin-dashboard .rbc-toolbar button {
+.admin-dashboard .rbc-wrapper .rbc-toolbar button {
   border: 1px solid #dee2e6;
   background: #fff;
   color: #495057;
@@ -336,17 +456,17 @@
   transition: all 0.2s;
 }
 
-.admin-dashboard .rbc-toolbar button:hover {
+.admin-dashboard .rbc-wrapper .rbc-toolbar button:hover {
   background: #f8f9fa;
 }
 
-.admin-dashboard .rbc-toolbar button.rbc-active {
+.admin-dashboard .rbc-wrapper .rbc-toolbar button.rbc-active {
   background: #0d6efd;
   border-color: #0d6efd;
   color: #fff;
 }
 
-.admin-dashboard .rbc-toolbar-label {
+.admin-dashboard .rbc-wrapper .rbc-toolbar-label {
   font-weight: 600;
   font-size: 15px;
   color: #212529;
@@ -396,6 +516,47 @@
     padding: 24px;
     padding-top: 80px;
   }
+
+  .admin-dashboard .schedule-header-row {
+    justify-content: center !important;
+  }
+
+  .admin-dashboard .schedule-header-row h3 {
+    width: 100%;
+    text-align: center;
+  }
+
+  .admin-dashboard .schedule-header-row .calendar-nav-arrows {
+    display: none !important;
+  }
+
+  .admin-dashboard .rbc-wrapper .rbc-toolbar {
+    gap: 6px;
+  }
+
+  .admin-dashboard .rbc-wrapper .rbc-toolbar button {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+
+  .admin-dashboard .rbc-wrapper .rbc-toolbar-label {
+    width: 100%;
+    text-align: center;
+    order: -1;
+  }
+
+  .admin-dashboard .stat-card .card-body > div {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .admin-dashboard .stat-card .card-body > div > div:first-child {
+    width: 100%;
+  }
+  .admin-dashboard .stat-icon {
+    margin-left: 0;
+    width: 100%;
+    justify-content: center;
+  }
   .admin-dashboard .stat-value {
     font-size: 28px;
   }
@@ -414,13 +575,30 @@
     margin-bottom: 8px;
   }
 
+  .admin-dashboard .stat-card .card-body > div {
+    flex-wrap: nowrap;
+    align-items: flex-start !important;
+    gap: 12px;
+  }
+
+  .admin-dashboard .stat-card .card-body > div > div:first-child {
+    width: auto;
+    flex: 1 1 auto;
+  }
+
   .admin-dashboard .stat-value {
     font-size: 24px;
   }
 
   .admin-dashboard .stat-icon {
+    margin-left: auto;
+    flex-shrink: 0;
     width: 44px;
     height: 44px;
+  }
+
+  .admin-dashboard .stat-change {
+    white-space: normal;
   }
 }
 
@@ -443,7 +621,115 @@
   }
 
   .admin-dashboard .stat-icon {
+    margin-left: auto;
     width: 40px;
     height: 40px;
   }
+}
+
+/* Dark mode */
+body.dark-mode .admin-dashboard,
+body.dark-mode .admin-dashboard .main-content {
+  background-color: #0f1117 !important;
+}
+
+body.dark-mode .admin-dashboard .header-title h1,
+body.dark-mode .admin-dashboard .schedule-card .card-header h3,
+body.dark-mode .admin-dashboard .quick-add-card .card-header h3,
+body.dark-mode .admin-dashboard .event-card .card-header h3,
+body.dark-mode .admin-dashboard .upcoming-card .card-header h3,
+body.dark-mode .admin-dashboard .upcoming-info h6,
+body.dark-mode .admin-dashboard .stat-value {
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .admin-dashboard .event-card .card-header h3 {
+  background: transparent !important;
+}
+
+body.dark-mode .admin-dashboard .event-card .form-label,
+body.dark-mode .admin-dashboard .event-card .text-muted {
+  color: #8b949e !important;
+  background: transparent !important;
+}
+
+body.dark-mode .admin-dashboard .event-card .form-control {
+  background: #21262d !important;
+  border-color: #30363d !important;
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .admin-dashboard .event-card .form-control:focus {
+  background: #21262d !important;
+  border-color: #1f6feb !important;
+  box-shadow: 0 0 0 0.2rem rgba(31, 111, 235, 0.25) !important;
+  color: #e6edf3 !important;
+}
+
+body.dark-mode .admin-dashboard .event-card .form-control::placeholder {
+  color: #6e7681 !important;
+}
+
+body.dark-mode .admin-dashboard .header-title p,
+body.dark-mode .admin-dashboard .stat-label,
+body.dark-mode .admin-dashboard .stat-extra,
+body.dark-mode .admin-dashboard .upcoming-info small,
+body.dark-mode .admin-dashboard .rbc-header {
+  color: #8b949e !important;
+}
+
+body.dark-mode .admin-dashboard .time-range-selector,
+body.dark-mode .admin-dashboard .stat-card,
+body.dark-mode .admin-dashboard .schedule-card,
+body.dark-mode .admin-dashboard .quick-add-card,
+body.dark-mode .admin-dashboard .event-card,
+body.dark-mode .admin-dashboard .upcoming-card,
+body.dark-mode .admin-dashboard .rbc-month-view,
+body.dark-mode .admin-dashboard .rbc-time-view {
+  background: #1c2230 !important;
+  border-color: #30363d !important;
+}
+
+body.dark-mode .admin-dashboard .schedule-card .card-header,
+body.dark-mode .admin-dashboard .quick-add-card .card-header,
+body.dark-mode .admin-dashboard .event-card .card-header,
+body.dark-mode .admin-dashboard .upcoming-card .card-header,
+body.dark-mode .admin-dashboard .rbc-wrapper .rbc-toolbar button,
+body.dark-mode .admin-dashboard .rbc-header,
+body.dark-mode .admin-dashboard .rbc-off-range-bg {
+  background: #161b22 !important;
+  border-color: #30363d !important;
+}
+
+body.dark-mode .admin-dashboard .time-range-selector .btn,
+body.dark-mode .admin-dashboard .rbc-wrapper .rbc-toolbar button,
+body.dark-mode .admin-dashboard .rbc-date-cell,
+body.dark-mode .admin-dashboard .calendar-nav-arrows .current-month {
+  color: #8b949e !important;
+}
+
+body.dark-mode .admin-dashboard .time-range-selector .btn:hover,
+body.dark-mode .admin-dashboard .rbc-wrapper .rbc-toolbar button:hover,
+body.dark-mode .admin-dashboard .upcoming-item:hover {
+  background: #21262d !important;
+}
+
+body.dark-mode .admin-dashboard .time-range-selector .btn.active,
+body.dark-mode .admin-dashboard .rbc-wrapper .rbc-toolbar button.rbc-active {
+  background: #1f6feb !important;
+  border-color: #1f6feb !important;
+  color: #ffffff !important;
+}
+
+body.dark-mode .admin-dashboard .upcoming-item {
+  border-bottom-color: #30363d !important;
+}
+
+body.dark-mode .admin-dashboard .upcoming-icon,
+body.dark-mode .admin-dashboard .rbc-today {
+  background: #21262d !important;
+}
+
+body.dark-mode .admin-dashboard .rbc-date-cell.rbc-now {
+  color: #58a6ff !important;
 }

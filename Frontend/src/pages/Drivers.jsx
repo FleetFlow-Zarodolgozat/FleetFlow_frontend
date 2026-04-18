@@ -1,9 +1,9 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Alert, Button, Container, Spinner } from 'react-bootstrap';
+import { Button, Container, Spinner } from 'react-bootstrap';
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
-import Footer from '../components/Footer';
+import CustomModal from '../components/CustomModal';
 import '../styles/Drivers.css';
 
 const PAGE_SIZE = 10;
@@ -14,7 +14,11 @@ const Drivers = () => {
 
   const [drivers, setDrivers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [errorModal, setErrorModal] = useState({
+    open: false,
+    title: 'Error',
+    message: '',
+  });
   const [totalCount, setTotalCount] = useState(0);
   const [page, setPage] = useState(1);
   const [togglingId, setTogglingId] = useState(null);
@@ -24,6 +28,19 @@ const Drivers = () => {
   const debounceRef = useRef(null);
   const [isActiveFilter, setIsActiveFilter] = useState(true); // true = Aktív, false = Inaktív
   const [driverImages, setDriverImages] = useState({});
+  const [deactivateModalOpen, setDeactivateModalOpen] = useState(false);
+  const [selectedDriverId, setSelectedDriverId] = useState(null);
+  const [activateModalOpen, setActivateModalOpen] = useState(false);
+  const [selectedActivateDriverId, setSelectedActivateDriverId] = useState(null);
+
+  // Központosított hibamegjelenítés, hogy minden backend hiba azonos modalban látszódjon.
+  const openErrorModal = (message) => {
+    setErrorModal({ open: true, title: 'Error', message });
+  };
+
+  const closeErrorModal = () => {
+    setErrorModal((prev) => ({ ...prev, open: false }));
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -36,8 +53,9 @@ const Drivers = () => {
 
   const fetchDrivers = useCallback(async (pageToLoad = 1) => {
     setLoading(true);
-    setError('');
     try {
+      // A lista backend oldalon lapozott és szűrt, ezért minden állapotváltozásnál
+      // új lekérést indítunk az aktuális oldalra/szűrőkre.
       const params = {
         page: pageToLoad,
         pageSize: PAGE_SIZE,
@@ -47,7 +65,10 @@ const Drivers = () => {
 
       const response = await api.get('/admin/drivers', { params });
       const payload = response.data || {};
-      const rawDrivers = Array.isArray(payload.data) ? payload.data : [];      const enriched = await Promise.all(
+      const rawDrivers = Array.isArray(payload.data) ? payload.data : [];
+      // A driver lista endpoint nem ad rendszámot minden sorban, ezért soronként
+      // lekérjük az aktuális hozzárendelt járművet és dúsítjuk vele a táblát.
+      const enriched = await Promise.all(
         rawDrivers.map(async (d) => {
           const driverId = d.id ?? d.Id;
           try {
@@ -72,7 +93,7 @@ const Drivers = () => {
         typeof apiMessage === 'string'
           ? apiMessage
           : apiMessage?.message || apiMessage?.Message || 'An error occurred while fetching drivers.';
-      setError(message);
+      openErrorModal(message);
     } finally {
       setLoading(false);
     }
@@ -90,63 +111,63 @@ const Drivers = () => {
   const handleSearchInputChange = (e) => {
     const val = e.target.value;
     setSearchInput(val);
+    // Debounce: gépelés közben nem terheljük túl a backend-et,
+    // csak rövid szünet után frissítjük a tényleges kereső queryt.
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       setSearchQ(val);
     }, 400);
   };
 
-  const handleDeactivateDriver = async (id) => {
-    if (!window.confirm('Are you sure you want to deactivate this driver? They will lose access and any active vehicle assignment will be ended.')) return;
-    setError('');
-    setTogglingId(id);
+  const handleDeactivateDriver = (id) => {
+    setSelectedDriverId(id);
+    setDeactivateModalOpen(true);
+  };
+
+  const confirmDeactivateDriver = async () => {
+    if (!selectedDriverId) return;
+    setTogglingId(selectedDriverId);
+    setDeactivateModalOpen(false);
     try {
-      await api.patch(`/admin/drivers/deactivate/${id}`);
+      await api.patch(`/admin/drivers/deactivate/${selectedDriverId}`);
       setTogglingId(null);
+      setSelectedDriverId(null);
       await fetchDrivers(1);
     } catch (err) {
       setTogglingId(null);
+      setSelectedDriverId(null);
       const apiMessage = err?.response?.data;
       const message =
         typeof apiMessage === 'string'
           ? apiMessage
           : apiMessage?.message || apiMessage?.Message || 'An error occurred while deactivating the driver.';
-      setError(message);
+      openErrorModal(message);
     }
   };
 
-  const handleActivateDriver = async (id) => {
-    if (!window.confirm('Are you sure you want to activate this driver? They will regain access to the system.')) return;
-    setError('');
-    setTogglingId(id);
+  const handleActivateDriver = (id) => {
+    setSelectedActivateDriverId(id);
+    setActivateModalOpen(true);
+  };
+
+  const confirmActivateDriver = async () => {
+    if (!selectedActivateDriverId) return;
+    setTogglingId(selectedActivateDriverId);
+    setActivateModalOpen(false);
     try {
-      await api.patch(`/admin/drivers/activate/${id}`);
+      await api.patch(`/admin/drivers/activate/${selectedActivateDriverId}`);
       setTogglingId(null);
+      setSelectedActivateDriverId(null);
       await fetchDrivers(1);
     } catch (err) {
       setTogglingId(null);
+      setSelectedActivateDriverId(null);
       const apiMessage = err?.response?.data;
       const message =
         typeof apiMessage === 'string'
           ? apiMessage
           : apiMessage?.message || apiMessage?.Message || 'An error occurred while activating the driver.';
-      setError(message);
-    }
-  };
-
-  const handleDeleteDriver = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this driver?')) return;
-    setError('');
-    try {
-      await api.delete(`/admin/drivers/${id}`);
-      await fetchDrivers(page);
-    } catch (err) {
-      const apiMessage = err?.response?.data;
-      const message =
-        typeof apiMessage === 'string'
-          ? apiMessage
-          : apiMessage?.message || apiMessage?.Message || 'An error occurred while deleting the driver.';
-      setError(message);
+      openErrorModal(message);
     }
   };
 
@@ -183,6 +204,8 @@ const Drivers = () => {
     let cancelled = false;
     const fetchImages = async () => {
       const newImages = {};
+      // A képeket blob URL-re alakítjuk, így a táblában gyorsan és cache-elhetően
+      // jelennek meg az avatárok extra render-logika nélkül.
       await Promise.all(
         drivers.map(async (d) => {
           const imgId = d.profileImgFileId ?? d.ProfileImgFileId;
@@ -228,11 +251,61 @@ const Drivers = () => {
             </Button>
           </div>
 
-          {error && (
-            <Alert variant="danger" className="mb-3" onClose={() => setError('')} dismissible>
-              {error}
-            </Alert>
-          )}
+          <CustomModal
+            isOpen={deactivateModalOpen}
+            onClose={() => {
+              setDeactivateModalOpen(false);
+              setSelectedDriverId(null);
+            }}
+            title="Confirm Deactivation"
+            secondaryAction={{
+              label: 'Cancel',
+              onClick: () => {
+                setDeactivateModalOpen(false);
+                setSelectedDriverId(null);
+              },
+            }}
+            primaryAction={{
+              label: 'Deactivate',
+              onClick: confirmDeactivateDriver,
+            }}
+          >
+            <p className="mb-0">Are you sure you want to deactivate this driver? They will lose access and any active vehicle assignment will be ended.</p>
+          </CustomModal>
+
+          <CustomModal
+            isOpen={activateModalOpen}
+            onClose={() => {
+              setActivateModalOpen(false);
+              setSelectedActivateDriverId(null);
+            }}
+            title="Confirm Reactivation"
+            secondaryAction={{
+              label: 'Cancel',
+              onClick: () => {
+                setActivateModalOpen(false);
+                setSelectedActivateDriverId(null);
+              },
+            }}
+            primaryAction={{
+              label: 'Reactivate',
+              onClick: confirmActivateDriver,
+            }}
+          >
+            <p className="mb-0">Are you sure you want to reactivate this driver? They will regain access to the system.</p>
+          </CustomModal>
+
+          <CustomModal
+            isOpen={errorModal.open}
+            onClose={closeErrorModal}
+            title={errorModal.title}
+            primaryAction={{
+              label: 'OK',
+              onClick: closeErrorModal,
+            }}
+          >
+            <p className="mb-0">{errorModal.message}</p>
+          </CustomModal>
 
           {/* Table Card */}
           <div className="drivers-table-card">
@@ -279,6 +352,7 @@ const Drivers = () => {
                     <th>EMAIL</th>
                     <th>PHONE</th>
                     <th>LICENSE NUMBER</th>
+                    <th>LICENSE EXPIRY</th>
                     <th>STATUS</th>
                     <th>ACTIONS</th>
                   </tr>
@@ -286,13 +360,13 @@ const Drivers = () => {
                 <tbody>
                   {loading ? (
                     <tr>
-                      <td colSpan={7} className="drivers-loading-cell">
+                      <td colSpan={8} className="drivers-loading-cell">
                         <Spinner animation="border" size="sm" /> Loading...
                       </td>
                     </tr>
                   ) : drivers.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="drivers-empty-cell">
+                      <td colSpan={8} className="drivers-empty-cell">
                         No drivers found matching the given criteria.
                       </td>
                     </tr>
@@ -322,6 +396,11 @@ const Drivers = () => {
                         </td>
                         <td>
                           {driver.licenseNumber || driver.LicenseNumber || '–'}
+                        </td>
+                        <td>
+                          {driver.licenseExpiryDate || driver.LicenseExpiryDate
+                            ? new Date(driver.licenseExpiryDate || driver.LicenseExpiryDate).toLocaleDateString('en-GB')
+                            : '–'}
                         </td>
                         <td>
                           <span className={`status-badge ${(driver.isActive ?? driver.IsActive) ? 'status-active' : 'status-inactive'}`}>
@@ -387,7 +466,9 @@ const Drivers = () => {
                     disabled={page <= 1}
                     onClick={() => fetchDrivers(page - 1)}
                   >
-                    Previous
+                    <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <polyline points="15,18 9,12 15,6" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
                   </button>
                   {buildPaginationItems().map((item, idx) =>
                     item === '...' ? (
@@ -407,14 +488,15 @@ const Drivers = () => {
                     disabled={page >= totalPages}
                     onClick={() => fetchDrivers(page + 1)}
                   >
-                    Next
+                    <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <polyline points="9,6 15,12 9,18" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
                   </button>
                 </div>
               </div>
             )}
           </div>
         </Container>
-        <Footer />
       </main>
     </div>
   );

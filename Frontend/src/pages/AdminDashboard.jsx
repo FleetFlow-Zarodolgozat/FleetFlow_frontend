@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import JSZip from 'jszip';
 import Sidebar from '../components/Sidebar';
 import { Card, Container, Row, Col, Badge, Button, Form } from 'react-bootstrap';
@@ -7,15 +6,14 @@ import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { hu, de, enUS } from 'date-fns/locale';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import { authService } from '../services/authService';
 import { useLanguage } from '../contexts/LanguageContext';
 import api from '../services/api';
+import CustomModal from '../components/CustomModal';
 import '../styles/AdminDashboard.css';
 
 const AdminDashboard = () => {
-  const navigate = useNavigate();
-  const user = authService.getCurrentUser();
-  const { t, language } = useLanguage();  const localeMap = { hu, de, en: enUS };
+  const { t, language } = useLanguage();
+  const localeMap = { hu, de, en: enUS };
   const currentLocale = localeMap[language] || enUS;
   const localizer = dateFnsLocalizer({
     format,
@@ -40,6 +38,7 @@ const AdminDashboard = () => {
   });
   
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 1200);
+  const [isMobileCalendar, setIsMobileCalendar] = useState(window.innerWidth <= 1024);
   const [selectedCalendarEvent, setSelectedCalendarEvent] = useState(null);
 
   useEffect(() => {
@@ -49,6 +48,7 @@ const AdminDashboard = () => {
       } else {
         setSidebarOpen(false);
       }
+      setIsMobileCalendar(window.innerWidth <= 1024);
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -58,15 +58,6 @@ const AdminDashboard = () => {
   const [scheduleEvents, setScheduleEvents] = useState([]);
   const [timeRange, setTimeRange] = useState('today');
   const [fleetStats, setFleetStats] = useState({ total: 0, activePercent: 0 });
-  const [stats, setStats] = useState({
-    totalFleet: 0,
-    fuelCosts: 0,
-    fuelCostsChange: 0,
-    activeTrips: 0,
-    utilizationRate: 0,
-    pendingMaintenance: 0,
-    urgentRequests: 0,
-  });
   const [trStats, setTrStats] = useState({
     fuelCost: 0,
     fuelCostChange: null,
@@ -86,9 +77,28 @@ const AdminDashboard = () => {
     description: ''
   });
   const [eventSaving, setEventSaving] = useState(false);
-  const [eventFeedback, setEventFeedback] = useState({ type: '', message: '' });
-  const [vehicles, setVehicles] = useState([]);
-  const [drivers, setDrivers] = useState([]);  const loadCalendarEvents = async () => {
+  const [eventSuccessModalMessage, setEventSuccessModalMessage] = useState('');
+  const [eventDeleting, setEventDeleting] = useState(false);
+  const [errorModalMessage, setErrorModalMessage] = useState('');
+  const [exportEmptyModalOpen, setExportEmptyModalOpen] = useState(false);
+  const [exportSuccessModalOpen, setExportSuccessModalOpen] = useState(false);
+
+  const openErrorModal = (message) => {
+    setErrorModalMessage(message || 'Unexpected error occurred.');
+  };
+
+  useEffect(() => {
+    if (!exportSuccessModalOpen) return;
+    const timeoutId = setTimeout(() => setExportSuccessModalOpen(false), 2000);
+    return () => clearTimeout(timeoutId);
+  }, [exportSuccessModalOpen]);
+
+  useEffect(() => {
+    if (!eventSuccessModalMessage) return;
+    const timeoutId = setTimeout(() => setEventSuccessModalMessage(''), 2000);
+    return () => clearTimeout(timeoutId);
+  }, [eventSuccessModalMessage]);
+  const loadCalendarEvents = async () => {
     try {
       const calendarResponse = await api.get('/calendarevents');
       const calendarData = Array.isArray(calendarResponse.data) ? calendarResponse.data : [];
@@ -116,34 +126,8 @@ const AdminDashboard = () => {
     } catch (error) {
       console.log('Could not fetch calendar events:', error.message);
     }
-  };  const loadStatistics = async () => {
-    try {
-      const statsResponse = await api.get('/statistics/admin-dashboard');
-      const data = statsResponse.data;
-
-      setStats({
-        totalFleet: data.totalFleet || data.TotalFleet || 0,
-        fuelCosts: data.fuelCosts || data.FuelCosts || 0,
-        fuelCostsChange: data.fuelCostsChange || data.FuelCostsChange || 0,
-        activeTrips: data.activeTrips || data.ActiveTrips || 0,
-        utilizationRate: data.utilizationRate || data.UtilizationRate || 0,
-        pendingMaintenance: data.pendingMaintenance || data.PendingMaintenance || 0,
-        urgentRequests: data.urgentRequests || data.UrgentRequests || 0,
-      });
-    } catch (error) {
-      console.log('Could not fetch admin statistics:', error.message);
-      // Set default values if API fails
-      setStats({
-        totalFleet: 142,
-        fuelCosts: 8450,
-        fuelCostsChange: 4.2,
-        activeTrips: 38,
-        utilizationRate: 92,
-        pendingMaintenance: 5,
-        urgentRequests: 2,
-      });
-    }
-  };  const loadUpcomingEvents = async () => {
+  };
+  const loadUpcomingEvents = async () => {
     try {
       // A scheduleEvents már tartalmazza a calendar eseményeket
       // Ha nincs, akkor API-ból töltjük be
@@ -175,43 +159,17 @@ const AdminDashboard = () => {
     } catch (error) {
       console.log('Could not fetch upcoming events:', error.message);
     }
-  };  const loadVehicles = async () => {
-    try {
-      const response = await api.get('/vehicles');
-      const vList = Array.isArray(response.data) ? response.data : [];
-      setVehicles(vList.map(v => ({
-        id: v.id || v.Id,
-        brandModel: v.brandModel || v.BrandModel || v.LicensePlate,
-        licensePlate: v.licensePlate || v.LicensePlate,
-      })));
-    } catch (error) {
-      console.log('Could not fetch vehicles:', error.message);
-    }
-  };  const loadDrivers = async () => {
-    try {
-      const response = await api.get('/drivers');
-      const dList = Array.isArray(response.data) ? response.data : [];
-      setDrivers(dList.map(d => ({
-        id: d.id || d.Id,
-        fullName: d.fullName || d.FullName,
-        email: d.email || d.Email,
-      })));
-    } catch (error) {
-      console.log('Could not fetch drivers:', error.message);
-    }
   };
 
   const loadFleetStats = async () => {
     try {
-      const [activeRes, maintenanceRes, retiredRes] = await Promise.all([
+      const [activeRes, maintenanceRes] = await Promise.all([
         api.get('/admin/vehicles', { params: { page: 1, pageSize: 1, Status: 'ACTIVE' } }),
         api.get('/admin/vehicles', { params: { page: 1, pageSize: 1, Status: 'MAINTENANCE' } }),
-        api.get('/admin/vehicles', { params: { page: 1, pageSize: 1, Status: 'RETIRED' } }),
       ]);
       const active = activeRes.data?.totalCount || 0;
       const maintenance = maintenanceRes.data?.totalCount || 0;
-      const retired = retiredRes.data?.totalCount || 0;
-      const total = active + maintenance + retired;
+      const total = active + maintenance;
       const activePercent = total > 0 ? Math.round((active / total) * 100) : 0;
       setFleetStats({ total, activePercent });
     } catch (error) {
@@ -285,13 +243,15 @@ const AdminDashboard = () => {
         : 0;
 
       // ── Service requests ───────────────────────────────────────────────
-      // Use scheduledStart if available, else closedAt, else treat as "now" (pending/new)
+      // Use createdAt as primary date field for filtering (when the request was submitted).
+      // Fall back to scheduledStart or closedAt if createdAt is not available.
+      // If no date field is present at all, exclude from the period count.
       const curSrs = srs.filter(sr => {
-        const dateField = sr.scheduledStart ?? sr.ScheduledStart ?? sr.closedAt ?? sr.ClosedAt;
-        if (!dateField) {
-          // No date set = newly submitted REQUESTED, count it in current period
-          return true;
-        }
+        const dateField =
+          sr.createdAt ?? sr.CreatedAt ??
+          sr.scheduledStart ?? sr.ScheduledStart ??
+          sr.closedAt ?? sr.ClosedAt;
+        if (!dateField) return false;
         return inRange(dateField, curFrom, curTo);
       });
       const srCount = curSrs.length;
@@ -310,17 +270,14 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     loadCalendarEvents();
-    loadStatistics();
     loadUpcomingEvents();
-    loadVehicles();
-    loadDrivers();
     loadFleetStats();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     loadTimeRangeStats(timeRange, fleetStats.total);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   }, [timeRange, fleetStats.total]);
 
   // ── Export helpers ────────────────────────────────────────────────────────
@@ -392,13 +349,17 @@ const AdminDashboard = () => {
         .filter(t => inRange(t.startTime ?? t.StartTime, curFrom, curTo));
       const srs = (Array.isArray(srRes.data?.data) ? srRes.data.data : [])
         .filter(sr => {
-          const dateField = sr.scheduledStart ?? sr.ScheduledStart ?? sr.closedAt ?? sr.ClosedAt;
-          if (!dateField) return true;
+          const dateField =
+            sr.createdAt ?? sr.CreatedAt ??
+            sr.scheduledStart ?? sr.ScheduledStart ??
+            sr.closedAt ?? sr.ClosedAt;
+          if (!dateField) return false;
           return inRange(dateField, curFrom, curTo);
         });
 
       if (fuelLogs.length === 0 && trips.length === 0 && srs.length === 0) {
         setExportLoading(false);
+        setExportEmptyModalOpen(true);
         return;
       }
 
@@ -533,12 +494,14 @@ const AdminDashboard = () => {
         const dest = t.endLocation ?? t.EndLocation ?? '—';
         const notes = t.notes ?? t.Notes ?? '';
         const id = t.id ?? t.Id;
-        return `<div class="trip-card">
+        return `<table class="card-block"><tr><td>
+      <div class="trip-card">
   <div class="card-header"><div class="card-number">#${id}</div><div class="card-plate">${plate}</div><div class="card-date">${fmt.date} &nbsp; ${fmt.time}</div></div>
   <div class="card-route"><div class="route-point"><span class="route-dot dot-origin"></span><span class="route-label">From</span><span class="route-value">${origin}</span></div><div class="route-arrow">&#8594;</div><div class="route-point"><span class="route-dot dot-dest"></span><span class="route-label">To</span><span class="route-value">${dest}</span></div></div>
   <div class="card-stats"><div class="stat-pill">&#128205; ${dist} km</div><div class="stat-pill">&#128344; ${dur}</div></div>
   <div class="card-footer"><span class="driver-label">Driver:</span> <span class="driver-email">${driver}</span>${notes ? ` &nbsp;|&nbsp; <span class="notes-text">${notes}</span>` : ''}</div>
-</div>`;
+      </div>
+      </td></tr></table>`;
       }).join('\n');
 
       const tripHtml_cards = tripCards; // already built above
@@ -557,12 +520,14 @@ const AdminDashboard = () => {
         const receiptHtml = receiptEntry
           ? `<div class="receipt-section"><div class="receipt-label">Receipt</div><div class="receipt-filename">&#128206; ${receiptEntry.filename}</div></div>`
           : `<div class="receipt-section receipt-missing">No receipt uploaded</div>`;
-        return `<div class="fuel-card">
+        return `<table class="card-block"><tr><td>
+      <div class="fuel-card">
   <div class="card-header"><div class="card-number">#${id}</div><div class="card-plate">${plate}</div><div class="card-date">${fmt.date}&nbsp;&nbsp;${fmt.time}</div></div>
   <div class="card-stats"><div class="stat-pill pill-orange">&#9650; ${liters} L</div><div class="stat-pill pill-green">&#128178; ${cost}</div><div class="stat-pill">&#128205; ${station}</div></div>
   <div class="card-driver"><span class="driver-label">Driver:</span> <span class="driver-email">${driver}</span></div>
   ${receiptHtml}
-</div>`;
+      </div>
+      </td></tr></table>`;
       }).join('\n');
 
       // Service request cards (for combined Word)
@@ -591,12 +556,14 @@ const AdminDashboard = () => {
         const invoiceHtml = invoiceEntry
           ? `<div class="invoice-section"><div class="invoice-label">Invoice</div><div class="invoice-filename">&#128206; ${invoiceEntry.filename}</div></div>`
           : '';
-        return `<div class="sr-card">
+        return `<table class="card-block"><tr><td>
+      <div class="sr-card">
   <div class="card-header"><div class="card-number">#${id}</div><div class="card-title">${title}</div><div class="status-badge" style="background:${sc.bg};color:${sc.text};border:1px solid ${sc.border}">${statusLbl}</div></div>
   <div class="card-row"><div class="stat-pill pill-vehicle">&#128663; ${plate}</div><div class="stat-pill pill-date">&#128197; ${scheduledFmt}</div>${cost != null && cost !== '' ? `<div class="stat-pill pill-cost">&#128178; ${cost} Ft</div>` : ''}${closedFmt ? `<div class="stat-pill pill-closed">&#10003; Closed: ${closedFmt}</div>` : ''}</div>
   <div class="card-driver"><span class="driver-label">Driver:</span> <span class="driver-email">${driver}</span></div>
   ${invoiceHtml}
-</div>`;
+      </div>
+      </td></tr></table>`;
       }).join('\n');
 
       // ── Dashboard KPI sub-labels (for Word summary cards) ──────────────────
@@ -620,7 +587,9 @@ h2.trips-title{color:#1d6ee6;}h2.fuel-title{color:#f97316;}h2.sr-title{color:#7c
 .stat-box .label{font-size:10px;text-transform:uppercase;color:#94a3b8;}
 .stat-box .value{font-size:17px;font-weight:700;color:#0f172a;}
 .stat-box.blue{border-top:3px solid #3b82f6;}.stat-box.green{border-top:3px solid #16a34a;}.stat-box.purple{border-top:3px solid #7c3aed;}.stat-box.orange{border-top:3px solid #f97316;}
-.trip-card,.fuel-card,.sr-card{border:1px solid #e2e8f0;border-radius:10px;padding:14px 18px;margin-bottom:12px;background:#ffffff;page-break-inside:avoid;}
+.card-block{width:100%;border-collapse:collapse;page-break-inside:avoid;break-inside:avoid;}
+.card-block td{padding:0;}
+.trip-card,.fuel-card,.sr-card{border:1px solid #e2e8f0;border-radius:10px;padding:14px 18px;margin-bottom:12px;background:#ffffff;page-break-inside:avoid;break-inside:avoid-page;break-inside:avoid;-webkit-column-break-inside:avoid;-moz-column-break-inside:avoid;display:block;width:100%;}
 .card-header{display:flex;align-items:center;gap:12px;margin-bottom:10px;border-bottom:1px solid #f1f5f9;padding-bottom:8px;}
 .card-number{font-size:11px;font-weight:700;color:#94a3b8;min-width:28px;}
 .card-plate{font-size:14px;font-weight:700;color:#1e293b;background:#f1f5f9;border-radius:5px;padding:2px 10px;letter-spacing:1px;}
@@ -750,6 +719,7 @@ ${srCards}
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(zipUrl);
+      setExportSuccessModalOpen(true);
     } catch (err) {
       console.error('Export failed:', err);
     } finally {
@@ -767,13 +737,13 @@ ${srCards}
 
     const title = eventForm.title.trim();
     if (!title || !eventForm.date || !eventForm.startTime) {
-      setEventFeedback({ type: 'danger', message: 'Title, date and start time are required.' });
+      openErrorModal('Title, date and start time are required.');
       return;
     }
 
     const startDate = new Date(`${eventForm.date}T${eventForm.startTime}:00`);
     if (Number.isNaN(startDate.getTime())) {
-      setEventFeedback({ type: 'danger', message: 'Invalid date format.' });
+      openErrorModal('Invalid date format.');
       return;
     }
 
@@ -781,17 +751,16 @@ ${srCards}
     if (eventForm.endTime) {
       endDate = new Date(`${eventForm.date}T${eventForm.endTime}:00`);
       if (Number.isNaN(endDate.getTime())) {
-        setEventFeedback({ type: 'danger', message: 'Invalid end time format.' });
+        openErrorModal('Invalid end time format.');
         return;
       }
       if (endDate <= startDate) {
-        setEventFeedback({ type: 'danger', message: 'End time must be later than start time.' });
+        openErrorModal('End time must be later than start time.');
         return;
       }
     }
 
     setEventSaving(true);
-    setEventFeedback({ type: '', message: '' });
 
     try {
       await api.post('/calendarevents', {
@@ -802,13 +771,38 @@ ${srCards}
       });
 
       setEventForm({ title: '', date: '', startTime: '09:00', endTime: '', description: '' });
-      setEventFeedback({ type: 'success', message: 'Event created successfully.' });
+      setEventSuccessModalMessage('Event created successfully.');
+      await loadCalendarEvents();
+      await loadUpcomingEvents();
+    } catch {
+      openErrorModal('Failed to create event.');
+    } finally {
+      setEventSaving(false);
+    }
+  };
+
+  const handleDeleteSelectedEvent = async () => {
+    if (!selectedCalendarEvent?.id) {
+      openErrorModal('Event id is missing.');
+      return;
+    }
+
+    setEventDeleting(true);
+
+    try {
+      await api.delete(`/calendarevents/${selectedCalendarEvent.id}`);
+      setSelectedCalendarEvent(null);
+      setEventSuccessModalMessage('Event deleted successfully.');
       await loadCalendarEvents();
       await loadUpcomingEvents();
     } catch (error) {
-      setEventFeedback({ type: 'danger', message: 'Failed to create event.' });
+      const apiMessage = error?.response?.data;
+      const message = typeof apiMessage === 'string'
+        ? apiMessage
+        : apiMessage?.message || apiMessage?.Message || 'Failed to delete event.';
+      openErrorModal(message);
     } finally {
-      setEventSaving(false);
+      setEventDeleting(false);
     }
   };
 
@@ -827,11 +821,6 @@ ${srCards}
         color: '#ffffff',
       },
     };
-  };
-
-  const getDisplayName = () => {
-    const emailPrefix = user?.email?.split('@')[0] || 'Admin';
-    return emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1);
   };
 
   const formatEventTime = (dateValue) => {
@@ -871,10 +860,10 @@ ${srCards}
     );
   };
 
-  const getEventTypeColor = (eventType) => {
-    if (eventType === 'SERVICE_APPOINTMENT') return '#0d6efd';
-    if (eventType === 'TRIP') return '#fd7e14';
-    return '#198754';
+  const getEventTypeDotClass = (eventType) => {
+    if (eventType === 'SERVICE_APPOINTMENT') return 'upcoming-status-dot--service';
+    if (eventType === 'TRIP') return 'upcoming-status-dot--trip';
+    return 'upcoming-status-dot--default';
   };
 
   return (
@@ -933,10 +922,50 @@ ${srCards}
           </Row>
         </div>
 
+        <CustomModal
+          isOpen={exportEmptyModalOpen}
+          onClose={() => setExportEmptyModalOpen(false)}
+          title={t('adminDash.export.emptyTitle')}
+          primaryAction={{
+            label: t('common.ok'),
+            onClick: () => setExportEmptyModalOpen(false),
+          }}
+        >
+          <p className="mb-0">{t('adminDash.export.emptyMessage')}</p>
+        </CustomModal>
+
+        <CustomModal
+          isOpen={exportSuccessModalOpen}
+          onClose={() => setExportSuccessModalOpen(false)}
+          title={t('common.successTitle')}
+        >
+          <p className="mb-0">Successfully exported.</p>
+        </CustomModal>
+
+        <CustomModal
+          isOpen={Boolean(errorModalMessage)}
+          onClose={() => setErrorModalMessage('')}
+          title={t('common.errorTitle')}
+          primaryAction={{
+            label: t('common.ok'),
+            onClick: () => setErrorModalMessage(''),
+          }}
+        >
+          <p className="mb-0">{errorModalMessage}</p>
+        </CustomModal>
+
+        <CustomModal
+          isOpen={Boolean(eventSuccessModalMessage)}
+          onClose={() => setEventSuccessModalMessage('')}
+          title={t('common.successTitle')}
+        >
+          <p className="mb-0">{eventSuccessModalMessage}</p>
+        </CustomModal>
+
         {/* Stats Cards */}
         <Row className="g-3 mb-4">
           {/* Card 1: Total Fleet — always all-time */}
-          <Col xl={3} lg={4} md={6}>
+          <Col xxl={3} xl={6} lg={6} md={6}>
             <Card className="stat-card h-100">
               <Card.Body>
                 <div className="d-flex justify-content-between align-items-start">
@@ -971,7 +1000,7 @@ ${srCards}
           </Col>
 
           {/* Card 2: Fuel Costs — filtered by timeRange */}
-          <Col xl={3} lg={4} md={6}>
+          <Col xxl={3} xl={6} lg={6} md={6}>
             <Card className="stat-card h-100">
               <Card.Body>
                 <div className="d-flex justify-content-between align-items-start">
@@ -1020,7 +1049,7 @@ ${srCards}
           </Col>
 
           {/* Card 3: Trips — filtered by timeRange */}
-          <Col xl={3} lg={4} md={6}>
+          <Col xxl={3} xl={6} lg={6} md={6}>
             <Card className="stat-card h-100">
               <Card.Body>
                 <div className="d-flex justify-content-between align-items-start">
@@ -1059,7 +1088,7 @@ ${srCards}
           </Col>
 
           {/* Card 4: Service Requests — filtered by timeRange */}
-          <Col xl={3} lg={4} md={6}>
+          <Col xxl={3} xl={6} lg={6} md={6}>
             <Card className="stat-card h-100">
               <Card.Body>
                 <div className="d-flex justify-content-between align-items-start">
@@ -1092,9 +1121,9 @@ ${srCards}
           <Col lg={8} xl={9}>
             <Card className="schedule-card h-100">
               <Card.Header className="bg-light">
-                <div className="d-flex justify-content-between align-items-center">
-                  <h3 className="mb-0">{t('adminDash.schedule.title')}</h3>
-                  <div className="calendar-nav-arrows d-flex align-items-center gap-2">
+                <div className={`schedule-header-row d-flex align-items-center ${isMobileCalendar ? 'justify-content-center' : 'justify-content-between'}`}>
+                  <h3 className={`mb-0 ${isMobileCalendar ? 'text-center' : ''}`}>{t('adminDash.schedule.title')}</h3>
+                  {!isMobileCalendar && <div className="calendar-nav-arrows d-flex align-items-center gap-2">
                     <Button variant="outline-secondary" size="sm" onClick={() => {
                       const newDate = new Date(calendarDate);
                       newDate.setMonth(newDate.getMonth() - 1);
@@ -1116,10 +1145,10 @@ ${srCards}
                         <polyline points="9,18 15,12 9,6" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     </Button>
-                  </div>
+                  </div>}
                 </div>
               </Card.Header>
-              <Card.Body className="rbc-wrapper h-100" style={{ height: '100%', minHeight: 0 }}>
+              <Card.Body className={`rbc-wrapper h-100 dashboard-calendar-body ${isMobileCalendar ? 'dashboard-calendar-body--mobile' : ''}`}>
                 {!selectedCalendarEvent ? (
                   <Calendar
                     localizer={localizer}
@@ -1134,7 +1163,7 @@ ${srCards}
                     view={calendarView}
                     onView={setCalendarView}
                     views={['month', 'week', 'day']}
-                    style={{ height: '100%' }}
+                    className={`dashboard-calendar ${isMobileCalendar ? 'dashboard-calendar--mobile' : ''}`}
                     toolbar={true}
                     messages={{
                       today: t('adminDash.cal.today'),
@@ -1147,7 +1176,7 @@ ${srCards}
                     popup
                   />
                 ) : (
-                  <div className="h-100 d-flex flex-column flex-grow-1" style={{ minHeight: 0 }}>
+                  <div className="h-100 d-flex flex-column flex-grow-1 dashboard-min-height-0">
                     <div className="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
                       <div>
                         <h4 className="mb-1 fw-bold">Event Details</h4>
@@ -1157,16 +1186,15 @@ ${srCards}
                         type="button"
                         variant="outline-secondary"
                         size="sm"
-                        className="rounded-circle d-flex align-items-center justify-content-center"
-                        style={{ width: 34, height: 34 }}
+                        className="rounded-circle d-flex align-items-center justify-content-center dashboard-close-btn"
                         aria-label="Close"
                         onClick={() => setSelectedCalendarEvent(null)}
                       >
                         ×
                       </Button>
                     </div>
-                    <Card className="border-0 bg-light-subtle mb-3 shadow-sm flex-grow-1" style={{ minHeight: 0 }}>
-                      <Card.Body className="p-3 h-100" style={{ minHeight: 0 }}>
+                    <Card className="border-0 bg-light-subtle mb-3 shadow-sm flex-grow-1 dashboard-min-height-0">
+                      <Card.Body className="p-3 h-100 dashboard-min-height-0">
                         <div className="d-flex justify-content-between align-items-start mb-3">
                           <div>
                             <small className="text-muted d-block">TITLE</small>
@@ -1204,6 +1232,17 @@ ${srCards}
                         </Row>
                       </Card.Body>
                     </Card>
+
+                    <div className="mt-auto d-flex justify-content-center">
+                      <Button
+                        variant="danger"
+                        className="px-4"
+                        onClick={handleDeleteSelectedEvent}
+                        disabled={eventDeleting}
+                      >
+                        {eventDeleting ? 'Deleting...' : 'Delete Event'}
+                      </Button>
+                    </div>
                   </div>
                 )}
               </Card.Body>
@@ -1214,12 +1253,12 @@ ${srCards}
             <Row className="g-3">
               <Col xs={12}>
                 <Card className="event-card h-100 d-flex flex-column">
-                  <Card.Header style={{ flexShrink: 0 }}>
+                  <Card.Header className="dashboard-flex-shrink-0">
                     <h3 className="mb-0">Quick Add Event</h3>
                   </Card.Header>
-                  <Card.Body className="d-flex flex-column" style={{ flex: 1, overflow: 'hidden' }}>
+                  <Card.Body className="d-flex flex-column dashboard-flex-fill-scroll-hidden">
                     <Form onSubmit={handleSaveEvent} className="d-flex flex-column h-100">
-                      <Form.Group className="mb-3" style={{ flexShrink: 0 }}>
+                      <Form.Group className="mb-3 dashboard-flex-shrink-0">
                         <Form.Label className="small text-muted fw-semibold">EVENT TITLE</Form.Label>
                         <Form.Control
                           type="text"
@@ -1230,7 +1269,7 @@ ${srCards}
                           required
                         />
                       </Form.Group>
-                      <Form.Group className="mb-3" style={{ flexShrink: 0 }}>
+                      <Form.Group className="mb-3 dashboard-flex-shrink-0">
                         <Form.Label className="small text-muted fw-semibold">DATE</Form.Label>
                         <Form.Control
                           type="date"
@@ -1240,7 +1279,7 @@ ${srCards}
                           required
                         />
                       </Form.Group>
-                      <Row className="g-2 mb-3" style={{ flexShrink: 0 }}>
+                      <Row className="g-2 mb-3 dashboard-flex-shrink-0">
                         <Col xs={6}>
                           <Form.Group>
                             <Form.Label className="small text-muted fw-semibold">START</Form.Label>
@@ -1265,18 +1304,18 @@ ${srCards}
                           </Form.Group>
                         </Col>
                       </Row>
-                      <Form.Group className="mb-3 d-flex flex-column" style={{ flex: 1, minHeight: 0 }}>
-                        <Form.Label className="small text-muted fw-semibold" style={{ flexShrink: 0 }}>DESCRIPTION</Form.Label>
+                      <Form.Group className="mb-3 d-flex flex-column dashboard-flex-1-min-height-0">
+                        <Form.Label className="small text-muted fw-semibold dashboard-flex-shrink-0">DESCRIPTION</Form.Label>
                         <Form.Control
                           as="textarea"
                           name="description"
                           placeholder="Additional notes..."
                           value={eventForm.description}
                           onChange={handleEventChange}
-                          style={{ resize: 'none', flex: 1, minHeight: 0 }}
+                          className="dashboard-event-textarea"
                         />
                       </Form.Group>
-                      <Button type="submit" variant="primary" className="w-100" style={{ flexShrink: 0 }} disabled={eventSaving}>
+                      <Button type="submit" variant="primary" className="w-100 dashboard-flex-shrink-0" disabled={eventSaving}>
                         <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="me-2">
                           <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" strokeLinecap="round" strokeLinejoin="round"/>
                           <polyline points="17,21 17,13 7,13 7,21" strokeLinecap="round" strokeLinejoin="round"/>
@@ -1284,11 +1323,6 @@ ${srCards}
                         </svg>
                         {eventSaving ? 'Saving...' : 'Save Event'}
                       </Button>
-                      {eventFeedback.message && (
-                        <div className={`mt-2 alert alert-${eventFeedback.type} py-2 px-3 mb-0`} role="alert">
-                          {eventFeedback.message}
-                        </div>
-                      )}
                     </Form>
                   </Card.Body>
                 </Card>
@@ -1317,8 +1351,7 @@ ${srCards}
                                 </small>
                               </div>
                               <div
-                                className="upcoming-status-dot"
-                                style={{ backgroundColor: getEventTypeColor(event.eventType) }}
+                                className={`upcoming-status-dot ${getEventTypeDotClass(event.eventType)}`}
                               />
                             </div>
                             <Button size="sm" variant="outline-primary" onClick={() => {

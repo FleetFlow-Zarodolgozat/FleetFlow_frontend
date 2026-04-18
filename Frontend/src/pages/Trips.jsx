@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Container, Row, Col, Pagination, Badge, Alert, Spinner, Button } from 'react-bootstrap';
+import { Card, Container, Row, Col, Pagination, Spinner, Button } from 'react-bootstrap';
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
 import { useLanguage } from '../contexts/LanguageContext';
 import '../styles/Trips.css';
 import Footer from '../components/Footer';
+import CustomModal from '../components/CustomModal';
 
 const Trips = () => {
   const navigate = useNavigate();
@@ -13,7 +14,20 @@ const Trips = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [confirmModal, setConfirmModal] = useState({
+    open: false,
+    title: '',
+    message: '',
+    confirmLabel: '',
+    cancelLabel: '',
+    confirmVariant: '',
+    onConfirm: null,
+  });
+  const [errorModal, setErrorModal] = useState({
+    open: false,
+    title: '',
+    message: '',
+  });
   const [pagination, setPagination] = useState({
     totalCount: 0,
     page: 1,
@@ -21,7 +35,50 @@ const Trips = () => {
   });
   const totalPages = Math.max(1, Math.ceil((pagination.totalCount || 0) / pagination.pageSize));
 
-  // Stats calculation
+  const getApiErrorMessage = (err, fallback) => {
+    const data = err?.response?.data;
+    if (typeof data === 'string') return data;
+    if (data?.message) return data.message;
+    if (data?.Message) return data.Message;
+    if (data?.detail) return data.detail;
+    if (data?.errors) return Array.isArray(data.errors) ? data.errors.join(', ') : JSON.stringify(data.errors);
+    if (err?.response?.statusText) return err.response.statusText;
+    return fallback;
+  };
+
+  const openConfirmModal = ({ title, message, confirmLabel, cancelLabel, confirmVariant, onConfirm }) => {
+    setConfirmModal({
+      open: true,
+      title,
+      message,
+      confirmLabel,
+      cancelLabel,
+      confirmVariant,
+      onConfirm,
+    });
+  };
+
+  const closeConfirmModal = () => {
+    setConfirmModal((prev) => ({ ...prev, open: false }));
+  };
+
+  const handleConfirmAction = async () => {
+    const action = confirmModal.onConfirm;
+    closeConfirmModal();
+    if (typeof action === 'function') {
+      await action();
+    }
+  };
+
+  const openErrorModal = (title, message) => {
+    setErrorModal({ open: true, title, message });
+  };
+
+  const closeErrorModal = () => {
+    setErrorModal((prev) => ({ ...prev, open: false }));
+  };
+
+  // Statisztikák számítása az aktuális oldali adatokból.
   const stats = {
     totalTrips: pagination.totalCount,
     totalDistance: trips.reduce((sum, trip) => sum + (trip.DistanceKm || trip.distanceKm || 0), 0),
@@ -30,7 +87,6 @@ const Trips = () => {
 
   const fetchTrips = async (pageToLoad = 1) => {
     setLoading(true);
-    setError('');
     try {
       const response = await api.get('/trips/mine', {
         params: {
@@ -46,7 +102,8 @@ const Trips = () => {
         pageSize: payload.pageSize || pagination.pageSize,
       });
     } catch (err) {
-      setError('An error occurred while fetching trips.');
+      openErrorModal(t('common.errorTitle'), 'An error occurred while fetching trips.');
+      setTrips([]);
     } finally {
       setLoading(false);
     }
@@ -56,6 +113,7 @@ const Trips = () => {
     fetchTrips(1);
   }, []);
 
+  // Lapozó generálása: széleken és az aktuális környezetében mutatjuk az oldalakat.
   const buildPagination = () => {
     const items = [];
     const current = pagination.page;
@@ -74,24 +132,21 @@ const Trips = () => {
   };
 
   const handleDeleteTrip = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this trip?')) return;
-    setError('');
-    try {
-      await api.patch(`/trips/delete/${id}`);
-      await fetchTrips(pagination.page);
-    } catch (err) {
-      let msg = 'An error occurred while deleting the trip.';
-      if (err.response && err.response.data) {
-        const data = err.response.data;
-        if (typeof data === 'string') msg = data;
-        else if (data.message) msg = data.message;
-        else if (data.detail) msg = data.detail;
-        else if (data.errors) msg = Array.isArray(data.errors) ? data.errors.join(', ') : JSON.stringify(data.errors);
-        else if (err.response.statusText) msg = err.response.statusText;
-        else msg = JSON.stringify(data);
-      }
-      setError(msg);
-    }
+    openConfirmModal({
+      title: t('trips.modal.deleteTitle'),
+      message: t('trips.modal.deleteMessage'),
+      confirmLabel: t('common.delete'),
+      cancelLabel: t('common.cancel'),
+      confirmVariant: 'danger',
+      onConfirm: async () => {
+        try {
+          await api.patch(`/trips/delete/${id}`);
+          await fetchTrips(pagination.page);
+        } catch (err) {
+          openErrorModal(t('trips.modal.deleteFailedTitle'), getApiErrorMessage(err, t('trips.modal.deleteFailedMessage')));
+        }
+      },
+    });
   };
 
   const formatDate = (dateStr) => {
@@ -159,8 +214,6 @@ const Trips = () => {
                 <div className="py-5 text-center">
                   <Spinner animation="border" role="status" />
                 </div>
-              ) : error ? (
-                <Alert variant="danger" className="m-3 mb-0">{error}</Alert>
               ) : trips.length === 0 ? (
                 <div className="sr-empty">
                   <svg width="64" height="64" fill="none" stroke="#cbd5e1" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -177,13 +230,6 @@ const Trips = () => {
                   {/* Desktop Table View */}
                   <div className="desktop-table">
                     <table className="trips-table">
-                      <colgroup>
-                        <col style={{ width: '12%' }} />
-                        <col style={{ width: '18%' }} />
-                        <col style={{ width: '38%' }} />
-                        <col style={{ width: '14%' }} />
-                        <col style={{ width: '18%' }} />
-                      </colgroup>
                       <thead>
                         <tr>
                           <th className="trip-header">{t('trips.th.date')}</th>
@@ -358,6 +404,35 @@ const Trips = () => {
           </Row>
         </Container>
         <Footer />
+
+        <CustomModal
+          isOpen={confirmModal.open}
+          onClose={closeConfirmModal}
+          title={confirmModal.title}
+          primaryAction={{
+            label: confirmModal.confirmLabel,
+            onClick: handleConfirmAction,
+            variant: confirmModal.confirmVariant,
+          }}
+          secondaryAction={{
+            label: confirmModal.cancelLabel,
+            onClick: closeConfirmModal,
+          }}
+        >
+          <p className="mb-0">{confirmModal.message}</p>
+        </CustomModal>
+
+        <CustomModal
+          isOpen={errorModal.open}
+          onClose={closeErrorModal}
+          title={errorModal.title}
+          primaryAction={{
+            label: t('common.ok'),
+            onClick: closeErrorModal,
+          }}
+        >
+          <p className="mb-0">{errorModal.message}</p>
+        </CustomModal>
       </main>
     </div>
   );

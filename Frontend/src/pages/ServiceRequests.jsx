@@ -1,15 +1,17 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Alert, Badge, Button, Card, Col, Container, Pagination, Row, Spinner } from 'react-bootstrap';
+import { Button, Card, Pagination, Spinner } from 'react-bootstrap';
 import api from '../services/api';
 import Sidebar from '../components/Sidebar';
 import '../styles/DriverDashboard.css';
 import '../styles/ServiceRequests.css';
 import { useLanguage } from '../contexts/LanguageContext';
 import Footer from '../components/Footer';
+import CustomModal from '../components/CustomModal';
 
 const ServiceRequests = () => {
+    // Státusz -> stat kártya kategória (összesítéshez).
     const getStatusBadgeVariant = (status) => {
         const s = status?.toUpperCase() || '';
         if (s === 'REQUESTED') return 'pending';
@@ -29,6 +31,7 @@ const ServiceRequests = () => {
         return 'status-default';
     };
 
+    // Dátumformázás egységesen a táblához és mobil kártyákhoz.
     const formatDateTimeFull = (value) => {
         if (!value) return 'N/A';
         const date = new Date(value);
@@ -45,7 +48,20 @@ const ServiceRequests = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [serviceRequests, setServiceRequests] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+    const [confirmModal, setConfirmModal] = useState({
+        open: false,
+        title: '',
+        message: '',
+        confirmLabel: '',
+        cancelLabel: '',
+        confirmVariant: '',
+        onConfirm: null,
+    });
+    const [errorModal, setErrorModal] = useState({
+        open: false,
+        title: '',
+        message: '',
+    });
     const [pagination, setPagination] = useState({
         totalCount: 0,
         page: 1,
@@ -56,9 +72,52 @@ const ServiceRequests = () => {
         return Math.max(1, Math.ceil((pagination.totalCount || 0) / pagination.pageSize));
     }, [pagination.totalCount, pagination.pageSize]);
 
+    // Különböző backend hibaszerkezetek egységes szöveggé alakítása.
+    const getApiErrorMessage = (err, fallback) => {
+        const data = err?.response?.data;
+        if (typeof data === 'string') return data;
+        if (data?.message) return data.message;
+        if (data?.Message) return data.Message;
+        if (data?.detail) return data.detail;
+        if (data?.errors) return Array.isArray(data.errors) ? data.errors.join(', ') : JSON.stringify(data.errors);
+        if (err?.response?.statusText) return err.response.statusText;
+        return fallback;
+    };
+
+    const openConfirmModal = ({ title, message, confirmLabel, cancelLabel, confirmVariant, onConfirm }) => {
+        setConfirmModal({
+            open: true,
+            title,
+            message,
+            confirmLabel,
+            cancelLabel,
+            confirmVariant,
+            onConfirm,
+        });
+    };
+
+    const closeConfirmModal = () => {
+        setConfirmModal((prev) => ({ ...prev, open: false }));
+    };
+
+    const handleConfirmAction = async () => {
+        const action = confirmModal.onConfirm;
+        closeConfirmModal();
+        if (typeof action === 'function') {
+            await action();
+        }
+    };
+
+    const openErrorModal = (title, message) => {
+        setErrorModal({ open: true, title, message });
+    };
+
+    const closeErrorModal = () => {
+        setErrorModal((prev) => ({ ...prev, open: false }));
+    };
+
     const fetchServiceRequests = async (pageToLoad = 1) => {
         setLoading(true);
-        setError('');
         try {
             const response = await api.get('/service-requests/mine', {
                 params: {
@@ -79,7 +138,8 @@ const ServiceRequests = () => {
                 typeof apiMessage === 'string'
                     ? apiMessage
                     : apiMessage?.message || apiMessage?.Message || 'Could not load service requests.';
-            setError(message);
+            openErrorModal(t('common.errorTitle'), message);
+            setServiceRequests([]);
         } finally {
             setLoading(false);
         }
@@ -95,22 +155,24 @@ const ServiceRequests = () => {
     };
 
     const handleDeleteServiceRequest = async (id) => {
-        if (!window.confirm('Are you sure you want to cancel this service request?')) return;
-        setLoading(true);
-        setError('');
-        try {
-            await api.delete(`/service-requests/cancel/${id}`);
-            fetchServiceRequests(pagination.page);
-        } catch (err) {
-            const apiMessage = err?.response?.data;
-            const message =
-                typeof apiMessage === 'string'
-                    ? apiMessage
-                    : apiMessage?.message || apiMessage?.Message || 'Could not cancel service request.';
-            setError(message);
-        } finally {
-            setLoading(false);
-        }
+        openConfirmModal({
+            title: t('sr.modal.cancelTitle'),
+            message: t('sr.modal.cancelMessage'),
+            confirmLabel: t('sr.modal.cancelConfirm'),
+            cancelLabel: t('sr.modal.keep'),
+            confirmVariant: 'danger',
+            onConfirm: async () => {
+                setLoading(true);
+                try {
+                    await api.delete(`/service-requests/cancel/${id}`);
+                    await fetchServiceRequests(pagination.page);
+                } catch (err) {
+                    openErrorModal(t('sr.modal.cancelFailedTitle'), getApiErrorMessage(err, t('sr.modal.cancelFailedMessage')));
+                } finally {
+                    setLoading(false);
+                }
+            },
+        });
     };
 
     return (
@@ -207,8 +269,6 @@ const ServiceRequests = () => {
                                     <Spinner animation="border" role="status" />
                                     <span>{t('sr.loading')}</span>
                                 </div>
-                            ) : error ? (
-                                <Alert variant="danger" className="m-3">{error}</Alert>
                             ) : serviceRequests.length === 0 ? (
                                 <div className="sr-empty">
                                     <svg width="64" height="64" fill="none" stroke="#cbd5e1" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -375,6 +435,35 @@ const ServiceRequests = () => {
                         )}
                     </Card>
                     <Footer />
+
+                    <CustomModal
+                        isOpen={confirmModal.open}
+                        onClose={closeConfirmModal}
+                        title={confirmModal.title}
+                        primaryAction={{
+                            label: confirmModal.confirmLabel,
+                            onClick: handleConfirmAction,
+                            variant: confirmModal.confirmVariant,
+                        }}
+                        secondaryAction={{
+                            label: confirmModal.cancelLabel,
+                            onClick: closeConfirmModal,
+                        }}
+                    >
+                        <p className="mb-0">{confirmModal.message}</p>
+                    </CustomModal>
+
+                    <CustomModal
+                        isOpen={errorModal.open}
+                        onClose={closeErrorModal}
+                        title={errorModal.title}
+                        primaryAction={{
+                            label: t('common.ok'),
+                            onClick: closeErrorModal,
+                        }}
+                    >
+                        <p className="mb-0">{errorModal.message}</p>
+                    </CustomModal>
                 </div>
             </main>
         </div>
