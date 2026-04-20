@@ -177,34 +177,52 @@ const AdminDashboard = () => {
     }
   };
 
-  const loadTimeRangeStats = async (range, totalVehicles) => {
+  const buildCalendarRange = (view, baseDateInput) => {
+    const baseDate = baseDateInput instanceof Date && !Number.isNaN(baseDateInput.getTime())
+      ? baseDateInput
+      : new Date();
+
+    let curFrom;
+    let curTo;
+    let prevFrom;
+    let prevTo;
+
+    if (view === 'day') {
+      curFrom = new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate(), 0, 0, 0, 0);
+      curTo = new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate(), 23, 59, 59, 999);
+      prevFrom = new Date(curFrom);
+      prevFrom.setDate(prevFrom.getDate() - 1);
+      prevTo = new Date(curTo);
+      prevTo.setDate(prevTo.getDate() - 1);
+      return { curFrom, curTo, prevFrom, prevTo, label: 'Day', prevLabel: 'day' };
+    }
+
+    if (view === 'week') {
+      const dayOfWeek = baseDate.getDay();
+      const diffToMon = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+      curFrom = new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate() + diffToMon, 0, 0, 0, 0);
+      curTo = new Date(curFrom);
+      curTo.setDate(curTo.getDate() + 6);
+      curTo.setHours(23, 59, 59, 999);
+      prevFrom = new Date(curFrom);
+      prevFrom.setDate(prevFrom.getDate() - 7);
+      prevTo = new Date(curFrom);
+      prevTo.setMilliseconds(-1);
+      return { curFrom, curTo, prevFrom, prevTo, label: 'Week', prevLabel: 'week' };
+    }
+
+    curFrom = new Date(baseDate.getFullYear(), baseDate.getMonth(), 1, 0, 0, 0, 0);
+    curTo = new Date(baseDate.getFullYear(), baseDate.getMonth() + 1, 0, 23, 59, 59, 999);
+    prevFrom = new Date(baseDate.getFullYear(), baseDate.getMonth() - 1, 1, 0, 0, 0, 0);
+    prevTo = new Date(curFrom);
+    prevTo.setMilliseconds(-1);
+    return { curFrom, curTo, prevFrom, prevTo, label: 'Month', prevLabel: 'month' };
+  };
+
+  const loadTimeRangeStats = async (view, baseDate, totalVehicles) => {
     setTrStatsLoading(true);
     try {
-      const now = new Date();
-      let curFrom, curTo, prevFrom, prevTo;
-
-      if (range === 'today') {
-        curFrom = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
-        curTo   = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
-        prevFrom = new Date(curFrom); prevFrom.setDate(prevFrom.getDate() - 1);
-        prevTo   = new Date(curTo);   prevTo.setDate(prevTo.getDate() - 1);
-      } else if (range === 'week') {
-        // Current calendar week: Monday 00:00 → Sunday 23:59
-        const dayOfWeek = now.getDay(); // 0=Sun,1=Mon,...
-        const diffToMon = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek);
-        curFrom = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMon, 0, 0, 0);
-        curTo   = new Date(curFrom); curTo.setDate(curTo.getDate() + 6); curTo.setHours(23, 59, 59, 999);
-        // Previous calendar week
-        prevFrom = new Date(curFrom); prevFrom.setDate(prevFrom.getDate() - 7);
-        prevTo   = new Date(curFrom); prevTo.setMilliseconds(-1);
-      } else {
-        // Current calendar month: 1st 00:00 → last day 23:59
-        curFrom = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0);
-        curTo   = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
-        // Previous calendar month
-        prevFrom = new Date(now.getFullYear(), now.getMonth() - 1, 1, 0, 0, 0);
-        prevTo   = new Date(curFrom); prevTo.setMilliseconds(-1);
-      }
+      const { curFrom, curTo, prevFrom, prevTo } = buildCalendarRange(view, baseDate);
 
       const inRange = (dateStr, from, to) => {
         if (!dateStr) return false;
@@ -243,16 +261,13 @@ const AdminDashboard = () => {
         : 0;
 
       // ── Service requests ───────────────────────────────────────────────
-      // Use createdAt as primary date field for filtering (when the request was submitted).
-      // Fall back to scheduledStart or closedAt if createdAt is not available.
-      // If no date field is present at all, exclude from the period count.
+      // Card #4 should count requests by scheduled date in the selected period.
       const curSrs = srs.filter(sr => {
-        const dateField =
-          sr.createdAt ?? sr.CreatedAt ??
-          sr.scheduledStart ?? sr.ScheduledStart ??
-          sr.closedAt ?? sr.ClosedAt;
-        if (!dateField) return false;
-        return inRange(dateField, curFrom, curTo);
+        const scheduledDate =
+          sr.scheduled ?? sr.Scheduled ??
+          sr.scheduledStart ?? sr.ScheduledStart;
+        if (!scheduledDate) return false;
+        return inRange(scheduledDate, curFrom, curTo);
       });
       const srCount = curSrs.length;
       const srWaiting = srs.filter(sr => {
@@ -276,9 +291,9 @@ const AdminDashboard = () => {
   }, []);
 
   useEffect(() => {
-    loadTimeRangeStats(timeRange, fleetStats.total);
+    loadTimeRangeStats(calendarView, calendarDate, fleetStats.total);
    
-  }, [timeRange, fleetStats.total]);
+  }, [calendarView, calendarDate, fleetStats.total]);
 
   // ── Export helpers ────────────────────────────────────────────────────────
   const exportFormatDateTime = (value) => {
@@ -311,22 +326,25 @@ const AdminDashboard = () => {
   const handleExportReport = async () => {
     setExportLoading(true);
     try {
-      const now = new Date();
+      const baseDate = calendarDate instanceof Date && !Number.isNaN(calendarDate.getTime())
+        ? calendarDate
+        : new Date();
+      const exportView = calendarView || 'month';
       let curFrom, curTo;
-      if (timeRange === 'today') {
-        curFrom = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
-        curTo   = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
-      } else if (timeRange === 'week') {
-        const dayOfWeek = now.getDay();
+      if (exportView === 'day') {
+        curFrom = new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate(), 0, 0, 0);
+        curTo   = new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate(), 23, 59, 59, 999);
+      } else if (exportView === 'week') {
+        const dayOfWeek = baseDate.getDay();
         const diffToMon = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek);
-        curFrom = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMon, 0, 0, 0);
+        curFrom = new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate() + diffToMon, 0, 0, 0);
         curTo   = new Date(curFrom); curTo.setDate(curTo.getDate() + 6); curTo.setHours(23, 59, 59, 999);
       } else {
-        curFrom = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0);
-        curTo   = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+        curFrom = new Date(baseDate.getFullYear(), baseDate.getMonth(), 1, 0, 0, 0);
+        curTo   = new Date(baseDate.getFullYear(), baseDate.getMonth() + 1, 0, 23, 59, 59, 999);
       }
 
-      const rangeLabel = timeRange === 'today' ? 'Today' : timeRange === 'week' ? 'This Week' : 'This Month';
+      const rangeLabel = exportView === 'day' ? 'Day View' : exportView === 'week' ? 'Week View' : 'Month View';
       const dateRange = `${curFrom.toLocaleDateString('hu-HU')} → ${curTo.toLocaleDateString('hu-HU')}`;
       const exportDate = new Date().toLocaleString('hu-HU');
       const fileDate = new Date().toISOString().slice(0, 10);
@@ -1027,14 +1045,14 @@ ${srCards}
             </Card>
           </Col>
 
-          {/* Card 2: Fuel Costs — filtered by timeRange */}
+          {/* Card 2: Fuel Costs — filtered by calendar selection */}
           <Col xxl={3} xl={6} lg={6} md={6}>
             <Card className="stat-card h-100">
               <Card.Body>
                 <div className="d-flex justify-content-between align-items-start">
                   <div>
                     <span className="stat-label text-muted small">
-                      Fuel Costs ({timeRange === 'today' ? 'Today' : timeRange === 'week' ? 'This Week' : 'This Month'})
+                      Fuel Costs ({calendarView === 'day' ? 'Day' : calendarView === 'week' ? 'Week' : 'Month'})
                     </span>
                     <h3 className="stat-value mb-2">
                       {trStatsLoading ? '…' : `${Math.round(trStats.fuelCost).toLocaleString('hu-HU')} Ft`}
@@ -1058,7 +1076,7 @@ ${srCards}
                             : <polyline points="23,6 13.5,15.5 8.5,10.5 1,18" strokeLinecap="round" strokeLinejoin="round"/>
                           }
                         </svg>
-                        {Math.abs(trStats.fuelCostChange)}% vs prev. {timeRange === 'today' ? 'day' : timeRange === 'week' ? 'week' : 'month'}
+                        {Math.abs(trStats.fuelCostChange)}% vs prev. {calendarView === 'day' ? 'day' : calendarView === 'week' ? 'week' : 'month'}
                       </Badge>
                     ) : !trStatsLoading ? (
                       <span className="stat-extra text-muted small">No data for previous period</span>
@@ -1076,14 +1094,14 @@ ${srCards}
             </Card>
           </Col>
 
-          {/* Card 3: Trips — filtered by timeRange */}
+          {/* Card 3: Trips — filtered by calendar selection */}
           <Col xxl={3} xl={6} lg={6} md={6}>
             <Card className="stat-card h-100">
               <Card.Body>
                 <div className="d-flex justify-content-between align-items-start">
                   <div>
                     <span className="stat-label text-muted small">
-                      Trips ({timeRange === 'today' ? 'Today' : timeRange === 'week' ? 'This Week' : 'This Month'})
+                      Trips ({calendarView === 'day' ? 'Day' : calendarView === 'week' ? 'Week' : 'Month'})
                     </span>
                     <h3 className="stat-value mb-2">
                       {trStatsLoading ? '…' : trStats.tripCount}
@@ -1115,17 +1133,17 @@ ${srCards}
             </Card>
           </Col>
 
-          {/* Card 4: Service Requests — filtered by timeRange */}
+          {/* Card 4: Service Requests — filtered by calendar selection */}
           <Col xxl={3} xl={6} lg={6} md={6}>
             <Card className="stat-card h-100">
               <Card.Body>
                 <div className="d-flex justify-content-between align-items-start">
                   <div>
                     <span className="stat-label text-muted small">
-                      Service Requests ({timeRange === 'today' ? 'Today' : timeRange === 'week' ? 'This Week' : 'This Month'})
+                      Service Requests ({calendarView === 'day' ? 'Day' : calendarView === 'week' ? 'Week' : 'Month'})
                     </span>
                     <h3 className="stat-value mb-2">
-                      {trStatsLoading ? '…' : `${trStats.srCount} created`}
+                      {trStatsLoading ? '…' : `${trStats.srCount} scheduled`}
                     </h3>
                     <span className="stat-extra text-muted small">
                       {trStatsLoading ? '…' : (
