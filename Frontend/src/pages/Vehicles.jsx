@@ -468,7 +468,7 @@ const Vehicles = () => {
             {/* Pagination */}
             {!loading && totalCount > 0 && (
               <div className="vehicles-pagination">
-                <span className="vpagination-info">
+                <span className="vpagination-info ff-pagination-info">
                   Showing <strong>{startItem}–{endItem}</strong> of <strong>{totalCount}</strong>
                 </span>
                 <div className="vpagination-controls">

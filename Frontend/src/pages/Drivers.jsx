@@ -457,7 +457,7 @@ const Drivers = () => {
             {/* Pagination */}
             {!loading && totalCount > 0 && (
               <div className="drivers-pagination">
-                <span className="pagination-info">
+                <span className="pagination-info ff-pagination-info">
                   Showing <strong>{startItem}–{endItem}</strong> of <strong>{totalCount}</strong>
                 </span>
                 <div className="pagination-controls">

@@ -24,6 +24,7 @@ const AdminServiceRequests = () => {
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 1024);
 
   const [requests, setRequests] = useState([]);
+  const [allRequests, setAllRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorModalMessage, setErrorModalMessage] = useState('');
   const [totalCount, setTotalCount] = useState(0);
@@ -74,25 +75,6 @@ const AdminServiceRequests = () => {
         const response = await api.get('/service-requests/admin', { params });
         const payload = response.data || {};
         let rawItems = Array.isArray(payload.data) ? payload.data : [];
-        const allItems = Array.isArray(payload.data) ? payload.data : [];
-        const totalOngoing = allItems.filter(r => {
-          const status = r.status ?? r.Status;
-          return status !== 'REJECTED' && status !== 'CLOSED';
-        }).length;
-        const totalRequested = allItems.filter(r => (r.status ?? r.Status) === 'REQUESTED').length;
-        const totalPending = allItems.filter(r => {
-          const status = r.status ?? r.Status;
-          return status === 'APPROVED' || status === 'DRIVER_COST';
-        }).length;
-        const totalEnded = allItems.filter(r => {
-          const status = r.status ?? r.Status;
-          return status === 'CLOSED' || status === 'REJECTED';
-        }).length;
-        
-        setTotalOngoingCount(totalOngoing);
-        setTotalRequestedCount(totalRequested);
-        setTotalPendingCount(totalPending);
-        setTotalEndedCount(totalEnded);
 
         if (statusFilter === 'ongoing') {
           rawItems = rawItems.filter(r => {
@@ -118,10 +100,57 @@ const AdminServiceRequests = () => {
     [searchQ, statusFilter, ordering]
   );
 
+  const fetchStats = useCallback(async () => {
+    try {
+      const params = {
+        page: 1,
+        pageSize: 5000,
+      };
+
+      if (searchQ.trim()) params.StringQ = searchQ.trim();
+      if (ordering) params.Ordering = ordering;
+
+      const response = await api.get('/service-requests/admin', { params });
+      const payload = response.data || {};
+      const allItems = Array.isArray(payload.data) ? payload.data : [];
+      setAllRequests(allItems);
+
+      const totalOngoing = allItems.filter(r => {
+        const status = r.status ?? r.Status;
+        return status !== 'REJECTED' && status !== 'CLOSED';
+      }).length;
+      const totalRequested = allItems.filter(r => (r.status ?? r.Status) === 'REQUESTED').length;
+      const totalPending = allItems.filter(r => {
+        const status = r.status ?? r.Status;
+        return status === 'APPROVED' || status === 'DRIVER_COST';
+      }).length;
+      const totalEnded = allItems.filter(r => {
+        const status = r.status ?? r.Status;
+        return status === 'CLOSED' || status === 'REJECTED';
+      }).length;
+
+      setTotalOngoingCount(totalOngoing);
+      setTotalRequestedCount(totalRequested);
+      setTotalPendingCount(totalPending);
+      setTotalEndedCount(totalEnded);
+    } catch (err) {
+      const apiMessage = err?.response?.data;
+      const message =
+        typeof apiMessage === 'string'
+          ? apiMessage
+          : apiMessage?.message || apiMessage?.Message || 'An error occurred while fetching service requests stats.';
+      openErrorModal(message);
+    }
+  }, [searchQ, ordering]);
+
   useEffect(() => {
     fetchRequests(1);
     setPage(1);
   }, [fetchRequests]);
+
+  useEffect(() => {
+    fetchStats();
+  }, [fetchStats]);
 
   const handleSearchInputChange = (e) => {
     const val = e.target.value;
@@ -451,7 +480,7 @@ ${serviceCards}
 
   const renderPagination = () => (
     <div className="asr-pagination">
-      <span className="asr-pagination-info">
+  <span className="asr-pagination-info ff-pagination-info">
         Showing <strong>{startItem}–{endItem}</strong> of <strong>{totalCount}</strong>
       </span>
       <div className="asr-pagination-controls">

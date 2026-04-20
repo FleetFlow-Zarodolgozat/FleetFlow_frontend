@@ -524,7 +524,7 @@ ${fuelCards}
 
   const renderPagination = () => (
     <div className="afl-pagination">
-      <span className="afl-pagination-info">
+  <span className="afl-pagination-info ff-pagination-info">
         Showing <strong>{startItem}–{endItem}</strong> of <strong>{totalCount}</strong>
       </span>
       <div className="afl-pagination-controls">

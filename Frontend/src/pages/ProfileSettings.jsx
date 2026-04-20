@@ -691,7 +691,7 @@ const ProfileSettings = () => {
                         <Button
                           variant="primary"
                           className="app-download-btn"
-                          href="https://github.com/FleetFlow-Zarodolgozat/FleetFlow_mobil/releases/download/v1.2/com.fleetflow.mobil-Signed.apk"
+                          href="https://github.com/FleetFlow-Zarodolgozat/FleetFlow_mobil/releases/download/v1.3/com.fleetflow.mobil-Signed.apk"
                           download
                         >
                           {t('profile.app.cta')}

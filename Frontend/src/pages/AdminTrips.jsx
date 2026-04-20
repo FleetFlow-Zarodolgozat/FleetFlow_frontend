@@ -494,7 +494,7 @@ ${tripCards}
 
   const renderPagination = () => (
     <div className="at-pagination">
-      <span className="at-pagination-info">
+  <span className="at-pagination-info ff-pagination-info">
         Showing <strong>{startItem} to {endItem}</strong> of <strong>{totalCount}</strong> results
       </span>
       <div className="at-pagination-controls">

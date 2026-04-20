@@ -1983,6 +1983,16 @@ body.dark-mode .srd-page .sr-mobile-card-body {
   border-color: #30363d !important;
 }
 
+/* Driver Service Requests táblázat fejléc – egyezzen a Fuel Logs fejléc sötét mód színeivel */
+body.dark-mode .service-requests-page .sr-table thead {
+  background: #161b22 !important;
+  border-bottom-color: #30363d !important;
+}
+
+body.dark-mode .service-requests-page .sr-table th {
+  color: #8b949e !important;
+}
+
 body.dark-mode .service-requests-page .sr-table th,
 body.dark-mode .service-requests-page .sr-mobile-label,
 body.dark-mode .service-requests-page .sr-page-info,
