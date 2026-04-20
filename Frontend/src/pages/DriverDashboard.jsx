@@ -716,7 +716,7 @@ const DriverDashboard = () => {
                   </div>}
                 </div>
               </Card.Header>
-              <Card.Body className={`rbc-wrapper dashboard-calendar-body ${isMobileCalendar ? 'dashboard-calendar-body--mobile' : ''}`}>
+              <Card.Body className={`rbc-wrapper dashboard-calendar-body ${isMobileCalendar ? 'dashboard-calendar-body--mobile' : ''} ${selectedCalendarEvent ? 'dashboard-calendar-body--details' : ''}`}>
                 {!selectedCalendarEvent ? (
                   <Calendar
                     localizer={localizer}
@@ -744,7 +744,7 @@ const DriverDashboard = () => {
                     popup
                   />
                 ) : (
-                  <div className="h-100 d-flex flex-column flex-grow-1 dashboard-min-height-0">
+                  <div className="d-flex flex-column flex-grow-1 dashboard-min-height-0 dashboard-event-details-view">
                     <div className="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
                       <div>
                         <h4 className="mb-1 fw-bold">{t('dashboard.event.detail.title')}</h4>
@@ -764,8 +764,8 @@ const DriverDashboard = () => {
                       </Button>
                     </div>
 
-                    <Card className="border-0 bg-light-subtle mb-3 shadow-sm">
-                      <Card.Body className="p-3">
+                    <Card className="border-0 bg-light-subtle mb-3 shadow-sm dashboard-event-details-card">
+                      <Card.Body className="p-3 dashboard-event-details-card-body">
                         <div className="d-flex justify-content-between align-items-start mb-3">
                           <div>
                             <small className="text-muted d-block">{t('dashboard.event.detail.label.title')}</small>
@@ -811,7 +811,7 @@ const DriverDashboard = () => {
                       </div>
                     )}
 
-                    <div className="mt-auto d-flex justify-content-center">
+                    <div className="mt-auto d-flex justify-content-center dashboard-event-details-actions">
                       <Button
                         variant="danger"
                         className="px-4"

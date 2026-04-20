@@ -472,6 +472,15 @@
   height: 34px;
 }
 
+.dashboard-event-details-view {
+  min-height: 0;
+}
+
+.dashboard-event-details-card,
+.dashboard-event-details-card-body {
+  min-height: 0;
+}
+
 .dashboard-flex-shrink-0 {
   flex-shrink: 0;
 }
@@ -628,6 +637,24 @@
     width: 48px;
     height: 48px;
   }
+
+  .admin-dashboard .dashboard-calendar-body.dashboard-calendar-body--mobile.dashboard-calendar-body--details {
+    height: auto !important;
+    min-height: 640px;
+    max-height: none !important;
+    overflow: visible;
+  }
+
+  .dashboard-event-details-view {
+    height: auto !important;
+    min-height: 100%;
+    overflow: visible;
+  }
+
+  .dashboard-event-details-actions {
+    margin-top: 12px !important;
+    padding-bottom: 4px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -702,9 +729,14 @@ body.dark-mode .admin-dashboard .schedule-card .card-header h3,
 body.dark-mode .admin-dashboard .quick-add-card .card-header h3,
 body.dark-mode .admin-dashboard .event-card .card-header h3,
 body.dark-mode .admin-dashboard .upcoming-card .card-header h3,
+body.dark-mode .admin-dashboard .dashboard-event-details-title,
 body.dark-mode .admin-dashboard .upcoming-info h6,
 body.dark-mode .admin-dashboard .stat-value {
   color: #e6edf3 !important;
+}
+
+body.dark-mode .admin-dashboard .dashboard-event-details-subtitle {
+  color: #8b949e !important;
 }
 
 body.dark-mode .admin-dashboard .event-card .card-header h3 {

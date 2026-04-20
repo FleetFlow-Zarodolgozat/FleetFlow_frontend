@@ -345,6 +345,15 @@
   height: 34px;
 }
 
+.dashboard-event-details-view {
+  min-height: 0;
+}
+
+.dashboard-event-details-card,
+.dashboard-event-details-card-body {
+  min-height: 0;
+}
+
 .vehicle-status-badge {
   font-size: 0.85rem;
 }
@@ -934,6 +943,24 @@
     gap: 1rem !important;
     padding: 0.5rem 0 !important;
     overflow-x: auto !important;
+  }
+
+  .dashboard-calendar-body.dashboard-calendar-body--mobile.dashboard-calendar-body--details {
+    height: auto !important;
+    min-height: 640px;
+    max-height: none !important;
+    overflow: visible;
+  }
+
+  .dashboard-event-details-view {
+    height: auto !important;
+    min-height: 100%;
+    overflow: visible;
+  }
+
+  .dashboard-event-details-actions {
+    margin-top: 12px !important;
+    padding-bottom: 4px;
   }
 }
 

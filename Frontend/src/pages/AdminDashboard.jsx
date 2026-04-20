@@ -54,7 +54,7 @@ const AdminDashboard = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
   const [calendarDate, setCalendarDate] = useState(new Date());
-  const [calendarView, setCalendarView] = useState('month');
+  const [calendarView, setCalendarView] = useState('day');
   const [scheduleEvents, setScheduleEvents] = useState([]);
   const [timeRange, setTimeRange] = useState('today');
   const [fleetStats, setFleetStats] = useState({ total: 0, activePercent: 0 });
@@ -123,16 +123,16 @@ const AdminDashboard = () => {
         .filter((evt) => !Number.isNaN(evt.start.getTime()) && !Number.isNaN(evt.end.getTime()));
 
       setScheduleEvents(mappedEvents);
+      return mappedEvents;
     } catch (error) {
       console.log('Could not fetch calendar events:', error.message);
+      return [];
     }
   };
-  const loadUpcomingEvents = async () => {
+  const loadUpcomingEvents = async (sourceEvents = null) => {
     try {
-      // A scheduleEvents már tartalmazza a calendar eseményeket
-      // Ha nincs, akkor API-ból töltjük be
-      let events = scheduleEvents;
-      if (!events || events.length === 0) {
+      let events = sourceEvents;
+      if (!Array.isArray(events)) {
         const response = await api.get('/calendarevents');
         events = Array.isArray(response.data) ? response.data.map(evt => ({
           id: evt.id || evt.Id,
@@ -772,8 +772,8 @@ ${srCards}
 
       setEventForm({ title: '', date: '', startTime: '09:00', endTime: '', description: '' });
       setEventSuccessModalMessage('Event created successfully.');
-      await loadCalendarEvents();
-      await loadUpcomingEvents();
+      const freshEvents = await loadCalendarEvents();
+      await loadUpcomingEvents(freshEvents);
     } catch {
       openErrorModal('Failed to create event.');
     } finally {
@@ -793,8 +793,8 @@ ${srCards}
       await api.delete(`/calendarevents/${selectedCalendarEvent.id}`);
       setSelectedCalendarEvent(null);
       setEventSuccessModalMessage('Event deleted successfully.');
-      await loadCalendarEvents();
-      await loadUpcomingEvents();
+      const freshEvents = await loadCalendarEvents();
+      await loadUpcomingEvents(freshEvents);
     } catch (error) {
       const apiMessage = error?.response?.data;
       const message = typeof apiMessage === 'string'
@@ -872,6 +872,28 @@ ${srCards}
     return 'upcoming-status-dot--default';
   };
 
+  const mapTimeRangeToCalendarView = (range) => {
+    if (range === 'today') return 'day';
+    if (range === 'week') return 'week';
+    return 'month';
+  };
+
+  const mapCalendarViewToTimeRange = (view) => {
+    if (view === 'day') return 'today';
+    if (view === 'week') return 'week';
+    return 'month';
+  };
+
+  const handleTimeRangeChange = (nextRange) => {
+    setTimeRange(nextRange);
+    setCalendarView(mapTimeRangeToCalendarView(nextRange));
+  };
+
+  const handleCalendarViewChange = (nextView) => {
+    setCalendarView(nextView);
+    setTimeRange(mapCalendarViewToTimeRange(nextView));
+  };
+
   return (
     <div className="admin-dashboard">
       <Sidebar
@@ -896,21 +918,21 @@ ${srCards}
                   <button
                     type="button"
                     className={`btn ${timeRange === 'today' ? 'active' : ''}`}
-                    onClick={() => setTimeRange('today')}
+                    onClick={() => handleTimeRangeChange('today')}
                   >
                     {t('adminDash.range.today')}
                   </button>
                   <button
                     type="button"
                     className={`btn ${timeRange === 'week' ? 'active' : ''}`}
-                    onClick={() => setTimeRange('week')}
+                    onClick={() => handleTimeRangeChange('week')}
                   >
                     {t('adminDash.range.week')}
                   </button>
                   <button
                     type="button"
                     className={`btn ${timeRange === 'month' ? 'active' : ''}`}
-                    onClick={() => setTimeRange('month')}
+                    onClick={() => handleTimeRangeChange('month')}
                   >
                     {t('adminDash.range.month')}
                   </button>
@@ -1154,7 +1176,7 @@ ${srCards}
                   </div>}
                 </div>
               </Card.Header>
-              <Card.Body className={`rbc-wrapper dashboard-calendar-body ${isMobileCalendar ? 'dashboard-calendar-body--mobile' : ''}`}>
+              <Card.Body className={`rbc-wrapper dashboard-calendar-body ${isMobileCalendar ? 'dashboard-calendar-body--mobile' : ''} ${selectedCalendarEvent ? 'dashboard-calendar-body--details' : ''}`}>
                 {!selectedCalendarEvent ? (
                   <Calendar
                     localizer={localizer}
@@ -1167,7 +1189,7 @@ ${srCards}
                     date={calendarDate}
                     onNavigate={setCalendarDate}
                     view={calendarView}
-                    onView={setCalendarView}
+                    onView={handleCalendarViewChange}
                     views={['month', 'week', 'day']}
                     className={`dashboard-calendar ${isMobileCalendar ? 'dashboard-calendar--mobile' : ''}`}
                     toolbar={true}
@@ -1182,11 +1204,11 @@ ${srCards}
                     popup
                   />
                 ) : (
-                  <div className="h-100 d-flex flex-column flex-grow-1 dashboard-min-height-0">
+                  <div className="d-flex flex-column flex-grow-1 dashboard-min-height-0 dashboard-event-details-view">
                     <div className="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
                       <div>
-                        <h4 className="mb-1 fw-bold">Event Details</h4>
-                        <small className="text-muted">Review, then delete if needed.</small>
+                        <h4 className="mb-1 fw-bold dashboard-event-details-title">Event Details</h4>
+                        <small className="text-muted dashboard-event-details-subtitle">Review, then delete if needed.</small>
                       </div>
                       <Button
                         type="button"
@@ -1199,8 +1221,8 @@ ${srCards}
                         ×
                       </Button>
                     </div>
-                    <Card className="border-0 bg-light-subtle mb-3 shadow-sm flex-grow-1 dashboard-min-height-0">
-                      <Card.Body className="p-3 h-100 dashboard-min-height-0">
+                    <Card className="border-0 bg-light-subtle mb-3 shadow-sm flex-grow-1 dashboard-min-height-0 dashboard-event-details-card">
+                      <Card.Body className="p-3 h-100 dashboard-min-height-0 dashboard-event-details-card-body">
                         <div className="d-flex justify-content-between align-items-start mb-3">
                           <div>
                             <small className="text-muted d-block">TITLE</small>
@@ -1239,7 +1261,7 @@ ${srCards}
                       </Card.Body>
                     </Card>
 
-                    <div className="mt-auto d-flex justify-content-center">
+                    <div className="mt-auto d-flex justify-content-center dashboard-event-details-actions">
                       <Button
                         variant="danger"
                         className="px-4"
