@@ -318,6 +318,13 @@
   flex-direction: column;
 }
 
+.admin-dashboard .upcoming-empty {
+  text-align: center;
+  color: #6c757d;
+  padding: 16px;
+  font-size: 0.875rem;
+}
+
 .admin-dashboard .upcoming-item {
   display: flex;
   align-items: flex-start;
@@ -388,16 +395,41 @@
 
 /* Layout util osztalyok: inline style helyett ujrahasznalhato blokkok */
 .dashboard-calendar-body {
-  height: 100%;
-  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  height: 460px !important;
+  min-height: 460px !important;
+  max-height: 460px !important;
+  overflow: hidden;
 }
 
 .dashboard-calendar-body--mobile {
+  height: 460px;
   min-height: 460px;
 }
 
 .dashboard-calendar {
+  flex: 1 1 auto;
   height: 100%;
+  min-height: 440px;
+}
+
+.admin-dashboard .rbc-wrapper .rbc-calendar {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.admin-dashboard .rbc-wrapper .rbc-month-view,
+.admin-dashboard .rbc-wrapper .rbc-time-view {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.admin-dashboard .rbc-wrapper .rbc-month-row {
+  flex: 1 1 0;
+  min-height: 0;
 }
 
 .dashboard-calendar--mobile {
@@ -728,6 +760,10 @@ body.dark-mode .admin-dashboard .rbc-wrapper .rbc-toolbar button.rbc-active {
 
 body.dark-mode .admin-dashboard .upcoming-item {
   border-bottom-color: #30363d !important;
+}
+
+body.dark-mode .admin-dashboard .upcoming-empty {
+  color: #8b949e !important;
 }
 
 body.dark-mode .admin-dashboard .upcoming-icon,

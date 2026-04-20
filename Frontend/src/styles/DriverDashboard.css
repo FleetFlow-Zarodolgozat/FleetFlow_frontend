@@ -326,11 +326,18 @@
 }
 
 .dashboard-calendar-body {
+  display: flex;
+  flex-direction: column;
+  height: 460px;
   min-height: 460px;
+  max-height: 460px;
+  overflow: hidden;
 }
 
 .dashboard-calendar {
-  height: 440px;
+  flex: 1 1 auto;
+  height: 100%;
+  min-height: 440px;
 }
 
 .dashboard-calendar-close-btn {
@@ -679,6 +686,10 @@
 /* react-big-calendar overrides */
 .rbc-wrapper .rbc-calendar {
   font-family: inherit;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
 }
 
 .rbc-wrapper .rbc-toolbar {
@@ -721,9 +732,16 @@
 
 .rbc-wrapper .rbc-month-view,
 .rbc-wrapper .rbc-time-view {
+  flex: 1 1 auto;
+  min-height: 0;
   border: 1px solid #dee2e6;
   border-radius: 10px;
   overflow: hidden;
+}
+
+.rbc-wrapper .rbc-month-row {
+  flex: 1 1 0;
+  min-height: 0;
 }
 
 .rbc-wrapper .rbc-header {

@@ -823,6 +823,12 @@ ${srCards}
     };
   };
 
+  const displayableUpcomingEvents = upcomingEvents.filter((event) => {
+    const hasTitle = Boolean(event?.title?.trim?.() || event?.title);
+    const hasValidStart = Boolean(event?.startAt) && !Number.isNaN(new Date(event.startAt).getTime());
+    return hasTitle && hasValidStart;
+  });
+
   const formatEventTime = (dateValue) => {
     if (!dateValue) return '';
     const d = new Date(dateValue);
@@ -1334,11 +1340,11 @@ ${srCards}
                     <h3 className="mb-0 fs-5">Upcoming</h3>
                   </Card.Header>
                   <Card.Body className="p-0">
-                    {upcomingEvents.length === 0 ? (
-                      <div className="text-center text-muted py-4 small">No upcoming events</div>
+                    {displayableUpcomingEvents.length === 0 ? (
+                      <div className="upcoming-empty">No upcoming events</div>
                     ) : (
                       <div className="upcoming-list">
-                        {upcomingEvents.map(event => (
+                        {displayableUpcomingEvents.map(event => (
                           <div key={event.id} className="upcoming-item d-flex align-items-center justify-content-between">
                             <div className="d-flex align-items-center gap-2">
                               <div className="upcoming-icon">

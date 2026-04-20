@@ -17,6 +17,8 @@ const ServiceRequestDetails = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const request = location.state?.request || {};
+  const statusUpper = (request.status || '').toUpperCase();
+  const isReadOnlyFinalStatus = statusUpper === 'CLOSED' || statusUpper === 'REJECTED';
   const [driverCost, setDriverCost] = useState(request.driverReportCost || '');
   const [closeNote, setCloseNote] = useState(request.driverCloseNote || '');
   const [file, setFile] = useState(null);
@@ -259,6 +261,29 @@ const ServiceRequestDetails = () => {
                       </Col>
                     )}
 
+                    {/* Closed state: show driver details as readonly info rows under Service Date */}
+                    {isReadOnlyFinalStatus && (
+                      <Col xs={12}>
+                        <div className="srd-info-row">
+                          <div className="srd-info-label">{t('srDetails.label.driverCost')}</div>
+                          <div className="srd-info-value">
+                            {request.driverReportCost || request.driverReportCost === 0
+                              ? `${request.driverReportCost} Ft`
+                              : '—'}
+                          </div>
+                        </div>
+                      </Col>
+                    )}
+
+                    {isReadOnlyFinalStatus && (
+                      <Col xs={12}>
+                        <div className="srd-info-row">
+                          <div className="srd-info-label">{t('srDetails.label.closeNote')}</div>
+                          <div className="srd-info-value srd-info-value--muted">{request.driverCloseNote || '—'}</div>
+                        </div>
+                      </Col>
+                    )}
+
                     {/* Status + License Plate info */}
                     <Col xs={12}>
                       <Row className="g-3">
@@ -305,7 +330,7 @@ const ServiceRequestDetails = () => {
                     )}
 
                     {/* Driver Cost - Only show when NOT requested */}
-                    {request.status !== 'REQUESTED' && (
+                    {request.status !== 'REQUESTED' && !isReadOnlyFinalStatus && (
                       <Col xs={12}>
                         <Form.Group>
                           <Form.Label className="form-label">
@@ -329,7 +354,7 @@ const ServiceRequestDetails = () => {
                     )}
 
                     {/* Close Note - Only show when NOT requested */}
-                    {request.status !== 'REQUESTED' && (
+                    {request.status !== 'REQUESTED' && !isReadOnlyFinalStatus && (
                       <Col xs={12}>
                         <Form.Group>
                           <Form.Label className="form-label">
@@ -359,7 +384,7 @@ const ServiceRequestDetails = () => {
 
                   {/* Action Buttons */}
                   <div className="form-actions mt-5">
-                    {request.status !== 'REQUESTED' && (
+                    {request.status !== 'REQUESTED' && !isReadOnlyFinalStatus && (
                       <Button
                         type="button"
                         className="btn-save srd-submit-btn"
@@ -409,7 +434,7 @@ const ServiceRequestDetails = () => {
             </Col>
 
             {/* Right Column */}
-            {request.status !== 'REQUESTED' && (
+            {request.status !== 'REQUESTED' && (!isReadOnlyFinalStatus || !!invoiceImgUrl) && (
               <Col lg={5} xl={4}>
                 {/* Invoice Upload Card */}
                 <Card className="receipt-card border-0 shadow-sm mb-4">
@@ -424,58 +449,60 @@ const ServiceRequestDetails = () => {
                     <span className="receipt-title">{t('srDetails.invoice.title')}</span>
                   </div>
 
-                  <div
-                    className={`receipt-dropzone srd-dropzone ${isDragging ? 'dragging' : ''} ${file ? 'has-file' : ''}`}
-                    onDrop={handleDrop}
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    onClick={() => document.getElementById('invoiceFileInput').click()}
-                  >
-                    <input
-                      type="file"
-                      accept="image/*"
-                      id="invoiceFileInput"
-                      className="srd-file-input"
-                      onChange={handleFileChange}
-                    />
-                    {file ? (
-                      <div className="receipt-file-selected">
-                        <div className="upload-icon srd-upload-icon">
-                          <svg width="24" height="24" fill="none" stroke="#7c3aed" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                            <polyline points="14 2 14 8 20 8" />
-                          </svg>
+                  {!isReadOnlyFinalStatus && (
+                    <div
+                      className={`receipt-dropzone srd-dropzone ${isDragging ? 'dragging' : ''} ${file ? 'has-file' : ''}`}
+                      onDrop={handleDrop}
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onClick={() => document.getElementById('invoiceFileInput').click()}
+                    >
+                      <input
+                        type="file"
+                        accept="image/*"
+                        id="invoiceFileInput"
+                        className="srd-file-input"
+                        onChange={handleFileChange}
+                      />
+                      {file ? (
+                        <div className="receipt-file-selected">
+                          <div className="upload-icon srd-upload-icon">
+                            <svg width="24" height="24" fill="none" stroke="#7c3aed" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                              <polyline points="14 2 14 8 20 8" />
+                            </svg>
+                          </div>
+                          <span className="file-name">{file.name}</span>
+                          <button
+                            className="remove-file"
+                            onClick={e => { e.stopPropagation(); setFile(null); }}
+                            type="button"
+                          >
+                            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                          </button>
                         </div>
-                        <span className="file-name">{file.name}</span>
-                        <button
-                          className="remove-file"
-                          onClick={e => { e.stopPropagation(); setFile(null); }}
-                          type="button"
-                        >
-                          <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
-                        </button>
-                      </div>
-                    ) : (
-                      <>
-                        <div className="upload-icon srd-upload-icon">
-                          <svg width="24" height="24" fill="none" stroke="#7c3aed" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="16 16 12 12 8 16" />
-                            <line x1="12" y1="12" x2="12" y2="21" />
-                            <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3" />
-                          </svg>
-                        </div>
-                        <div className="upload-text">
-                          <strong>{t('srDetails.invoice.click')}</strong>
-                          <span>{t('srDetails.invoice.drag')}</span>
-                        </div>
-                        <span className="upload-hint">{t('srDetails.invoice.hint')}</span>
-                      </>
-                    )}
-                  </div>
+                      ) : (
+                        <>
+                          <div className="upload-icon srd-upload-icon">
+                            <svg width="24" height="24" fill="none" stroke="#7c3aed" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="16 16 12 12 8 16" />
+                              <line x1="12" y1="12" x2="12" y2="21" />
+                              <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3" />
+                            </svg>
+                          </div>
+                          <div className="upload-text">
+                            <strong>{t('srDetails.invoice.click')}</strong>
+                            <span>{t('srDetails.invoice.drag')}</span>
+                          </div>
+                          <span className="upload-hint">{t('srDetails.invoice.hint')}</span>
+                        </>
+                      )}
+                    </div>
+                  )}
 
                   {/* Existing invoice from DB */}
                   {invoiceImgUrl && (
-                    <div className="srd-existing-invoice mt-4">
+                    <div className={`srd-existing-invoice ${isReadOnlyFinalStatus ? '' : 'mt-4'}`}>
                       <div className="srd-existing-header">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <rect x="3" y="3" width="18" height="18" rx="2" />
@@ -506,34 +533,36 @@ const ServiceRequestDetails = () => {
               </Card>
 
               {/* Request Info Card */}
-              <Card className="pro-tip-card border-0 shadow-sm srd-info-card">
-                <Card.Body className="p-4">
-                  <div className="pro-tip-header mb-3">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#0d6efd" className="me-2">
-                      <path d="M9 18h6a2 2 0 0 1 2 2v2H7v-2a2 2 0 0 1 2-2z" />
-                      <path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2.26C17.81 13.47 19 11.38 19 9a7 7 0 0 0-7-7z" />
-                    </svg>
-                    <span className="pro-tip-title">{t('srDetails.proTip.title')}</span>
-                  </div>
-                  <p className="pro-tip-text">
-                    {t('srDetails.proTip.text')}
-                  </p>
-                  <ul className="pro-tip-list">
-                    <li>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="#0d6efd" className="me-2">
-                        <polyline points="20 6 9 17 4 12" />
+              {!isReadOnlyFinalStatus && (
+                <Card className="pro-tip-card border-0 shadow-sm srd-info-card">
+                  <Card.Body className="p-4">
+                    <div className="pro-tip-header mb-3">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="#0d6efd" className="me-2">
+                        <path d="M9 18h6a2 2 0 0 1 2 2v2H7v-2a2 2 0 0 1 2-2z" />
+                        <path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2.26C17.81 13.47 19 11.38 19 9a7 7 0 0 0-7-7z" />
                       </svg>
-                      {t('srDetails.proTip.1')}
-                    </li>
-                    <li>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="#0d6efd" className="me-2">
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
-                      {t('srDetails.proTip.2')}
-                    </li>
-                  </ul>
-                </Card.Body>
-              </Card>
+                      <span className="pro-tip-title">{t('srDetails.proTip.title')}</span>
+                    </div>
+                    <p className="pro-tip-text">
+                      {t('srDetails.proTip.text')}
+                    </p>
+                    <ul className="pro-tip-list">
+                      <li>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="#0d6efd" className="me-2">
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                        {t('srDetails.proTip.1')}
+                      </li>
+                      <li>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="#0d6efd" className="me-2">
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                        {t('srDetails.proTip.2')}
+                      </li>
+                    </ul>
+                  </Card.Body>
+                </Card>
+              )}
             </Col>
             )}
           </Row>

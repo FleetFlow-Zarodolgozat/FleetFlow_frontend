@@ -61,6 +61,16 @@ const AddDriver = () => {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  const openDatePicker = (e) => {
+    if (typeof e.target.showPicker === 'function') {
+      try {
+        e.target.showPicker();
+      } catch {
+        // Native picker may reject when not triggered by a direct user gesture.
+      }
+    }
+  };
+
   const handleSubmit = async (e) => {
     // Űrlap elküldése: először létrehozzuk a sofőrt, majd siker esetén rövid késleltetéssel visszalépünk a listába.
     // A késleltetés célja, hogy a felhasználó biztosan lássa a siker modal tartalmát.
@@ -214,6 +224,8 @@ const AddDriver = () => {
                       name="licenseExpiryDate"
                       value={form.licenseExpiryDate}
                       onChange={handleChange}
+                      onClick={openDatePicker}
+                      onFocus={openDatePicker}
                       min={minLicenseDateString}
                       required
                       className="field-input"

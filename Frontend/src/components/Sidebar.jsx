@@ -50,6 +50,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, notificationRefresh }) => {
         setProfileImageError(false);
       } catch (error) {
         console.log('Sidebar: could not fetch profile image:', error.message);
+        setProfileImageUrl(null);
         setProfileImageError(true);
       }
     };
@@ -57,7 +58,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, notificationRefresh }) => {
     return () => {
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
-  }, [profile.id, notificationRefresh]);
+  }, [profile.id]);
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth > 1024) {

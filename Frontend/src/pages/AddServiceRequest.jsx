@@ -31,10 +31,13 @@ const AddServiceRequest = () => {
         const res = await api.get('/service-requests/mine', { params: { page: 1, pageSize: 50 } });
         const payload = res.data || {};
         const all = Array.isArray(payload.data) ? payload.data : [];
-        const nonCompleted = all
-          .filter(r => (r.status || r.Status || '').toLowerCase() !== 'completed')
+        const visiblePending = all
+          .filter((r) => {
+            const status = (r.status || r.Status || '').toLowerCase();
+            return status !== 'closed' && status !== 'rejected';
+          })
           .slice(0, 2);
-        setPendingRequests(nonCompleted);
+        setPendingRequests(visiblePending);
       } catch {
         // Hiba a lekérésnél
       }

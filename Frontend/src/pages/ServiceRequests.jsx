@@ -332,17 +332,19 @@ const ServiceRequests = () => {
                                                                             <circle cx="12" cy="12" r="3" strokeLinecap="round" strokeLinejoin="round" />
                                                                         </svg>
                                                                     </Button>
-                                                                    <Button
-                                                                        className="sr-delete-btn"
-                                                                        variant="outline-danger"
-                                                                        onClick={() => handleDeleteServiceRequest(request.id || request.Id)}
-                                                                        title="Cancel request"
-                                                                    >
-                                                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                                            <polyline points="3,6 5,6 21,6" strokeLinecap="round" strokeLinejoin="round" />
-                                                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" strokeLinecap="round" strokeLinejoin="round" />
-                                                                        </svg>
-                                                                    </Button>
+                                                                    {(request.status || '').toUpperCase() === 'REQUESTED' && (
+                                                                        <Button
+                                                                            className="sr-delete-btn"
+                                                                            variant="outline-danger"
+                                                                            onClick={() => handleDeleteServiceRequest(request.id || request.Id)}
+                                                                            title="Cancel request"
+                                                                        >
+                                                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                                                <line x1="18" y1="6" x2="6" y2="18" strokeLinecap="round" strokeLinejoin="round" />
+                                                                                <line x1="6" y1="6" x2="18" y2="18" strokeLinecap="round" strokeLinejoin="round" />
+                                                                            </svg>
+                                                                        </Button>
+                                                                    )}
                                                                 </div>
                                                             </td>
                                                         </tr>
@@ -395,16 +397,18 @@ const ServiceRequests = () => {
                                                             </svg>
                                                             {t('sr.mobile.viewDetails')}
                                                         </Button>
-                                                        <Button
-                                                            className="sr-mobile-delete-btn"
-                                                            onClick={() => handleDeleteServiceRequest(request.id || request.Id)}
-                                                        >
-                                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                                <polyline points="3,6 5,6 21,6" />
-                                                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                                                            </svg>
-                                                            {t('sr.mobile.cancel')}
-                                                        </Button>
+                                                        {(request.status || '').toUpperCase() === 'REQUESTED' && (
+                                                            <Button
+                                                                className="sr-mobile-delete-btn"
+                                                                onClick={() => handleDeleteServiceRequest(request.id || request.Id)}
+                                                            >
+                                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                                    <line x1="18" y1="6" x2="6" y2="18" />
+                                                                    <line x1="6" y1="6" x2="18" y2="18" />
+                                                                </svg>
+                                                                {t('sr.mobile.cancel')}
+                                                            </Button>
+                                                        )}
                                                     </div>
                                                 </Card.Body>
                                             </Card>

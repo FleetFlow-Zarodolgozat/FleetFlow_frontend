@@ -119,6 +119,16 @@ const EditDriver = () => {
     }));
   };
 
+  const openDatePicker = (e) => {
+    if (typeof e.target.showPicker === 'function') {
+      try {
+        e.target.showPicker();
+      } catch {
+        // Native picker may reject when not triggered by a direct user gesture.
+      }
+    }
+  };
+
   const handleToggleActive = () => {
     setForm((prev) => ({ ...prev, isActive: !prev.isActive }));
   };
@@ -326,6 +336,8 @@ const EditDriver = () => {
                         name="licenseExpiryDate"
                         value={form.licenseExpiryDate}
                         onChange={handleChange}
+                        onClick={openDatePicker}
+                        onFocus={openDatePicker}
                         min={new Date(Date.now() + 86400000).toISOString().split('T')[0]}
                         className="field-input"
                       />

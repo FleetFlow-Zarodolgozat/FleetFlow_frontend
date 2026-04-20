@@ -1638,7 +1638,7 @@ body.dark-mode .asr-table {
 }
 
 body.dark-mode .asr-th {
-  background: #21262d !important;
+  background: #161b22 !important;
   color: #8b949e !important;
   border-bottom-color: #30363d !important;
 }
@@ -1917,6 +1917,25 @@ body.dark-mode .at-tr:hover {
   background: #21262d !important;
 }
 
+/* Deleted rows/cards in dark mode (Admin Fuel Logs, Admin Trips) */
+body.dark-mode .afl-tr--deleted,
+body.dark-mode .at-tr--deleted {
+  background: rgba(248, 81, 73, 0.12) !important;
+  opacity: 1 !important;
+}
+
+body.dark-mode .afl-tr--deleted:hover,
+body.dark-mode .at-tr--deleted:hover {
+  background: rgba(248, 81, 73, 0.18) !important;
+}
+
+body.dark-mode .afl-mobile-card--deleted,
+body.dark-mode .at-mobile-card--deleted {
+  background: rgba(248, 81, 73, 0.12) !important;
+  border-color: #5a1c1c !important;
+  opacity: 1 !important;
+}
+
 body.dark-mode .afl-td,
 body.dark-mode .afl-date-main,
 body.dark-mode .afl-td--cost,
@@ -1962,6 +1981,10 @@ body.dark-mode .srd-page {
   background: #0f1117 !important;
 }
 
+body.dark-mode .service-requests-page .sr-header-section {
+  border-bottom-color: #30363d !important;
+}
+
 body.dark-mode .service-requests-page .sr-table-card,
 body.dark-mode .service-requests-page .sr-stat-card,
 body.dark-mode .service-requests-page .sr-mobile-card,
@@ -1983,10 +2006,10 @@ body.dark-mode .srd-page .sr-mobile-card-body {
   border-color: #30363d !important;
 }
 
-/* Driver Service Requests táblázat fejléc – egyezzen a Fuel Logs fejléc sötét mód színeivel */
+/* Driver Service Requests táblázat fejléc – egyezzen a Trips táblázat fejléc sötét mód színeivel */
 body.dark-mode .service-requests-page .sr-table thead {
-  background: #161b22 !important;
-  border-bottom-color: #30363d !important;
+  background: #21262d !important;
+  border-bottom-color: #e2e8f0 !important;
 }
 
 body.dark-mode .service-requests-page .sr-table th {
