@@ -1564,11 +1564,12 @@ body.dark-mode .asr-select {
 body.dark-mode .asr-reset-btn {
   background: #21262d !important;
   border-color: #30363d !important;
-  color: #8b949e !important;
+  color: #e6edf3 !important;
 }
 
 body.dark-mode .asr-reset-btn:hover {
   background: #30363d !important;
+  border-color: #484f58 !important;
   color: #e6edf3 !important;
 }
 

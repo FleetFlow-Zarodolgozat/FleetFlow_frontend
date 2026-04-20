@@ -56,9 +56,18 @@ const AdminTrips = () => {
   const [exportSuccessModalOpen, setExportSuccessModalOpen] = useState(false);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState({ type: '', id: null });
+  const [actionFeedbackModal, setActionFeedbackModal] = useState({
+    open: false,
+    title: '',
+    message: '',
+  });
 
   const openErrorModal = (message) => {
     setErrorModalMessage(message || 'Unexpected error occurred.');
+  };
+
+  const openActionFeedbackModal = (title, message) => {
+    setActionFeedbackModal({ open: true, title, message });
   };
 
   useEffect(() => {
@@ -66,6 +75,14 @@ const AdminTrips = () => {
     const timeoutId = setTimeout(() => setExportSuccessModalOpen(false), 2000);
     return () => clearTimeout(timeoutId);
   }, [exportSuccessModalOpen]);
+
+  useEffect(() => {
+    if (!actionFeedbackModal.open) return;
+    const timeoutId = setTimeout(() => {
+      setActionFeedbackModal((prev) => ({ ...prev, open: false }));
+    }, 2000);
+    return () => clearTimeout(timeoutId);
+  }, [actionFeedbackModal.open]);
 
   useEffect(() => {
     const handleResize = () => setSidebarOpen(window.innerWidth > 1024);
@@ -168,10 +185,11 @@ const AdminTrips = () => {
     setActionLoading(id);
     try {
       await api.patch(`/trips/delete/${id}`);
+      openActionFeedbackModal('Successful', 'Trip deactivated successfully.');
       fetchTrips(page);
     } catch (err) {
       const msg = err?.response?.data;
-      openErrorModal(typeof msg === 'string' ? msg : msg?.message || 'Failed to delete trip.');
+      openActionFeedbackModal('Error', typeof msg === 'string' ? msg : msg?.message || 'Failed to deactivate trip.');
     } finally {
       setActionLoading(null);
     }
@@ -181,10 +199,11 @@ const AdminTrips = () => {
     setActionLoading(id);
     try {
       await api.patch(`/trips/restore/${id}`);
+      openActionFeedbackModal('Successful', 'Trip activated successfully.');
       fetchTrips(page);
     } catch (err) {
       const msg = err?.response?.data;
-      openErrorModal(typeof msg === 'string' ? msg : msg?.message || 'Failed to restore trip.');
+      openActionFeedbackModal('Error', typeof msg === 'string' ? msg : msg?.message || 'Failed to activate trip.');
     } finally {
       setActionLoading(null);
     }
@@ -579,6 +598,14 @@ ${tripCards}
             }}
           >
             <p className="mb-0">{errorModalMessage}</p>
+          </CustomModal>
+
+          <CustomModal
+            isOpen={actionFeedbackModal.open}
+            onClose={() => setActionFeedbackModal((prev) => ({ ...prev, open: false }))}
+            title={actionFeedbackModal.title}
+          >
+            <p className="mb-0">{actionFeedbackModal.message}</p>
           </CustomModal>
 
           {/* ── Header ─────────────────────────────────── */}

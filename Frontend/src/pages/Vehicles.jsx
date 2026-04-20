@@ -42,6 +42,23 @@ const Vehicles = () => {
   const [deactivateModalOpen, setDeactivateModalOpen] = useState(false);
   const [activateModalOpen, setActivateModalOpen] = useState(false);
   const [selectedVehicleAction, setSelectedVehicleAction] = useState({ id: null, userEmail: null });
+  const [actionFeedbackModal, setActionFeedbackModal] = useState({
+    open: false,
+    title: '',
+    message: '',
+  });
+
+  const openActionFeedbackModal = (title, message) => {
+    setActionFeedbackModal({ open: true, title, message });
+  };
+
+  useEffect(() => {
+    if (!actionFeedbackModal.open) return;
+    const timeoutId = setTimeout(() => {
+      setActionFeedbackModal((prev) => ({ ...prev, open: false }));
+    }, 2000);
+    return () => clearTimeout(timeoutId);
+  }, [actionFeedbackModal.open]);
 
   const getDriverInitials = (email) => {
     if (!email) return '?';
@@ -155,6 +172,7 @@ const Vehicles = () => {
         }
       }
       await api.patch(`/admin/vehicles/deactivate/${id}`);
+      openActionFeedbackModal('Successful', 'Vehicle deactivated successfully.');
       setSelectedVehicleAction({ id: null, userEmail: null });
       await fetchVehicles(page);
     } catch (err) {
@@ -164,7 +182,7 @@ const Vehicles = () => {
         typeof apiMessage === 'string'
           ? apiMessage
           : apiMessage?.message || apiMessage?.Message || 'An error occurred while deactivating the vehicle.';
-      setErrorModal({ open: true, message });
+      openActionFeedbackModal('Error', message);
     } finally {
       setTogglingId(null);
     }
@@ -182,6 +200,7 @@ const Vehicles = () => {
     setTogglingId(id);
     try {
       await api.patch(`/admin/vehicles/activate/${id}`);
+      openActionFeedbackModal('Successful', 'Vehicle activated successfully.');
       setSelectedVehicleAction({ id: null, userEmail: null });
       await fetchVehicles(page);
     } catch (err) {
@@ -191,7 +210,7 @@ const Vehicles = () => {
         typeof apiMessage === 'string'
           ? apiMessage
           : apiMessage?.message || apiMessage?.Message || 'An error occurred while activating the vehicle.';
-      setErrorModal({ open: true, message });
+      openActionFeedbackModal('Error', message);
     } finally {
       setTogglingId(null);
     }
@@ -271,6 +290,14 @@ const Vehicles = () => {
             }}
           >
             <p className="mb-0">Are you sure you want to deactivate this vehicle? Any active driver assignment will be ended.</p>
+          </CustomModal>
+
+          <CustomModal
+            isOpen={actionFeedbackModal.open}
+            onClose={() => setActionFeedbackModal((prev) => ({ ...prev, open: false }))}
+            title={actionFeedbackModal.title}
+          >
+            <p className="mb-0">{actionFeedbackModal.message}</p>
           </CustomModal>
 
           <CustomModal

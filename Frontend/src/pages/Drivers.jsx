@@ -32,6 +32,11 @@ const Drivers = () => {
   const [selectedDriverId, setSelectedDriverId] = useState(null);
   const [activateModalOpen, setActivateModalOpen] = useState(false);
   const [selectedActivateDriverId, setSelectedActivateDriverId] = useState(null);
+  const [actionFeedbackModal, setActionFeedbackModal] = useState({
+    open: false,
+    title: '',
+    message: '',
+  });
 
   // Központosított hibamegjelenítés, hogy minden backend hiba azonos modalban látszódjon.
   const openErrorModal = (message) => {
@@ -41,6 +46,18 @@ const Drivers = () => {
   const closeErrorModal = () => {
     setErrorModal((prev) => ({ ...prev, open: false }));
   };
+
+  const openActionFeedbackModal = (title, message) => {
+    setActionFeedbackModal({ open: true, title, message });
+  };
+
+  useEffect(() => {
+    if (!actionFeedbackModal.open) return;
+    const timeoutId = setTimeout(() => {
+      setActionFeedbackModal((prev) => ({ ...prev, open: false }));
+    }, 2000);
+    return () => clearTimeout(timeoutId);
+  }, [actionFeedbackModal.open]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -130,6 +147,7 @@ const Drivers = () => {
     setDeactivateModalOpen(false);
     try {
       await api.patch(`/admin/drivers/deactivate/${selectedDriverId}`);
+      openActionFeedbackModal('Successful', 'Driver deactivated successfully.');
       setTogglingId(null);
       setSelectedDriverId(null);
       await fetchDrivers(1);
@@ -141,7 +159,7 @@ const Drivers = () => {
         typeof apiMessage === 'string'
           ? apiMessage
           : apiMessage?.message || apiMessage?.Message || 'An error occurred while deactivating the driver.';
-      openErrorModal(message);
+      openActionFeedbackModal('Error', message);
     }
   };
 
@@ -156,6 +174,7 @@ const Drivers = () => {
     setActivateModalOpen(false);
     try {
       await api.patch(`/admin/drivers/activate/${selectedActivateDriverId}`);
+      openActionFeedbackModal('Successful', 'Driver activated successfully.');
       setTogglingId(null);
       setSelectedActivateDriverId(null);
       await fetchDrivers(1);
@@ -167,7 +186,7 @@ const Drivers = () => {
         typeof apiMessage === 'string'
           ? apiMessage
           : apiMessage?.message || apiMessage?.Message || 'An error occurred while activating the driver.';
-      openErrorModal(message);
+      openActionFeedbackModal('Error', message);
     }
   };
 
@@ -305,6 +324,14 @@ const Drivers = () => {
             }}
           >
             <p className="mb-0">{errorModal.message}</p>
+          </CustomModal>
+
+          <CustomModal
+            isOpen={actionFeedbackModal.open}
+            onClose={() => setActionFeedbackModal((prev) => ({ ...prev, open: false }))}
+            title={actionFeedbackModal.title}
+          >
+            <p className="mb-0">{actionFeedbackModal.message}</p>
           </CustomModal>
 
           {/* Table Card */}

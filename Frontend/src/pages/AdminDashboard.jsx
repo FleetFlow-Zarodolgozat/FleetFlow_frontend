@@ -1154,7 +1154,7 @@ ${srCards}
                   </div>}
                 </div>
               </Card.Header>
-              <Card.Body className={`rbc-wrapper h-100 dashboard-calendar-body ${isMobileCalendar ? 'dashboard-calendar-body--mobile' : ''}`}>
+              <Card.Body className={`rbc-wrapper dashboard-calendar-body ${isMobileCalendar ? 'dashboard-calendar-body--mobile' : ''}`}>
                 {!selectedCalendarEvent ? (
                   <Calendar
                     localizer={localizer}

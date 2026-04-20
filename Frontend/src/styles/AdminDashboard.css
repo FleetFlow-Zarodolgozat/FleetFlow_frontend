@@ -208,6 +208,9 @@
   background: #ffffff;
   border: 1px solid #dee2e6;
   border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .admin-dashboard .schedule-card .card-header {
@@ -224,6 +227,10 @@
 
 .admin-dashboard .schedule-card .card-body {
   padding: 20px;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .admin-dashboard .calendar-nav-arrows .current-month {
@@ -403,6 +410,19 @@
   overflow: hidden;
 }
 
+.admin-dashboard .dashboard-calendar-body {
+  flex: 1 1 auto;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+}
+
+.admin-dashboard .dashboard-calendar-body.dashboard-calendar-body--mobile {
+  height: 460px !important;
+  min-height: 460px !important;
+  max-height: 460px !important;
+}
+
 .dashboard-calendar-body--mobile {
   height: 460px;
   min-height: 460px;
@@ -423,6 +443,13 @@
 
 .admin-dashboard .rbc-wrapper .rbc-month-view,
 .admin-dashboard .rbc-wrapper .rbc-time-view {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+}
+
+.admin-dashboard .rbc-wrapper .rbc-row-content,
+.admin-dashboard .rbc-wrapper .rbc-row-bg {
   flex: 1 1 auto;
   min-height: 0;
 }

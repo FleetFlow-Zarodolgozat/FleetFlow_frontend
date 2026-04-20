@@ -43,10 +43,19 @@ const AdminFuelLogs = () => {
   const [exportSuccessModalOpen, setExportSuccessModalOpen] = useState(false);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState({ type: '', id: null });
+  const [actionFeedbackModal, setActionFeedbackModal] = useState({
+    open: false,
+    title: '',
+    message: '',
+  });
 
   // Minden hiba egysegesen modalban jelenik meg.
   const openErrorModal = (message) => {
     setErrorModalMessage(message || 'Unexpected error occurred.');
+  };
+
+  const openActionFeedbackModal = (title, message) => {
+    setActionFeedbackModal({ open: true, title, message });
   };
 
   useEffect(() => {
@@ -54,6 +63,14 @@ const AdminFuelLogs = () => {
     const timeoutId = setTimeout(() => setExportSuccessModalOpen(false), 2000);
     return () => clearTimeout(timeoutId);
   }, [exportSuccessModalOpen]);
+
+  useEffect(() => {
+    if (!actionFeedbackModal.open) return;
+    const timeoutId = setTimeout(() => {
+      setActionFeedbackModal((prev) => ({ ...prev, open: false }));
+    }, 2000);
+    return () => clearTimeout(timeoutId);
+  }, [actionFeedbackModal.open]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -459,10 +476,11 @@ ${fuelCards}
     setActionLoading(id);
     try {
       await api.patch(`/fuellogs/delete/${id}`);
+      openActionFeedbackModal('Successful', 'Fuel log deactivated successfully.');
       fetchFuelLogs(page);
     } catch (err) {
       const msg = err?.response?.data;
-      openErrorModal(typeof msg === 'string' ? msg : msg?.message || 'Failed to delete fuel log.');
+      openActionFeedbackModal('Error', typeof msg === 'string' ? msg : msg?.message || 'Failed to deactivate fuel log.');
     } finally {
       setActionLoading(null);
     }
@@ -472,10 +490,11 @@ ${fuelCards}
     setActionLoading(id);
     try {
       await api.patch(`/fuellogs/restore/${id}`);
+      openActionFeedbackModal('Successful', 'Fuel log activated successfully.');
       fetchFuelLogs(page);
     } catch (err) {
       const msg = err?.response?.data;
-      openErrorModal(typeof msg === 'string' ? msg : msg?.message || 'Failed to restore fuel log.');
+      openActionFeedbackModal('Error', typeof msg === 'string' ? msg : msg?.message || 'Failed to activate fuel log.');
     } finally {
       setActionLoading(null);
     }
@@ -622,6 +641,14 @@ ${fuelCards}
             }}
           >
             <p className="mb-0">{errorModalMessage}</p>
+          </CustomModal>
+
+          <CustomModal
+            isOpen={actionFeedbackModal.open}
+            onClose={() => setActionFeedbackModal((prev) => ({ ...prev, open: false }))}
+            title={actionFeedbackModal.title}
+          >
+            <p className="mb-0">{actionFeedbackModal.message}</p>
           </CustomModal>
 
           {/* ── Header ─────────────────────────────────── */}
